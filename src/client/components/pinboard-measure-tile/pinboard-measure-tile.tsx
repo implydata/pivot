@@ -5,12 +5,12 @@ import { List } from 'immutable';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { ply, $, Expression, Executor, Dataset } from 'plywood';
-import { Stage, Clicker, Essence, DataSource, Filter, Dimension, Measure, SortOn } from '../../../common/models/index';
+import { Stage, CubeEssence, DataSource, Filter, Dimension, Measure, SortOn } from '../../../common/models/index';
 // import { ... } from '../../config/constants';
 import { Dropdown, DropdownProps } from '../dropdown/dropdown';
 
 export interface PinboardMeasureTileProps extends React.Props<any> {
-  essence: Essence;
+  essence: CubeEssence;
   title: string;
   dimension?: Dimension;
   sortOn: SortOn;

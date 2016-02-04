@@ -1,11 +1,11 @@
 'use strict';
 
-import { Clicker } from '../clicker/clicker';
+import { CubeClicker } from '../clicker/clicker';
 import { Stage } from '../stage/stage';
-import { Essence } from '../essence/essence';
+import { CubeEssence } from '../essence/cube-essence';
 
 export interface VisualizationProps {
-  clicker: Clicker;
-  essence: Essence;
+  clicker: CubeClicker;
+  essence: CubeEssence;
   stage: Stage;
 }

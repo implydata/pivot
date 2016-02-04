@@ -4,15 +4,15 @@ require('./dimension-measure-panel.css');
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { $, Expression, Executor, Dataset } from 'plywood';
-import { Stage, Clicker, Essence, DataSource, Filter, Dimension, Measure } from '../../../common/models/index';
+import { Stage, CubeClicker, CubeEssence, DataSource, Filter, Dimension, Measure } from '../../../common/models/index';
 // import { ... } from '../../config/constants';
 // import { SvgIcon } from '../svg-icon/svg-icon';
 import { DimensionListTile } from '../dimension-list-tile/dimension-list-tile';
 import { MeasuresTile } from '../measures-tile/measures-tile';
 
 export interface DimensionMeasurePanelProps extends React.Props<any> {
-  clicker: Clicker;
-  essence: Essence;
+  clicker: CubeClicker;
+  essence: CubeEssence;
   menuStage: Stage;
   triggerFilterMenu: Function;
   triggerSplitMenu: Function;

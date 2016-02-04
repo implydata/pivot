@@ -80,9 +80,9 @@ export interface EssenceContext {
 }
 
 var check: Class<EssenceValue, EssenceJS>;
-export class Essence implements Instance<EssenceValue, EssenceJS> {
+export class CubeEssence implements Instance<EssenceValue, EssenceJS> {
   static isEssence(candidate: any): boolean {
-    return isInstanceOf(candidate, Essence);
+    return isInstanceOf(candidate, CubeEssence);
   }
 
   static getBaseURL(): string {
@@ -90,7 +90,7 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
     return url.origin + url.pathname;
   }
 
-  static fromHash(hash: string, context: EssenceContext): Essence {
+  static fromHash(hash: string, context: EssenceContext): CubeEssence {
     // trim a potential leading #
     if (hash[0] === '#') hash = hash.substr(1);
 
@@ -114,9 +114,9 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
     var jsArrayLength = jsArray.length;
     if (!(6 <= jsArrayLength && jsArrayLength <= 9)) return null;
 
-    var essence: Essence;
+    var essence: CubeEssence;
     try {
-      essence = Essence.fromJS({
+      essence = CubeEssence.fromJS({
         dataSource: dataSource,
         visualization: visualization,
         timezone: jsArray[0],
@@ -136,7 +136,7 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
     return essence;
   }
 
-  static fromDataSource(dataSource: DataSource, context: EssenceContext): Essence {
+  static fromDataSource(dataSource: DataSource, context: EssenceContext): CubeEssence {
     var timezone = dataSource.defaultTimezone;
 
     var filter = dataSource.defaultFilter;
@@ -158,7 +158,7 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
       }
     }
 
-    return new Essence({
+    return new CubeEssence({
       dataSources: context.dataSources,
       visualizations: context.visualizations,
 
@@ -176,7 +176,7 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
     });
   }
 
-  static fromJS(parameters: EssenceJS, context?: EssenceContext): Essence {
+  static fromJS(parameters: EssenceJS, context?: EssenceContext): CubeEssence {
     var dataSourceName = parameters.dataSource;
     var visualizationID = parameters.visualization;
     var visualizations = context.visualizations;
@@ -209,7 +209,7 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
       highlight = Highlight.fromJS(highlightJS).constrainToDimensions(dataSource.dimensions, dataSource.timeAttribute);
     }
 
-    return new Essence({
+    return new CubeEssence({
       dataSources,
       visualizations,
 
@@ -332,8 +332,8 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
     return `[Essence]`;
   }
 
-  public equals(other: Essence): boolean {
-    return Essence.isEssence(other) &&
+  public equals(other: CubeEssence): boolean {
+    return CubeEssence.isEssence(other) &&
       this.dataSource.equals(other.dataSource) &&
       this.visualization.id === other.visualization.id &&
       this.timezone.equals(other.timezone) &&
@@ -378,7 +378,7 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
   }
 
   public getURL(): string {
-    return Essence.getBaseURL() + this.toHash();
+    return CubeEssence.getBaseURL() + this.toHash();
   }
 
   public getBestVisualization(splits: Splits, colors: Colors, currentVisualization: Manifest): VisualizationAndResolve {
@@ -421,55 +421,55 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
     return <List<Measure>>this.selectedMeasures.toList().map(measureName => dataSource.getMeasure(measureName));
   }
 
-  public differentDataSource(other: Essence): boolean {
+  public differentDataSource(other: CubeEssence): boolean {
     return this.dataSource !== other.dataSource;
   }
 
-  public differentTimezone(other: Essence): boolean {
+  public differentTimezone(other: CubeEssence): boolean {
     return !this.timezone.equals(other.timezone);
   }
 
-  public differentFilter(other: Essence): boolean {
+  public differentFilter(other: CubeEssence): boolean {
     return !this.filter.equals(other.filter);
   }
 
-  public differentSplits(other: Essence): boolean {
+  public differentSplits(other: CubeEssence): boolean {
     return !this.splits.equals(other.splits);
   }
 
-  public differentColors(other: Essence): boolean {
+  public differentColors(other: CubeEssence): boolean {
     if (Boolean(this.colors) !== Boolean(other.colors)) return true;
     if (!this.colors) return false;
     return !this.colors.equals(other.colors);
   }
 
-  public differentSelectedMeasures(other: Essence): boolean {
+  public differentSelectedMeasures(other: CubeEssence): boolean {
     return !this.selectedMeasures.equals(other.selectedMeasures);
   }
 
-  public newSelectedMeasures(other: Essence): boolean {
+  public newSelectedMeasures(other: CubeEssence): boolean {
     return !this.selectedMeasures.isSubset(other.selectedMeasures);
   }
 
-  public differentPinnedDimensions(other: Essence): boolean {
+  public differentPinnedDimensions(other: CubeEssence): boolean {
     return !this.pinnedDimensions.equals(other.pinnedDimensions);
   }
 
-  public differentPinnedSort(other: Essence): boolean {
+  public differentPinnedSort(other: CubeEssence): boolean {
     return this.pinnedSort !== other.pinnedSort;
   }
 
-  public differentCompare(other: Essence): boolean {
+  public differentCompare(other: CubeEssence): boolean {
     if (Boolean(this.compare) !== Boolean(other.compare)) return true;
     return Boolean(this.compare && !this.compare.equals(other.compare));
   }
 
-  public differentHighligh(other: Essence): boolean {
+  public differentHighligh(other: CubeEssence): boolean {
     if (Boolean(this.highlight) !== Boolean(other.highlight)) return true;
     return Boolean(this.highlight && !this.highlight.equals(other.highlight));
   }
 
-  public differentEffectiveFilter(other: Essence, highlightId: string = null, unfilterDimension: Dimension = null): boolean {
+  public differentEffectiveFilter(other: CubeEssence, highlightId: string = null, unfilterDimension: Dimension = null): boolean {
     var myEffectiveFilter = this.getEffectiveFilter(highlightId, unfilterDimension);
     var otherEffectiveFilter = other.getEffectiveFilter(highlightId, unfilterDimension);
     return !myEffectiveFilter.equals(otherEffectiveFilter);
@@ -510,7 +510,7 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
 
   // Modification
 
-  public changeDataSource(dataSource: DataSource): Essence {
+  public changeDataSource(dataSource: DataSource): CubeEssence {
     var { dataSources, visualizations } = this;
 
     if (this.dataSource.equals(dataSource)) return this; // nothing to do
@@ -518,7 +518,7 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
     if (this.dataSource.equalsWithoutMaxTime(dataSource)) { // Updated maxTime
       var value = this.valueOf();
       value.dataSource = dataSource;
-      return new Essence(value);
+      return new CubeEssence(value);
     }
 
     var dataSourceName = dataSource.name;
@@ -527,7 +527,7 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
 
     if (existingDataSource.equals(dataSource)) {
       // Just changing DataSource, nothing to see here.
-      return Essence.fromDataSource(dataSource, { dataSources: dataSources, visualizations: visualizations });
+      return CubeEssence.fromDataSource(dataSource, { dataSources: dataSources, visualizations: visualizations });
     }
 
     // We are actually updating info within the current dataSource
@@ -559,10 +559,10 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
       value.highlight = value.highlight.constrainToDimensions(dataSource.dimensions, dataSource.timeAttribute);
     }
 
-    return new Essence(value);
+    return new CubeEssence(value);
   }
 
-  public changeFilter(filter: Filter, removeHighlight: boolean = false): Essence {
+  public changeFilter(filter: Filter, removeHighlight: boolean = false): CubeEssence {
     var value = this.valueOf();
     value.filter = filter;
 
@@ -579,16 +579,16 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
       }
     }
 
-    return new Essence(value);
+    return new CubeEssence(value);
   }
 
-  public changeTimeSelection(check: Expression): Essence {
+  public changeTimeSelection(check: Expression): CubeEssence {
     var { filter } = this;
     var timeAttribute = this.getTimeAttribute();
     return this.changeFilter(filter.setSelection(timeAttribute, check));
   }
 
-  public changeSplits(splits: Splits, strategy: VisStrategy): Essence {
+  public changeSplits(splits: Splits, strategy: VisStrategy): CubeEssence {
     var { dataSource, visualization, visResolve, filter, colors } = this;
 
     var timeAttribute = this.getTimeAttribute();
@@ -613,58 +613,58 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
       value.filter = value.highlight.applyToFilter(value.filter);
       value.highlight = null;
     }
-    return new Essence(value);
+    return new CubeEssence(value);
   }
 
-  public changeSplit(splitCombine: SplitCombine, strategy: VisStrategy): Essence {
+  public changeSplit(splitCombine: SplitCombine, strategy: VisStrategy): CubeEssence {
     return this.changeSplits(Splits.fromSplitCombine(splitCombine), strategy);
   }
 
-  public addSplit(split: SplitCombine, strategy: VisStrategy): Essence {
+  public addSplit(split: SplitCombine, strategy: VisStrategy): CubeEssence {
     var { splits } = this;
     return this.changeSplits(splits.addSplit(split), strategy);
   }
 
-  public removeSplit(split: SplitCombine, strategy: VisStrategy): Essence {
+  public removeSplit(split: SplitCombine, strategy: VisStrategy): CubeEssence {
     var { splits } = this;
     return this.changeSplits(splits.removeSplit(split), strategy);
   }
 
-  public changeColors(colors: Colors): Essence {
+  public changeColors(colors: Colors): CubeEssence {
     var value = this.valueOf();
     value.colors = colors;
-    return new Essence(value);
+    return new CubeEssence(value);
   }
 
-  public changeVisualization(visualization: Manifest): Essence {
+  public changeVisualization(visualization: Manifest): CubeEssence {
     var value = this.valueOf();
     value.visualization = visualization;
-    return new Essence(value);
+    return new CubeEssence(value);
   }
 
-  public pin(dimension: Dimension): Essence {
+  public pin(dimension: Dimension): CubeEssence {
     var value = this.valueOf();
     value.pinnedDimensions = value.pinnedDimensions.add(dimension.name);
-    return new Essence(value);
+    return new CubeEssence(value);
   }
 
-  public unpin(dimension: Dimension): Essence {
+  public unpin(dimension: Dimension): CubeEssence {
     var value = this.valueOf();
     value.pinnedDimensions = value.pinnedDimensions.remove(dimension.name);
-    return new Essence(value);
+    return new CubeEssence(value);
   }
 
   public getPinnedSortMeasure(): Measure {
     return this.dataSource.getMeasure(this.pinnedSort);
   }
 
-  public changePinnedSortMeasure(measure: Measure): Essence {
+  public changePinnedSortMeasure(measure: Measure): CubeEssence {
     var value = this.valueOf();
     value.pinnedSort = measure.name;
-    return new Essence(value);
+    return new CubeEssence(value);
   }
 
-  public toggleMeasure(measure: Measure): Essence {
+  public toggleMeasure(measure: Measure): CubeEssence {
     var dataSource = this.dataSource;
     var value = this.valueOf();
     var selectedMeasures = value.selectedMeasures;
@@ -682,16 +682,16 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
       );
     }
 
-    return new Essence(value);
+    return new CubeEssence(value);
   }
 
-  public acceptHighlight(): Essence {
+  public acceptHighlight(): CubeEssence {
     var { highlight } = this;
     if (!highlight) return this;
     return this.changeFilter(highlight.applyToFilter(this.filter), true);
   }
 
-  public changeHighlight(owner: string, delta: Filter): Essence {
+  public changeHighlight(owner: string, delta: Filter): CubeEssence {
     var { highlight } = this;
 
     // If there is already a highlight from someone else accept it
@@ -706,14 +706,14 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
       owner,
       delta
     });
-    return new Essence(value);
+    return new CubeEssence(value);
   }
 
-  public dropHighlight(): Essence {
+  public dropHighlight(): CubeEssence {
     var value = this.valueOf();
     value.highlight = null;
-    return new Essence(value);
+    return new CubeEssence(value);
   }
 
 }
-check = Essence;
+check = CubeEssence;

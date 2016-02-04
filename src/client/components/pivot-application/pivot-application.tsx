@@ -6,7 +6,7 @@ import * as ReactDOM from 'react-dom';
 import * as ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 
 import { List } from 'immutable';
-import { Clicker, DataSource, Essence } from "../../../common/models/index";
+import { DataSource, CubeEssence } from "../../../common/models/index";
 
 import { HeaderBar } from '../header-bar/header-bar';
 import { SideDrawer, SideDrawerProps } from '../side-drawer/side-drawer';
@@ -28,8 +28,12 @@ export interface PivotApplicationProps extends React.Props<any> {
 export interface PivotApplicationState {
   ReactCSSTransitionGroupAsync?: typeof ReactCSSTransitionGroup;
   SideDrawerAsync?: typeof SideDrawer;
-  essence?: Essence;
+  essence?: CubeEssence;
   drawerOpen?: boolean;
+
+  hash?: string;
+  dataSources?: List<DataSource>;
+  selectedDataSource?: DataSource;
 }
 
 export class PivotApplication extends React.Component<PivotApplicationProps, PivotApplicationState> {
@@ -41,7 +45,10 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
       ReactCSSTransitionGroupAsync: null,
       SideDrawerAsync: null,
       essence: null,
-      drawerOpen: false
+      drawerOpen: false,
+      hash: window.location.hash,
+      dataSources: null,
+      selectedDataSource: null
     };
 
 
@@ -51,9 +58,21 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
   componentWillMount() {
     var { dataSources } = this.props;
     if (!dataSources.size) throw new Error('must have data sources');
-    var dataSource = dataSources.first();
-    var essence = this.getEssenceFromHash() || Essence.fromDataSource(dataSource, { dataSources, visualizations });
-    this.setState({ essence });
+    var selectedDataSource = dataSources.first();
+    var hash = window.location.hash;
+    var hashDataSource = this.getDataSourceFromHash(hash, dataSources);
+    if (hashDataSource && !hashDataSource.equals(selectedDataSource)) selectedDataSource = hashDataSource;
+    this.setState({ hash, dataSources, selectedDataSource });
+  }
+
+  getDataSourceFromHash(hash: string, dataSources? : List<DataSource>) : DataSource {
+    // can change header from hash
+    if (hash[0] === '#') hash = hash.substr(1);
+    var parts = hash.split('/');
+    if (parts.length < 4) return null;
+    var dataSourceName = parts.shift();
+    var dataSource = dataSources.find((ds) => ds.name === dataSourceName);
+    return dataSource;
   }
 
   componentDidMount() {
@@ -75,51 +94,43 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
   }
 
   changeDataSource(dataSource: DataSource) {
-    var { essence } = this.state;
-    this.setState({ essence: essence.changeDataSource(dataSource) });
+    if (!this.state.selectedDataSource.equals(dataSource)) {
+      this.setState({ selectedDataSource: dataSource });
+    }
   };
 
-  getDataSources(): List<DataSource> {
-    var { essence } = this.state;
-    return essence ? essence.dataSources : this.props.dataSources;
-  }
-
-  getEssenceFromHash(): Essence {
-    var hash = window.location.hash;
-    var dataSources = this.getDataSources();
-    return Essence.fromHash(hash, { dataSources, visualizations });
-  }
-
-  globalHashChangeListener() {
+  globalHashChangeListener(): void {
     if (this.hashUpdating) return;
-    var essence = this.getEssenceFromHash();
-    if (!essence) return;
-    this.setState({ essence });
+    var hash = window.location.hash;
+    this.setState({ hash });
+    var dataSource = this.getDataSourceFromHash(hash, this.state.dataSources);
+    this.changeDataSource(dataSource);
   }
 
   sideDrawerOpen(drawerOpen: boolean): void {
     this.setState({ drawerOpen });
   }
 
-  updateHash(newEssence: Essence): void {
+  updateHash(newHash: string): void {
     this.hashUpdating = true;
-    window.location.hash = newEssence.toHash();
-    setTimeout(() => {
-      this.hashUpdating = false;
-    }, 10);
+    window.location.hash = newHash;
+    //setTimeout(() => {
+    this.hashUpdating = false;
+  //  }, 10);
   }
 
   render() {
     var { homeLink, maxFilters, maxSplits, showLastUpdated, hideGitHubIcon, headerBackground } = this.props;
-    var { ReactCSSTransitionGroupAsync, essence, drawerOpen, SideDrawerAsync } = this.state;
-    if (!essence) return null;
+    var { ReactCSSTransitionGroupAsync, drawerOpen, SideDrawerAsync } = this.state;
+
     var sideDrawer: JSX.Element = null;
     if (drawerOpen && SideDrawerAsync) {
       var closeSideDrawer: () => void = this.sideDrawerOpen.bind(this, false);
       sideDrawer = <SideDrawerAsync
         key='drawer'
         changeDataSource={this.changeDataSource.bind(this)}
-        essence={essence}
+        selectedDataSource={this.state.selectedDataSource}
+        dataSources={this.state.dataSources}
         onClose={closeSideDrawer}
         homeLink={homeLink}
       />;
@@ -139,7 +150,7 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
 
     return <main className='pivot-application'>
       <HeaderBar
-        dataSource={essence.dataSource}
+        dataSource={this.state.selectedDataSource}
         onNavClick={this.sideDrawerOpen.bind(this, true)}
         showLastUpdated={showLastUpdated}
         hideGitHubIcon={hideGitHubIcon}
@@ -147,7 +158,9 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
       />
       <CubeView
         updateHash={this.updateHash.bind(this)}
-        essence={essence}
+        selectedDataSource={this.state.selectedDataSource}
+        hash={this.state.hash}
+        dataSources={this.state.dataSources}
         maxFilters={maxFilters}
         maxSplits={maxSplits}
       />

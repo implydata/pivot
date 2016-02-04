@@ -6,14 +6,14 @@ import * as ReactDOM from 'react-dom';
 import { List, OrderedSet } from 'immutable';
 import { $, Expression, Executor, Dataset, RefExpression, SortAction } from 'plywood';
 import { SvgIcon } from '../svg-icon/svg-icon';
-import { Clicker, Essence, DataSource, Filter, Dimension, Measure, SortOn, VisStrategy, Colors } from '../../../common/models/index';
+import { CubeClicker, CubeEssence, DataSource, Filter, Dimension, Measure, SortOn, VisStrategy, Colors } from '../../../common/models/index';
 import { DragManager } from '../../utils/drag-manager/drag-manager';
 import { PinboardMeasureTile } from '../pinboard-measure-tile/pinboard-measure-tile';
 import { DimensionTile } from '../dimension-tile/dimension-tile';
 
 export interface PinboardPanelProps extends React.Props<any> {
-  clicker: Clicker;
-  essence: Essence;
+  clicker: CubeClicker;
+  essence: CubeEssence;
 }
 
 export interface PinboardPanelState {

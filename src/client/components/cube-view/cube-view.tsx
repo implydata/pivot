@@ -6,7 +6,7 @@ import * as ReactDOM from 'react-dom';
 import { List } from 'immutable';
 import { Expression } from 'plywood';
 import { DragManager } from '../../utils/drag-manager/drag-manager';
-import { Colors, Clicker, DataSource, Dimension, Essence, Filter, Stage, Manifest, Measure,
+import { Colors, CubeClicker, DataSource, Dimension, CubeEssence, Filter, Stage, Manifest, Measure,
   SplitCombine, Splits, VisStrategy, VisualizationProps} from '../../../common/models/index';
 // import { ... } from '../../config/constants';
 
@@ -23,12 +23,14 @@ import { visualizations } from '../../visualizations/index';
 export interface CubeViewProps extends React.Props<any> {
   maxFilters?: number;
   maxSplits?: number;
-  essence: Essence;
+  dataSources: List<DataSource>;
+  hash: string;
+  selectedDataSource: DataSource;
   updateHash: Function;
 }
 
 export interface CubeViewState {
-  essence?: Essence;
+  essence?: CubeEssence;
   visualizationStage?: Stage;
   menuStage?: Stage;
   dragOver?: boolean;
@@ -40,7 +42,7 @@ export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
     maxSplits: 3
   };
 
-  private clicker: Clicker;
+  private clicker: CubeClicker;
   private dragCounter: number;
 
   constructor() {
@@ -137,7 +139,9 @@ export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
   }
 
   componentWillMount() {
-    var { essence } = this.props;
+    var dataSources = this.props.dataSources;
+    var selectedDataSource = this.props.selectedDataSource;
+    var essence = this.getEssenceFromHash(this.props.hash, dataSources) || this.getEssenceFromDataSources(dataSources, selectedDataSource);
     this.setState({ essence });
   }
 
@@ -149,23 +153,33 @@ export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
   }
 
   componentWillReceiveProps(nextProps: CubeViewProps) {
-    var { essence } = nextProps;
-    if (!essence.equals(this.state.essence)) {
-      this.setState({ essence });
+    var hashEssence = this.getEssenceFromHash(nextProps.hash, nextProps.dataSources);
+    if (hashEssence && !hashEssence.equals(this.state.essence)) {
+      this.setState({ essence: hashEssence });
     }
-  }
+    if (!this.props.selectedDataSource.equals(nextProps.selectedDataSource)) {
+      var newEssence = this.state.essence.changeDataSource(nextProps.selectedDataSource);
+      this.setState({ essence: newEssence });
+    }
 
-  shouldComponentUpdate(nextProps: CubeViewProps, nextState: CubeViewState): boolean {
-    return Boolean(nextProps.essence);
   }
 
   componentWillUpdate(nextProps: CubeViewProps, nextState: CubeViewState): void {
-    this.props.updateHash(nextState.essence);
+    this.props.updateHash(nextState.essence.toHash());
   }
 
   componentWillUnmount() {
     window.removeEventListener('resize', this.globalResizeListener);
     window.removeEventListener('keydown', this.globalKeyDownListener);
+  }
+
+  getEssenceFromDataSources(dataSources: List<DataSource>, selectedDataSource: DataSource ): CubeEssence {
+    if (!selectedDataSource) selectedDataSource = dataSources.first();
+    return CubeEssence.fromDataSource(selectedDataSource, { dataSources, visualizations });
+  }
+
+  getEssenceFromHash(hash: string, dataSources: List<DataSource>): CubeEssence {
+    return CubeEssence.fromHash(hash, { dataSources, visualizations });
   }
 
   globalKeyDownListener(e: KeyboardEvent) {
@@ -241,6 +255,8 @@ export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
     var clicker = this.clicker;
 
     var { essence, menuStage, visualizationStage, dragOver } = this.state;
+
+    if (!essence) return null;
 
     var { visualization } = essence;
 

@@ -5,7 +5,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { Timezone, Duration, minute, hour, day, week, month, year } from 'chronoshift';
 import { $, r, Expression, Executor, Dataset, TimeRange } from 'plywood';
-import { Stage, Clicker, Essence, DataSource, Filter, FilterClause, Dimension, Measure } from '../../../common/models/index';
+import { Stage, CubeClicker, CubeEssence, DataSource, Filter, FilterClause, Dimension, Measure } from '../../../common/models/index';
 import { formatTimeRange, DisplayYear } from '../../utils/date/date';
 import { enterKey } from '../../utils/dom/dom';
 // import { ... } from '../../config/constants';
@@ -43,8 +43,8 @@ var previousPresets: Preset[] = [
 ];
 
 export interface TimeFilterMenuProps extends React.Props<any> {
-  clicker: Clicker;
-  essence: Essence;
+  clicker: CubeClicker;
+  essence: CubeEssence;
   dimension: Dimension;
   onClose: Function;
 }

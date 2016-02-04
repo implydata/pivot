@@ -10,14 +10,14 @@ import { TITLE_HEIGHT, DIMENSION_HEIGHT } from '../../config/constants';
 import { moveInList } from '../../../common/utils/general/general';
 import { DragManager } from '../../utils/drag-manager/drag-manager';
 import { findParentWithClass, setDragGhost, transformStyle } from '../../utils/dom/dom';
-import { Stage, Clicker, Essence, VisStrategy, DataSource, Filter, Dimension, Measure, SplitCombine} from '../../../common/models/index';
+import { Stage, CubeClicker, CubeEssence, VisStrategy, DataSource, Filter, Dimension, Measure, SplitCombine} from '../../../common/models/index';
 import { PreviewMenu } from '../preview-menu/preview-menu';
 
 const DIMENSION_CLASS_NAME = 'dimension';
 
 export interface DimensionListTileProps extends React.Props<any> {
-  clicker: Clicker;
-  essence: Essence;
+  clicker: CubeClicker;
+  essence: CubeEssence;
   menuStage: Stage;
   triggerFilterMenu: Function;
   triggerSplitMenu: Function;
