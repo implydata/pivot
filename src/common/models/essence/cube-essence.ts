@@ -81,7 +81,7 @@ export interface EssenceContext {
 
 var check: Class<EssenceValue, EssenceJS>;
 export class CubeEssence implements Instance<EssenceValue, EssenceJS> {
-  static isEssence(candidate: any): boolean {
+  static isCubeEssence(candidate: any): boolean {
     return isInstanceOf(candidate, CubeEssence);
   }
 
@@ -333,7 +333,7 @@ export class CubeEssence implements Instance<EssenceValue, EssenceJS> {
   }
 
   public equals(other: CubeEssence): boolean {
-    return CubeEssence.isEssence(other) &&
+    return CubeEssence.isCubeEssence(other) &&
       this.dataSource.equals(other.dataSource) &&
       this.visualization.id === other.visualization.id &&
       this.timezone.equals(other.timezone) &&
