@@ -7,12 +7,12 @@ import * as ReactDOM from 'react-dom';
 import { SvgIcon } from '../svg-icon/svg-icon';
 import { $, Expression, Executor, Dataset } from 'plywood';
 import { isInside, escapeKey } from '../../utils/dom/dom';
-import { CubeClicker, CubeEssence, Measure, Manifest } from '../../../common/models/index';
+import { Clicker, Essence, Measure, Manifest } from '../../../common/models/index';
 // import { SomeComp } from '../some-comp/some-comp';
 
 export interface VisSelectorMenuProps extends React.Props<any> {
-  clicker: CubeClicker;
-  essence: CubeEssence;
+  clicker: Clicker;
+  essence: Essence;
   openOn: Element;
   onClose: Function;
 }

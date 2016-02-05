@@ -6,7 +6,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { $, ply, r, Expression, Executor, Dataset, SortAction, Set } from 'plywood';
 import { SEGMENT, MAX_SEARCH_LENGTH, SEARCH_WAIT } from '../../config/constants';
-import { Stage, CubeClicker, CubeEssence, DataSource, Filter, FilterClause, Dimension, Measure, Colors } from '../../../common/models/index';
+import { Stage, Clicker, Essence, DataSource, Filter, FilterClause, Dimension, Measure, Colors } from '../../../common/models/index';
 import { collect } from '../../../common/utils/general/general';
 import { enterKey } from '../../utils/dom/dom';
 import { ClearableInput } from '../clearable-input/clearable-input';
@@ -17,9 +17,9 @@ import { HighlightString } from '../highlight-string/highlight-string';
 const TOP_N = 100;
 
 export interface StringFilterMenuProps extends React.Props<any> {
-  clicker: CubeClicker;
+  clicker: Clicker;
   dimension: Dimension;
-  essence: CubeEssence;
+  essence: Essence;
   insertPosition: number;
   replacePosition: number;
   onClose: Function;
@@ -60,7 +60,7 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
     this.globalKeyDownListener = this.globalKeyDownListener.bind(this);
   }
 
-  fetchData(essence: CubeEssence, dimension: Dimension): void {
+  fetchData(essence: Essence, dimension: Dimension): void {
     var { searchText } = this.state;
     var { dataSource } = essence;
     var nativeCount = dataSource.getMeasure('count');

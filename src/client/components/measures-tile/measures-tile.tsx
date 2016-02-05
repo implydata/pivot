@@ -7,13 +7,13 @@ import * as ReactDOM from 'react-dom';
 import { $, Expression, Executor, Dataset } from 'plywood';
 import { PIN_TITLE_HEIGHT, SEARCH_BOX_HEIGHT, MEASURE_HEIGHT, PIN_PADDING_BOTTOM } from '../../config/constants';
 import { hasOwnProperty } from '../../../common/utils/general/general';
-import { CubeClicker, CubeEssence, DataSource, Filter, Dimension, Measure } from '../../../common/models/index';
+import { Clicker, Essence, DataSource, Filter, Dimension, Measure } from '../../../common/models/index';
 import { TileHeader } from '../tile-header/tile-header';
 import { Checkbox } from '../checkbox/checkbox';
 
 export interface MeasuresTileProps extends React.Props<any> {
-  clicker: CubeClicker;
-  essence: CubeEssence;
+  clicker: Clicker;
+  essence: Essence;
 }
 
 export interface MeasuresTileState {

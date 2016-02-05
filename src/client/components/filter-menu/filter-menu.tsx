@@ -5,7 +5,7 @@ import { List } from 'immutable';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { $, Expression, Executor, Dataset } from 'plywood';
-import { Stage, CubeClicker, CubeEssence, DataSource, Filter, Dimension, Measure } from '../../../common/models/index';
+import { Stage, Clicker, Essence, DataSource, Filter, Dimension, Measure } from '../../../common/models/index';
 import { BubbleMenu } from '../bubble-menu/bubble-menu';
 
 
@@ -14,8 +14,8 @@ import { TimeFilterMenu } from '../time-filter-menu/time-filter-menu';
 
 
 export interface FilterMenuProps extends React.Props<any> {
-  clicker: CubeClicker;
-  essence: CubeEssence;
+  clicker: Clicker;
+  essence: Essence;
   direction: string;
   containerStage?: Stage;
   openOn: Element;

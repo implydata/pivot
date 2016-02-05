@@ -7,12 +7,12 @@ import * as ReactDOM from 'react-dom';
 // import { SvgIcon } from '../svg-icon/svg-icon';
 import { $, Expression, Executor, Dataset } from 'plywood';
 // import { ... } from '../../config/constants';
-import { Stage, CubeClicker, CubeEssence, Resolution, VisStrategy } from '../../../common/models/index';
+import { Stage, Clicker, Essence, Resolution, VisStrategy } from '../../../common/models/index';
 
 
 export interface ManualFallbackProps extends React.Props<any> {
-  clicker: CubeClicker;
-  essence: CubeEssence;
+  clicker: Clicker;
+  essence: Essence;
 }
 
 export interface ManualFallbackState {

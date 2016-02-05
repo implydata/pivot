@@ -6,7 +6,7 @@ import * as ReactDOM from 'react-dom';
 import { List } from 'immutable';
 import { Expression } from 'plywood';
 import { DragManager } from '../../utils/drag-manager/drag-manager';
-import { Colors, CubeClicker, DataSource, Dimension, CubeEssence, Filter, Stage, Manifest, Measure,
+import { Colors, Clicker, DataSource, Dimension, Essence, Filter, Stage, Manifest, Measure,
   SplitCombine, Splits, VisStrategy, VisualizationProps} from '../../../common/models/index';
 // import { ... } from '../../config/constants';
 
@@ -30,7 +30,7 @@ export interface CubeViewProps extends React.Props<any> {
 }
 
 export interface CubeViewState {
-  essence?: CubeEssence;
+  essence?: Essence;
   visualizationStage?: Stage;
   menuStage?: Stage;
   dragOver?: boolean;
@@ -42,7 +42,7 @@ export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
     maxSplits: 3
   };
 
-  private clicker: CubeClicker;
+  private clicker: Clicker;
   private dragCounter: number;
 
   constructor() {
@@ -173,13 +173,13 @@ export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
     window.removeEventListener('keydown', this.globalKeyDownListener);
   }
 
-  getEssenceFromDataSources(dataSources: List<DataSource>, selectedDataSource: DataSource ): CubeEssence {
+  getEssenceFromDataSources(dataSources: List<DataSource>, selectedDataSource: DataSource ): Essence {
     if (!selectedDataSource) selectedDataSource = dataSources.first();
-    return CubeEssence.fromDataSource(selectedDataSource, { dataSources, visualizations });
+    return Essence.fromDataSource(selectedDataSource, { dataSources, visualizations });
   }
 
-  getEssenceFromHash(hash: string, dataSources: List<DataSource>): CubeEssence {
-    return CubeEssence.fromHash(hash, { dataSources, visualizations });
+  getEssenceFromHash(hash: string, dataSources: List<DataSource>): Essence {
+    return Essence.fromHash(hash, { dataSources, visualizations });
   }
 
   globalKeyDownListener(e: KeyboardEvent) {

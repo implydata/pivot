@@ -7,7 +7,7 @@ import * as ReactDOM from 'react-dom';
 import { SvgIcon } from '../svg-icon/svg-icon';
 import { $, Expression, Executor, Dataset } from 'plywood';
 import { CORE_ITEM_WIDTH, CORE_ITEM_GAP } from '../../config/constants';
-import { Stage, CubeClicker, CubeEssence, VisStrategy, DataSource, Filter, SplitCombine, Dimension, Measure} from '../../../common/models/index';
+import { Stage, Clicker, Essence, VisStrategy, DataSource, Filter, SplitCombine, Dimension, Measure} from '../../../common/models/index';
 import { calculateDragPosition, DragPosition } from '../../../common/utils/general/general';
 import { findParentWithClass, setDragGhost, transformStyle, getXFromEvent } from '../../utils/dom/dom';
 import { DragManager } from '../../utils/drag-manager/drag-manager';
@@ -17,8 +17,8 @@ import { SplitMenu } from '../split-menu/split-menu';
 const SPLIT_CLASS_NAME = 'split';
 
 export interface SplitTileProps extends React.Props<any> {
-  clicker: CubeClicker;
-  essence: CubeEssence;
+  clicker: Clicker;
+  essence: Essence;
   menuStage: Stage;
 }
 

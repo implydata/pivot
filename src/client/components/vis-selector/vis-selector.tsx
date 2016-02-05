@@ -7,12 +7,12 @@ import { List } from 'immutable';
 import { $, Expression, Executor, Dataset } from 'plywood';
 import { findParentWithClass } from '../../utils/dom/dom';
 import { SvgIcon } from '../svg-icon/svg-icon';
-import { CubeClicker, CubeEssence, Measure, Manifest } from '../../../common/models/index';
+import { Clicker, Essence, Measure, Manifest } from '../../../common/models/index';
 import { VisSelectorMenu } from '../vis-selector-menu/vis-selector-menu';
 
 export interface VisSelectorProps extends React.Props<any> {
-  clicker: CubeClicker;
-  essence: CubeEssence;
+  clicker: Clicker;
+  essence: Essence;
 }
 
 export interface VisSelectorState {

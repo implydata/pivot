@@ -7,7 +7,7 @@ import * as ReactDOM from 'react-dom';
 import { $, ply, r, Expression, RefExpression, Executor, Dataset, Datum, TimeRange, Set, SortAction } from 'plywood';
 import { listsEqual } from '../../../common/utils/general/general';
 import { formatterFromData } from '../../../common/utils/formatter/formatter';
-import { Stage, Filter, FilterClause, CubeEssence, VisStrategy, Splits, SplitCombine, Dimension,
+import { Stage, Filter, FilterClause, Essence, VisStrategy, Splits, SplitCombine, Dimension,
   Measure, Colors, DataSource, VisualizationProps, Resolve } from '../../../common/models/index';
 import { SPLIT, SEGMENT, TIME_SEGMENT } from '../../config/constants';
 import { getXFromEvent, getYFromEvent } from '../../utils/dom/dom';
@@ -137,7 +137,7 @@ export class Table extends React.Component<VisualizationProps, TableState> {
     };
   }
 
-  fetchData(essence: CubeEssence): void {
+  fetchData(essence: Essence): void {
     var { splits, dataSource } = essence;
     var measures = essence.getMeasures();
 

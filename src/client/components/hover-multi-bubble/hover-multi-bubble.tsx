@@ -4,7 +4,7 @@ require('./hover-multi-bubble.css');
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { $, Expression, Executor, Dataset, Datum } from 'plywood';
-import { Stage, CubeEssence, DataSource, Filter, Dimension, Measure } from '../../../common/models/index';
+import { Stage, Essence, DataSource, Filter, Dimension, Measure } from '../../../common/models/index';
 import { SEGMENT, TIME_SEGMENT } from '../../config/constants';
 import { formatTimeRange, DisplayYear } from '../../utils/date/date';
 import { BodyPortal } from '../body-portal/body-portal';
@@ -12,7 +12,7 @@ import { BodyPortal } from '../body-portal/body-portal';
 const LEFT_OFFSET = 22;
 
 export interface HoverMultiBubbleProps extends React.Props<any> {
-  essence: CubeEssence;
+  essence: Essence;
   datums: Datum[];
   measure: Measure;
   getY: Function;

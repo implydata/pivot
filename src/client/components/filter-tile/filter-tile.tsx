@@ -7,7 +7,7 @@ import * as Q from 'q';
 import { Timezone, Duration, hour, day, week } from 'chronoshift';
 import { $, Expression, InAction, Executor, Dataset } from 'plywood';
 import { BAR_TITLE_WIDTH, CORE_ITEM_WIDTH, CORE_ITEM_GAP } from '../../config/constants';
-import { Stage, CubeClicker, CubeEssence, DataSource, Filter, FilterClause, Dimension, Measure} from '../../../common/models/index';
+import { Stage, Clicker, Essence, DataSource, Filter, FilterClause, Dimension, Measure} from '../../../common/models/index';
 import { calculateDragPosition, DragPosition } from '../../../common/utils/general/general';
 import { formatTimeRange, DisplayYear } from '../../utils/date/date';
 import { findParentWithClass, setDragGhost, uniqueId, isInside, transformStyle, getXFromEvent } from '../../utils/dom/dom';
@@ -28,7 +28,7 @@ export interface ItemBlank {
   clause?: FilterClause;
 }
 
-function formatLabel(dimension: Dimension, clause: FilterClause, essence: CubeEssence): string {
+function formatLabel(dimension: Dimension, clause: FilterClause, essence: Essence): string {
   var label = dimension.title;
 
   switch (dimension.kind) {
@@ -56,8 +56,8 @@ function formatLabelDummy(dimension: Dimension): string {
 }
 
 export interface FilterTileProps extends React.Props<any> {
-  clicker: CubeClicker;
-  essence: CubeEssence;
+  clicker: Clicker;
+  essence: Essence;
   menuStage: Stage;
 }
 

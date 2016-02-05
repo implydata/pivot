@@ -6,7 +6,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { $, ply, r, Expression, Executor, Dataset, Datum } from 'plywood';
 // import { ... } from '../../config/constants';
-import { Stage, CubeEssence, DataSource, Filter, Splits, SplitCombine, Dimension, Measure, Colors, VisualizationProps, Resolve } from '../../../common/models/index';
+import { Stage, Essence, DataSource, Filter, Splits, SplitCombine, Dimension, Measure, Colors, VisualizationProps, Resolve } from '../../../common/models/index';
 import { SPLIT, SEGMENT } from '../../config/constants';
 import { Loader } from '../../components/loader/loader';
 import { QueryError } from '../../components/query-error/query-error';
@@ -52,7 +52,7 @@ export class BarChart extends React.Component<VisualizationProps, BarChartState>
     };
   }
 
-  fetchData(essence: CubeEssence): void {
+  fetchData(essence: Essence): void {
     var { splits, dataSource } = essence;
     var measures = essence.getMeasures();
 

@@ -7,7 +7,7 @@ import * as ReactDOM from 'react-dom';
 import { SvgIcon } from '../svg-icon/svg-icon';
 import { Timezone, Duration } from 'chronoshift';
 import { $, Expression, RefExpression, Executor, Dataset, TimeBucketAction, SortAction, LimitAction } from 'plywood';
-import { Stage, CubeClicker, CubeEssence, VisStrategy, DataSource, SplitCombine, Filter, Colors, Dimension, Measure, SortOn } from '../../../common/models/index';
+import { Stage, Clicker, Essence, VisStrategy, DataSource, SplitCombine, Filter, Colors, Dimension, Measure, SortOn } from '../../../common/models/index';
 import { SEGMENT } from '../../config/constants';
 import { enterKey } from '../../utils/dom/dom';
 import { BubbleMenu } from '../bubble-menu/bubble-menu';
@@ -25,8 +25,8 @@ function formatGranularity(gran: string): string {
 }
 
 export interface SplitMenuProps extends React.Props<any> {
-  clicker: CubeClicker;
-  essence: CubeEssence;
+  clicker: Clicker;
+  essence: Essence;
   direction: string;
   containerStage: Stage;
   openOn: Element;

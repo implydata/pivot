@@ -5,7 +5,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { SvgIcon } from '../svg-icon/svg-icon';
 import { $, Expression, Datum, Dataset } from 'plywood';
-import { CubeEssence, DataSource } from "../../../common/models/index";
+import { Essence, DataSource } from "../../../common/models/index";
 
 import { Modal } from '../modal/modal';
 
@@ -42,7 +42,7 @@ export class HeaderBar extends React.Component<HeaderBarProps, HeaderBarState> {
       });
       return;
     }
-    window.location.assign(CubeEssence.getBaseURL());
+    window.location.assign(Essence.getBaseURL());
   }
 
   onModalClose() {

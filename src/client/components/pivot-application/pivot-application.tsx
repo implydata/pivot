@@ -6,7 +6,7 @@ import * as ReactDOM from 'react-dom';
 import * as ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 
 import { List } from 'immutable';
-import { DataSource, CubeEssence } from "../../../common/models/index";
+import { DataSource, BaseEssence } from "../../../common/models/index";
 
 import { HeaderBar } from '../header-bar/header-bar';
 import { SideDrawer, SideDrawerProps } from '../side-drawer/side-drawer';
@@ -28,9 +28,9 @@ export interface PivotApplicationProps extends React.Props<any> {
 export interface PivotApplicationState {
   ReactCSSTransitionGroupAsync?: typeof ReactCSSTransitionGroup;
   SideDrawerAsync?: typeof SideDrawer;
-  essence?: CubeEssence;
   drawerOpen?: boolean;
 
+  baseEssence? : BaseEssence;
   hash?: string;
   dataSources?: List<DataSource>;
   selectedDataSource?: DataSource;
@@ -44,11 +44,11 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
     this.state = {
       ReactCSSTransitionGroupAsync: null,
       SideDrawerAsync: null,
-      essence: null,
       drawerOpen: false,
       hash: window.location.hash,
       dataSources: null,
-      selectedDataSource: null
+      selectedDataSource: null,
+      baseEssence: null
     };
 
 
@@ -58,21 +58,15 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
   componentWillMount() {
     var { dataSources } = this.props;
     if (!dataSources.size) throw new Error('must have data sources');
+    var baseEssence  = new BaseEssence({ dataSources });
+    this.setState({ baseEssence});
+
     var selectedDataSource = dataSources.first();
     var hash = window.location.hash;
-    var hashDataSource = this.getDataSourceFromHash(hash, dataSources);
+
+    var hashDataSource = baseEssence.getDataSourceFromHash(hash);
     if (hashDataSource && !hashDataSource.equals(selectedDataSource)) selectedDataSource = hashDataSource;
     this.setState({ hash, dataSources, selectedDataSource });
-  }
-
-  getDataSourceFromHash(hash: string, dataSources? : List<DataSource>) : DataSource {
-    // can change header from hash
-    if (hash[0] === '#') hash = hash.substr(1);
-    var parts = hash.split('/');
-    if (parts.length < 4) return null;
-    var dataSourceName = parts.shift();
-    var dataSource = dataSources.find((ds) => ds.name === dataSourceName);
-    return dataSource;
   }
 
   componentDidMount() {
@@ -103,7 +97,7 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
     if (this.hashUpdating) return;
     var hash = window.location.hash;
     this.setState({ hash });
-    var dataSource = this.getDataSourceFromHash(hash, this.state.dataSources);
+    var dataSource = this.state.baseEssence.getDataSourceFromHash(hash);
     this.changeDataSource(dataSource);
   }
 

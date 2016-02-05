@@ -10,9 +10,9 @@ import { Dimension } from '../dimension/dimension';
 import { Measure } from '../measure/measure';
 import { Manifest } from '../manifest/manifest';
 import { Colors } from '../colors/colors';
-import { VisStrategy } from '../essence/cube-essence';
+import { VisStrategy } from '../essence/essence';
 
-export interface CubeClicker {
+export interface Clicker {
   changeDataSource(dataSource: DataSource): void;
   changeTimeSelection(selection: Expression): void;
   changeFilter(filter: Filter, colors?: Colors): void;

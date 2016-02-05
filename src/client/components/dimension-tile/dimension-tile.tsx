@@ -8,7 +8,7 @@ import { $, r, Expression, Executor, Dataset, Set, SortAction } from 'plywood';
 import { SEGMENT, PIN_TITLE_HEIGHT, PIN_ITEM_HEIGHT, PIN_PADDING_BOTTOM, MAX_SEARCH_LENGTH, SEARCH_WAIT } from '../../config/constants';
 import { formatterFromData } from '../../../common/utils/formatter/formatter';
 import { setDragGhost, isInside, escapeKey } from '../../utils/dom/dom';
-import { CubeClicker, CubeEssence, VisStrategy, DataSource, Filter, Dimension, Measure, SortOn, SplitCombine, Colors } from '../../../common/models/index';
+import { Clicker, Essence, VisStrategy, DataSource, Filter, Dimension, Measure, SortOn, SplitCombine, Colors } from '../../../common/models/index';
 import { collect } from '../../../common/utils/general/general';
 import { DragManager } from '../../utils/drag-manager/drag-manager';
 
@@ -26,8 +26,8 @@ const SEARCH_BOX_GAP = 3;
 const FOLDER_BOX_HEIGHT = 30;
 
 export interface DimensionTileProps extends React.Props<any> {
-  clicker: CubeClicker;
-  essence: CubeEssence;
+  clicker: Clicker;
+  essence: Essence;
   dimension: Dimension;
   sortOn: SortOn;
   colors?: Colors;
@@ -73,7 +73,7 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
     this.globalKeyDownListener = this.globalKeyDownListener.bind(this);
   }
 
-  fetchData(essence: CubeEssence, dimension: Dimension, sortOn: SortOn, unfolded: boolean): void {
+  fetchData(essence: Essence, dimension: Dimension, sortOn: SortOn, unfolded: boolean): void {
     var { searchText } = this.state;
     var { dataSource, colors } = essence;
 
@@ -127,7 +127,7 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
       );
   }
 
-  updateFoldability(essence: CubeEssence, dimension: Dimension, colors: Colors): boolean {
+  updateFoldability(essence: Essence, dimension: Dimension, colors: Colors): boolean {
     var { unfolded } = this.state;
     var foldability = true;
     if (essence.filter.filteredOn(dimension.expression)) { // has filter

@@ -7,7 +7,7 @@ import * as ReactDOM from 'react-dom';
 import { SvgIcon } from '../svg-icon/svg-icon';
 import { $, Expression, Executor, Dataset } from 'plywood';
 // import { ... } from '../../config/constants';
-import { Stage, CubeClicker, CubeEssence, DataSource, Filter, Dimension, Measure } from '../../../common/models/index';
+import { Stage, Clicker, Essence, DataSource, Filter, Dimension, Measure } from '../../../common/models/index';
 // import { SomeComp } from '../some-comp/some-comp';
 
 function stopEvent(e: React.MouseEvent): void {
@@ -15,7 +15,7 @@ function stopEvent(e: React.MouseEvent): void {
 }
 
 export interface HighlightControlsProps extends React.Props<any> {
-  clicker: CubeClicker;
+  clicker: Clicker;
   orientation: string;
   onClose?: Function;
   style?: any;

@@ -5,13 +5,13 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { Timezone, Duration } from 'chronoshift';
 import { $, r, Expression, Executor, Dataset, TimeRange, Set } from 'plywood';
-import { CubeClicker, CubeEssence, Filter, FilterClause, Dimension, Measure } from '../../../common/models/index';
+import { Clicker, Essence, Filter, FilterClause, Dimension, Measure } from '../../../common/models/index';
 import { isInside, escapeKey, getXFromEvent } from '../../utils/dom/dom';
 import { HighlightControls } from '../highlight-controls/highlight-controls';
 
 export interface HighlighterProps extends React.Props<any> {
-  clicker: CubeClicker;
-  essence: CubeEssence;
+  clicker: Clicker;
+  essence: Essence;
   highlightId: string;
   scaleX: any;
   dragStart: number;
