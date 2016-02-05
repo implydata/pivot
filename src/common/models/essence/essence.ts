@@ -16,7 +16,7 @@ import { Dimension } from '../dimension/dimension';
 import { Measure } from '../measure/measure';
 import { Colors, ColorsJS } from '../colors/colors';
 import { Manifest, Resolve } from '../manifest/manifest';
-
+import { BaseEssence } from './base-essence';
 const HASH_VERSION = 1;
 
 function constrainDimensions(dimensions: OrderedSet<string>, dataSource: DataSource): OrderedSet<string> {
@@ -80,7 +80,7 @@ export interface EssenceContext {
 }
 
 var check: Class<EssenceValue, EssenceJS>;
-export class Essence implements Instance<EssenceValue, EssenceJS> {
+export class Essence implements Instance<EssenceValue, EssenceJS>  {
   static isEssence(candidate: any): boolean {
     return isInstanceOf(candidate, Essence);
   }

@@ -8,13 +8,14 @@ import { SvgIcon } from '../svg-icon/svg-icon';
 import { List } from 'immutable';
 import { $, Expression, Executor, Dataset } from 'plywood';
 import { isInside, escapeKey } from '../../utils/dom/dom';
-import { DataSource, Clicker, Essence } from '../../../common/models/index';
+import { DataSource } from '../../../common/models/index';
 // import { SomeComp } from '../some-comp/some-comp';
 
 
 export interface SideDrawerProps extends React.Props<any> {
   changeDataSource: Function;
-  essence: Essence;
+  selectedDataSource: DataSource;
+  dataSources: List<DataSource>;
   onClose: Function;
   homeLink?: string;
 }
@@ -61,10 +62,9 @@ export class SideDrawer extends React.Component<SideDrawerProps, SideDrawerState
   }
 
   renderDataSourceItems() {
-    var { essence } = this.props;
 
-    var selectedDataSource = essence.dataSource;
-    return essence.dataSources.map((dataSource) => {
+    var selectedDataSource = this.props.selectedDataSource;
+    return this.props.dataSources.map((dataSource) => {
       return <li
         className={dataSource === selectedDataSource ? 'selected' : ''}
         key={dataSource.name}
