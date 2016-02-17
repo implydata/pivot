@@ -16,7 +16,6 @@ import { Dimension } from '../dimension/dimension';
 import { Measure } from '../measure/measure';
 import { Colors, ColorsJS } from '../colors/colors';
 import { Manifest, Resolve } from '../manifest/manifest';
-
 const HASH_VERSION = 1;
 
 function constrainDimensions(dimensions: OrderedSet<string>, dataSource: DataSource): OrderedSet<string> {
@@ -44,10 +43,9 @@ export enum VisStrategy {
 }
 
 export interface EssenceValue {
-  dataSources?: List<DataSource>;
   visualizations?: List<Manifest>;
+  dataSource?: DataSource;
 
-  dataSource: DataSource;
   visualization: Manifest;
   timezone: Timezone;
   filter: Filter;
@@ -61,7 +59,6 @@ export interface EssenceValue {
 }
 
 export interface EssenceJS {
-  dataSource: string;
   visualization: string;
   timezone: string;
   filter: FilterJS;
@@ -75,7 +72,7 @@ export interface EssenceJS {
 }
 
 export interface EssenceContext {
-  dataSources: List<DataSource>;
+  dataSource: DataSource;
   visualizations: List<Manifest>;
 }
 
@@ -91,9 +88,6 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
   }
 
   static fromHash(hash: string, context: EssenceContext): Essence {
-    // trim a potential leading #
-    if (hash[0] === '#') hash = hash.substr(1);
-
     var parts = hash.split('/');
     if (parts.length < 4) return null;
     var dataSource = parts.shift();
@@ -117,7 +111,6 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
     var essence: Essence;
     try {
       essence = Essence.fromJS({
-        dataSource: dataSource,
         visualization: visualization,
         timezone: jsArray[0],
         filter: jsArray[1],
@@ -159,10 +152,9 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
     }
 
     return new Essence({
-      dataSources: context.dataSources,
+      dataSource: context.dataSource,
       visualizations: context.visualizations,
 
-      dataSource,
       visualization: null,
       timezone,
       filter,
@@ -177,13 +169,12 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
   }
 
   static fromJS(parameters: EssenceJS, context?: EssenceContext): Essence {
-    var dataSourceName = parameters.dataSource;
-    var visualizationID = parameters.visualization;
     var visualizations = context.visualizations;
-    var dataSources = context.dataSources;
+    var dataSource = context.dataSource;
+
+    var visualizationID = parameters.visualization;
     var visualization = visualizations.find(v => v.id === visualizationID);
 
-    var dataSource = dataSources.find((ds) => ds.name === dataSourceName);
     var timezone = Timezone.fromJS(parameters.timezone);
     var filter = Filter.fromJS(parameters.filter).constrainToDimensions(dataSource.dimensions, dataSource.timeAttribute);
     var splits = Splits.fromJS(parameters.splits).constrainToDimensions(dataSource.dimensions);
@@ -210,10 +201,9 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
     }
 
     return new Essence({
-      dataSources,
+      dataSource,
       visualizations,
 
-      dataSource,
       visualization,
       timezone,
       filter,
@@ -228,10 +218,9 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
   }
 
 
-  public dataSources: List<DataSource>;
+  public dataSource: DataSource;
   public visualizations: List<Manifest>;
 
-  public dataSource: DataSource;
   public visualization: Manifest;
   public timezone: Timezone;
   public filter: Filter;
@@ -246,8 +235,6 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
   public visResolve: Resolve;
 
   constructor(parameters: EssenceValue) {
-    this.dataSources = parameters.dataSources;
-    if (!this.dataSources.size) throw new Error('can not have empty dataSource list');
     this.visualizations = parameters.visualizations;
 
     this.dataSource = parameters.dataSource;
@@ -287,10 +274,9 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
 
   public valueOf(): EssenceValue {
     return {
-      dataSources: this.dataSources,
+      dataSource: this.dataSource,
       visualizations: this.visualizations,
 
-      dataSource: this.dataSource,
       visualization: this.visualization,
       timezone: this.timezone,
       filter: this.filter,
@@ -308,7 +294,6 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
     var selectedMeasures = this.selectedMeasures.toArray();
     var pinnedDimensions = this.pinnedDimensions.toArray();
     var js: EssenceJS = {
-      dataSource: this.dataSource.name,
       visualization: this.visualization.id,
       timezone: this.timezone.toJS(),
       filter: this.filter.toJS(),
@@ -351,7 +336,7 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
   }
 
   public toHash(): string {
-    var js: any = this.toJS();
+    var js = this.toJS();
     var compressed: any[] = [
       js.timezone,         // 0
       js.filter,           // 1
@@ -369,12 +354,11 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
       restJSON.push(JSON.stringify(compressed[i] || null));
     }
 
-    return '#' + [
-        js.dataSource,
-        js.visualization,
-        HASH_VERSION,
-        compressToBase64(restJSON.join(','))
-      ].join('/');
+    return [
+      js.visualization,
+      HASH_VERSION,
+      compressToBase64(restJSON.join(','))
+    ].join('/');
   }
 
   public getURL(): string {
@@ -508,26 +492,23 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
     return commonSort;
   }
 
-  // Modification
+  public updateDataSource(newDataSource: DataSource): Essence {
+    var { dataSource, visualizations } = this;
 
-  public changeDataSource(dataSource: DataSource): Essence {
-    var { dataSources, visualizations } = this;
-
-    if (this.dataSource.equals(dataSource)) return this; // nothing to do
-
-    if (this.dataSource.equalsWithoutMaxTime(dataSource)) { // Updated maxTime
+    if (dataSource.equals(newDataSource)) return this; // nothing to do
+    if (dataSource.equalsWithoutMaxTime(newDataSource)) { // Updated maxTime
       var value = this.valueOf();
-      value.dataSource = dataSource;
+      value.dataSource = newDataSource;
       return new Essence(value);
     }
 
-    var dataSourceName = dataSource.name;
-    var existingDataSource = dataSources.find((ds) => ds.name === dataSourceName);
+    var dataSourceName = newDataSource.name;
+    var existingDataSource = dataSource;
     if (!existingDataSource) throw new Error(`unknown DataSource changed: ${dataSourceName}`);
 
-    if (existingDataSource.equals(dataSource)) {
+    if (existingDataSource.equals(newDataSource)) {
       // Just changing DataSource, nothing to see here.
-      return Essence.fromDataSource(dataSource, { dataSources: dataSources, visualizations: visualizations });
+      return Essence.fromDataSource(dataSource, { dataSource: dataSource, visualizations: visualizations });
     }
 
     // We are actually updating info within the current dataSource
@@ -535,7 +516,6 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
 
     var value = this.valueOf();
     value.dataSource = dataSource;
-    value.dataSources = <List<DataSource>>dataSources.map((ds) => ds.name === dataSourceName ? dataSource : ds);
 
     // Make sure that all the elements of state are still valid
     var oldDataSource = this.dataSource;
@@ -561,6 +541,8 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
 
     return new Essence(value);
   }
+
+  // Modification
 
   public changeFilter(filter: Filter, removeHighlight: boolean = false): Essence {
     var value = this.valueOf();
