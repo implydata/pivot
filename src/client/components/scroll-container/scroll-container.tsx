@@ -8,8 +8,6 @@ import { Stage, Clicker, Essence, DataSource, Filter, Dimension, Measure } from 
 import { SvgIcon } from '../svg-icon/svg-icon';
 import { Fn } from "../../../common/utils/general/general";
 
-// I am: import { ScrollContainer } from '../scroll-container/scroll-container';
-
 export interface ScrollContainerProps extends React.Props<any> {
   style?: Lookup<any>;
   className?: string;
@@ -24,21 +22,6 @@ export interface ScrollContainerState {
 }
 
 export class ScrollContainer extends React.Component<ScrollContainerProps, ScrollContainerState> {
-  public mounted: boolean;
-
-  constructor() {
-    super();
-    // this.state = {};
-
-  }
-
-  componentDidMount() {
-    this.mounted = true;
-  }
-
-  componentWillUnmount() {
-    this.mounted = false;
-  }
 
   render() {
     const { style, onScroll, onMouseLeave, onMouseMove, onClick } = this.props;

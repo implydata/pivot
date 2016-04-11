@@ -66,23 +66,7 @@ export class SimpleTable extends React.Component<SimpleTableProps, SimpleTableSt
       height: SimpleTable.HEADER_HEIGHT + bodyHeight + SimpleTable.BODY_PADDING_BOTTOM
     };
   }
-
-  public mounted: boolean;
-
-  constructor() {
-    super();
-    //this.state = {};
-
-  }
-  componentDidMount() {
-    this.mounted = true;
-  }
-
-  componentWillUnmount() {
-    this.mounted = false;
-  }
-
-
+  
   getHeaderStyle(): InlineStyle {
     const { scrollLeft, rowWidth } = this.props;
     return {
