@@ -1,5 +1,6 @@
 import { List } from 'immutable';
 import { immutableArraysEqual, Equalable } from 'immutable-class';
+import { Set } from 'plywood';
 
 // The most generic function
 export interface Fn {
@@ -108,4 +109,18 @@ export function verifyUrlSafeName(name: string): void {
   if (name !== urlSafeName) {
     throw new Error(`'${name}' is not a URL safe name. Try '${urlSafeName}' instead?`);
   }
+}
+
+
+export function setToString(set: Set, options?: { encloseIn?: string | string[]}): string {
+  if (!options ) return `${set.elements.join(", ")}`;
+  var { encloseIn } = options;
+  if (!Array.isArray(encloseIn)) {
+    return `${encloseIn}${set.elements.join(",")}${encloseIn}`;
+  } else if (encloseIn.length === 2) {
+    return `${encloseIn[0]}${set.elements.join(",")}${encloseIn[1]}`;
+  } else {
+    throw new Error('unsupported encloseIn, supply either a string or an array of length 2');
+  }
+
 }

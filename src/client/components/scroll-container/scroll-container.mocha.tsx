@@ -7,22 +7,18 @@ import '../../utils/require-extensions';
 import * as TestUtils from 'react-addons-test-utils';
 
 import { $, Expression } from 'plywood';
-import { HilukMenu } from './hiluk-menu';
+import { ScrollContainer } from './scroll-container';
 
-describe('HilukMenu', () => {
+describe('ScrollContainer', () => {
   it('adds the correct class', () => {
     var renderedComponent = TestUtils.renderIntoDocument(
-      <HilukMenu
-        essence={null}
-        onClose={null}
-        openOn={null}
-        getUrlPrefix={null}
-        openRawDataModal={null}
+      <ScrollContainer
+
       />
     );
 
     expect(TestUtils.isCompositeComponent(renderedComponent), 'should be composite').to.equal(true);
-    expect((ReactDOM.findDOMNode(renderedComponent) as any).className, 'should contain class').to.contain('hiluk-menu');
+    expect((ReactDOM.findDOMNode(renderedComponent) as any).className, 'should contain class').to.contain('scroll-container');
   });
 
 });

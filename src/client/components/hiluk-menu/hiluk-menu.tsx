@@ -12,6 +12,7 @@ export interface HilukMenuProps extends React.Props<any> {
   openOn: Element;
   onClose: Fn;
   getUrlPrefix: () => string;
+  openRawDataModal: Fn;
 }
 
 export interface HilukMenuState {
@@ -43,6 +44,12 @@ export class HilukMenu extends React.Component<HilukMenuProps, HilukMenuState> {
     });
   }
 
+  openRawDataModal() {
+    const { openRawDataModal, onClose } = this.props;
+    openRawDataModal();
+    onClose();
+  }
+
   render() {
     const { openOn, onClose } = this.props;
     const { url, specificUrl } = this.state;
@@ -64,6 +71,11 @@ export class HilukMenu extends React.Component<HilukMenuProps, HilukMenuState> {
         onClick={onClose}
       >{STRINGS.copySpecificUrl}</li>);
     }
+    shareOptions.push(<li
+      className="select-query"
+      key="select-query"
+      onClick={this.openRawDataModal.bind(this)}
+    >{STRINGS.seeRawData}</li>);
 
     var stage = Stage.fromSize(200, 200);
     return <BubbleMenu

@@ -11,19 +11,13 @@ import { SPLIT, SEGMENT, TIME_SEGMENT } from '../../config/constants';
 import { getXFromEvent, getYFromEvent } from '../../utils/dom/dom';
 import { SvgIcon } from '../../components/svg-icon/svg-icon';
 import { SegmentBubble } from '../../components/segment-bubble/segment-bubble';
-import { Loader } from '../../components/loader/loader';
-import { QueryError } from '../../components/query-error/query-error';
+import { ScrollContainer } from '../../components/scroll-container/scroll-container';
+import { SimpleTable, InlineStyle } from '../../components/simple-table/simple-table';
 
-const HEADER_HEIGHT = 38;
 const SEGMENT_WIDTH = 300;
 const INDENT_WIDTH = 25;
 const MEASURE_WIDTH = 100;
-const ROW_HEIGHT = 30;
-const SPACE_LEFT = 10;
-const SPACE_RIGHT = 10;
 
-const ROW_PADDING_RIGHT = 50;
-const BODY_PADDING_BOTTOM = 90;
 const HIGHLIGHT_BUBBLE_V_OFFSET = -4;
 
 function formatSegment(value: any): string {
@@ -245,10 +239,10 @@ export class Table extends React.Component<VisualizationProps, TableState> {
     var x = getXFromEvent(e) - rect.left;
     var y = getYFromEvent(e) - rect.top;
 
-    if (x <= SPACE_LEFT) return { what: 'space-left' };
-    x -= SPACE_LEFT;
+    if (x <= SimpleTable.SPACE_LEFT) return { what: 'space-left' };
+    x -= SimpleTable.SPACE_LEFT;
 
-    if (y <= HEADER_HEIGHT) {
+    if (y <= SimpleTable.HEADER_HEIGHT) {
       if (x <= SEGMENT_WIDTH) return { what: 'corner' };
 
       x = x - SEGMENT_WIDTH + scrollLeft;
@@ -258,8 +252,8 @@ export class Table extends React.Component<VisualizationProps, TableState> {
       return { what: 'header', measure };
     }
 
-    y = y - HEADER_HEIGHT + scrollTop;
-    var rowIndex = Math.floor(y / ROW_HEIGHT);
+    y = y - SimpleTable.HEADER_HEIGHT + scrollTop;
+    var rowIndex = Math.floor(y / SimpleTable.ROW_HEIGHT);
     var datum = flatData ? flatData[rowIndex] : null;
     if (!datum) return { what: 'whitespace' };
     return { what: 'row', row: datum };
@@ -370,10 +364,10 @@ export class Table extends React.Component<VisualizationProps, TableState> {
         highlightDelta = essence.highlight.delta;
       }
 
-      const skipNumber = Math.max(0, Math.floor(scrollTop / ROW_HEIGHT));
-      const lastElementToShow = Math.min(flatData.length, Math.ceil((scrollTop + stage.height) / ROW_HEIGHT));
+      const skipNumber = SimpleTable.getFirstElementToShow(scrollTop);
+      const lastElementToShow = SimpleTable.getLastElementToShow(flatData.length, scrollTop, stage.height);
 
-      var rowY = skipNumber * ROW_HEIGHT;
+      var rowY = skipNumber * SimpleTable.ROW_HEIGHT;
       for (var i = skipNumber; i < lastElementToShow; i++) {
         var d = flatData[i];
         var nest = d['__nest'];
@@ -402,7 +396,7 @@ export class Table extends React.Component<VisualizationProps, TableState> {
           return <div className="measure" key={measure.name}>{measureValueStr}</div>;
         });
 
-        var rowStyle = { top: rowY };
+        var rowStyle = SimpleTable.getRowStyle(rowY);
         rows.push(<div
           className={'row nest' + nest + ' ' + selectedClass + hoverClass}
           key={'_' + i}
@@ -423,41 +417,30 @@ export class Table extends React.Component<VisualizationProps, TableState> {
             timezone={essence.timezone}
             clicker={clicker}
             left={stage.x + stage.width / 2}
-            top={stage.y + HEADER_HEIGHT + rowY - scrollTop - HIGHLIGHT_BUBBLE_V_OFFSET}
+            top={stage.y + SimpleTable.HEADER_HEIGHT + rowY - scrollTop - HIGHLIGHT_BUBBLE_V_OFFSET}
           />;
         }
 
-        rowY += ROW_HEIGHT;
+        rowY += SimpleTable.ROW_HEIGHT;
       }
     }
 
-    var rowWidth = MEASURE_WIDTH * measuresArray.length + ROW_PADDING_RIGHT;
+    var rowWidth = measuresArray.length *  MEASURE_WIDTH + SimpleTable.ROW_PADDING_RIGHT;
 
     // Extended so that the horizontal lines extend fully
     var rowWidthExtended = rowWidth;
     if (stage) {
       rowWidthExtended = Math.max(
         rowWidthExtended,
-        stage.width - (SPACE_LEFT + SEGMENT_WIDTH + SPACE_RIGHT)
+        stage.width - (SimpleTable.SPACE_LEFT + SEGMENT_WIDTH + SimpleTable.SPACE_RIGHT)
       );
     }
-
-    const headerStyle = {
-      width: rowWidthExtended,
-      left: -scrollLeft
-    };
 
     const segmentsStyle = {
       top: -scrollTop
     };
 
-    const bodyHeight = flatData ? flatData.length * ROW_HEIGHT : 0;
-    const bodyStyle = {
-      left: -scrollLeft,
-      top: -scrollTop,
-      width: rowWidthExtended,
-      height: bodyHeight
-    };
+    const bodyHeight = flatData ? flatData.length * SimpleTable.ROW_HEIGHT : 0;
 
     const highlightStyle = {
       top: -scrollTop
@@ -475,52 +458,56 @@ export class Table extends React.Component<VisualizationProps, TableState> {
       verticalScrollShadowStyle = {};
     }
 
-    const scrollerStyle = {
-      width: SPACE_LEFT + SEGMENT_WIDTH + rowWidth + SPACE_RIGHT,
-      height: HEADER_HEIGHT + bodyHeight + BODY_PADDING_BOTTOM
-    };
+    const scrollerStyle = SimpleTable.getScrollerStyle(rowWidth + SEGMENT_WIDTH, bodyHeight);
 
-    var loader: JSX.Element = null;
-    if (loading) {
-      loader = <Loader/>;
+    var highlightBubble: JSX.Element = null;
+    if (highlighter) {
+      highlightBubble = <SegmentBubble
+        clicker={clicker}
+        left={stage.x + stage.width / 2}
+        top={stage.y + SimpleTable.HEADER_HEIGHT + highlighterStyle.top - scrollTop - HIGHLIGHT_BUBBLE_V_OFFSET}
+      />;
     }
+    const preRows = <div className="segments-cont">
+      <div className="segments" style={segmentsStyle}>{segments}</div>
+    </div>;
+    // added extra wrapping div for pin full and single parent
+    const postRows = <div className="post-body">
+                      <div className="highlight-cont">
+                        <div className="highlight" style={highlightStyle}>{highlighter}</div>
+                      </div>
+                      <div className="horizontal-scroll-shadow" style={horizontalScrollShadowStyle}></div>
+                      <div className="vertical-scroll-shadow" style={verticalScrollShadowStyle}></div>
+                    </div>;
 
-    var queryError: JSX.Element = null;
-    if (error) {
-      queryError = <QueryError error={error}/>;
-    }
+    const scrollContainer = <ScrollContainer
+      style={scrollerStyle}
+      ref="base"
+      onScroll={this.onScroll.bind(this)}
+      onMouseLeave={this.onMouseLeave.bind(this)}
+      onMouseMove={this.onMouseMove.bind(this)}
+      onClick={this.onClick.bind(this)}
+    />;
 
     return <div className="table">
       <div className="corner">
         <div className="corner-wrap">{segmentTitle}</div>
         {cornerSortArrow}
       </div>
-      <div className="header-cont">
-        <div className="header" style={headerStyle}>{headerColumns}</div>
-      </div>
-      <div className="segments-cont">
-        <div className="segments" style={segmentsStyle}>{segments}</div>
-      </div>
-      <div className="body-cont">
-        <div className="body" style={bodyStyle}>{rows}</div>
-      </div>
-      <div className="highlight-cont">
-        <div className="highlight" style={highlightStyle}>{highlighter}</div>
-      </div>
-      <div className="horizontal-scroll-shadow" style={horizontalScrollShadowStyle}></div>
-      <div className="vertical-scroll-shadow" style={verticalScrollShadowStyle}></div>
-      {queryError}
-      {loader}
-      <div
-        className="scroller-cont"
-        ref="base"
-        onScroll={this.onScroll.bind(this)}
-        onMouseLeave={this.onMouseLeave.bind(this)}
-        onMouseMove={this.onMouseMove.bind(this)}
-        onClick={this.onClick.bind(this)}
-      >
-        <div className="scroller" style={scrollerStyle}></div>
-      </div>
+      <SimpleTable
+        scrollLeft={scrollLeft}
+        scrollTop={scrollTop}
+        dataLength={flatData ? flatData.length : 0}
+        headerColumns={headerColumns}
+        rowWidth={rowWidthExtended}
+        preRows={preRows}
+        rows={rows}
+        postRows={postRows}
+        scrollContainer={scrollContainer}
+        loading={loading}
+        error={error}
+      />
+
       {highlightBubble}
     </div>;
   }

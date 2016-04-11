@@ -11,6 +11,7 @@ import { calculateDragPosition, DragPosition } from '../../../common/utils/gener
 import { formatTimeRange, DisplayYear } from '../../utils/date/date';
 import { findParentWithClass, setDragGhost, uniqueId, isInside, transformStyle, getXFromEvent } from '../../utils/dom/dom';
 import { DragManager } from '../../utils/drag-manager/drag-manager';
+import { setToString } from "../../../common/utils/general/general";
 
 import { SvgIcon } from '../svg-icon/svg-icon';
 import { FancyDragIndicator } from '../fancy-drag-indicator/fancy-drag-indicator';
@@ -27,21 +28,36 @@ export interface ItemBlank {
   clause?: FilterClause;
 }
 
-function formatLabel(dimension: Dimension, clause: FilterClause, essence: Essence): string {
+export interface LabelFormatOptions {
+  dimension: Dimension;
+  clause: FilterClause;
+  essence: Essence;
+  verbose?: boolean;
+}
+
+export function formatLabel(options: LabelFormatOptions): string {
+  const { dimension, clause, essence, verbose } = options;
   var label = dimension.title;
 
   switch (dimension.kind) {
     case 'boolean':
     case 'number':
     case 'string':
-      var setElements = clause.getLiteralSet().elements;
-      label += setElements.length > 1 ? ` (${setElements.length})` : `: ${setElements[0]}`;
+      if (verbose) {
+        label += `: ${setToString(clause.getLiteralSet(), {encloseIn: ""})}`;
+      } else {
+        var setElements = clause.getLiteralSet().elements;
+        label += setElements.length > 1 ? ` (${setElements.length})` : `: ${setElements[0]}`;
+      }
       break;
-
     case 'time':
       var timeSelection = clause.selection;
       var timeRange = essence.evaluateSelection(timeSelection);
-      label = formatTimeRange(timeRange, essence.timezone, DisplayYear.IF_DIFF);
+      if (verbose) {
+        label = `Time: ${ formatTimeRange(timeRange, essence.timezone, DisplayYear.IF_DIFF) }`;
+      } else {
+        label = formatTimeRange(timeRange, essence.timezone, DisplayYear.IF_DIFF);
+      }
       break;
 
     default:
@@ -483,7 +499,7 @@ export class FilterTile extends React.Component<FilterTileProps, FilterTileState
         onClick={clicker.acceptHighlight.bind(clicker)}
         style={style}
       >
-        <div className="reading">{formatLabel(dimension, clause, essence)}</div>
+        <div className="reading">{formatLabel({dimension, clause, essence})}</div>
         {this.renderRemoveButton(itemBlank)}
       </div>;
     }
@@ -498,7 +514,7 @@ export class FilterTile extends React.Component<FilterTileProps, FilterTileState
         onDragStart={this.dragStart.bind(this, dimension, clause)}
         style={style}
       >
-        <div className="reading">{formatLabel(dimension, clause, essence)}</div>
+        <div className="reading">{formatLabel({dimension, clause, essence})}</div>
         {this.renderRemoveButton(itemBlank)}
       </div>;
     } else {

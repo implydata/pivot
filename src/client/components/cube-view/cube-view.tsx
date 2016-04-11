@@ -16,6 +16,7 @@ import { VisSelector } from '../vis-selector/vis-selector';
 import { ManualFallback } from '../manual-fallback/manual-fallback';
 import { DropIndicator } from '../drop-indicator/drop-indicator';
 import { PinboardPanel } from '../pinboard-panel/pinboard-panel';
+import { RawDataModal } from '../raw-data-modal/raw-data-modal';
 
 import { visualizations } from '../../visualizations/index';
 
@@ -35,6 +36,8 @@ export interface CubeViewState {
   visualizationStage?: Stage;
   menuStage?: Stage;
   dragOver?: boolean;
+  showRawDataModal?: boolean;
+  RawDataModalAsync?: typeof RawDataModal;
 }
 
 export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
@@ -51,7 +54,8 @@ export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
     super();
     this.state = {
       essence: null,
-      dragOver: false
+      dragOver: false,
+      showRawDataModal: false
     };
 
     var clicker = {
@@ -155,6 +159,11 @@ export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
     window.addEventListener('resize', this.globalResizeListener);
     window.addEventListener('keydown', this.globalKeyDownListener);
     this.globalResizeListener();
+    require.ensure(['../raw-data-modal/raw-data-modal'], (require) => {
+      this.setState({
+        RawDataModalAsync: require('../raw-data-modal/raw-data-modal').RawDataModal
+      });
+    }, 'raw-data-modal');
   }
 
   componentWillReceiveProps(nextProps: CubeViewProps) {
@@ -258,6 +267,24 @@ export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
     this.setState({ dragOver: false });
   }
 
+  openRawDataModal() {
+    this.setState({
+      showRawDataModal: true
+    });
+  }
+
+  onRawDataModalClose() {
+    this.setState({
+      showRawDataModal: false
+    });
+  }
+
+  renderRawDataModal() {
+    const { RawDataModalAsync, showRawDataModal, essence, visualizationStage } = this.state;
+    if (!RawDataModalAsync || !showRawDataModal) return null;
+    return <RawDataModalAsync stage={visualizationStage} essence={essence} onClose={this.onRawDataModalClose.bind(this)}/>;
+  }
+
   triggerFilterMenu(dimension: Dimension) {
     if (!dimension) return;
     (this.refs['filterTile'] as FilterTile).filterMenuRequest(dimension);
@@ -310,6 +337,7 @@ export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
         onNavClick={onNavClick}
         getUrlPrefix={getUrlPrefix}
         refreshMaxTime={this.refreshMaxTime.bind(this)}
+        openRawDataModal={this.openRawDataModal.bind(this)}
       />
       <div className="container" ref='container'>
         <DimensionMeasurePanel
@@ -358,6 +386,7 @@ export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
           getUrlPrefix={getUrlPrefix}
         />
       </div>
+      {this.renderRawDataModal()}
     </div>;
   }
 }

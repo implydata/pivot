@@ -1,0 +1,70 @@
+@import '../../imports';
+
+
+.raw-data-modal {
+  .content {
+    @include unpin-top($modal-header-height + $control-height);
+    left: $modal-window-padding;
+    right: $modal-window-padding;
+    overflow: hidden;
+
+    .filters {
+      @include pin-full;
+      height: $control-height;
+
+      .filter {
+        font-size: 14px;
+        text-transform: uppercase;
+        color: $text-light;
+        height: $control-height;
+        display: inline;
+      }
+
+      .filter + .filter:before {
+        content: '; ';
+      }
+
+    }
+
+    .simple-table {
+      position: absolute;
+      top: $control-height + 10;
+      bottom: $control-height + $modal-window-padding + $padding ;
+      left: 0;
+      right: 0;
+
+      .header-cont {
+
+        .header {
+          background: $background-lightest;
+
+          .table-header {
+            border-right: 1px solid $border-extra-light;
+            padding-right: $padding;
+          }
+        }
+      }
+
+      .body-cont {
+
+        .cell {
+          border-right: 1px solid $border-extra-light;
+          padding-right: $padding;
+        }
+      }
+    }
+
+    .button-bar {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: $modal-window-padding;
+
+      .close {
+        margin-right: 8px;
+      }
+    }
+  }
+
+}
+

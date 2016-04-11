@@ -1,0 +1,16 @@
+@import '../../imports';
+
+.download-button {
+  // todo: there must be a better way to do this
+  &.primary {
+    @extend %button-primary;
+    display: inline;
+    top: 9px;
+  }
+
+  &.secondary {
+    @extend %button-secondary;
+    display: inline;
+    top: 9px;
+  }
+}

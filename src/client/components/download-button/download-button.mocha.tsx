@@ -6,23 +6,20 @@ import * as ReactDOM from 'react-dom';
 import '../../utils/require-extensions';
 import * as TestUtils from 'react-addons-test-utils';
 
-import { $, Expression } from 'plywood';
-import { HilukMenu } from './hiluk-menu';
+import { $, Expression, Dataset } from 'plywood';
+import { DownloadButton } from './download-button';
 
-describe('HilukMenu', () => {
+describe('DownloadButton', () => {
   it('adds the correct class', () => {
+    var dataset = new Dataset({});
     var renderedComponent = TestUtils.renderIntoDocument(
-      <HilukMenu
-        essence={null}
-        onClose={null}
-        openOn={null}
-        getUrlPrefix={null}
-        openRawDataModal={null}
+      <DownloadButton
+        dataset={dataset}
       />
     );
 
     expect(TestUtils.isCompositeComponent(renderedComponent), 'should be composite').to.equal(true);
-    expect((ReactDOM.findDOMNode(renderedComponent) as any).className, 'should contain class').to.contain('hiluk-menu');
+    expect((ReactDOM.findDOMNode(renderedComponent) as any).className, 'should contain class').to.contain('download-button');
   });
 
 });

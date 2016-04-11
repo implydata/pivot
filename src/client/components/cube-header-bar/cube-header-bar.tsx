@@ -19,6 +19,7 @@ export interface CubeHeaderBarProps extends React.Props<any> {
   onNavClick: Fn;
   getUrlPrefix?: () => string;
   refreshMaxTime?: Fn;
+  openRawDataModal?: Fn;
 }
 
 export interface CubeHeaderBarState {
@@ -105,7 +106,7 @@ export class CubeHeaderBar extends React.Component<CubeHeaderBarProps, CubeHeade
   }
 
   renderHilukMenu() {
-    const { essence, getUrlPrefix } = this.props;
+    const { essence, getUrlPrefix, openRawDataModal } = this.props;
     const { hilukMenuOpenOn } = this.state;
     if (!hilukMenuOpenOn) return null;
 
@@ -114,6 +115,7 @@ export class CubeHeaderBar extends React.Component<CubeHeaderBarProps, CubeHeade
       openOn={hilukMenuOpenOn}
       onClose={this.onHilukMenuClose.bind(this)}
       getUrlPrefix={getUrlPrefix}
+      openRawDataModal={openRawDataModal}
     />;
   }
 
