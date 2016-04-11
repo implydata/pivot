@@ -13,7 +13,8 @@ describe('ScrollContainer', () => {
   it('adds the correct class', () => {
     var renderedComponent = TestUtils.renderIntoDocument(
       <ScrollContainer
-
+        ref="base"
+        onScroll={() => {}}
       />
     );
 

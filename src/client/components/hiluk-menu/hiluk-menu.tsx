@@ -72,10 +72,10 @@ export class HilukMenu extends React.Component<HilukMenuProps, HilukMenuState> {
       >{STRINGS.copySpecificUrl}</li>);
     }
     shareOptions.push(<li
-      className="select-query"
-      key="select-query"
+      className="view-raw-data"
+      key="view-raw-data"
       onClick={this.openRawDataModal.bind(this)}
-    >{STRINGS.seeRawData}</li>);
+    >{STRINGS.viewRawData}</li>);
 
     var stage = Stage.fromSize(200, 200);
     return <BubbleMenu

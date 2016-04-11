@@ -9,10 +9,10 @@ import { SvgIcon } from '../svg-icon/svg-icon';
 import { Fn } from "../../../common/utils/general/general";
 
 export interface ScrollContainerProps extends React.Props<any> {
+  onScroll: Fn;
   style?: Lookup<any>;
-  className?: string;
   ref?: string;
-  onScroll?: Fn;
+  className?: string;
   onMouseLeave?: Fn;
   onMouseMove?: Fn;
   onClick?: Fn;

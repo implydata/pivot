@@ -52,7 +52,7 @@ export const STRINGS = {
   autoUpdate: 'Auto update',
   download: 'Download',
   copyUrl: 'Copy URL',
-  seeRawData: 'See Raw Data',
+  viewRawData: 'View raw data',
   rawData: 'Raw Data',
   copySpecificUrl: 'Copy URL - fixed time',
   logout: 'Logout',
