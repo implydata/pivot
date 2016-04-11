@@ -113,7 +113,7 @@ export function verifyUrlSafeName(name: string): void {
 
 
 export function setToString(set: Set, options?: { encloseIn?: string | string[]}): string {
-  if (!options ) return `${set.elements.join(", ")}`;
+  if (!options) return `${set.elements.join(", ")}`;
   var { encloseIn } = options;
   if (!Array.isArray(encloseIn)) {
     return `${encloseIn}${set.elements.join(",")}${encloseIn}`;

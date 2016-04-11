@@ -249,7 +249,6 @@ export class RawDataModal extends React.Component<RawDataModalProps, RawDataModa
   }
 
 
-
   render() {
     const { onClose, stage } = this.props;
     const { dataset, loading, scrollTop, scrollLeft, error } = this.state;
@@ -278,7 +277,7 @@ export class RawDataModal extends React.Component<RawDataModalProps, RawDataModa
     </div>;
 
     const scrollerStyle = SimpleTable.getScrollerStyle(rowWidth, bodyHeight);
-    const scrollContainer = <ScrollContainer style={scrollerStyle} onScroll={this.onScroll.bind(this)} />;
+    const scrollContainer = <ScrollContainer style={scrollerStyle} onScroll={this.onScroll.bind(this)}/>;
     return <Modal
       className="raw-data-modal"
       title={title}
@@ -304,7 +303,7 @@ export class RawDataModal extends React.Component<RawDataModalProps, RawDataModa
             className="secondary"
             fileName={this.makeFileName()}
             fileFormat={DownloadButton.defaultFileFormat}
-            dataset={dataset} />
+            dataset={dataset}/>
         </div>
       </div>
     </Modal>;

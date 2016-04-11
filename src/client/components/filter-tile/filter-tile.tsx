@@ -44,7 +44,7 @@ export function formatLabel(options: LabelFormatOptions): string {
     case 'number':
     case 'string':
       if (verbose) {
-        label += `: ${setToString(clause.getLiteralSet(), {encloseIn: ""})}`;
+        label += `: ${setToString(clause.getLiteralSet(), { encloseIn: "" })}`;
       } else {
         var setElements = clause.getLiteralSet().elements;
         label += setElements.length > 1 ? ` (${setElements.length})` : `: ${setElements[0]}`;
@@ -536,7 +536,7 @@ export class FilterTile extends React.Component<FilterTileProps, FilterTileState
       dragOver, dragInsertPosition, dragReplacePosition,
       possibleDimension, possibleInsertPosition, possibleReplacePosition,
       maxItems
-    } = this.state;
+      } = this.state;
     var { dataSource, filter, highlight } = essence;
 
     const sectionWidth = CORE_ITEM_WIDTH + CORE_ITEM_GAP;

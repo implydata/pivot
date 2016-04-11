@@ -266,7 +266,8 @@ export class SplitMenu extends React.Component<SplitMenuProps, SplitMenuState> {
     >
       {menuControls}
       <div className="button-bar">
-        <button className="ok" onClick={this.onOkClick.bind(this)} disabled={!this.actionEnabled()}>{STRINGS.ok}</button>
+        <button className="ok" onClick={this.onOkClick.bind(this)}
+                disabled={!this.actionEnabled()}>{STRINGS.ok}</button>
         <button className="cancel" onClick={this.onCancelClick.bind(this)}>{STRINGS.cancel}</button>
       </div>
     </BubbleMenu>;

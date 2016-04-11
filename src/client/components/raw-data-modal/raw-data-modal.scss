@@ -1,6 +1,5 @@
 @import '../../imports';
 
-
 .raw-data-modal {
   .content {
     @include unpin-top($modal-header-height + $control-height);
@@ -29,7 +28,7 @@
     .simple-table {
       position: absolute;
       top: $control-height + 10;
-      bottom: $control-height + $modal-window-padding + $padding ;
+      bottom: $control-height + $modal-window-padding + $padding;
       left: 0;
       right: 0;
 

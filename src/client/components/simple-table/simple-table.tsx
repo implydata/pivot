@@ -66,7 +66,7 @@ export class SimpleTable extends React.Component<SimpleTableProps, SimpleTableSt
       height: SimpleTable.HEADER_HEIGHT + bodyHeight + SimpleTable.BODY_PADDING_BOTTOM
     };
   }
-  
+
   getHeaderStyle(): InlineStyle {
     const { scrollLeft, rowWidth } = this.props;
     return {

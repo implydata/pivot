@@ -425,7 +425,7 @@ export class Table extends React.Component<VisualizationProps, TableState> {
       }
     }
 
-    var rowWidth = measuresArray.length *  MEASURE_WIDTH + SimpleTable.ROW_PADDING_RIGHT;
+    var rowWidth = measuresArray.length * MEASURE_WIDTH + SimpleTable.ROW_PADDING_RIGHT;
 
     // Extended so that the horizontal lines extend fully
     var rowWidthExtended = rowWidth;
@@ -473,12 +473,12 @@ export class Table extends React.Component<VisualizationProps, TableState> {
     </div>;
     // added extra wrapping div for pin full and single parent
     const postRows = <div className="post-body">
-                      <div className="highlight-cont">
-                        <div className="highlight" style={highlightStyle}>{highlighter}</div>
-                      </div>
-                      <div className="horizontal-scroll-shadow" style={horizontalScrollShadowStyle}></div>
-                      <div className="vertical-scroll-shadow" style={verticalScrollShadowStyle}></div>
-                    </div>;
+      <div className="highlight-cont">
+        <div className="highlight" style={highlightStyle}>{highlighter}</div>
+      </div>
+      <div className="horizontal-scroll-shadow" style={horizontalScrollShadowStyle}></div>
+      <div className="vertical-scroll-shadow" style={verticalScrollShadowStyle}></div>
+    </div>;
 
     const scrollContainer = <ScrollContainer
       style={scrollerStyle}

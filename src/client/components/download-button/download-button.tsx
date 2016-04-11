@@ -25,6 +25,7 @@ export interface DownloadButtonState {
 
 export class DownloadButton extends React.Component<DownloadButtonProps, DownloadButtonState> {
   static defaultFileFormat: FileFormat = 'csv';
+
   static renderDisabled(className?: string) {
     const qualifiedClassName = classNames('download-button', className);
     return <a className={qualifiedClassName}
