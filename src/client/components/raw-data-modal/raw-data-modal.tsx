@@ -241,7 +241,7 @@ export class RawDataModal extends React.Component<RawDataModalProps, RawDataModa
       wordsOnly = `filters-${filters.size}`;
     } else {
       wordsOnly = filters.map((filter) => {
-        return filter.toLowerCase().replace(/[^0-9a-z]/gi, '');
+        return filter.toLowerCase().replace(/[^0-9a-z]/g, '');
       }).join('-');
     }
     const dsName = essence.dataSource.name.toLowerCase().substr(0, 5);
@@ -254,11 +254,11 @@ export class RawDataModal extends React.Component<RawDataModalProps, RawDataModa
     const { dataset, loading, scrollTop, scrollLeft, error } = this.state;
     const headerColumns = this.renderHeader();
     const rows = this.renderRows(dataset, scrollTop, stage);
-    const dimensionsWidth = this.dimensionsWidths.reduce((p: number, c: number) => {
-      return p + c;
+    const dimensionsWidth = this.dimensionsWidths.reduce((pV: number, cV: number) => {
+      return pV + cV;
     }, 0);
-    const measuresWidths = this.measuresWidths.reduce((p: number, c: number) => {
-      return p + c;
+    const measuresWidths = this.measuresWidths.reduce((pV: number, cV: number) => {
+      return pV + cV;
     }, 0);
     const rowWidth = dimensionsWidth + measuresWidths;
 
