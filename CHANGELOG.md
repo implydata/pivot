@@ -2,6 +2,16 @@
 
 For updates follow [@implydata](https://twitter.com/implydata) on Twitter.
 
+## 0.8.6
+
+- New plywood
+
+## 0.8.5
+
+- Bubble refactor
+- Copy selected value option in bubbles
+- Fix bug in selecting measures in totals
+
 ## 0.8.4
 
 - Fix SVG sizing in IE Edge
