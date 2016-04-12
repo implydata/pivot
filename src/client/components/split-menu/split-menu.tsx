@@ -11,7 +11,7 @@ import { SvgIcon } from '../svg-icon/svg-icon';
 import { BubbleMenu } from '../bubble-menu/bubble-menu';
 import { Dropdown, DropdownProps } from '../dropdown/dropdown';
 
-const GRANULARITIES = ['PT1M', 'PT5M', 'PT1H', 'P1D', 'P1W'];
+const GRANULARITIES = ['PT1S', 'PT5S', 'PT1M', 'PT5M', 'PT1H', 'P1D', 'P1W'];
 
 function formatLimit(limit: number | string): string {
   if (limit === 'custom') return 'Custom';
