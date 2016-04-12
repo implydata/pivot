@@ -113,12 +113,14 @@ export function verifyUrlSafeName(name: string): void {
 
 
 export function setToString(set: Set, options?: { encloseIn?: string | string[]}): string {
-  if (!options) return `${set.elements.join(", ")}`;
+  var elements = set.elements;
+  if (set.setType === "NULL") elements = ["null"];
+  if (!options) return `${elements.join(", ")}`;
   var { encloseIn } = options;
   if (!Array.isArray(encloseIn)) {
-    return `${encloseIn}${set.elements.join(",")}${encloseIn}`;
+    return `${encloseIn}${elements.join(",")}${encloseIn}`;
   } else if (encloseIn.length === 2) {
-    return `${encloseIn[0]}${set.elements.join(",")}${encloseIn[1]}`;
+    return `${encloseIn[0]}${elements.join(",")}${encloseIn[1]}`;
   } else {
     throw new Error('unsupported encloseIn, supply either a string or an array of length 2');
   }

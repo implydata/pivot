@@ -1,3 +1,4 @@
+import {Manifest} from "../../../common/models/manifest/manifest";
 require('./raw-data-modal.css');
 
 import * as React from 'react';
@@ -19,6 +20,9 @@ import { SimpleTable, InlineStyle } from '../../components/simple-table/simple-t
 
 const LIMIT = 100;
 const TIME_COL_WIDTH = 170;
+const BOOLEAN_COL_WIDTH = 50;
+const NUMBER_COL_WIDTH = 70;
+const DEFAULT_COL_WIDTH = 100;
 const thClassName = "table-header";
 const thText = "title-wrap";
 const tdClassName = "cell";
@@ -27,7 +31,6 @@ const rowClassName = "row";
 
 export interface RawDataModalProps extends React.Props<any> {
   onClose: Fn;
-
   stage: Stage;
   essence: Essence;
   parentId?: string;
@@ -44,11 +47,11 @@ export interface RawDataModalState {
 function getColumnWidth(type: string): number {
   switch (type) {
     case 'boolean':
-      return 50;
+      return BOOLEAN_COL_WIDTH;
     case 'number':
-      return 70;
+      return NUMBER_COL_WIDTH;
     default:
-      return 100;
+      return DEFAULT_COL_WIDTH;
   }
 }
 
@@ -161,7 +164,7 @@ export class RawDataModal extends React.Component<RawDataModalProps, RawDataModa
 
     this.measuresWidths = [];
     measures.map((measure, i) => {
-      const width = getColumnWidth('number');
+      const width = NUMBER_COL_WIDTH;
       const colStyle = { width };
       this.measuresWidths = this.measuresWidths.concat(width);
       cols = cols.concat(<div className={thClassName} style={colStyle} key={`${measure.name}${i}`}>
@@ -232,7 +235,7 @@ export class RawDataModal extends React.Component<RawDataModalProps, RawDataModa
 
   makeFileName(): string {
     const { essence } = this.props;
-    const visType = ((essence.visualization as any)['name']).toLowerCase();
+    const visType = essence.visualization.title.toLowerCase();
     const filters = this.getStringifiedFilters();
     var wordsOnly = "";
     if (filters.size > 2) {
@@ -259,7 +262,6 @@ export class RawDataModal extends React.Component<RawDataModalProps, RawDataModa
       return pV + cV;
     }, 0);
     const rowWidth = dimensionsWidth + measuresWidths;
-
     const title = `${makeTitle(SEGMENT.toLowerCase())} ${STRINGS.rawData} `;
     const dataLength = dataset ? dataset.data.length : 0;
     const bodyHeight = dataLength * SimpleTable.ROW_HEIGHT;
@@ -292,7 +294,7 @@ export class RawDataModal extends React.Component<RawDataModalProps, RawDataModa
           rowWidth={rowWidth}
           rows={rows}
           postRows={postRows}
-          scrollContainer={scrollContainer}
+          scrollContainer={error ? null : scrollContainer}
           dataLength={dataLength}
         />
         <div className="button-bar">
