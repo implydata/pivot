@@ -416,6 +416,7 @@ export class BarChart extends React.Component<VisualizationProps, BarChartState>
             top={containerStage.y + topOffset}
             left={leftOffset}
             clicker={clicker}
+            openRawDataModal={openRawDataModal}
           />;
         }
       });
@@ -432,6 +433,7 @@ export class BarChart extends React.Component<VisualizationProps, BarChartState>
           getY={getY}
           top={containerStage.y + topOffset}
           left={leftOffset}
+          openRawDataModal={openRawDataModal}
         />;
       }
     }
