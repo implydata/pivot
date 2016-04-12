@@ -317,7 +317,7 @@ export class Table extends React.Component<VisualizationProps, TableState> {
   }
 
   render() {
-    var { clicker, essence, stage } = this.props;
+    var { clicker, essence, stage, openRawDataModal } = this.props;
     var { loading, error, flatData, scrollLeft, scrollTop, hoverMeasure, hoverRow } = this.state;
     var { splits } = essence;
 
@@ -466,6 +466,7 @@ export class Table extends React.Component<VisualizationProps, TableState> {
         clicker={clicker}
         left={stage.x + stage.width / 2}
         top={stage.y + SimpleTable.HEADER_HEIGHT + highlighterStyle.top - scrollTop - HIGHLIGHT_BUBBLE_V_OFFSET}
+        openRawDataModal={openRawDataModal}
       />;
     }
     const preRows = <div className="segments-cont">

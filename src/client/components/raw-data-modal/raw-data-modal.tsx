@@ -2,23 +2,18 @@ require('./raw-data-modal.css');
 
 import * as React from 'react';
 import { List } from 'immutable';
-import { $, ply, Expression, Executor, Dataset, Datum, PlyType, PlywoodValue, Set } from 'plywood';
-import { Stage, FilterClause, Dimension, Measure, DataSource } from '../../../common/models/index';
+import { $, Expression, Executor, Dataset, PlywoodValue, Datum, Set } from 'plywood';
+import { Essence, Stage, FilterClause, Dimension, Measure, DataSource } from '../../../common/models/index';
 
 import { Fn, makeTitle, hasOwnProperty, setToString } from "../../../common/utils/general/general";
 import { formatTimeRange, DisplayYear } from "../../utils/date/date";
+import { STRINGS, SEGMENT, SPLIT} from '../../config/constants';
 import { formatLabel } from "../filter-tile/filter-tile";
-
-import { STRINGS } from '../../config/constants';
 import { Modal } from '../modal/modal';
-import { Essence } from "../../../common/models/essence/essence";
 import { Button } from '../button/button';
 import { DownloadButton } from '../download-button/download-button';
-
 import { ScrollContainer } from '../scroll-container/scroll-container';
 import { SvgIcon } from '../../components/svg-icon/svg-icon';
-
-import { SEGMENT, SPLIT } from "../../config/constants";
 import { SimpleTable, InlineStyle } from '../../components/simple-table/simple-table';
 
 
@@ -32,8 +27,10 @@ const rowClassName = "row";
 
 export interface RawDataModalProps extends React.Props<any> {
   onClose: Fn;
-  essence: Essence;
+
   stage: Stage;
+  essence: Essence;
+  parentId?: string;
 }
 
 export interface RawDataModalState {
@@ -56,7 +53,8 @@ function getColumnWidth(type: string): number {
 }
 
 export class RawDataModal extends React.Component<RawDataModalProps, RawDataModalState> {
-  static id = 'table';
+  static id = 'raw-data-table';
+
   public mounted: boolean;
   public dimensionsWidths: number[];
   public measuresWidths: number[];
@@ -118,8 +116,8 @@ export class RawDataModal extends React.Component<RawDataModalProps, RawDataModa
 
   getStringifiedFilters(): List<string> {
     const { essence } = this.props;
-    const { dataSource, filter } = essence;
-    return filter.clauses.map((clause, i) => {
+    const { dataSource } = essence;
+    return essence.getEffectiveFilter(RawDataModal.id).clauses.map((clause, i) => {
       const dimension = dataSource.getDimensionByExpression(clause.expression);
       if (!dimension) return null;
       return formatLabel({ dimension, clause, essence, verbose: true });
