@@ -10,6 +10,7 @@ import { Dropdown, DropdownProps } from '../dropdown/dropdown';
 
 const AUTO_REFRESH_LABELS: Lookup<string> = {
   "null": "Off",
+  "PT1S": "Every 1 second",
   "PT5S": "Every 5 seconds",
   "PT15S": "Every 15 seconds",
   "PT1M": "Every minute",
@@ -20,6 +21,7 @@ const AUTO_REFRESH_LABELS: Lookup<string> = {
 
 const REFRESH_DURATIONS: Duration[] = [
   null,
+  Duration.fromJS("PT1S"),
   Duration.fromJS("PT5S"),
   Duration.fromJS("PT15S"),
   Duration.fromJS("PT1M"),
