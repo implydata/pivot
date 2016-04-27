@@ -58,7 +58,7 @@ export class Totals extends React.Component<VisualizationProps, TotalsState> {
     dataSource.executor(query)
       .then(
         (dataset: Dataset) => {
-          registerDownloadableDataset(dataset);
+          if (registerDownloadableDataset) registerDownloadableDataset(dataset);
           if (!this.mounted) return;
           this.setState({
             loading: false,
@@ -67,7 +67,7 @@ export class Totals extends React.Component<VisualizationProps, TotalsState> {
           });
         },
         (error) => {
-          registerDownloadableDataset(null);
+          if (registerDownloadableDataset) registerDownloadableDataset(null);
           if (!this.mounted) return;
           this.setState({
             loading: false,
