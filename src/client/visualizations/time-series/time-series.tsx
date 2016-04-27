@@ -284,7 +284,7 @@ export class TimeSeries extends React.Component<VisualizationProps, TimeSeriesSt
     dataSource.executor(query)
       .then(
         (dataset: Dataset) => {
-          registerDownloadableDataset(dataset);
+          if (registerDownloadableDataset) registerDownloadableDataset(dataset);
           if (!this.mounted) return;
 
           this.setState({
@@ -294,7 +294,7 @@ export class TimeSeries extends React.Component<VisualizationProps, TimeSeriesSt
           });
         },
         (error) => {
-          registerDownloadableDataset(null);
+          if (registerDownloadableDataset) registerDownloadableDataset(null);
           if (!this.mounted) return;
           this.setState({
             loading: false,
