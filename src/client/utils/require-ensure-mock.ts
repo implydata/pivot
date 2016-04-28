@@ -1,5 +1,4 @@
-var {resolve, dirname} = require('path');
-
+import {resolve, dirname} from 'path';
 import * as rewire from 'rewire';
 
 function getCallerFile() {
@@ -26,17 +25,14 @@ function getStack(): any[] {
   return stack;
 }
 
-export function mockEnsure(path: string, className: string): any {
+export function mockRequireEnsure(path: string): any {
   // Gets the absolute path based on the caller's path
   path = resolve(dirname(getCallerFile()), path);
 
-  let required = rewire(path);
-  let mod = (required as any)[className];
+  let mod = rewire(path);
 
-  let mockedRequire = required.__get__('require');
-  mockedRequire.ensure = (path: any, callback: any) => {
-    callback(mockedRequire);
-  };
+  let mockedRequire = mod.__get__('require');
+  mockedRequire.ensure = (path: any, callback: any) => callback(mockedRequire);
 
   return mod;
 }
