@@ -2,16 +2,26 @@ require('./link-view.css');
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { Expression } from 'plywood';
+import { Expression, $ } from 'plywood';
 import { classNames } from "../../utils/dom/dom";
 import { Fn } from "../../../common/utils/general/general";
-import { Colors, Clicker, DataSource, Dimension, Essence, Filter, Stage, Manifest, Measure,
+import { Colors, Clicker, Essence, Filter, FilterClause, Stage, Measure,
   VisualizationProps, LinkViewConfig, LinkItem, User, Customization } from '../../../common/models/index';
 // import { ... } from '../../config/constants';
 
 import { LinkHeaderBar } from '../link-header-bar/link-header-bar';
 import { ManualFallback } from '../manual-fallback/manual-fallback';
 import { PinboardPanel } from '../pinboard-panel/pinboard-panel';
+import { ButtonGroup } from '../button-group/button-group';
+import { Preset } from '../time-filter-menu/time-filter-menu';
+
+var $maxTime = $(FilterClause.MAX_TIME_REF_NAME);
+var latestPresets: Preset[] = [
+  { name: '5M',  selection: $maxTime.timeRange('PT5M', -1) },
+  { name: '1H',  selection: $maxTime.timeRange('PT1H', -1) },
+  { name: '1D',  selection: $maxTime.timeRange('P1D', -1)  },
+  { name: '1W',  selection: $maxTime.timeRange('P1W', -1)  }
+];
 
 export interface LinkViewProps extends React.Props<any> {
   linkViewConfig: LinkViewConfig;
@@ -29,6 +39,7 @@ export interface LinkViewState {
   essence?: Essence;
   visualizationStage?: Stage;
   menuStage?: Stage;
+  timeSelection?: Expression;
 }
 
 export class LinkView extends React.Component<LinkViewProps, LinkViewState> {
@@ -40,7 +51,8 @@ export class LinkView extends React.Component<LinkViewProps, LinkViewState> {
       linkItem: null,
       essence: null,
       visualizationStage: null,
-      menuStage: null
+      menuStage: null,
+      timeSelection: null
     };
 
     var clicker = {
@@ -149,6 +161,22 @@ export class LinkView extends React.Component<LinkViewProps, LinkViewState> {
     changeHash(`${essence.dataSource.name}/${essence.toHash()}`, true);
   }
 
+  selectPreset(timeSelection: Expression) {
+    this.clicker.changeTimeSelection(timeSelection);
+    this.setState({ timeSelection });
+  }
+
+  renderPresets(clicker: Clicker) {
+    var presetToButton = (preset: Preset) => {
+      return <li
+        className={classNames({ selected: preset.selection.equals(this.state.timeSelection) })}
+        key={preset.name}
+        onClick={this.selectPreset.bind(this, preset.selection)}
+      >{preset.name}</li>;
+    };
+    return <ButtonGroup>{latestPresets.map(presetToButton)}</ButtonGroup>;
+  }
+
   renderLinkPanel() {
     const { linkViewConfig } = this.props;
     const { linkItem } = this.state;
@@ -225,6 +253,9 @@ export class LinkView extends React.Component<LinkViewProps, LinkViewState> {
           <div className='center-top-bar'>
             <div className='link-title'>{linkItem.title}</div>
             <div className='link-description'>{linkItem.description}</div>
+            <div className="right-align">
+              {this.renderPresets(clicker)}
+            </div>
           </div>
           <div className='center-main'>
             <div className='visualization' ref='visualization'>{visElement}</div>

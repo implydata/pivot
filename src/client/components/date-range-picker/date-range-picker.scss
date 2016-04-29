@@ -1,0 +1,116 @@
+@import '../../imports';
+
+.date-range-picker {
+
+  .side-by-side {
+    display: flex;
+
+    :not(:last-child) {
+      margin-right: 8px;
+    }
+  }
+
+  .calendar {
+
+    padding-left: 6px;
+    padding-right: 6px;
+
+    .calendar-nav {
+      margin-top: 20px;
+      margin-bottom: 14px;
+      text-align: center;
+      line-height: 19px;
+
+      .caret {
+        position: absolute;
+        top: 0;
+        padding: 0 2px 0 2px;
+        cursor: pointer;
+
+        svg {
+          width: 19px;
+
+          path {
+            fill: #777;
+          }
+        }
+
+        &:hover:not(.disabled) {
+          svg path {
+            fill: #555;
+          }
+        }
+
+        &.left {
+          left: 0;
+        }
+
+        &.right {
+          right: 0;
+        }
+
+        &.disabled {
+          opacity: 0.4;
+          cursor: auto;
+        }
+      }
+    }
+
+    .week {
+      display: flex;
+      width: 100%;
+
+      .day {
+        flex-grow: 1;
+        flex-basis: 0;
+        text-align: center;
+        height: 28px;
+        line-height: 28px;
+        cursor: pointer;
+
+        &.label {
+          color: #bbb;
+          pointer-events: none;
+        }
+
+
+        &.value {
+          &.selectable {
+            background: rgba($brand, 0.26);
+          }
+
+          &:hover {
+            &:after {
+              @include pin-full;
+              content: '';
+              pointer-events: none;
+              background: rgba($black, 0.06);
+            }
+          }
+
+          &.beyond {
+            color: #aaa;
+          }
+
+          &.past,
+          &.future {
+            color: $background-base;
+          }
+
+          &.selected {
+            background: rgba($brand, 0.26);
+          }
+
+          &.selected-edge {
+            background: $brand;
+            color: $white;
+          }
+        }
+
+        span.space {
+          color: transparent;
+        }
+      }
+    }
+  }
+}

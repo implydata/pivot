@@ -63,3 +63,11 @@ export const STRINGS = {
   exportToCSV: 'Export to CSV',
   splitDelimiter: 'by'
 };
+
+export const EN_US = {
+  shortDays: [ "S", "M", "T", "W", "T", "F", "S" ]
+};
+
+export function getLocale() {
+  return EN_US;
+}

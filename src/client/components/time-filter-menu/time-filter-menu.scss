@@ -60,36 +60,13 @@
       @extend %indicator-field;
     }
 
-    .time-input {
-      width: 100%;
-      height: $input-height;
-      border: 0;
-      margin-bottom: $form-spacing-compact;
-
-      input {
-        @extend %input-cont-inset;
-        padding-left: 6px;
-
-        &.date {
-          width: 70%;
-          margin-right: 2%;
-        }
-
-        &.time {
-          width: 28%;
-        }
-      }
-    }
   }
 
   .button-bar {
-    .ok {
-      @extend %button-primary;
-      margin-right: 8px;
-    }
+    margin-top: 12px;
 
-    .cancel {
-      @extend %button-secondary;
+    .primary {
+      margin-right: 6px;
     }
   }
 }

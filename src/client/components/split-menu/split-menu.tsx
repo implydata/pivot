@@ -6,10 +6,11 @@ import { $, TimeBucketAction, SortAction, LimitAction } from 'plywood';
 import { Fn } from "../../../common/utils/general/general";
 import { Stage, Clicker, Essence, VisStrategy, DataSource, SplitCombine, Filter, Colors, Dimension, Measure, SortOn } from '../../../common/models/index';
 import { STRINGS } from '../../config/constants';
-import { enterKey } from '../../utils/dom/dom';
+import { enterKey, classNames } from '../../utils/dom/dom';
 import { SvgIcon } from '../svg-icon/svg-icon';
 import { BubbleMenu } from '../bubble-menu/bubble-menu';
 import { Dropdown, DropdownProps } from '../dropdown/dropdown';
+import { ButtonGroup } from '../button-group/button-group';
 
 const GRANULARITIES = ['PT1M', 'PT5M', 'PT1H', 'P1D', 'P1W'];
 
@@ -155,16 +156,12 @@ export class SplitMenu extends React.Component<SplitMenuProps, SplitMenuState> {
 
     var buttons = GRANULARITIES.map(g => {
       return <li
-        className={'granularity' + (g === selectedGran ? ' selected' : '')}
+        className={classNames('granularity', { selected: g === selectedGran })}
         key={g}
         onClick={this.onSelectGran.bind(this, g)}
       >{formatGranularity(g)}</li>;
     });
-
-    return <div className="button-group">
-      <div className="button-group-title">{STRINGS.granularity}</div>
-      <ul>{buttons}</ul>
-    </div>;
+    return <ButtonGroup title={STRINGS.granularity}>{buttons}</ButtonGroup>;
   }
 
   renderSortDropdown() {

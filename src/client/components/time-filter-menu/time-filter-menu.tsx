@@ -1,14 +1,16 @@
 require('./time-filter-menu.css');
 
 import * as React from 'react';
-import { Timezone, Duration, minute, hour, day, week, month, year } from 'chronoshift';
-import { $, r, Expression, Executor, Dataset, TimeRange } from 'plywood';
+import { Timezone, WallTime, Duration, second, minute, hour, day, week, month, year } from 'chronoshift';
+import { $, r, Expression, TimeRange } from 'plywood';
 import { Fn } from "../../../common/utils/general/general";
 import { STRINGS } from '../../config/constants';
-import { Stage, Clicker, Essence, DataSource, Filter, FilterClause, Dimension, Measure } from '../../../common/models/index';
-import { formatTimeRange, DisplayYear } from '../../utils/date/date';
+import { Clicker, Essence, Filter, FilterClause, Dimension } from '../../../common/models/index';
+import { formatTimeRange, DisplayYear, wallTimeHelper } from '../../utils/date/date';
 import { enterKey, classNames } from '../../utils/dom/dom';
-import { TimeInput } from '../time-input/time-input';
+import { Button } from '../button/button';
+import { ButtonGroup } from '../button-group/button-group';
+import { DateRangePicker } from '../date-range-picker/date-range-picker';
 
 export interface Preset {
   name: string;
@@ -103,8 +105,17 @@ export class TimeFilterMenu extends React.Component<TimeFilterMenuProps, TimeFil
     var { essence, dimension } = this.props;
     var { tab, startTime, endTime } = this.state;
     var { filter } = essence;
+    var { timezone } = essence;
 
     if (tab !== 'specific') return null;
+
+    if (startTime && !endTime) {
+      var tzString = timezone.toString();
+      var startTimeCeil = day.ceil(startTime, timezone);
+      var startTimeFl = day.floor(startTime, timezone);
+      startTime = wallTimeHelper(startTimeFl, tzString);
+      endTime = wallTimeHelper(startTimeCeil, tzString);
+    }
 
     if (startTime && endTime && startTime < endTime) {
       return filter.setSelection(dimension.expression, r(TimeRange.fromJS({ start: startTime, end: endTime })));
@@ -212,33 +223,37 @@ export class TimeFilterMenu extends React.Component<TimeFilterMenuProps, TimeFil
     if (!timeSelection) return null;
     var { timezone } = essence;
 
-    return <div className="cont">
-      <div className="type">{STRINGS.start}</div>
-      <TimeInput time={startTime} timezone={timezone} onChange={this.onStartChange.bind(this)}/>
-      <div className="type">{STRINGS.end}</div>
-      <TimeInput time={endTime} timezone={timezone} onChange={this.onEndChange.bind(this)}/>
+    return <div>
+      <DateRangePicker
+        startTime={startTime}
+        endTime={endTime}
+        maxTime={new Date(essence.evaluateSelection($maxTime).toString())}
+        timezone={timezone}
+        onStartChange={this.onStartChange.bind(this)}
+        onEndChange={this.onEndChange.bind(this)}
+        ref="start-date-range-picker"
+      />
       <div className="button-bar">
-        <button className="ok" onClick={this.onOkClick.bind(this)} disabled={!this.actionEnabled()}>{STRINGS.ok}</button>
-        <button className="cancel" onClick={this.onCancelClick.bind(this)}>{STRINGS.cancel}</button>
+        <Button type="primary" onClick={this.onOkClick.bind(this)} disabled={!this.actionEnabled()} title={STRINGS.ok} />
+        <Button type="secondary" onClick={this.onCancelClick.bind(this)} title={STRINGS.cancel} />
       </div>
     </div>;
-  }
+  };
 
   render() {
     var { dimension } = this.props;
     var { tab } = this.state;
     if (!dimension) return null;
-
     var tabs = ['relative', 'specific'].map((name) => {
-      return <div
-        className={'tab ' + (tab === name ? 'selected' : '')}
+      return <li
+        className={classNames('tab', {selected: tab === name})}
         key={name}
         onClick={this.selectTab.bind(this, name)}
-      >{name === 'relative' ? STRINGS.relative : STRINGS.specific}</div>;
+      >{name === 'relative' ? STRINGS.relative : STRINGS.specific}</li>;
     });
 
     return <div className="time-filter-menu">
-      <div className="tabs">{tabs}</div>
+      <ButtonGroup>{tabs}</ButtonGroup>
       {tab === 'relative' ? this.renderPresets() : this.renderCustom()}
     </div>;
   }
