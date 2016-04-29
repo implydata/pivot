@@ -3,7 +3,7 @@ require('./date-range-picker.css');
 import * as React from "react";
 import { Timezone, WallTime, Duration, minute, hour, day, week, month, year } from "chronoshift";
 import { TimeRange } from "plywood";
-import { formatFullMonthAndYear, prependDays, appendDays, daysEqualWallTime,
+import { formatFullMonthAndYear, prependDays, appendDays, wallTimeDaysEqual,
   getEndWallTimeInclusive, monthToWeeks, wallTimeHelper } from "../../utils/date/date";
 import { classNames } from "../../utils/dom/dom";
 import { getLocale } from "../../config/constants";
@@ -39,13 +39,6 @@ export class DateRangePicker extends React.Component<DateRangePickerProps, DateR
   componentWillMount() {
     var { startTime } = this.props;
     if (!startTime) return;
-    if (isNaN(startTime.valueOf())) {
-      this.setState({
-        activeMonthStartDate: null
-      });
-      return;
-    }
-
     this.setState({
       activeMonthStartDate: startTime
     });
@@ -85,40 +78,42 @@ export class DateRangePicker extends React.Component<DateRangePickerProps, DateR
     this.setState({ hoverTimeRange });
   }
 
+  selectNewStart(startDate: Date, isSingleDate: boolean) {
+    this.selectNewRange(startDate, null);
+    this.setState({ selectionSet: isSingleDate });
+  }
+
+  selectNewRange(startDate: Date, endDate?: Date) {
+    const { onStartChange, onEndChange } = this.props;
+    onStartChange(startDate);
+    onEndChange(endDate);
+  }
+
   selectDay(selection: Date): void {
-    const { onStartChange, onEndChange, startTime, endTime, timezone } = this.props;
-    const tzString = timezone.toString();
+    const { startTime, endTime, timezone } = this.props;
+    const timezoneString = timezone.toString();
     if (!startTime) return;
-    var selectionFloored = day.floor(selection, timezone);
+    const selectionFloored = day.floor(selection, timezone);
 
     if (endTime) {
-      // clicking on end date of range should do nothing
-      if (daysEqualWallTime(selection, getEndWallTimeInclusive(endTime, timezone), tzString)
-        && !daysEqualWallTime(startTime, endTime, tzString)) {
-        return;
-      }
-      // clicking outside of time range starts new selection
-      this.setState({ selectionSet: false });
-      onStartChange(selectionFloored);
-      onEndChange(null);
+      const isEndDayClick = wallTimeDaysEqual(selection, getEndWallTimeInclusive(endTime, timezone), timezoneString)
+        && !wallTimeDaysEqual(startTime, endTime, timezoneString);
+      if (isEndDayClick) return;
+      this.selectNewStart(selectionFloored, false);
     } else {
-      // double click same day
-      if (daysEqualWallTime(selection, startTime, tzString)) {
-        onStartChange(selection);
-        onEndChange(null);
-        this.setState({ selectionSet: true });
+      const isDoubleClickSameDay = wallTimeDaysEqual(selection, startTime, timezoneString);
+      if (isDoubleClickSameDay) {
+        this.selectNewStart(selection, true);
         return;
       }
-      var end = day.ceil(selection, timezone);
-      var endWallTime = wallTimeHelper(end, tzString);
-      // if selected backwards, set end to old start time
-      if (selection < startTime) {
-        onStartChange(selectionFloored);
-        // add one ms to day because it's floored and otherwise won't ceil properly
-        var newEnd = day.ceil(new Date(startTime.valueOf() + 1), timezone);
-        endWallTime = wallTimeHelper(newEnd, tzString);
+      const isBackwardSelection = selection < startTime;
+      if (isBackwardSelection) {
+        var endFromOldStart = day.ceil(new Date(startTime.valueOf() + 1), timezone);
+        var endWallTime = wallTimeHelper(endFromOldStart, timezoneString);
+        this.selectNewRange(selectionFloored, endWallTime);
+      } else {
+        this.selectNewRange(startTime, wallTimeHelper(day.ceil(selection, timezone), timezoneString));
       }
-      onEndChange(endWallTime);
     }
   }
 
@@ -131,25 +126,31 @@ export class DateRangePicker extends React.Component<DateRangePickerProps, DateR
     return inHoverTimeRange && !selectionSet;
   }
 
-  renderDays(weeks: Date[][], prependEndCol: number, appendStartCol: number, singleDate: boolean): JSX.Element[] {
+  getIsSelectedEdgeEnd(isSingleDate: boolean, candidate: Date) {
+    if (isSingleDate) return false;
+    const { startTime, endTime, timezone } = this.props;
+    const wallTimeInclusiveEnd = getEndWallTimeInclusive(endTime, timezone);
+    return wallTimeDaysEqual(candidate, wallTimeInclusiveEnd, timezone.toString()) && endTime > startTime;
+  }
+
+  renderDays(weeks: Date[][], prependEndCol: number, appendStartCol: number, isSingleDate: boolean): JSX.Element[] {
     const { startTime, endTime, maxTime, timezone } = this.props;
     const tzString = timezone.toString();
-
     return weeks.map((daysInWeek: Date[], row: number) => {
       return <div className="week" key={row}> { daysInWeek.map((dayDate: Date, column: number) => {
-        var past = row === 0 && column < prependEndCol;
-        var future = row === weeks.length - 1 && column >= appendStartCol;
-        var beyondMaxRange = dayDate > maxTime;
-        var selectedEdgeStart = daysEqualWallTime(dayDate, startTime, tzString);
-        var selectedEdgeEnd = singleDate ? false : daysEqualWallTime(dayDate, getEndWallTimeInclusive(endTime, timezone), tzString) && endTime > startTime;
+        var isPast = row === 0 && column < prependEndCol;
+        var isFuture = row === weeks.length - 1 && column >= appendStartCol;
+        var isBeyondMaxRange = dayDate > maxTime;
+        var isSelectedEdgeStart = wallTimeDaysEqual(dayDate, startTime, tzString);
+        var isSelectedEdgeEnd = this.getIsSelectedEdgeEnd(isSingleDate, dayDate);
         var className = classNames("day", "value",
           {
-            past,
-            future,
-            "beyond-max-range": beyondMaxRange,
+            isPast,
+            isFuture,
+            "beyond-max-range": isBeyondMaxRange,
             "selectable": this.getIsSelectable(dayDate),
             "selected": startTime < dayDate && dayDate < endTime,
-            "selected-edge": selectedEdgeStart || selectedEdgeEnd
+            "selected-edge": isSelectedEdgeStart || isSelectedEdgeEnd
           });
 
         return <div
@@ -203,8 +204,7 @@ export class DateRangePicker extends React.Component<DateRangePickerProps, DateR
     if (!activeMonthStartDate) return null;
 
     var endTimeInclusive = endTime ? (getEndWallTimeInclusive(endTime, timezone) as any)['wallTime'] : null;
-    var isSingleDate = endTime === null || daysEqualWallTime(activeMonthStartDate, endTimeInclusive, timezone.toString());
-
+    var isSingleDate = endTime === null;
     return <div className="date-range-picker">
       <div className="side-by-side">
         <DateInput type="start" time={startTime} timezone={timezone} onChange={onStartChange.bind(this)}/>

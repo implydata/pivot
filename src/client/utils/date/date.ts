@@ -2,6 +2,7 @@ import * as d3 from 'd3';
 import { Timezone, WallTime, month, day } from 'chronoshift';
 import { TimeRange } from 'plywood';
 import { isDate } from "util";
+import { getLocale } from "../../config/constants";
 
 const formatWithYear = d3.time.format('%b %-d, %Y');
 const formatWithoutYear = d3.time.format('%b %-d');
@@ -75,8 +76,7 @@ export function monthToWeeks(startDate: Date, tzString: string): Date[][] {
   var firstDayOfMonth = wallTimePreciseToMonth(startDate, tzString);
   for (var i = 1; i <= getCountDaysInMonth(firstDayOfMonth); i++) {
     var activeDay = wallTimePreciseToDay(startDate, i, tzString);
-    // this assumes week starts on sunday..
-    if (activeDay.getDay() === 0 && week.length > 0) {
+    if (activeDay.getDay() === getLocale().weekStart || 0 && week.length > 0) {
       weeks.push(week);
       week = [];
     }
@@ -110,14 +110,14 @@ export function appendDays(timezone: Timezone, weekAppendTo: Date[], countAppend
   return weekAppendTo;
 }
 
-export function daysEqualWallTime(d1: Date, d2: Date, timezone: string): boolean {
+export function wallTimeDaysEqual(d1: Date, d2: Date, timezone: string): boolean {
   if (!Boolean(d1) === Boolean(d2)) return false;
   if (d1 === d2 ) return true;
-  return monthsEqualWallTime(d1, d2, timezone) &&
+  return wallTimeMonthsEqual(d1, d2, timezone) &&
     WallTime.UTCToWallTime(d1, timezone).getDate() === WallTime.UTCToWallTime(d2, timezone).getDate();
 }
 
-export function monthsEqualWallTime(d1: Date, d2: Date, timezone: string): boolean {
+export function wallTimeMonthsEqual(d1: Date, d2: Date, timezone: string): boolean {
   if (!Boolean(d1) === Boolean(d2)) return false;
   if (d1 === d2 ) return true;
   var w1 = wallTimePreciseToMonth(d1, timezone);

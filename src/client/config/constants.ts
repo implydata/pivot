@@ -65,7 +65,8 @@ export const STRINGS = {
 };
 
 export const EN_US = {
-  shortDays: [ "S", "M", "T", "W", "T", "F", "S" ]
+  shortDays: [ "S", "M", "T", "W", "T", "F", "S" ],
+  weekStart: 0
 };
 
 export function getLocale() {

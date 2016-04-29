@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import "../../utils/jsdom-setup";
 import { Timezone } from "chronoshift";
-import { prependDays, appendDays, getCountDaysInMonth, daysEqualWallTime, monthsEqualWallTime } from "./date";
+import { prependDays, appendDays, getCountDaysInMonth, wallTimeDaysEqual, wallTimeMonthsEqual } from "./date";
 
 var { WallTime } = require('chronoshift');
 if (!WallTime.rules) {
@@ -55,33 +55,33 @@ describe('Date', () => {
   it('reports walltime day equality', () => {
     var day1 = new Date("2012-11-04T03:30:00-08:00");
     var day2 = new Date("2012-11-04T10:30:00-08:00");
-    expect(daysEqualWallTime(day1, day2, "America/Los_Angeles")).to.equal(true);
+    expect(wallTimeDaysEqual(day1, day2, "America/Los_Angeles")).to.equal(true);
 
     day1 = new Date("2012-11-04T03:30:00-08:00");
     day2 = new Date("2012-11-04T00:00:00-08:00");
-    expect(daysEqualWallTime(day1, day2, "America/Los_Angeles")).to.equal(true);
+    expect(wallTimeDaysEqual(day1, day2, "America/Los_Angeles")).to.equal(true);
 
     day1 = new Date("2012-11-30T03:30:00-08:00");
     day2 = new Date("2012-12-30T00:00:00-08:00");
-    expect(daysEqualWallTime(day1, day2, "America/Los_Angeles")).to.equal(false);
+    expect(wallTimeDaysEqual(day1, day2, "America/Los_Angeles")).to.equal(false);
   });
 
   it('reports walltime month equality', () => {
     var day1 = new Date("2012-12-04T03:30:00-08:00");
     var day2 = new Date("2012-11-04T10:30:00-08:00");
-    expect(monthsEqualWallTime(day1, day2, "America/Los_Angeles")).to.equal(false);
+    expect(wallTimeMonthsEqual(day1, day2, "America/Los_Angeles")).to.equal(false);
 
     day1 = new Date("2012-12-31T03:30:00-08:00");
     day2 = new Date("2014-12-31T00:00:00-08:00");
-    expect(monthsEqualWallTime(day1, day2, "Europe/Paris")).to.equal(false);
+    expect(wallTimeMonthsEqual(day1, day2, "Europe/Paris")).to.equal(false);
 
     day1 = new Date("2012-12-31T03:30:00-08:00");
     day2 = new Date("2012-12-30T00:00:00-08:00");
-    expect(monthsEqualWallTime(day1, day2, "America/Los_Angeles")).to.equal(true);
+    expect(wallTimeMonthsEqual(day1, day2, "America/Los_Angeles")).to.equal(true);
 
     day1 = new Date("2012-01-31T03:30:00-08:00");
     day2 = new Date("2012-01-30T00:00:00-08:00");
-    expect(monthsEqualWallTime(day1, day2, "Asia/Kathmandu")).to.equal(true);
+    expect(wallTimeMonthsEqual(day1, day2, "Asia/Kathmandu")).to.equal(true);
 
   });
 
