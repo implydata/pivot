@@ -161,6 +161,7 @@ export class SplitMenu extends React.Component<SplitMenuProps, SplitMenuState> {
         onClick={this.onSelectGran.bind(this, g)}
       >{formatGranularity(g)}</li>;
     });
+
     return <ButtonGroup title={STRINGS.granularity}>{buttons}</ButtonGroup>;
   }
 

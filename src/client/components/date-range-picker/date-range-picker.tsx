@@ -3,15 +3,8 @@ require('./date-range-picker.css');
 import * as React from "react";
 import { Timezone, WallTime, Duration, minute, hour, day, week, month, year } from "chronoshift";
 import { TimeRange } from "plywood";
-import {
-  formatFullMonthAndYear,
-  prependDays,
-  appendDays,
-  daysEqualWallTime,
-  getEndWallTimeInclusive,
-  prepareWeeks,
-  wallTimeHelper
-} from "../../utils/date/date";
+import { formatFullMonthAndYear, prependDays, appendDays, daysEqualWallTime,
+  getEndWallTimeInclusive, monthToWeeks, wallTimeHelper } from "../../utils/date/date";
 import { classNames } from "../../utils/dom/dom";
 import { getLocale } from "../../config/constants";
 import { SvgIcon } from "../svg-icon/svg-icon";
@@ -96,20 +89,20 @@ export class DateRangePicker extends React.Component<DateRangePickerProps, DateR
   selectDay(selection: Date): void {
     const { onStartChange, onEndChange, startTime, endTime, timezone } = this.props;
     const tzString = timezone.toString();
-    var startFloored = day.floor(selection, timezone);
     if (!startTime) return;
+    var selectionFloored = day.floor(selection, timezone);
 
     if (endTime) {
       // clicking on end date of range should do nothing
-      if (daysEqualWallTime(selection, getEndWallTimeInclusive(endTime, timezone), tzString) && !daysEqualWallTime(startTime, endTime, tzString)) {
+      if (daysEqualWallTime(selection, getEndWallTimeInclusive(endTime, timezone), tzString)
+        && !daysEqualWallTime(startTime, endTime, tzString)) {
         return;
       }
       // clicking outside of time range starts new selection
       this.setState({ selectionSet: false });
-      onStartChange(startFloored);
+      onStartChange(selectionFloored);
       onEndChange(null);
     } else {
-
       // double click same day
       if (daysEqualWallTime(selection, startTime, tzString)) {
         onStartChange(selection);
@@ -121,9 +114,9 @@ export class DateRangePicker extends React.Component<DateRangePickerProps, DateR
       var endWallTime = wallTimeHelper(end, tzString);
       // if selected backwards, set end to old start time
       if (selection < startTime) {
-        onStartChange(day.floor(selection, timezone));
-        // shift one day forward to account for the fact that getting inclusive endTime will subtract into previous day.. todo revisit this
-        var newEnd = day.ceil(day.shift(startTime, timezone, 1), timezone);
+        onStartChange(selectionFloored);
+        // add one ms to day because it's floored and otherwise won't ceil properly
+        var newEnd = day.ceil(new Date(startTime.valueOf() + 1), timezone);
         endWallTime = wallTimeHelper(newEnd, tzString);
       }
       onEndChange(endWallTime);
@@ -142,6 +135,7 @@ export class DateRangePicker extends React.Component<DateRangePickerProps, DateR
   renderDays(weeks: Date[][], prependEndCol: number, appendStartCol: number, singleDate: boolean): JSX.Element[] {
     const { startTime, endTime, maxTime, timezone } = this.props;
     const tzString = timezone.toString();
+
     return weeks.map((daysInWeek: Date[], row: number) => {
       return <div className="week" key={row}> { daysInWeek.map((dayDate: Date, column: number) => {
         var past = row === 0 && column < prependEndCol;
@@ -153,7 +147,7 @@ export class DateRangePicker extends React.Component<DateRangePickerProps, DateR
           {
             past,
             future,
-            "beyond": beyondMaxRange,
+            "beyond-max-range": beyondMaxRange,
             "selectable": this.getIsSelectable(dayDate),
             "selected": startTime < dayDate && dayDate < endTime,
             "selected-edge": selectedEdgeStart || selectedEdgeEnd
@@ -170,7 +164,7 @@ export class DateRangePicker extends React.Component<DateRangePickerProps, DateR
 
   renderCalendar(startDate: Date, isSingleDate: boolean): JSX.Element[] {
     const { timezone } = this.props;
-    var weeks: Date[][] = prepareWeeks(startDate, timezone.toString());
+    var weeks: Date[][] = monthToWeeks(startDate, timezone.toString());
     const firstWeek = weeks[0];
     const lastWeek = weeks[weeks.length - 1];
     const countPrepend = 7 - firstWeek.length;

@@ -14,40 +14,40 @@ describe('Date', () => {
   it('prepends days', () => {
     var testFirstWeek: Date[] = [];
     for (var i = 1; i < 5; i++) {
-      testFirstWeek.push(new Date(1995, 2, i));
+      testFirstWeek.push(new Date(Date.UTC(1995, 2, i)));
     }
 
     var prepended = prependDays(Timezone.UTC, testFirstWeek, 5);
     expect(prepended).to.deep.equal([
-      new Date('1995-02-24T08:00:00.000Z'),
-      new Date('1995-02-25T08:00:00.000Z'),
-      new Date('1995-02-26T08:00:00.000Z'),
-      new Date('1995-02-27T08:00:00.000Z'),
-      new Date('1995-02-28T08:00:00.000Z'),
-      new Date('1995-03-01T08:00:00.000Z'),
-      new Date('1995-03-02T08:00:00.000Z'),
-      new Date('1995-03-03T08:00:00.000Z'),
-      new Date('1995-03-04T08:00:00.000Z')
+      new Date('1995-02-24T00:00:00.000Z'),
+      new Date('1995-02-25T00:00:00.000Z'),
+      new Date('1995-02-26T00:00:00.000Z'),
+      new Date('1995-02-27T00:00:00.000Z'),
+      new Date('1995-02-28T00:00:00.000Z'),
+      new Date('1995-03-01T00:00:00.000Z'),
+      new Date('1995-03-02T00:00:00.000Z'),
+      new Date('1995-03-03T00:00:00.000Z'),
+      new Date('1995-03-04T00:00:00.000Z')
     ]);
   });
 
   it('appends days', () => {
     var testWeek: Date[] = [];
     for (var i = 1; i < 5; i++) {
-      testWeek.push(new Date(1995, 2, i));
+      testWeek.push(new Date(Date.UTC(1995, 2, i)));
     }
 
     var append = appendDays(Timezone.UTC, testWeek, 5);
     expect(append).to.deep.equal([
-      new Date('1995-03-01T08:00:00.000Z'),
-      new Date('1995-03-02T08:00:00.000Z'),
-      new Date('1995-03-03T08:00:00.000Z'),
-      new Date('1995-03-04T08:00:00.000Z'),
-      new Date('1995-03-05T08:00:00.000Z'),
-      new Date('1995-03-06T08:00:00.000Z'),
-      new Date('1995-03-07T08:00:00.000Z'),
-      new Date('1995-03-08T08:00:00.000Z'),
-      new Date('1995-03-09T08:00:00.000Z')
+      new Date('1995-03-01T00:00:00.000Z'),
+      new Date('1995-03-02T00:00:00.000Z'),
+      new Date('1995-03-03T00:00:00.000Z'),
+      new Date('1995-03-04T00:00:00.000Z'),
+      new Date('1995-03-05T00:00:00.000Z'),
+      new Date('1995-03-06T00:00:00.000Z'),
+      new Date('1995-03-07T00:00:00.000Z'),
+      new Date('1995-03-08T00:00:00.000Z'),
+      new Date('1995-03-09T00:00:00.000Z')
 
     ]);
   });

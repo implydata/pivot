@@ -75,7 +75,8 @@
 
 
         &.value {
-          &.selectable {
+          &.selectable,
+          &.selected {
             background: rgba($brand, 0.26);
           }
 
@@ -88,17 +89,13 @@
             }
           }
 
-          &.beyond {
+          &.beyond-max-range {
             color: #aaa;
           }
 
           &.past,
           &.future {
             color: $background-base;
-          }
-
-          &.selected {
-            background: rgba($brand, 0.26);
           }
 
           &.selected-edge {

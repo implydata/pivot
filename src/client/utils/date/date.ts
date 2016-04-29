@@ -69,8 +69,7 @@ export function formatTimeRange(timeRange: TimeRange, timezone: Timezone, displa
 
 // calendar utils
 
-
-export function prepareWeeks(startDate: Date, tzString: string): Date[][] {
+export function monthToWeeks(startDate: Date, tzString: string): Date[][] {
   const weeks: Date[][] = [];
   var week: Date[] = [];
   var firstDayOfMonth = wallTimePreciseToMonth(startDate, tzString);
