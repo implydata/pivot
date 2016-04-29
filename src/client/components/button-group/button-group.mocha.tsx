@@ -14,6 +14,7 @@ describe('ButtonGroup', () => {
     var renderedComponent = TestUtils.renderIntoDocument(
       <ButtonGroup
         title="my-buttons"
+        groupMembers={[]}
       />
     );
 

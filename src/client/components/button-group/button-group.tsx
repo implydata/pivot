@@ -14,9 +14,9 @@ export interface GroupMember {
 }
 
 export interface ButtonGroupProps extends React.Props<any> {
+  groupMembers: GroupMember[];
   title?: string;
   className?: string;
-  groupMembers?: GroupMember[];
 }
 
 export interface ButtonGroupState {
