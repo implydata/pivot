@@ -145,8 +145,8 @@ export class DateRangePicker extends React.Component<DateRangePickerProps, DateR
         var isSelectedEdgeEnd = this.getIsSelectedEdgeEnd(isSingleDate, dayDate);
         var className = classNames("day", "value",
           {
-            isPast,
-            isFuture,
+            past: isPast,
+            future: isFuture,
             "beyond-max-range": isBeyondMaxRange,
             "selectable": this.getIsSelectable(dayDate),
             "selected": startTime < dayDate && dayDate < endTime,
