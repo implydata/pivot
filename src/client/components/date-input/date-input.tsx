@@ -87,9 +87,10 @@ export class DateInput extends React.Component<DateInputProps, DateInputState> {
   }
 
   render() {
-    var { hide } = this.props;
-    var { dateString } = this.state;
-    var value = hide ? '' : dateString;
+    const { hide } = this.props;
+    const { dateString } = this.state;
+    const value = hide ? '' : dateString;
+
     return <div className="date-input">
       <input className="input-field" value={value} onChange={this.dateChange.bind(this)}/>
     </div>;

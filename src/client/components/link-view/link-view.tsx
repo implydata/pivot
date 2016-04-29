@@ -166,15 +166,16 @@ export class LinkView extends React.Component<LinkViewProps, LinkViewState> {
     this.setState({ timeSelection });
   }
 
-  renderPresets(clicker: Clicker) {
+  renderPresets() {
     var presetToButton = (preset: Preset) => {
-      return <li
-        className={classNames({ selected: preset.selection.equals(this.state.timeSelection) })}
-        key={preset.name}
-        onClick={this.selectPreset.bind(this, preset.selection)}
-      >{preset.name}</li>;
+      return {
+        isSelected: preset.selection.equals(this.state.timeSelection),
+        title: preset.name,
+        onClick: this.selectPreset.bind(this, preset.selection),
+        key: preset.name
+      };
     };
-    return <ButtonGroup>{latestPresets.map(presetToButton)}</ButtonGroup>;
+    return <ButtonGroup groupMembers={latestPresets.map(presetToButton)} />;
   }
 
   renderLinkPanel() {
@@ -254,7 +255,7 @@ export class LinkView extends React.Component<LinkViewProps, LinkViewState> {
             <div className='link-title'>{linkItem.title}</div>
             <div className='link-description'>{linkItem.description}</div>
             <div className="right-align">
-              {this.renderPresets(clicker)}
+              {this.renderPresets()}
             </div>
           </div>
           <div className='center-main'>

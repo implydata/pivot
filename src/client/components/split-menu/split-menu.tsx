@@ -2,11 +2,11 @@ require('./split-menu.css');
 
 import * as React from 'react';
 import { Timezone, Duration } from 'chronoshift';
-import { $, TimeBucketAction, SortAction, LimitAction } from 'plywood';
+import { TimeBucketAction, SortAction } from 'plywood';
 import { Fn } from "../../../common/utils/general/general";
-import { Stage, Clicker, Essence, VisStrategy, DataSource, SplitCombine, Filter, Colors, Dimension, Measure, SortOn } from '../../../common/models/index';
+import { Stage, Clicker, Essence, VisStrategy, SplitCombine, Colors, Dimension, SortOn } from '../../../common/models/index';
 import { STRINGS } from '../../config/constants';
-import { enterKey, classNames } from '../../utils/dom/dom';
+import { enterKey } from '../../utils/dom/dom';
 import { SvgIcon } from '../svg-icon/svg-icon';
 import { BubbleMenu } from '../bubble-menu/bubble-menu';
 import { Dropdown, DropdownProps } from '../dropdown/dropdown';
@@ -155,14 +155,15 @@ export class SplitMenu extends React.Component<SplitMenuProps, SplitMenuState> {
     var selectedGran = (split.bucketAction as TimeBucketAction).duration.toString();
 
     var buttons = GRANULARITIES.map(g => {
-      return <li
-        className={classNames('granularity', { selected: g === selectedGran })}
-        key={g}
-        onClick={this.onSelectGran.bind(this, g)}
-      >{formatGranularity(g)}</li>;
+      return {
+        isSelected: g === selectedGran,
+        title: formatGranularity(g),
+        key: g,
+        onClick: this.onSelectGran.bind(this, g)
+      };
     });
 
-    return <ButtonGroup title={STRINGS.granularity}>{buttons}</ButtonGroup>;
+    return <ButtonGroup title={STRINGS.granularity} groupMembers={buttons} />;
   }
 
   renderSortDropdown() {

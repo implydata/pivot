@@ -34,7 +34,6 @@ export class DateRangePicker extends React.Component<DateRangePickerProps, DateR
       hoverTimeRange: null,
       selectionSet: false
     };
-
   }
 
   componentWillMount() {
@@ -152,6 +151,7 @@ export class DateRangePicker extends React.Component<DateRangePickerProps, DateR
             "selected": startTime < dayDate && dayDate < endTime,
             "selected-edge": selectedEdgeStart || selectedEdgeEnd
           });
+
         return <div
           className={className}
           key={column}
@@ -201,8 +201,10 @@ export class DateRangePicker extends React.Component<DateRangePickerProps, DateR
     const { startTime, endTime, timezone, onStartChange, onEndChange } = this.props;
     const { activeMonthStartDate } = this.state;
     if (!activeMonthStartDate) return null;
+    
     var endTimeInclusive = endTime ? (getEndWallTimeInclusive(endTime, timezone) as any)['wallTime'] : null;
     var isSingleDate = endTime === null || daysEqualWallTime(activeMonthStartDate, endTimeInclusive, timezone.toString());
+
     return <div className="date-range-picker">
       <div className="side-by-side">
         <DateInput type="start" time={startTime} timezone={timezone} onChange={onStartChange.bind(this)}/>

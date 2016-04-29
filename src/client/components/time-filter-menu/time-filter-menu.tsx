@@ -245,15 +245,16 @@ export class TimeFilterMenu extends React.Component<TimeFilterMenuProps, TimeFil
     var { tab } = this.state;
     if (!dimension) return null;
     var tabs = ['relative', 'specific'].map((name) => {
-      return <li
-        className={classNames('tab', {selected: tab === name})}
-        key={name}
-        onClick={this.selectTab.bind(this, name)}
-      >{name === 'relative' ? STRINGS.relative : STRINGS.specific}</li>;
+      return {
+        isSelected: tab === name,
+        title: (name === 'relative' ? STRINGS.relative : STRINGS.specific),
+        key: name,
+        onClick: this.selectTab.bind(this, name)
+      };
     });
 
     return <div className="time-filter-menu">
-      <ButtonGroup>{tabs}</ButtonGroup>
+      <ButtonGroup groupMembers={tabs} />
       {tab === 'relative' ? this.renderPresets() : this.renderCustom()}
     </div>;
   }
