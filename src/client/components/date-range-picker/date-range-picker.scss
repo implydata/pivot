@@ -35,7 +35,7 @@
           }
         }
 
-        &:hover:not(.disabled) {
+        &:hover {
           svg path {
             fill: #555;
           }
@@ -50,9 +50,8 @@
         }
 
         &.disabled {
-          pointer-events: none;
-          opacity: 0.4;
-          cursor: auto;
+          /*pointer-events: none;
+          opacity: 0.4;*/
         }
       }
     }
