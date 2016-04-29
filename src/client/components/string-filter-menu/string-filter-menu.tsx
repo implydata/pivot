@@ -300,8 +300,8 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
     return <div className="string-filter-menu">
       {this.renderTable()}
       <div className="button-bar">
-        <button className="ok" onClick={this.onOkClick.bind(this)} disabled={!this.actionEnabled()}>{STRINGS.ok}</button>
-        <button className="cancel" onClick={this.onCancelClick.bind(this)}>{STRINGS.cancel}</button>
+        <button className="button primary" onClick={this.onOkClick.bind(this)} disabled={!this.actionEnabled()}>{STRINGS.ok}</button>
+        <button className="button secondary" onClick={this.onCancelClick.bind(this)}>{STRINGS.cancel}</button>
       </div>
     </div>;
   }

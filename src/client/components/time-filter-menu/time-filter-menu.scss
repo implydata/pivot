@@ -34,14 +34,5 @@
     .preview {
       @extend %indicator-field;
     }
-
-  }
-
-  .button-bar {
-    margin-top: 12px;
-
-    .primary {
-      margin-right: 6px;
-    }
   }
 }
