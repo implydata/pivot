@@ -39,7 +39,6 @@ export interface LinkViewState {
   essence?: Essence;
   visualizationStage?: Stage;
   menuStage?: Stage;
-  timeSelection?: Expression;
 }
 
 export class LinkView extends React.Component<LinkViewProps, LinkViewState> {
@@ -51,8 +50,7 @@ export class LinkView extends React.Component<LinkViewProps, LinkViewState> {
       linkItem: null,
       essence: null,
       visualizationStage: null,
-      menuStage: null,
-      timeSelection: null
+      menuStage: null
     };
 
     var clicker = {
@@ -161,17 +159,14 @@ export class LinkView extends React.Component<LinkViewProps, LinkViewState> {
     changeHash(`${essence.dataSource.name}/${essence.toHash()}`, true);
   }
 
-  selectPreset(timeSelection: Expression) {
-    this.clicker.changeTimeSelection(timeSelection);
-    this.setState({ timeSelection });
-  }
-
   renderPresets() {
+    const { essence } = this.state;
+
     var presetToButton = (preset: Preset) => {
       return {
-        isSelected: preset.selection.equals(this.state.timeSelection),
+        isSelected: preset.selection.equals(essence.getTimeSelection()),
         title: preset.name,
-        onClick: this.selectPreset.bind(this, preset.selection),
+        onClick: this.clicker.changeTimeSelection.bind(this, preset.selection),
         key: preset.name
       };
     };

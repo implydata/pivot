@@ -449,6 +449,11 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
     return filter.getSpecificFilter(new Date(), maxTime, timezone);
   }
 
+  public getTimeSelection() {
+    const timeAttribute = this.getTimeAttribute();
+    return this.filter.getSelection(timeAttribute);
+  }
+
   public isFixedMeasureMode(): boolean {
     return Boolean(this.visualization.measureModeNeed);
   }
