@@ -201,7 +201,7 @@ export class DateRangePicker extends React.Component<DateRangePickerProps, DateR
     const { startTime, endTime, timezone, onStartChange, onEndChange } = this.props;
     const { activeMonthStartDate } = this.state;
     if (!activeMonthStartDate) return null;
-    
+
     var endTimeInclusive = endTime ? (getEndWallTimeInclusive(endTime, timezone) as any)['wallTime'] : null;
     var isSingleDate = endTime === null || daysEqualWallTime(activeMonthStartDate, endTimeInclusive, timezone.toString());
 
