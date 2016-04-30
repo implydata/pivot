@@ -20,6 +20,7 @@
       margin-bottom: 14px;
       text-align: center;
       line-height: 19px;
+      user-select: none;
 
       .caret {
         position: absolute;
@@ -50,8 +51,8 @@
         }
 
         &.disabled {
-          /*pointer-events: none;
-          opacity: 0.4;*/
+          //pointer-events: none;
+          //opacity: 0.4;
         }
       }
     }
@@ -64,15 +65,15 @@
         flex-grow: 1;
         flex-basis: 0;
         text-align: center;
-        height: 28px;
-        line-height: 28px;
+        height: 26px;
+        line-height: 26px;
         cursor: pointer;
+        user-select: none;
 
         &.label {
           color: #bbb;
           pointer-events: none;
         }
-
 
         &.value {
           &.selectable,
@@ -90,12 +91,12 @@
           }
 
           &.beyond-max-range {
-            color: #aaa;
+            color: rgba($black, 0.3);
           }
 
           &.past,
           &.future {
-            color: $background-base;
+            color: rgba($black, 0.3);
           }
 
           &.selected-edge {
