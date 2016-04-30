@@ -17,21 +17,20 @@
   }
 
   .calendar {
-
-    padding-left: 6px;
-    padding-right: 6px;
+    padding-left: 4px;
+    padding-right: 4px;
 
     .calendar-nav {
-      margin-top: 20px;
-      margin-bottom: 14px;
+      margin-top: 18px;
+      margin-bottom: 12px;
       text-align: center;
-      line-height: 19px;
+      line-height: 23px;
       user-select: none;
 
       .caret {
         position: absolute;
         top: 0;
-        padding: 0 2px 0 2px;
+        padding: 3px 3px;
         cursor: pointer;
 
         svg {
@@ -87,8 +86,7 @@
             background: rgba($brand, 0.26);
 
             &.past:not(.selected-edge),
-            &.future:not(.selected-edge),
-            &.beyond-max-range:not(.selected-edge) {
+            &.future:not(.selected-edge) {
               color: #87acbf;
             }
           }
@@ -100,10 +98,21 @@
               pointer-events: none;
               background: rgba($black, 0.06);
             }
+
+            &.beyond-max-range {
+              &:after {
+                background: rgba($black, 0.1);
+              }
+            }
           }
 
           &.beyond-max-range {
-            color: #bbb;
+            &:after {
+              @include pin-full;
+              content: '';
+              pointer-events: none;
+              background: rgba($black, 0.05);
+            }
           }
 
           &.past,
