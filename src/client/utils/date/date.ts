@@ -70,32 +70,32 @@ export function formatTimeRange(timeRange: TimeRange, timezone: Timezone, displa
 
 // calendar utils
 
-export function monthToWeeks(startDate: Date, tzString: string): Date[][] {
+export function monthToWeeks(startDate: Date, timezone: Timezone): Date[][] {
   const weeks: Date[][] = [];
-  var week: Date[] = [];
-  var firstDayOfMonth = wallTimePreciseToMonth(startDate, tzString);
-  for (var i = 1; i <= getCountDaysInMonth(firstDayOfMonth); i++) {
-    var activeDay = wallTimePreciseToDay(startDate, i, tzString);
+  const firstDayOfMonth = new Date(startDate.getUTCFullYear(), startDate.getUTCMonth(), 1, 0, 0, 0);
+  const firstDayNextMonth = month.shift(firstDayOfMonth, timezone, 1);
+
+  let week: Date[] = [];
+  let currentPointer = firstDayOfMonth;
+  while (currentPointer < firstDayNextMonth) {
+    const activeDay = new Date(firstDayOfMonth.getUTCFullYear(), firstDayOfMonth.getUTCMonth(), currentPointer.getUTCDate(), 0, 0, 0);
     if (activeDay.getDay() === getLocale().weekStart || 0 && week.length > 0) {
       weeks.push(week);
       week = [];
     }
     week.push(activeDay);
+    currentPointer = day.shift(currentPointer, timezone, 1);
   }
   // push last week
   if (week.length > 0) weeks.push(week);
   return weeks;
 }
 
-export function getCountDaysInMonth(date: Date): number {
-  if (!isDate(date)) return 0;
-  return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-}
-
 export function prependDays(timezone: Timezone, weekPrependTo: Date[], countPrepend: number): Date[] {
   for (var i = 0; i < countPrepend; i++) {
     var firstDate = weekPrependTo[0];
-    var shiftedDate = day.shift(firstDate, timezone, - 1);
+    if (!firstDate) continue;
+    var shiftedDate = day.shift(firstDate, timezone, -1);
     weekPrependTo.unshift(shiftedDate);
   }
   return weekPrependTo;
@@ -104,36 +104,16 @@ export function prependDays(timezone: Timezone, weekPrependTo: Date[], countPrep
 export function appendDays(timezone: Timezone, weekAppendTo: Date[], countAppend: number): Date[] {
   for (var i = 0; i < countAppend; i++) {
     var lastDate = weekAppendTo[weekAppendTo.length - 1];
+    if (!lastDate) continue;
     var shiftedDate = day.shift(lastDate, timezone, 1);
     weekAppendTo.push(shiftedDate);
   }
   return weekAppendTo;
 }
 
-export function wallTimeDaysEqual(d1: Date, d2: Date, timezone: string): boolean {
+export function daysEqual(d1: Date, d2: Date): boolean {
   if (!Boolean(d1) === Boolean(d2)) return false;
   if (d1 === d2 ) return true;
-  return wallTimeMonthsEqual(d1, d2, timezone) &&
-    WallTime.UTCToWallTime(d1, timezone).getDate() === WallTime.UTCToWallTime(d2, timezone).getDate();
+  return d1.valueOf() === d2.valueOf();
 }
 
-export function wallTimeMonthsEqual(d1: Date, d2: Date, timezone: string): boolean {
-  if (!Boolean(d1) === Boolean(d2)) return false;
-  if (d1 === d2 ) return true;
-  var w1 = wallTimePreciseToMonth(d1, timezone);
-  var w2 = wallTimePreciseToMonth(d2, timezone);
-  return w1.getUTCFullYear() === w2.getUTCFullYear() &&
-    w1.getUTCMonth() === w2.getUTCMonth();
-}
-
-export function wallTimePreciseToMonth(date: Date, timezone: string): Date {
-  return wallTimePreciseToDay(date, 1, timezone);
-}
-
-export function wallTimePreciseToDay(date: Date, day: number, timezone: string): Date {
-  return wallTimeHelper(new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), day, 12, 0, 0)), timezone.toString());
-}
-
-export function wallTimeHelper(date: Date, timezone: string) {
-  return (WallTime.UTCToWallTime(date, timezone) as any)['wallTime'];
-}

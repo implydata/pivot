@@ -5,6 +5,7 @@ $title-margin: 6px;
 
 .button-group {
   margin-bottom: $bottom-margin;
+  user-select: none;
 
   .button-group-title {
     @extend %input-top-label;

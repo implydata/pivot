@@ -44,7 +44,7 @@ export class ButtonGroup extends React.Component<ButtonGroupProps, ButtonGroupSt
     const { title, className } = this.props;
 
     return <div className={classNames('button-group', className)}>
-      <div className="button-group-title">{title}</div>
+      {title ? <div className="button-group-title">{title}</div> : null}
       <ul className="group-container">{this.renderMembers()}</ul>
     </div>;
   }

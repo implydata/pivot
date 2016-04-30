@@ -6,7 +6,7 @@ import { $, r, Expression, TimeRange } from 'plywood';
 import { Fn } from "../../../common/utils/general/general";
 import { STRINGS } from '../../config/constants';
 import { Clicker, Essence, Filter, FilterClause, Dimension } from '../../../common/models/index';
-import { formatTimeRange, DisplayYear, wallTimeHelper } from '../../utils/date/date';
+import { formatTimeRange, DisplayYear } from '../../utils/date/date';
 import { enterKey, classNames } from '../../utils/dom/dom';
 import { Button } from '../button/button';
 import { ButtonGroup } from '../button-group/button-group';
@@ -64,7 +64,7 @@ export class TimeFilterMenu extends React.Component<TimeFilterMenuProps, TimeFil
   constructor() {
     super();
     this.state = {
-      tab: 'relative',
+      tab: null,
       timeSelection: null,
       startTime: null,
       endTime: null,
@@ -82,6 +82,7 @@ export class TimeFilterMenu extends React.Component<TimeFilterMenuProps, TimeFil
 
     this.setState({
       timeSelection,
+      tab: filter.isRelative() ? 'relative' : 'specific',
       startTime: selectedTimeRange ? selectedTimeRange.start : null,
       endTime: selectedTimeRange ? selectedTimeRange.end : null
     });
@@ -110,11 +111,8 @@ export class TimeFilterMenu extends React.Component<TimeFilterMenuProps, TimeFil
     if (tab !== 'specific') return null;
 
     if (startTime && !endTime) {
-      var timezoneString = timezone.toString();
-      var startTimeCeil = day.ceil(startTime, timezone);
-      var startTimeFloor = day.floor(startTime, timezone);
-      startTime = wallTimeHelper(startTimeFloor, timezoneString);
-      endTime = wallTimeHelper(startTimeCeil, timezoneString);
+      startTime = day.ceil(startTime, timezone);
+      endTime = day.floor(startTime, timezone);
     }
 
     if (startTime && endTime && startTime < endTime) {
@@ -231,7 +229,6 @@ export class TimeFilterMenu extends React.Component<TimeFilterMenuProps, TimeFil
         timezone={timezone}
         onStartChange={this.onStartChange.bind(this)}
         onEndChange={this.onEndChange.bind(this)}
-        ref="start-date-range-picker"
       />
       <div className="button-bar">
         <Button type="primary" onClick={this.onOkClick.bind(this)} disabled={!this.actionEnabled()} title={STRINGS.ok} />

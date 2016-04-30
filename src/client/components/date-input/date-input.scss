@@ -1,10 +1,6 @@
 @import '../../imports';
 
 .date-input {
-  flex-grow: 1;
-  flex-shrink: 1;
-  flex-basis: 0;
-
   .input-field {
     border: 1px solid #d4d4d4;
     border-radius: $corner;

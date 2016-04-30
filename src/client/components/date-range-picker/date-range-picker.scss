@@ -5,6 +5,12 @@
   .side-by-side {
     display: flex;
 
+    .date-input {
+      flex-grow: 1;
+      flex-shrink: 1;
+      flex-basis: 0;
+    }
+
     :not(:last-child) {
       margin-right: 8px;
     }
@@ -87,7 +93,7 @@
             }
           }
 
-          &:hover {
+          &:hover:not(.disabled):not(.selectable) {
             &:after {
               @include pin-full;
               content: '';
