@@ -128,8 +128,13 @@ export class DateRangePicker extends React.Component<DateRangePickerProps, DateR
   getIsSelectedEdgeEnd(isSingleDate: boolean, candidate: Date) {
     if (isSingleDate) return false;
     const { startTime, endTime, timezone } = this.props;
-    const wallTimeInclusiveEnd = (getEndWallTimeInclusive(endTime, timezone) as any)['wallTime'];
-    const candidateWallTimeInclusiveEnd = (getEndWallTimeInclusive(getCeilFromFloored(candidate, timezone), timezone) as any)['wallTime'];
+    const candidateCeiling = getCeilFromFloored(candidate, timezone);
+    // everything selected from the calendar will have been processed and be a round date.
+    // take care of dates coming from preset or timezone or maybe even hash
+    const isEndTimeNotRound = day.ceil(endTime, timezone).valueOf() !== endTime.valueOf();
+    const endCeiling = isEndTimeNotRound ? getCeilFromFloored(day.floor(endTime, timezone), timezone) : endTime;
+    const wallTimeInclusiveEnd = (getEndWallTimeInclusive(endCeiling, timezone) as any)['wallTime'];
+    const candidateWallTimeInclusiveEnd = (getEndWallTimeInclusive(candidateCeiling, timezone) as any)['wallTime'];
     return daysEqual(wallTimeInclusiveEnd, candidateWallTimeInclusiveEnd) && endTime > startTime;
   }
 
@@ -141,7 +146,7 @@ export class DateRangePicker extends React.Component<DateRangePickerProps, DateR
         var isPast = row === 0 && column < prependEndCol;
         var isFuture = row === weeks.length - 1 && column >= appendStartCol;
         var isBeyondMaxRange = dayDate > maxTime;
-        var isSelectedEdgeStart = daysEqual(dayDate, startTime);
+        var isSelectedEdgeStart = daysEqual(dayDate, day.floor(startTime, timezone));
         var isSelectedEdgeEnd = this.getIsSelectedEdgeEnd(isSingleDate, dayDate);
         var className = classNames("day", "value",
           {
@@ -204,7 +209,7 @@ export class DateRangePicker extends React.Component<DateRangePickerProps, DateR
     const { activeMonthStartDate } = this.state;
     if (!activeMonthStartDate) return null;
 
-    var isSingleDate = endTime === null || daysEqual(startTime, day.shift(endTime, timezone, -1));
+    var isSingleDate = endTime === null || daysEqual(startTime, day.floor(endTime, timezone));
     return <div className="date-range-picker">
       <div className="side-by-side">
         <DateRangeInput type="start" time={startTime} timezone={timezone} onChange={onStartChange.bind(this)}/>
