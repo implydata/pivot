@@ -42,13 +42,19 @@ export class SettingsMenu extends React.Component<SettingsMenuProps, SettingsMen
     //this.state = {};
   }
 
+  changeTimezone(newTimezone: Timezone) {
+    const { onClose, changeTimezone } = this.props;
+    changeTimezone(newTimezone);
+    onClose();
+  }
+
   renderTimezonesDropdown() {
-    const { timezone, changeTimezone } = this.props;
+    const { timezone } = this.props;
     return React.createElement(Dropdown, {
       label: STRINGS.timezone,
       selectedItem: timezone,
       items: TIMEZONES,
-      onSelect: changeTimezone.bind(this)
+      onSelect: this.changeTimezone.bind(this)
     });
   }
 
