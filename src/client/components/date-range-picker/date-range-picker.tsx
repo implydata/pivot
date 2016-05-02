@@ -181,21 +181,19 @@ export class DateRangePicker extends React.Component<DateRangePickerProps, DateR
   }
 
   renderCalendarNav(startDate: Date): JSX.Element {
-    const { maxTime, timezone } = this.props;
-    const startMonth = startDate.getMonth();
-    const maxMonth = maxTime.getMonth();
+    const { timezone } = this.props;
     const wallTime = WallTime.UTCToWallTime(startDate, timezone.toString());
 
     return <div className="calendar-nav">
       <div
-        className={classNames('caret', 'left', {'disabled': startMonth - 1 > maxMonth })}
+        className='caret left'
         onClick={this.goToPreviousMonth.bind(this)}
       >
         <SvgIcon svg={require('../../icons/full-caret-left.svg')}/>
       </div>
       { `${formatFullMonthAndYear(wallTime)} ` }
       <div
-        className={classNames('caret', 'right', {'disabled': startMonth + 1 > maxMonth })}
+        className='caret right'
         onClick={this.goToNextMonth.bind(this)}
       >
         <SvgIcon svg={require('../../icons/full-caret-right.svg')}/>

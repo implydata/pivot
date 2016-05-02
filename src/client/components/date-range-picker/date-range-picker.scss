@@ -91,7 +91,7 @@
             }
           }
 
-          &:hover:not(.disabled):not(.selectable) {
+          &:hover:not(.selectable) {
             &:after {
               @include pin-full;
               content: '';
