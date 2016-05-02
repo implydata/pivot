@@ -96,21 +96,20 @@ export class DateRangePicker extends React.Component<DateRangePickerProps, DateR
   selectDay(selection: Date): void {
     const { startTime, endTime, timezone } = this.props;
     if (!startTime) return;
-    const selectionFloored = day.floor(selection, timezone);
 
     if (endTime) {
-      this.calculateHoverTimeRange(selectionFloored);
-      this.selectNewStart(selectionFloored, false);
+      this.calculateHoverTimeRange(selection);
+      this.selectNewStart(selection, false);
     } else {
-      const isDoubleClickSameDay = daysEqual(selectionFloored, startTime);
+      const isDoubleClickSameDay = daysEqual(selection, startTime);
       if (isDoubleClickSameDay) {
         this.selectNewStart(startTime, true);
         return;
       }
-      const isBackwardSelection = selectionFloored < startTime;
+      const isBackwardSelection = selection < startTime;
       if (isBackwardSelection) {
         var endFromOldStart = getCeilFromFloored(startTime, timezone);
-        this.selectNewRange(selectionFloored, endFromOldStart);
+        this.selectNewRange(selection, endFromOldStart);
         return;
       }
       this.selectNewRange(startTime, getCeilFromFloored(selection, timezone));
@@ -142,7 +141,7 @@ export class DateRangePicker extends React.Component<DateRangePickerProps, DateR
         var isPast = row === 0 && column < prependEndCol;
         var isFuture = row === weeks.length - 1 && column >= appendStartCol;
         var isBeyondMaxRange = dayDate > maxTime;
-        var isSelectedEdgeStart = daysEqual(day.floor(dayDate, timezone), day.floor(startTime, timezone));
+        var isSelectedEdgeStart = daysEqual(dayDate, startTime);
         var isSelectedEdgeEnd = this.getIsSelectedEdgeEnd(isSingleDate, dayDate);
         var className = classNames("day", "value",
           {

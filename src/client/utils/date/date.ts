@@ -74,7 +74,7 @@ export function monthToWeeks(firstDayOfMonth: Date, timezone: Timezone): Date[][
   const firstDayNextMonth = month.shift(firstDayOfMonth, timezone, 1);
 
   let week: Date[] = [];
-  let currentPointer = firstDayOfMonth;
+  let currentPointer = day.floor(firstDayOfMonth, timezone);
   while (currentPointer < firstDayNextMonth) {
     var wallTime = WallTime.UTCToWallTime(currentPointer, timezone.toString());
     if ((wallTime.getDay() === getLocale().weekStart || 0) && week.length > 0) {
