@@ -89,12 +89,12 @@ export class DateRangePicker extends React.Component<DateRangePickerProps, DateR
   selectNewRange(startDate: Date, endDate?: Date) {
     const { onStartChange, onEndChange, timezone } = this.props;
     onStartChange(startDate);
-    if (endDate) endDate = day.ceil(endDate, timezone);
+    if (endDate) endDate = getCeilFromFloored(endDate, timezone);
     onEndChange(endDate);
   }
 
   selectDay(selection: Date): void {
-    const { startTime, endTime, timezone } = this.props;
+    const { startTime, endTime } = this.props;
     if (!startTime) return;
 
     if (endTime) {
@@ -108,11 +108,10 @@ export class DateRangePicker extends React.Component<DateRangePickerProps, DateR
       }
       const isBackwardSelection = selection < startTime;
       if (isBackwardSelection) {
-        var endFromOldStart = getCeilFromFloored(startTime, timezone);
-        this.selectNewRange(selection, endFromOldStart);
+        this.selectNewRange(selection, startTime);
         return;
       }
-      this.selectNewRange(startTime, getCeilFromFloored(selection, timezone));
+      this.selectNewRange(startTime, selection);
     }
   }
 
