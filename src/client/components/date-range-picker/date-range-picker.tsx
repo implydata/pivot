@@ -3,12 +3,14 @@ require('./date-range-picker.css');
 import * as React from "react";
 import { Timezone, WallTime, Duration, second, minute, hour, day, week, month, year } from "chronoshift";
 import { TimeRange } from "plywood";
-import { formatFullMonthAndYear, prependDays, appendDays, daysEqual,
-  getEndWallTimeInclusive, monthToWeeks } from "../../utils/date/date";
+import {
+  formatFullMonthAndYear, prependDays, appendDays, daysEqual,
+  getEndWallTimeInclusive, monthToWeeks, getCeilFromFloored
+} from "../../utils/date/date";
 import { classNames } from "../../utils/dom/dom";
 import { getLocale } from "../../config/constants";
 import { SvgIcon } from "../svg-icon/svg-icon";
-import { DateInput } from "../date-input/date-input";
+import { DateRangeInput } from "../date-range-input/date-range-input";
 
 
 export interface DateRangePickerProps extends React.Props<any> {
@@ -39,7 +41,7 @@ export class DateRangePicker extends React.Component<DateRangePickerProps, DateR
   componentWillMount() {
     var { startTime, timezone } = this.props;
     if (!startTime) return;
-    const flooredStart = day.floor(startTime, timezone);
+    const flooredStart = month.floor(day.floor(startTime, timezone), timezone);
     this.setState({
       activeMonthStartDate: flooredStart
     });
@@ -100,18 +102,18 @@ export class DateRangePicker extends React.Component<DateRangePickerProps, DateR
       this.calculateHoverTimeRange(selectionFloored);
       this.selectNewStart(selectionFloored, false);
     } else {
-      const isDoubleClickSameDay = daysEqual(selection, startTime);
+      const isDoubleClickSameDay = daysEqual(selectionFloored, startTime);
       if (isDoubleClickSameDay) {
-        this.selectNewStart(selection, true);
+        this.selectNewStart(startTime, true);
         return;
       }
-      const isBackwardSelection = selection < startTime;
+      const isBackwardSelection = selectionFloored < startTime;
       if (isBackwardSelection) {
-        var endFromOldStart = day.ceil(new Date(startTime.valueOf() + 1), timezone);
+        var endFromOldStart = getCeilFromFloored(startTime, timezone);
         this.selectNewRange(selectionFloored, endFromOldStart);
-      } else {
-        this.selectNewRange(startTime, day.ceil(selection, timezone));
+        return;
       }
+      this.selectNewRange(startTime, getCeilFromFloored(selection, timezone));
     }
   }
 
@@ -128,7 +130,7 @@ export class DateRangePicker extends React.Component<DateRangePickerProps, DateR
     if (isSingleDate) return false;
     const { startTime, endTime, timezone } = this.props;
     const wallTimeInclusiveEnd = (getEndWallTimeInclusive(endTime, timezone) as any)['wallTime'];
-    const candidateWallTimeInclusiveEnd = (getEndWallTimeInclusive(day.ceil(candidate, timezone), timezone) as any)['wallTime'];
+    const candidateWallTimeInclusiveEnd = (getEndWallTimeInclusive(getCeilFromFloored(candidate, timezone), timezone) as any)['wallTime'];
     return daysEqual(wallTimeInclusiveEnd, candidateWallTimeInclusiveEnd) && endTime > startTime;
   }
 
@@ -151,13 +153,14 @@ export class DateRangePicker extends React.Component<DateRangePickerProps, DateR
             "selected": startTime < dayDate && dayDate < endTime,
             "selected-edge": isSelectedEdgeStart || isSelectedEdgeEnd
           });
+        var wallTime = WallTime.UTCToWallTime(dayDate, timezone.toString());
 
         return <div
           className={className}
           key={column}
           onClick={this.selectDay.bind(this, dayDate)}
           onMouseEnter={this.calculateHoverTimeRange.bind(this, dayDate)}
-        >{dayDate.getUTCDate()}</div>;
+        >{wallTime.getDate()}</div>;
       })}</div>;
     });
   };
@@ -202,12 +205,11 @@ export class DateRangePicker extends React.Component<DateRangePickerProps, DateR
     const { activeMonthStartDate } = this.state;
     if (!activeMonthStartDate) return null;
 
-    var endTimeInclusive = endTime ? (getEndWallTimeInclusive(endTime, timezone) as any)['wallTime'] : null;
-    var isSingleDate = endTime === null;
+    var isSingleDate = endTime === null || daysEqual(startTime, day.shift(endTime, timezone, -1));
     return <div className="date-range-picker">
       <div className="side-by-side">
-        <DateInput type="start" time={startTime} timezone={timezone} onChange={onStartChange.bind(this)}/>
-        <DateInput type="end" time={endTimeInclusive} timezone={timezone} onChange={onEndChange.bind(this)} hide={isSingleDate}/>
+        <DateRangeInput type="start" time={startTime} timezone={timezone} onChange={onStartChange.bind(this)}/>
+        <DateRangeInput type="end" time={endTime} timezone={timezone} onChange={onEndChange.bind(this)} hide={isSingleDate}/>
       </div>
       <div className="calendar" ref="calendar">
         {this.renderCalendarNav(activeMonthStartDate)}

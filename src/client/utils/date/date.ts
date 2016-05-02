@@ -1,7 +1,6 @@
 import * as d3 from 'd3';
 import { Timezone, WallTime, month, day } from 'chronoshift';
 import { TimeRange } from 'plywood';
-import { isDate } from "util";
 import { getLocale } from "../../config/constants";
 
 const formatWithYear = d3.time.format('%b %-d, %Y');
@@ -70,20 +69,20 @@ export function formatTimeRange(timeRange: TimeRange, timezone: Timezone, displa
 
 // calendar utils
 
-export function monthToWeeks(startDate: Date, timezone: Timezone): Date[][] {
+export function monthToWeeks(firstDayOfMonth: Date, timezone: Timezone): Date[][] {
   const weeks: Date[][] = [];
-  const firstDayOfMonth = new Date(startDate.getUTCFullYear(), startDate.getUTCMonth(), 1, 0, 0, 0);
   const firstDayNextMonth = month.shift(firstDayOfMonth, timezone, 1);
 
   let week: Date[] = [];
   let currentPointer = firstDayOfMonth;
   while (currentPointer < firstDayNextMonth) {
-    const activeDay = new Date(firstDayOfMonth.getUTCFullYear(), firstDayOfMonth.getUTCMonth(), currentPointer.getUTCDate(), 0, 0, 0);
-    if (activeDay.getDay() === getLocale().weekStart || 0 && week.length > 0) {
+    var wallTime = WallTime.UTCToWallTime(currentPointer, timezone.toString());
+    if ((wallTime.getDay() === getLocale().weekStart || 0) && week.length > 0) {
       weeks.push(week);
       week = [];
     }
-    week.push(activeDay);
+
+    week.push(currentPointer);
     currentPointer = day.shift(currentPointer, timezone, 1);
   }
   // push last week
@@ -94,7 +93,6 @@ export function monthToWeeks(startDate: Date, timezone: Timezone): Date[][] {
 export function prependDays(timezone: Timezone, weekPrependTo: Date[], countPrepend: number): Date[] {
   for (var i = 0; i < countPrepend; i++) {
     var firstDate = weekPrependTo[0];
-    if (!firstDate) continue;
     var shiftedDate = day.shift(firstDate, timezone, -1);
     weekPrependTo.unshift(shiftedDate);
   }
@@ -104,7 +102,6 @@ export function prependDays(timezone: Timezone, weekPrependTo: Date[], countPrep
 export function appendDays(timezone: Timezone, weekAppendTo: Date[], countAppend: number): Date[] {
   for (var i = 0; i < countAppend; i++) {
     var lastDate = weekAppendTo[weekAppendTo.length - 1];
-    if (!lastDate) continue;
     var shiftedDate = day.shift(lastDate, timezone, 1);
     weekAppendTo.push(shiftedDate);
   }
@@ -115,5 +112,9 @@ export function daysEqual(d1: Date, d2: Date): boolean {
   if (!Boolean(d1) === Boolean(d2)) return false;
   if (d1 === d2 ) return true;
   return d1.valueOf() === d2.valueOf();
+}
+
+export function getCeilFromFloored(floored: Date, timezone: Timezone) {
+  return day.ceil(new Date(floored.valueOf() + 1), timezone);
 }
 

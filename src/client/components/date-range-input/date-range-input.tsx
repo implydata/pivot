@@ -1,9 +1,10 @@
-require('./date-input.css');
+require('./date-range-input.css');
 
 import * as React from 'react';
 import { Timezone, WallTime } from 'chronoshift';
+import { getEndWallTimeInclusive } from "../../utils/date/date";
 
-export interface DateInputProps extends React.Props<any> {
+export interface DateRangeInputProps extends React.Props<any> {
   time: Date;
   timezone: Timezone;
   onChange: (t: Date) => void;
@@ -11,18 +12,17 @@ export interface DateInputProps extends React.Props<any> {
   type?: string;
 }
 
-export interface DateInputState {
+export interface DateRangeInputState {
   dateString?: string;
 }
 
-export class DateInput extends React.Component<DateInputProps, DateInputState> {
+export class DateRangeInput extends React.Component<DateRangeInputProps, DateRangeInputState> {
 
   constructor() {
     super();
     this.state = {
       dateString: ''
     };
-
   }
 
   // 2015-09-23T17:42:57.636Z
@@ -33,7 +33,7 @@ export class DateInput extends React.Component<DateInputProps, DateInputState> {
     this.updateStateFromTime(time, timezone);
   }
 
-  componentWillReceiveProps(nextProps: DateInputProps) {
+  componentWillReceiveProps(nextProps: DateRangeInputProps) {
     var { time, timezone } = nextProps;
     this.updateStateFromTime(time, timezone);
   }
@@ -47,8 +47,15 @@ export class DateInput extends React.Component<DateInputProps, DateInputState> {
       return;
     }
 
-    var adjTime = WallTime.UTCToWallTime(time, timezone.toString());
-    var timeISO = adjTime.toISOString().replace(/:\d\d(\.\d\d\d)?Z?$/, '').split('T');
+    var adjTime: Date = null;
+    if (this.props.type === "end") {
+      adjTime = getEndWallTimeInclusive(time, timezone);
+    } else {
+      adjTime = WallTime.UTCToWallTime(time, timezone.toString());
+    }
+
+    var timeISO = (adjTime as any)['wallTime'].toISOString().replace(/:\d\d(\.\d\d\d)?Z?$/, '').split('T');
+
     this.setState({
       dateString: timeISO[0]
     });
@@ -91,7 +98,7 @@ export class DateInput extends React.Component<DateInputProps, DateInputState> {
     const { dateString } = this.state;
     const value = hide ? '' : dateString;
 
-    return <div className="date-input">
+    return <div className="date-range-input">
       <input className="input-field" value={value} onChange={this.dateChange.bind(this)}/>
     </div>;
   }

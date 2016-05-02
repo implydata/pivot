@@ -8,12 +8,12 @@ import '../../utils/require-extensions';
 import * as TestUtils from 'react-addons-test-utils';
 
 import { $, Expression } from 'plywood';
-import { DateInput } from './date-input';
+import { DateRangeInput } from './date-range-input';
 
-describe('DateInput', () => {
+describe('DateRangeInput', () => {
   it('adds the correct class', () => {
     var renderedComponent = TestUtils.renderIntoDocument(
-      <DateInput
+      <DateRangeInput
         hide={true}
         onChange={null}
         time={null}
@@ -22,7 +22,7 @@ describe('DateInput', () => {
     );
 
     expect(TestUtils.isCompositeComponent(renderedComponent), 'should be composite').to.equal(true);
-    expect((ReactDOM.findDOMNode(renderedComponent) as any).className, 'should contain class').to.contain('date-input');
+    expect((ReactDOM.findDOMNode(renderedComponent) as any).className, 'should contain class').to.contain('date-range-input');
   });
 
 });

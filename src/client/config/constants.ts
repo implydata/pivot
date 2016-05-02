@@ -61,6 +61,8 @@ export const STRINGS = {
   goToUrl: 'Go to URL',
   openIn: 'Open in',
   exportToCSV: 'Export to CSV',
+  updateTimezone: 'Update Timezone',
+  timezone: 'Timezone',
   splitDelimiter: 'by'
 };
 

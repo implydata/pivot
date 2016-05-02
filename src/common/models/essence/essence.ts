@@ -652,6 +652,14 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
     return new Essence(value);
   }
 
+  public changeTimezone(newTimezone: Timezone): Essence {
+    var { timezone } = this;
+    if (timezone === newTimezone) return this;
+    var value = this.valueOf();
+    value.timezone = newTimezone;
+    return new Essence(value);
+  }
+
   public changeTimeSelection(check: Expression): Essence {
     var { filter } = this;
     var timeAttribute = this.getTimeAttribute();
