@@ -40,6 +40,7 @@ export class ButtonGroup extends React.Component<ButtonGroupProps, ButtonGroupSt
       </li>;
     });
   }
+
   render() {
     const { title, className } = this.props;
 

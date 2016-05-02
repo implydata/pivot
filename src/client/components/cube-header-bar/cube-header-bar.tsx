@@ -253,7 +253,7 @@ export class CubeHeaderBar extends React.Component<CubeHeaderBarProps, CubeHeade
           <SvgIcon className="hiluk-icon" svg={require('../../icons/full-hiluk.svg')}/>
         </div>
         <div className="icon-button settings" onClick={this.onSettingsMenuClick.bind(this)}>
-          <SvgIcon className="settings-icon" svg={require('../../icons/full-settings.svg')}/>
+          <SvgIcon className="settings-icon not-implemented" svg={require('../../icons/full-settings.svg')}/>
         </div>
         {userButton}
       </div>
