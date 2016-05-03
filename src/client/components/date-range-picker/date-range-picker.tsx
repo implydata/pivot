@@ -84,11 +84,6 @@ export class DateRangePicker extends React.Component<DateRangePickerProps, DateR
     this.setState({ hoverTimeRange });
   }
 
-  selectNewStart(startDate: Date, isSingleDate: boolean) {
-    this.selectNewRange(startDate, null);
-    this.setState({ selectionSet: isSingleDate });
-  }
-
   selectNewRange(startDate: Date, endDate?: Date) {
     const { onStartChange, onEndChange, timezone } = this.props;
     onStartChange(startDate);
@@ -103,21 +98,19 @@ export class DateRangePicker extends React.Component<DateRangePickerProps, DateR
     if (!startTime) return;
 
     if (selectionSet) {
-      this.setState({ hoverTimeRange: null });
-      this.selectNewStart(selection, false);
+      this.setState({ hoverTimeRange: null, selectionSet: false });
+      this.selectNewRange(selection, null);
     } else {
       const isDoubleClickSameDay = datesEqual(selection, startTime);
-      if (isDoubleClickSameDay) {
-        this.selectNewStart(startTime, true);
-        return;
-      }
       const isBackwardSelection = selection < startTime;
-      if (isBackwardSelection) {
+
+      if (isDoubleClickSameDay) {
+        this.selectNewRange(startTime, null);
+      } else if (isBackwardSelection) {
         this.selectNewRange(selection, startTime);
-        this.setState({ selectionSet: true });
-        return;
+      } else {
+        this.selectNewRange(startTime, selection);
       }
-      this.selectNewRange(startTime, selection);
       this.setState({ selectionSet: true });
     }
   }
