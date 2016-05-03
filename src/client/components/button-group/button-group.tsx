@@ -26,7 +26,6 @@ export class ButtonGroup extends React.Component<ButtonGroupProps, ButtonGroupSt
 
   constructor() {
     super();
-    // this.state = {};
   }
 
   renderMembers() {
