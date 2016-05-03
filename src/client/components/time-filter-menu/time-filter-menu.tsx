@@ -74,8 +74,9 @@ export class TimeFilterMenu extends React.Component<TimeFilterMenuProps, TimeFil
   }
 
   componentWillMount() {
-    var { essence, dimension } = this.props;
-    var { filter } = essence;
+    const { essence, dimension } = this.props;
+    const { filter } = essence;
+    const { timezone } = essence;
 
     var timeSelection = filter.getSelection(dimension.expression);
     var selectedTimeRange = essence.evaluateSelection(timeSelection);
@@ -83,8 +84,8 @@ export class TimeFilterMenu extends React.Component<TimeFilterMenuProps, TimeFil
     this.setState({
       timeSelection,
       tab: filter.isRelative() ? 'relative' : 'specific',
-      startTime: selectedTimeRange ? selectedTimeRange.start : null,
-      endTime: selectedTimeRange ? selectedTimeRange.end : null
+      startTime: selectedTimeRange ? day.floor(selectedTimeRange.start, timezone) : null,
+      endTime: selectedTimeRange ? day.ceil(selectedTimeRange.end, timezone) : null
     });
   }
 

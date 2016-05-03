@@ -129,11 +129,7 @@ export class DateRangePicker extends React.Component<DateRangePickerProps, DateR
     if (isSingleDate) return false;
     const { startTime, endTime, timezone } = this.props;
     const candidateEndPoint = shiftOneDay(candidate, timezone);
-    // everything selected from the calendar will have been processed and be a round date.
-    // take care of dates coming from preset or timezone or maybe even hash
-    const isEndTimeNotRound = day.floor(endTime, timezone).valueOf() !== endTime.valueOf();
-    const currentEndPoint = isEndTimeNotRound ? shiftOneDay(day.floor(endTime, timezone), timezone) : endTime;
-    return wallTimeInclusiveEndEqual(currentEndPoint, candidateEndPoint, timezone) && endTime > startTime;
+    return wallTimeInclusiveEndEqual(endTime, candidateEndPoint, timezone) && endTime > startTime;
   }
 
   renderDays(weeks: Date[][], monthStart: Date, isSingleDate: boolean): JSX.Element[] {
@@ -145,7 +141,7 @@ export class DateRangePicker extends React.Component<DateRangePickerProps, DateR
         var isPast = dayDate < monthStart;
         var isFuture = dayDate >= nextMonthStart;
         var isBeyondMaxRange = dayDate > maxTime;
-        var isSelectedEdgeStart = datesEqual(dayDate, day.floor(startTime, timezone));
+        var isSelectedEdgeStart = datesEqual(dayDate, startTime);
         var isSelectedEdgeEnd = this.getIsSelectedEdgeEnd(isSingleDate, dayDate);
         var className = classNames("day", "value",
           {
@@ -204,7 +200,7 @@ export class DateRangePicker extends React.Component<DateRangePickerProps, DateR
     const { activeMonthStartDate } = this.state;
     if (!activeMonthStartDate) return null;
 
-    var isSingleDate = endTime === null || datesEqual(startTime, day.floor(endTime, timezone));
+    var isSingleDate = endTime === null || datesEqual(startTime, endTime);
     return <div className="date-range-picker">
       <div className="side-by-side">
         <DateRangeInput type="start" time={startTime} timezone={timezone} onChange={onStartChange.bind(this)}/>
