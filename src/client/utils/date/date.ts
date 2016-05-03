@@ -3,16 +3,16 @@ import { Timezone, WallTime, month, day } from 'chronoshift';
 import { TimeRange } from 'plywood';
 import { getLocale } from "../../config/constants";
 
-const formatWithYear = d3.time.format('%b %-d, %Y');
-const formatWithoutYear = d3.time.format('%b %-d');
+const FORMAT_WITH_YEAR = d3.time.format('%b %-d, %Y');
+const FORMAT_WITHOUT_YEAR = d3.time.format('%b %-d');
 
-const formatTimeOfDayWithoutMinutes = d3.time.format('%-I%p');
-const formatTimeOfDayWithMinutes = d3.time.format('%-I:%M%p');
+const FORMAT_TIME_OF_DAY_WITHOUT_MINUTES = d3.time.format('%-I%p');
+const FORMAT_TIME_OF_DAY_WITH_MINUTES = d3.time.format('%-I:%M%p');
 
-export const formatFullMonthAndYear = d3.time.format('%B %Y');
+const FORMAT_FULL_MONTH_WITH_YEAR = d3.time.format('%B %Y');
 
 function formatTimeOfDay(d: Date): string {
-  return d.getMinutes() ? formatTimeOfDayWithMinutes(d) : formatTimeOfDayWithoutMinutes(d);
+  return d.getMinutes() ? FORMAT_TIME_OF_DAY_WITH_MINUTES(d) : FORMAT_TIME_OF_DAY_WITHOUT_MINUTES(d);
 }
 
 function isCurrentYear(year: number, timezone: Timezone): boolean {
@@ -37,12 +37,12 @@ export function formatTimeRange(timeRange: TimeRange, timezone: Timezone, displa
   var showingYear = true;
   var formatted: string;
   if (startWallTime.getFullYear() !== endWallTimeInclusive.getFullYear()) {
-    formatted = [formatWithYear(startWallTime), formatWithYear(endWallTimeInclusive)].join(' - ');
+    formatted = [FORMAT_WITH_YEAR(startWallTime), FORMAT_WITH_YEAR(endWallTimeInclusive)].join(' - ');
   } else {
     showingYear = displayYear === DisplayYear.ALWAYS || (displayYear === DisplayYear.IF_DIFF && !isCurrentYear(endWallTimeInclusive.getFullYear(), timezone));
-    var fmt = showingYear ? formatWithYear : formatWithoutYear;
+    var fmt = showingYear ? FORMAT_WITH_YEAR : FORMAT_WITHOUT_YEAR;
     if (startWallTime.getMonth() !== endWallTimeInclusive.getMonth() || startWallTime.getDate() !== endWallTimeInclusive.getDate()) {
-      formatted = [formatWithoutYear(startWallTime), fmt(endWallTimeInclusive)].join(' - ');
+      formatted = [FORMAT_WITHOUT_YEAR(startWallTime), fmt(endWallTimeInclusive)].join(' - ');
     } else {
       formatted = fmt(startWallTime);
     }
@@ -108,13 +108,30 @@ export function appendDays(timezone: Timezone, weekAppendTo: Date[], countAppend
   return weekAppendTo;
 }
 
-export function daysEqual(d1: Date, d2: Date): boolean {
+export function shiftOneDay(floored: Date, timezone: Timezone) {
+  return day.shift(floored, timezone, 1);
+}
+
+export function datesEqual(d1: Date, d2: Date): boolean {
   if (!Boolean(d1) === Boolean(d2)) return false;
   if (d1 === d2 ) return true;
   return d1.valueOf() === d2.valueOf();
 }
 
-export function getCeilFromFloored(floored: Date, timezone: Timezone) {
-  return day.ceil(new Date(floored.valueOf() + 1), timezone);
+export function getWallTimeDay(date: Date, timezone: Timezone) {
+  return WallTime.UTCToWallTime(date, timezone.toString()).getDate();
 }
 
+export function getWallTimeMonth(date: Date, timezone: Timezone) {
+  return FORMAT_FULL_MONTH_WITH_YEAR(WallTime.UTCToWallTime(date, timezone.toString()));
+}
+
+export function wallTimeInclusiveEndEqual(d1: Date, d2: Date, timezone: Timezone): boolean {
+  const d1InclusiveEnd = wallTimeHelper(getEndWallTimeInclusive(d1, timezone));
+  const d2InclusiveEnd = wallTimeHelper(getEndWallTimeInclusive(d2, timezone));
+  return datesEqual(d1InclusiveEnd, d2InclusiveEnd);
+}
+
+function wallTimeHelper(wallTime: any) {
+  return wallTime['wallTime'];
+}
