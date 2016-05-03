@@ -3,10 +3,10 @@ require('./settings-menu.css');
 import * as React from 'react';
 import { Timezone } from 'chronoshift';
 import { Fn } from "../../../common/utils/general/general";
-import { Stage, Essence } from '../../../common/models/index';
+import { Stage } from '../../../common/models/index';
 import { STRINGS } from '../../config/constants';
 import { BubbleMenu } from '../bubble-menu/bubble-menu';
-import { Dropdown, DropdownProps } from '../dropdown/dropdown';
+import { Dropdown } from '../dropdown/dropdown';
 var { WallTime } = require('chronoshift');
 if (!WallTime.rules) {
   var tzData = require("chronoshift/lib/walltime/walltime-data.js");
@@ -39,7 +39,6 @@ export class SettingsMenu extends React.Component<SettingsMenuProps, SettingsMen
 
   constructor() {
     super();
-    //this.state = {};
   }
 
   changeTimezone(newTimezone: Timezone) {
