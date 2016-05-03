@@ -45,7 +45,8 @@ export class DateRangePicker extends React.Component<DateRangePickerProps, DateR
     if (!datesEqual(endTime, day.floor(endTime, timezone))) throw new Error("end time must be round");
     const flooredStart = month.floor(startTime, timezone);
     this.setState({
-      activeMonthStartDate: flooredStart
+      activeMonthStartDate: flooredStart,
+      selectionSet: true
     });
   }
 
@@ -97,11 +98,12 @@ export class DateRangePicker extends React.Component<DateRangePickerProps, DateR
   }
 
   selectDay(selection: Date): void {
-    const { startTime, endTime } = this.props;
+    const { startTime } = this.props;
+    const { selectionSet } = this.state;
     if (!startTime) return;
 
-    if (endTime) {
-      this.calculateHoverTimeRange(selection);
+    if (selectionSet) {
+      this.setState({ hoverTimeRange: null });
       this.selectNewStart(selection, false);
     } else {
       const isDoubleClickSameDay = datesEqual(selection, startTime);
@@ -112,9 +114,11 @@ export class DateRangePicker extends React.Component<DateRangePickerProps, DateR
       const isBackwardSelection = selection < startTime;
       if (isBackwardSelection) {
         this.selectNewRange(selection, startTime);
+        this.setState({ selectionSet: true });
         return;
       }
       this.selectNewRange(startTime, selection);
+      this.setState({ selectionSet: true });
     }
   }
 

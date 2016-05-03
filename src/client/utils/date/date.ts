@@ -127,6 +127,8 @@ export function getWallTimeMonthWithYear(date: Date, timezone: Timezone) {
 }
 
 export function wallTimeInclusiveEndEqual(d1: Date, d2: Date, timezone: Timezone): boolean {
+  if (!Boolean(d1) === Boolean(d2)) return false;
+  if (d1 === d2 ) return true;
   const d1InclusiveEnd = wallTimeHelper(getEndWallTimeInclusive(d1, timezone));
   const d2InclusiveEnd = wallTimeHelper(getEndWallTimeInclusive(d2, timezone));
   return datesEqual(d1InclusiveEnd, d2InclusiveEnd);
