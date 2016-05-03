@@ -3,25 +3,11 @@ import { Class, Instance, isInstanceOf, immutableArraysEqual } from 'immutable-c
 import { Timezone, Duration, day, hour } from 'chronoshift';
 import { $, Expression, RefExpression, TimeRange, TimeBucketAction, SortAction } from 'plywood';
 import { immutableListsEqual } from '../../utils/general/general';
+import { getBestGranularity } from '../../utils/date-calc/date-calc';
 import { Dimension } from '../dimension/dimension';
 import { SplitCombine, SplitCombineJS, SplitCombineContext } from '../split-combine/split-combine';
 
 const DEFAULT_GRANULARITY = Duration.fromJS('P1D');
-
-function getBestGranularity(timeRange: TimeRange): Duration {
-  var len = timeRange.end.valueOf() - timeRange.start.valueOf();
-  if (len > 95 * day.canonicalLength) {
-    return Duration.fromJS('P1W');
-  } else if (len > 8 * day.canonicalLength) {
-    return Duration.fromJS('P1D');
-  } else if (len > 8 * hour.canonicalLength) {
-    return Duration.fromJS('PT1H');
-  } else if (len > 3 * hour.canonicalLength) {
-    return Duration.fromJS('PT5M');
-  } else {
-    return Duration.fromJS('PT1M');
-  }
-}
 
 function withholdSplit(splits: List<SplitCombine>, split: SplitCombine, allowIndex: number): List<SplitCombine> {
   return <List<SplitCombine>>splits.filter((s, i) => {
