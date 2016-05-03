@@ -122,7 +122,7 @@ export function getWallTimeDay(date: Date, timezone: Timezone) {
   return WallTime.UTCToWallTime(date, timezone.toString()).getDate();
 }
 
-export function getWallTimeMonth(date: Date, timezone: Timezone) {
+export function getWallTimeMonthWithYear(date: Date, timezone: Timezone) {
   return FORMAT_FULL_MONTH_WITH_YEAR(WallTime.UTCToWallTime(date, timezone.toString()));
 }
 

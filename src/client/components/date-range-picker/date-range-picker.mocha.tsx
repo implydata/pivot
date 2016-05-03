@@ -7,7 +7,6 @@ import '../../utils/require-extensions';
 import * as TestUtils from 'react-addons-test-utils';
 import { Timezone } from "chronoshift";
 
-import { $, Expression } from 'plywood';
 import { DateRangePicker } from './date-range-picker';
 var { WallTime } = require('chronoshift');
 if (!WallTime.rules) {
@@ -33,4 +32,31 @@ describe('DateRangePicker', () => {
     expect((ReactDOM.findDOMNode(renderedComponent) as any).className, 'should contain class').to.contain('date-range-picker');
   });
 
+  it('throws on non round start time input', () => {
+    expect(() => {
+      TestUtils.renderIntoDocument(
+        <DateRangePicker
+          startTime={new Date(Date.UTC(2003, 11, 2, 2, 4))}
+          endTime={new Date(Date.UTC(2004, 11, 2))}
+          maxTime={new Date(Date.UTC(2004, 11, 2))}
+          timezone={Timezone.UTC}
+          onStartChange={() => {}}
+          onEndChange={() => {}}
+        />);
+    }).to.throw('start time must be round');
+  });
+
+  it('throws on non round end time input', () => {
+    expect(() => {
+      TestUtils.renderIntoDocument(
+      <DateRangePicker
+        startTime={new Date(Date.UTC(2003, 11, 2))}
+        endTime={new Date(Date.UTC(2004, 11, 2, 2, 3))}
+        maxTime={new Date(Date.UTC(2004, 11, 2))}
+        timezone={Timezone.UTC}
+        onStartChange={() => {}}
+        onEndChange={() => {}}
+      />);
+    }).to.throw('end time must be round');
+  });
 });
