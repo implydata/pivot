@@ -13,16 +13,29 @@ if (!WallTime.rules) {
   WallTime.init(tzData.rules, tzData.zones);
 }
 
+/*
+ some fun timezones
+
+ new Timezone("Pacific/Niue"), // -11.0
+ new Timezone("Pacific/Marquesas"), // -9.5
+ new Timezone("America/Tijuana"), // -8.0
+ new Timezone("America/St_Johns"), // -3.5
+ new Timezone("Asia/Kathmandu"), // +5.8
+ new Timezone("Australia/Broken_Hill"), // +9.5
+ new Timezone("Pacific/Kiritimati") // +14.0
+
+ */
+
 const TIMEZONES: Timezone[] = [
-  new Timezone("Pacific/Niue"), // -11.0
-  new Timezone("Pacific/Marquesas"), // -9.5
-  new Timezone("America/Tijuana"), // -8.0
-  new Timezone("America/St_Johns"), // -3.5
+  new Timezone("America/Los_Angeles"), // -8.0
+  new Timezone("America/Mexico_City"), // -6.0
+  new Timezone("America/New_York"), // -5.0
+  new Timezone("America/Argentina/San_Luis"), // -4.0
   Timezone.UTC,
-  new Timezone("Asia/Kathmandu"), // +5.8
+  new Timezone("Asia/Jerusalem"), // +2.0
+  new Timezone("Europe/Paris"), // +1.0
   new Timezone("Asia/Hong_Kong"), // +8.0
-  new Timezone("Australia/Broken_Hill"), // +9.5
-  new Timezone("Pacific/Kiritimati") // +14.0
+  new Timezone("Pacific/Guam") // +10.0
 ];
 
 export interface SettingsMenuProps extends React.Props<any> {
@@ -52,6 +65,7 @@ export class SettingsMenu extends React.Component<SettingsMenuProps, SettingsMen
     return React.createElement(Dropdown, {
       label: STRINGS.timezone,
       selectedItem: timezone,
+      renderItem: (d: Timezone) => d.toString().replace(/_/g, ' '),
       items: TIMEZONES,
       onSelect: this.changeTimezone.bind(this)
     });
