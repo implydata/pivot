@@ -279,7 +279,7 @@ export class TimeSeries extends React.Component<VisualizationProps, TimeSeriesSt
     query = query.apply(SPLIT, makeQuery(0));
 
     this.precalculate(this.props, { loading: true });
-    dataSource.executor(query)
+    dataSource.executor(query, { timezone: essence.timezone })
       .then(
         (dataset: Dataset) => {
           if (!this.mounted) return;
@@ -322,7 +322,7 @@ export class TimeSeries extends React.Component<VisualizationProps, TimeSeriesSt
     if (
       nextEssence.differentDataSource(essence) ||
       nextEssence.differentEffectiveFilter(essence, TimeSeries.id) ||
-      nextEssence.differentSplits(essence) ||
+      nextEssence.differentEffectiveSplits(essence) ||
       nextEssence.differentColors(essence) ||
       nextEssence.newEffectiveMeasures(essence)
     ) {

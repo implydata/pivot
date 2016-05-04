@@ -144,7 +144,7 @@ export class Splits implements Instance<SplitsValue, SplitsJS> {
     return this.splitCombines.toArray();
   }
 
-  public updateWithTimeRange(timeAttribute: RefExpression, timeRange: TimeRange, timezone: Timezone, force?: boolean): Splits {
+  public updateWithTimeRange(timeAttribute: RefExpression, timeRange: TimeRange, force?: boolean): Splits {
     var changed = false;
 
     var granularity = timeRange ? getBestGranularity(timeRange) : DEFAULT_GRANULARITY;
@@ -157,7 +157,7 @@ export class Splits implements Instance<SplitsValue, SplitsJS> {
         if (bucketAction instanceof TimeBucketAction && !bucketAction.duration.equals(granularity)) {
           changed = true;
           return splitCombine.changeBucketAction(new TimeBucketAction({
-            timezone: bucketAction.timezone,
+            timezone: bucketAction.timezone, // This is just preserving the existing timezone which is probably null
             duration: granularity
           }));
         } else {
@@ -166,7 +166,6 @@ export class Splits implements Instance<SplitsValue, SplitsJS> {
       } else {
         changed = true;
         return splitCombine.changeBucketAction(new TimeBucketAction({
-          timezone,
           duration: granularity
         }));
       }
@@ -189,6 +188,11 @@ export class Splits implements Instance<SplitsValue, SplitsJS> {
 
     return hasChanged ? new Splits(List(splitCombines)) : this;
   }
+
+  public timezoneDependant(): boolean {
+    return this.splitCombines.some((splitCombine) => splitCombine.timezoneDependant());
+  }
+
 }
 check = Splits;
 
