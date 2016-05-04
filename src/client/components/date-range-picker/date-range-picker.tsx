@@ -6,7 +6,7 @@ import { TimeRange } from "plywood";
 import {
   prependDays, appendDays, datesEqual, monthToWeeks, shiftOneDay, getWallTimeMonthWithYear,
   getWallTimeDay, wallTimeInclusiveEndEqual, getEndWallTimeInclusive
-} from "../../utils/date/date";
+} from "../../../common/utils/time/time";
 import { classNames } from "../../utils/dom/dom";
 import { getLocale } from "../../config/constants";
 import { SvgIcon } from "../svg-icon/svg-icon";
@@ -168,7 +168,7 @@ export class DateRangePicker extends React.Component<DateRangePickerProps, DateR
 
   renderCalendar(startDate: Date, isSingleDate: boolean): JSX.Element[] {
     const { timezone } = this.props;
-    var weeks: Date[][] = monthToWeeks(startDate, timezone);
+    var weeks: Date[][] = monthToWeeks(startDate, timezone, getLocale());
     const firstWeek = weeks[0];
     const lastWeek = weeks[weeks.length - 1];
     const countPrepend = 7 - firstWeek.length;

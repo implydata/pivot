@@ -6,7 +6,7 @@ import { $, r, Expression, TimeRange } from 'plywood';
 import { Fn } from "../../../common/utils/general/general";
 import { STRINGS } from '../../config/constants';
 import { Clicker, Essence, Filter, FilterClause, Dimension } from '../../../common/models/index';
-import { formatTimeRange, DisplayYear } from '../../utils/date/date';
+import { formatTimeRange, DisplayYear } from '../../../common/utils/time/time';
 import { enterKey, classNames } from '../../utils/dom/dom';
 import { Button } from '../button/button';
 import { ButtonGroup } from '../button-group/button-group';
