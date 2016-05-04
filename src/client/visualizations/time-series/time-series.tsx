@@ -5,7 +5,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import * as d3 from 'd3';
 import { r, $, ply, Executor, Expression, Dataset, Datum, TimeRange, TimeRangeJS, TimeBucketAction } from 'plywood';
-import { Stage, Essence, Splits, SplitCombine, Filter, FilterClause, Measure, DataSource, VisualizationProps, DatasetLoad, Resolve, Colors } from "../../../common/models/index";
+import { Stage, Essence, Splits, SplitCombine, Filter, FilterClause, Measure, DataSource, VisualizationProps, DatasetLoad, Resolve, Colors } from '../../../common/models/index';
 import { getTimeTicks } from '../../../common/utils/time/time';
 import { SPLIT, SEGMENT, TIME_SEGMENT, TIME_SORT_ACTION, VIS_H_PADDING } from '../../config/constants';
 import { getXFromEvent, escapeKey } from '../../utils/dom/dom';

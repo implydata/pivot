@@ -3,7 +3,7 @@ require('./time-filter-menu.css');
 import * as React from 'react';
 import { Timezone, WallTime, Duration, second, minute, hour, day, week, month, year } from 'chronoshift';
 import { $, r, Expression, TimeRange } from 'plywood';
-import { Fn } from "../../../common/utils/general/general";
+import { Fn } from '../../../common/utils/general/general';
 import { STRINGS } from '../../config/constants';
 import { Clicker, Essence, Filter, FilterClause, Dimension } from '../../../common/models/index';
 import { formatTimeRange, DisplayYear } from '../../../common/utils/time/time';

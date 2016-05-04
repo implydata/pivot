@@ -2,7 +2,7 @@ require('./date-range-input.css');
 
 import * as React from 'react';
 import { Timezone, WallTime } from 'chronoshift';
-import { getWallTimeString, exclusiveToInclusiveEnd } from "../../../common/utils/time/time";
+import { getWallTimeString, exclusiveToInclusiveEnd } from '../../../common/utils/time/time';
 
 export interface DateRangeInputProps extends React.Props<any> {
   time: Date;

@@ -1,14 +1,14 @@
 require('./date-range-picker.css');
 
-import * as React from "react";
-import { Timezone, Duration, second, minute, hour, day, week, month, year } from "chronoshift";
-import { TimeRange } from "plywood";
+import * as React from 'react';
+import { Timezone, Duration, second, minute, hour, day, week, month, year } from 'chronoshift';
+import { TimeRange } from 'plywood';
 import {
   prependDays, appendDays, datesEqual, monthToWeeks, shiftOneDay, getWallTimeMonthWithYear,
   getWallTimeDay, wallTimeInclusiveEndEqual, getEndWallTimeInclusive
-} from "../../../common/utils/time/time";
-import { classNames } from "../../utils/dom/dom";
-import { getLocale } from "../../config/constants";
+} from '../../../common/utils/time/time';
+import { classNames } from '../../utils/dom/dom';
+import { getLocale } from '../../config/constants';
 import { SvgIcon } from "../svg-icon/svg-icon";
 import { DateRangeInput } from "../date-range-input/date-range-input";
 
