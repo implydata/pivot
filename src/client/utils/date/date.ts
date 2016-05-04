@@ -138,10 +138,12 @@ export function wallTimeInclusiveEndEqual(d1: Date, d2: Date, timezone: Timezone
   return datesEqual(d1InclusiveEnd, d2InclusiveEnd);
 }
 
-export function getWallTimeISOString(date: Date, timezone: Timezone, includeTime?: boolean): string {
-  const wallTime = wallTimeHelper(WallTime.UTCToWallTime(date, timezone.toString()));
-  const isoString = wallTime.toISOString().replace(/:\d\d(\.\d\d\d)?Z?$/, '');
-  return includeTime ? isoString : isoString.split('T')[0]
+export function getWallTimeString(date: Date, timezone: Timezone, includeTime?: boolean, delimiter?: string): string {
+  const wallTimeISOString = wallTimeHelper(WallTime.UTCToWallTime(date, timezone.toString())).toISOString();
+  if (includeTime) {
+    return wallTimeISOString.replace(/(\.\d\d\d)?Z?$/, '').replace('T', delimiter || ', ');
+  }
+  return wallTimeISOString.replace( /:\d\d(\.\d\d\d)?Z?$/, '').split('T')[0];
 }
 
 function wallTimeHelper(wallTime: any) {

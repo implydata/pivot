@@ -6,7 +6,7 @@ import { $, ply, r, Expression, ExpressionJS, Executor, External, DruidExternal,
   Attributes, AttributeInfo, AttributeJSs, SortAction, SimpleFullType, DatasetFullType, PlyTypeSimple,
   CustomDruidAggregations, helper } from 'plywood';
 import { hasOwnProperty, verifyUrlSafeName, makeUrlSafeName, makeTitle, immutableListsEqual } from '../../utils/general/general';
-import { getWallTimeISOString } from "../../../client/utils/date/date";
+import { getWallTimeString } from "../../../client/utils/date/date";
 import { Dimension, DimensionJS } from '../dimension/dimension';
 import { Measure, MeasureJS } from '../measure/measure';
 import { Filter, FilterJS } from '../filter/filter';
@@ -651,7 +651,7 @@ export class DataSource implements Instance<DataSourceValue, DataSourceJS> {
     if (refreshRule.isRealtime()) {
       return 'Updated ~1 second ago';
     } else if (refreshRule.isFixed()) {
-      return `Fixed to ${getWallTimeISOString(refreshRule.time, this.defaultTimezone, true)}`;
+      return `Fixed to ${getWallTimeString(refreshRule.time, this.defaultTimezone, true)}`;
     } else { // refreshRule is query
       var { maxTime } = this;
       if (maxTime) {
