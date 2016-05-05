@@ -27,10 +27,13 @@ if (!WallTime.rules) {
  */
 
 const TIMEZONES: Timezone[] = [
-  new Timezone("America/Anchorage"), // -9.0
+  new Timezone("America/Juneau"), // -9.0
   new Timezone("America/Los_Angeles"), // -8.0
   new Timezone("America/Yellowknife"), // -7.0
+  new Timezone("America/Phoenix"), // -7.0
+  new Timezone("America/Denver"), // -7.0
   new Timezone("America/Mexico_City"), // -6.0
+  new Timezone("America/Chicago"), // -6.0
   new Timezone("America/New_York"), // -5.0
   new Timezone("America/Argentina/Buenos_Aires"), // -4.0
   Timezone.UTC,
