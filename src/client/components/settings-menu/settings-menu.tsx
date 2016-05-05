@@ -27,6 +27,7 @@ if (!WallTime.rules) {
  */
 
 const TIMEZONES: Timezone[] = [
+  new Timezone("America/Anchorage"), // -9.0
   new Timezone("America/Los_Angeles"), // -8.0
   new Timezone("America/Yellowknife"), // -7.0
   new Timezone("America/Mexico_City"), // -6.0
