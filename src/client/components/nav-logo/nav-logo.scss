@@ -9,8 +9,11 @@
     overflow: hidden;
 
     svg {
-      margin-top: 15px;
-      height: 30px;
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translate(0, -50%);
+      height: 31px;
     }
   }
 }
