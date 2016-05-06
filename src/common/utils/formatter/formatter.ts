@@ -106,3 +106,6 @@ export function formatLabel(options: LabelFormatOptions): string {
   return label;
 }
 
+export function formatGranularity(gran: string): string {
+  return gran.replace(/^PT?/, '');
+}

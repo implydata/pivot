@@ -71,6 +71,11 @@ $folder-box-height: 32px;
         bottom: -34px;
       }
     }
+
+    &.continuous {
+      pointer-events: none;
+      color: $black;
+    }
   }
 
   .segment-value {

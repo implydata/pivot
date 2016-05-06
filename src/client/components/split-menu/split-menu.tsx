@@ -3,7 +3,7 @@ require('./split-menu.css');
 import * as React from 'react';
 import { Timezone, Duration } from 'chronoshift';
 import { TimeBucketAction, SortAction } from 'plywood';
-import { Fn } from '../../../common/utils/general/general';
+import { Fn, formatGranularity } from '../../../common/utils/index';
 import { Stage, Clicker, Essence, VisStrategy, SplitCombine, Colors, Dimension, SortOn } from '../../../common/models/index';
 import { STRINGS } from '../../config/constants';
 import { enterKey } from '../../utils/dom/dom';
@@ -17,10 +17,6 @@ const GRANULARITIES = ['PT1M', 'PT5M', 'PT1H', 'P1D', 'P1W'];
 function formatLimit(limit: number | string): string {
   if (limit === 'custom') return 'Custom';
   return limit === null ? 'None' : String(limit);
-}
-
-function formatGranularity(gran: string): string {
-  return gran.replace(/^PT?/, '');
 }
 
 export interface SplitMenuProps extends React.Props<any> {
@@ -82,13 +78,13 @@ export class SplitMenu extends React.Component<SplitMenuProps, SplitMenuState> {
     }
   }
 
-  onSelectGran(gran: string): void {
+  onSelectGran(gran: Duration): void {
     var { split } = this.state;
     var bucketAction = split.bucketAction;
     if (bucketAction instanceof TimeBucketAction) {
       this.setState({
         split: split.changeBucketAction(new TimeBucketAction({
-          duration: Duration.fromJS(gran),
+          duration: gran,
           timezone: bucketAction.timezone
         }))
       });
@@ -152,13 +148,15 @@ export class SplitMenu extends React.Component<SplitMenuProps, SplitMenuState> {
 
   renderGranularityPicker() {
     var { split } = this.state;
+    var { dimension } = this.props;
     var selectedGran = (split.bucketAction as TimeBucketAction).duration.toString();
-
-    var buttons = GRANULARITIES.map(g => {
+    const granularities = dimension.granularities || GRANULARITIES.map(Duration.fromJS);
+    var buttons = granularities.map((g) => {
+      const granString = g.toString();
       return {
-        isSelected: g === selectedGran,
-        title: formatGranularity(g),
-        key: g,
+        isSelected: granString === selectedGran,
+        title: formatGranularity(granString),
+        key: granString,
         onClick: this.onSelectGran.bind(this, g)
       };
     });
