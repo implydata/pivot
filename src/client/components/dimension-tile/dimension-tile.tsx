@@ -158,6 +158,7 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
         unfolded = false;
       } else if (dimension.kind === "time") {
         foldable = false;
+        unfolded = true;
       }
     } else {
       if (!colors) {
@@ -188,21 +189,21 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
     // keep granularity selection if measures change
     var timeSelection = essence.getTimeSelection();
     var nextTimeSelection = nextEssence.getTimeSelection();
-    var sameTimeFilterSelection = false;
+    var differentTimeFilterSelection = false;
     if (timeSelection instanceof ChainExpression && nextTimeSelection instanceof ChainExpression) {
       var currentTimeAction = (essence.getTimeSelection() as ChainExpression).getSingleAction();
       var nextTimeAction = (nextEssence.getTimeSelection() as ChainExpression).getSingleAction();
-      sameTimeFilterSelection = currentTimeAction.equals(nextTimeAction);
+      differentTimeFilterSelection = !currentTimeAction.equals(nextTimeAction);
     }
 
-    var persistedGranularity = sameTimeFilterSelection ? selectedGranularity : null;
-
+    var persistedGranularity = differentTimeFilterSelection ? null : selectedGranularity;
     if (
       essence.differentDataSource(nextEssence) ||
       essence.differentEffectiveFilter(nextEssence, null, unfolded ? dimension : null) ||
       essence.differentColors(nextEssence) || !dimension.equals(nextDimension) || !sortOn.equals(nextSortOn) ||
       essence.differentTimezoneMatters(nextEssence) ||
-      (essence.timezone !== nextEssence.timezone) && dimension.kind === 'time'
+      (essence.timezone !== nextEssence.timezone) && dimension.kind === 'time' ||
+      differentTimeFilterSelection
     ) {
       this.fetchData(nextEssence, nextDimension, nextSortOn, unfolded, persistedGranularity);
     }
@@ -304,7 +305,7 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
     this.collectTriggerSearch();
   }
 
-  toggleShowMore(e: MouseEvent) {
+  toggleActionsMenu(e: MouseEvent) {
     var { actionsMenuOpenOn } = this.state;
     if (actionsMenuOpenOn) return this.onShowMoreClose();
     this.setState({
@@ -327,15 +328,16 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
     return dimension.title;
   }
 
-  onSelectGranularity(granularity: Granularity) {
+  onSelectGranularity(selectedGranularity: Granularity) {
+    if (selectedGranularity === this.state.selectedGranularity) return;
     var { essence, dimension, colors, sortOn } = this.props;
     var unfolded = this.updateFoldability(essence, dimension, colors);
-    this.setState({ selectedGranularity: granularity });
+    this.setState({ dataset: null });
     this.onShowMoreClose();
-    this.fetchData(essence, dimension, sortOn, unfolded, granularity);
+    this.fetchData(essence, dimension, sortOn, unfolded, selectedGranularity);
   }
 
-  renderShowMoreMenu() {
+  renderActionsMenu() {
     const { dimension } = this.props;
     const { actionsMenuOpenOn, selectedGranularity } = this.state;
     if (!selectedGranularity) return;
@@ -361,8 +363,7 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
 
   render() {
     var { clicker, essence, dimension, sortOn, colors, onClose } = this.props;
-    var { loading, dataset, error, showSearch, actionsMenuOpenOn, unfolded, foldable, fetchQueued, searchText } = this.state;
-
+    var { loading, dataset, error, showSearch, actionsMenuOpenOn, unfolded, foldable, fetchQueued, searchText, selectedGranularity } = this.state;
     var measure = sortOn.measure;
     var measureName = measure ? measure.name : null;
     var filterSet = essence.filter.getLiteralSet(dimension.expression);
@@ -424,7 +425,7 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
         }
 
         if (segmentValue instanceof TimeRange) {
-          segmentValueStr = formatTimeBasedOnGranularity(segmentValue, (this.state.selectedGranularity as Duration), essence.timezone, getLocale());
+          segmentValueStr = formatTimeBasedOnGranularity(segmentValue, (selectedGranularity as Duration), essence.timezone, getLocale());
           className += ' continuous';
         }
 
@@ -483,7 +484,7 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
       {
         name: 'more',
         ref: 'more',
-        onClick: this.toggleShowMore.bind(this),
+        onClick: this.toggleActionsMenu.bind(this),
         svg: require('../../icons/full-more.svg'),
         active: Boolean(actionsMenuOpenOn)
       }
@@ -513,7 +514,7 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
       icons={icons}
       className={className}
       >
-      {actionsMenuOpenOn ? this.renderShowMoreMenu() : null}
+      {actionsMenuOpenOn ? this.renderActionsMenu() : null}
       <div className="rows">
         {rows}
         {message}
