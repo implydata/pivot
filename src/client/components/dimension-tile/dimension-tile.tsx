@@ -2,7 +2,7 @@ require('./dimension-tile.css');
 
 import * as React from 'react';
 import { Duration } from 'chronoshift';
-import { $, r, Dataset, SortAction, TimeRange, ChainExpression, RefExpression } from 'plywood';
+import { $, r, Dataset, SortAction, TimeRange, RefExpression } from 'plywood';
 
 import { formatterFromData, formatGranularity, getBestGranularity, collect, getTimeBucketTitle, formatTimeBasedOnGranularity } from '../../../common/utils/index';
 import { Fn } from '../../../common/utils/general/general';
@@ -186,16 +186,8 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
     var nextSortOn = nextProps.sortOn;
     var unfolded = this.updateFoldability(nextEssence, nextDimension, nextColors);
 
-    // keep granularity selection if measures change
-    var timeSelection = essence.getTimeSelection();
-    var nextTimeSelection = nextEssence.getTimeSelection();
-    var differentTimeFilterSelection = false;
-    if (timeSelection instanceof ChainExpression && nextTimeSelection instanceof ChainExpression) {
-      var currentTimeAction = (essence.getTimeSelection() as ChainExpression).getSingleAction();
-      var nextTimeAction = (nextEssence.getTimeSelection() as ChainExpression).getSingleAction();
-      differentTimeFilterSelection = !currentTimeAction.equals(nextTimeAction);
-    }
-
+    // keep granularity selection if measures change or if autoupdate
+    var differentTimeFilterSelection = essence.getTimeSelection() !== nextEssence.getTimeSelection();
     if (differentTimeFilterSelection) {
       // otherwise render will try to format exiting dataset based off of new granularity (before fetchData returns)
       this.setState({ dataset: null });

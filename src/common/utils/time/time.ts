@@ -235,37 +235,17 @@ export function getTimeBucketTitle(duration: Duration): string {
     }
 }
 
-interface FriendlyTime {
-  year: string;
-  month: number;
-  day: number;
-  hour: number;
-  minute: string;
-  second: string;
-}
-
-function parseISOString(iso: string): FriendlyTime {
-  const dayMonthYear = iso.split('T')[0].split('-');
-
-  try {
-    const year = dayMonthYear[0];
-    const month = parseInt(dayMonthYear[1], 10) - 1;
-    const day = parseInt(dayMonthYear[2], 10);
-    const time = iso.split('T')[1].split(":");
-    const hour = parseInt(time[0], 10);
-    const minute = time[1];
-    const second = time[2];
-    return { year, month, day, hour, minute, second};
-  } catch (e) {
-    throw new Error(`could not parse iso string ${e}`);
-  }
-}
-
 export function formatTimeBasedOnGranularity(range: TimeRange, granularity: Duration, timezone: Timezone, locale: Locale): string {
-  const startISO = wallTimeHelper(WallTime.UTCToWallTime(range.start, timezone.toString())).toISOString().replace(/(\.\d\d\d)?Z?$/, '');
-  const { year, month, day, hour, minute, second } = parseISOString(startISO);
-  const monthString = locale.shortMonths[month];
+  const startISO = wallTimeHelper(WallTime.UTCToWallTime(range.start, timezone.toString()));
 
+  const year = startISO.getFullYear();
+  const month = startISO.getMonth();
+  const day = startISO.getUTCDate();
+  const hour = startISO.getHours();
+  const minute = startISO.getMinutes();
+  const second = startISO.getSeconds();
+
+  const monthString = locale.shortMonths[month];
   const hourToTwelve = hour % 12 === 0 ? 12 : hour % 12;
   const amPm = (hour / 12) >= 1 ? 'pm' : 'am';
 
@@ -278,9 +258,9 @@ export function formatTimeBasedOnGranularity(range: TimeRange, granularity: Dura
     case 'M':
       return `${monthString} ${day}, ${hourToTwelve}:${minute}${amPm}`;
     case 'H':
-      return `${monthString} ${day} ${year}, ${hourToTwelve}${amPm}`;
+      return `${monthString} ${day}, ${year}, ${hourToTwelve}${amPm}`;
     case 'D':
-      return `${monthString} ${day} ${year}`;
+      return `${monthString} ${day}, ${year}`;
     case 'W':
       return `${formatTimeRange(range, timezone, DisplayYear.ALWAYS)}`;
     default:
