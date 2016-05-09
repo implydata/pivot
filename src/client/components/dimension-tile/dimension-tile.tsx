@@ -2,13 +2,14 @@ require('./dimension-tile.css');
 
 import * as React from 'react';
 import { Duration } from 'chronoshift';
-import { Fn } from "../../../common/utils/general/general";
-import { $, r, Dataset, SortAction, TimeRange, ChainExpression } from 'plywood';
+import { Fn } from '../../../common/utils/general/general';
+import { $, r, Dataset, SortAction, TimeRange, ChainExpression, RefExpression } from 'plywood';
 import { SEGMENT, PIN_TITLE_HEIGHT, PIN_ITEM_HEIGHT, PIN_PADDING_BOTTOM, MAX_SEARCH_LENGTH, SEARCH_WAIT, STRINGS } from '../../config/constants';
 import { Clicker, Essence, VisStrategy, Dimension, SortOn, SplitCombine, Colors, Granularity } from '../../../common/models/index';
-import { formatterFromData, formatGranularity, getBestGranularity, collect, getTimeBucketTitle } from '../../../common/utils/index';
+import { formatterFromData, formatGranularity, getBestGranularity, collect, getTimeBucketTitle, formatTimeBasedOnGranularity } from '../../../common/utils/index';
 import { setDragGhost, classNames } from '../../utils/dom/dom';
 import { DragManager } from '../../utils/drag-manager/drag-manager';
+import { getLocale } from '../../config/constants';
 
 import { SvgIcon } from '../svg-icon/svg-icon';
 import { TileHeaderIcon } from '../tile-header/tile-header';
@@ -17,12 +18,13 @@ import { Loader } from '../loader/loader';
 import { QueryError } from '../query-error/query-error';
 import { HighlightString } from '../highlight-string/highlight-string';
 import { SearchableTile } from '../searchable-tile/searchable-tile';
-import { DimensionTileShowMore } from '../dimension-tile-show-more/dimension-tile-show-more';
+import { DimensionTileActions } from '../dimension-tile-actions/dimension-tile-actions';
 
 const TOP_N = 100;
 const FOLDER_BOX_HEIGHT = 30;
 
-const DURATION_GRANULARITIES = ['PT1M', 'PT5M', 'PT1H', 'PT6H', 'P1D', 'P1W'];
+const DEFAULT_DURATION_GRANULARITIES = ['PT1M', 'PT5M', 'PT1H', 'PT6H', 'P1D', 'P1W'];
+const DEFAULT_DURATION_GRANULARITY = 'P1D';
 
 export interface DimensionTileProps extends React.Props<any> {
   clicker: Clicker;
@@ -100,13 +102,18 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
       .split(dimension.expression, SEGMENT);
 
     if (dimension.kind === 'time') {
-      const selectedGranularity = granularity || getBestGranularity(essence.evaluateSelection(essence.getTimeSelection()));
-      this.setState({ selectedGranularity });
-      const timeAttribute = essence.getTimeAttribute().name;
+      const dimensionExpression = dimension.expression as RefExpression;
+      const attributeName = dimensionExpression.name;
+      const timeFilterSelection = essence.filter.getSelection(dimensionExpression);
+      let selectedGranularity: Granularity = Duration.fromJS(DEFAULT_DURATION_GRANULARITY);
+      if (timeFilterSelection) {
+        selectedGranularity = granularity || getBestGranularity(essence.evaluateSelection(timeFilterSelection));
+        query = $('main')
+          .filter(filterExpression);
+      }
 
-      query = $('main')
-        .filter(filterExpression)
-        .split($(timeAttribute).timeBucket(selectedGranularity, essence.timezone), SEGMENT);
+      query = query.split($(attributeName).timeBucket((selectedGranularity), essence.timezone), SEGMENT);
+      this.setState({ selectedGranularity });
     }
 
     if (sortOn.measure) {
@@ -147,7 +154,7 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
       if (colors) {
         foldable = false;
         unfolded = false;
-      } else if (dimension.name === "__time") {
+      } else if (dimension.kind === "time") {
         foldable = false;
         unfolded = false;
       }
@@ -312,7 +319,7 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
   getTitleHeader(dimension: Dimension): string {
     const { selectedGranularity } = this.state;
 
-    if (dimension.kind === 'time') {
+    if (dimension.kind === 'time' && selectedGranularity) {
       return `${dimension.title}${getTimeBucketTitle((selectedGranularity as Duration))}`;
     }
     return dimension.title;
@@ -329,7 +336,8 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
   renderShowMoreMenu() {
     const { dimension } = this.props;
     const { showMoreMenuOpenOn, selectedGranularity } = this.state;
-    const granularities = dimension.granularities || DURATION_GRANULARITIES.map(Duration.fromJS);
+    if (!selectedGranularity) return;
+    const granularities = dimension.granularities || DEFAULT_DURATION_GRANULARITIES.map(Duration.fromJS);
     var granularityElements = granularities.map((g) => {
       const granString = g.toString();
       return <li
@@ -341,12 +349,12 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
       </li>;
     });
 
-    return <DimensionTileShowMore
+    return <DimensionTileActions
       openOn={showMoreMenuOpenOn}
       onClose={this.onShowMoreClose.bind(this)}
     >
       { granularityElements }
-    </DimensionTileShowMore>;
+    </DimensionTileActions>;
   }
 
   render() {
@@ -414,8 +422,7 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
         }
 
         if (segmentValue instanceof TimeRange) {
-          //segmentValueStr = formatTimeRange(segmentValue, essence.timezone, null);
-          segmentValueStr = segmentValue.start.toISOString().replace(/(\.\d\d\d)?Z?$/, '').replace('T', ' ');
+          segmentValueStr = formatTimeBasedOnGranularity(segmentValue, (this.state.selectedGranularity as Duration), essence.timezone, getLocale());
           className += ' continuous';
         }
 

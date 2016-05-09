@@ -21,6 +21,7 @@ function isCurrentYear(year: number, timezone: Timezone): boolean {
 
 export interface Locale {
   shortDays: string[];
+  shortMonths: string[];
   weekStart: number;
 }
 
@@ -145,15 +146,18 @@ export function wallTimeInclusiveEndEqual(d1: Date, d2: Date, timezone: Timezone
 export function getWallTimeString(date: Date, timezone: Timezone, includeTime?: boolean, delimiter?: string): string {
   const wallTimeISOString = wallTimeHelper(WallTime.UTCToWallTime(date, timezone.toString())).toISOString();
   if (includeTime) {
-    return wallTimeISOString.replace(/(\.\d\d\d)?Z?$/, '').replace('T', delimiter || ', ');
+    return cleanISOString(wallTimeISOString).replace('T', delimiter || ', ');
   }
-  return wallTimeISOString.replace( /:\d\d(\.\d\d\d)?Z?$/, '').split('T')[0];
+  return cleanISOString(wallTimeISOString).replace( /:\d\d/, '').split('T')[0];
 }
 
 function wallTimeHelper(wallTime: any) {
   return wallTime['wallTime'];
 }
 
+function cleanISOString(input: string) {
+  return input.replace(/(\.\d\d\d)?Z?$/, '');
+}
 
 export function getBestGranularity(timeRange: TimeRange): Duration {
   var len = timeRange.end.valueOf() - timeRange.start.valueOf();
@@ -229,4 +233,61 @@ export function getTimeBucketTitle(duration: Duration): string {
       default:
         return '';
     }
+}
+
+interface FriendlyTime {
+  year: string;
+  month: number;
+  day: number;
+  hour: number;
+  minute: string;
+  second: string;
+}
+
+function parseISOString(iso: string): FriendlyTime {
+  const dayMonthYear = iso.split('T')[0].split('-');
+  try {
+    const year = dayMonthYear[0];
+    const month = parseInt(dayMonthYear[1], 10) - 1;
+    const day = parseInt(dayMonthYear[2], 10);
+    const time = iso.split('T')[1].split(":");
+    const hour = parseInt(time[0], 10);
+    const minute = time[1];
+    const second = time[2];
+    return { year, month, day, hour, minute, second};
+  } catch (e) {
+    throw new Error(`could not parse iso string ${e}`);
+  }
+}
+
+export function formatTimeBasedOnGranularity(range: TimeRange, granularity: Duration, timezone: Timezone, locale: Locale): string {
+  const startISO = wallTimeHelper(WallTime.UTCToWallTime(range.start, timezone.toString())).toISOString().replace(/(\.\d\d\d)?Z?$/, '');
+
+  const { year, month, day, hour, minute, second } = parseISOString(startISO);
+  const monthString = locale.shortMonths[month];
+
+  const hourToTwelve = hour % 12 === 0 ? 12 : hour % 12;
+  const amPm = (hour / 12) > 1 ? 'pm' : 'am';
+
+  var granularityString = granularity.toJS();
+  var unit = granularityString.substring(granularityString.length - 1);
+
+  switch (unit) {
+    case 'S':
+      return `${monthString} ${day}, ${hour}:${minute}:${second}`;
+    case 'M':
+      return `${monthString} ${day}, ${hourToTwelve}:${minute}${amPm}`;
+    case 'H':
+      return `${monthString} ${day} ${year}, ${hourToTwelve}${amPm}`;
+    case 'D':
+      return `${monthString} ${day} ${year}`;
+    case 'W':
+      return `${formatTimeRange(range, timezone, DisplayYear.ALWAYS)}`;
+    default:
+      return startISO;
+  }
+}
+
+export function formatGranularity(granularity: string): string {
+  return granularity.replace(/^PT?/, '');
 }
