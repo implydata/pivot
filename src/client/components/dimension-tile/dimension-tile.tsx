@@ -196,6 +196,11 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
       differentTimeFilterSelection = !currentTimeAction.equals(nextTimeAction);
     }
 
+    if (differentTimeFilterSelection) {
+      // otherwise render will try to format exiting dataset based off of new granularity (before fetchData returns)
+      this.setState({ dataset: null });
+    }
+
     var persistedGranularity = differentTimeFilterSelection ? null : selectedGranularity;
     if (
       essence.differentDataSource(nextEssence) ||
@@ -480,7 +485,8 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
       maxHeight
     };
 
-    var icons: TileHeaderIcon[] = dimension.getIsContinuous() ? [
+    // for now actions menu is just time bucketing, so checking if kind === time
+    var icons: TileHeaderIcon[] = dimension.kind === 'time' ? [
       {
         name: 'more',
         ref: 'more',
