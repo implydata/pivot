@@ -246,6 +246,7 @@ interface FriendlyTime {
 
 function parseISOString(iso: string): FriendlyTime {
   const dayMonthYear = iso.split('T')[0].split('-');
+
   try {
     const year = dayMonthYear[0];
     const month = parseInt(dayMonthYear[1], 10) - 1;
@@ -262,12 +263,11 @@ function parseISOString(iso: string): FriendlyTime {
 
 export function formatTimeBasedOnGranularity(range: TimeRange, granularity: Duration, timezone: Timezone, locale: Locale): string {
   const startISO = wallTimeHelper(WallTime.UTCToWallTime(range.start, timezone.toString())).toISOString().replace(/(\.\d\d\d)?Z?$/, '');
-
   const { year, month, day, hour, minute, second } = parseISOString(startISO);
   const monthString = locale.shortMonths[month];
 
   const hourToTwelve = hour % 12 === 0 ? 12 : hour % 12;
-  const amPm = (hour / 12) > 1 ? 'pm' : 'am';
+  const amPm = (hour / 12) >= 1 ? 'pm' : 'am';
 
   var granularityString = granularity.toJS();
   var unit = granularityString.substring(granularityString.length - 1);

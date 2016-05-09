@@ -78,13 +78,13 @@ export class SplitMenu extends React.Component<SplitMenuProps, SplitMenuState> {
     }
   }
 
-  onSelectGran(gran: Duration): void {
+  onSelectGranularity(granularity: Duration): void {
     var { split } = this.state;
     var bucketAction = split.bucketAction;
     if (bucketAction instanceof TimeBucketAction) {
       this.setState({
         split: split.changeBucketAction(new TimeBucketAction({
-          duration: gran,
+          duration: granularity,
           timezone: bucketAction.timezone
         }))
       });
@@ -152,12 +152,12 @@ export class SplitMenu extends React.Component<SplitMenuProps, SplitMenuState> {
     var selectedGran = (split.bucketAction as TimeBucketAction).duration.toString();
     const granularities = dimension.granularities || GRANULARITIES.map(Duration.fromJS);
     var buttons = granularities.map((g) => {
-      const granString = g.toString();
+      const granularityStr = g.toString();
       return {
-        isSelected: granString === selectedGran,
-        title: formatGranularity(granString),
-        key: granString,
-        onClick: this.onSelectGran.bind(this, g)
+        isSelected: granularityStr === selectedGran,
+        title: formatGranularity(granularityStr),
+        key: granularityStr,
+        onClick: this.onSelectGranularity.bind(this, g)
       };
     });
 

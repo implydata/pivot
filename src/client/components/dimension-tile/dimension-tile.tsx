@@ -2,14 +2,16 @@ require('./dimension-tile.css');
 
 import * as React from 'react';
 import { Duration } from 'chronoshift';
-import { Fn } from '../../../common/utils/general/general';
 import { $, r, Dataset, SortAction, TimeRange, ChainExpression, RefExpression } from 'plywood';
-import { SEGMENT, PIN_TITLE_HEIGHT, PIN_ITEM_HEIGHT, PIN_PADDING_BOTTOM, MAX_SEARCH_LENGTH, SEARCH_WAIT, STRINGS } from '../../config/constants';
-import { Clicker, Essence, VisStrategy, Dimension, SortOn, SplitCombine, Colors, Granularity } from '../../../common/models/index';
+
 import { formatterFromData, formatGranularity, getBestGranularity, collect, getTimeBucketTitle, formatTimeBasedOnGranularity } from '../../../common/utils/index';
+import { Fn } from '../../../common/utils/general/general';
+import { Clicker, Essence, VisStrategy, Dimension, SortOn, SplitCombine, Colors, Granularity } from '../../../common/models/index';
+
 import { setDragGhost, classNames } from '../../utils/dom/dom';
 import { DragManager } from '../../utils/drag-manager/drag-manager';
 import { getLocale } from '../../config/constants';
+import { SEGMENT, PIN_TITLE_HEIGHT, PIN_ITEM_HEIGHT, PIN_PADDING_BOTTOM, MAX_SEARCH_LENGTH, SEARCH_WAIT, STRINGS } from '../../config/constants';
 
 import { SvgIcon } from '../svg-icon/svg-icon';
 import { TileHeaderIcon } from '../tile-header/tile-header';
@@ -45,7 +47,7 @@ export interface DimensionTileState {
   foldable?: boolean;
   showSearch?: boolean;
   searchText?: string;
-  showMoreMenuOpenOn?: Element;
+  actionsMenuOpenOn?: Element;
   selectedGranularity?: Granularity;
 }
 
@@ -63,7 +65,7 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
       unfolded: true,
       foldable: false,
       showSearch: false,
-      showMoreMenuOpenOn: null,
+      actionsMenuOpenOn: null,
       selectedGranularity: null,
       searchText: ''
     };
@@ -156,7 +158,6 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
         unfolded = false;
       } else if (dimension.kind === "time") {
         foldable = false;
-        unfolded = false;
       }
     } else {
       if (!colors) {
@@ -189,12 +190,11 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
     var nextTimeSelection = nextEssence.getTimeSelection();
     var sameTimeFilterSelection = false;
     if (timeSelection instanceof ChainExpression && nextTimeSelection instanceof ChainExpression) {
-      var action1 = (essence.getTimeSelection() as ChainExpression).getSingleAction();
-      var action2 = (nextEssence.getTimeSelection() as ChainExpression).getSingleAction();
-      sameTimeFilterSelection = action1.equals(action2);
+      var currentTimeAction = (essence.getTimeSelection() as ChainExpression).getSingleAction();
+      var nextTimeAction = (nextEssence.getTimeSelection() as ChainExpression).getSingleAction();
+      sameTimeFilterSelection = currentTimeAction.equals(nextTimeAction);
     }
 
-    // keep granularity selection if measures change
     var persistedGranularity = sameTimeFilterSelection ? selectedGranularity : null;
 
     if (
@@ -305,15 +305,17 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
   }
 
   toggleShowMore(e: MouseEvent) {
-    var { showMoreMenuOpenOn } = this.state;
-    if (showMoreMenuOpenOn) return this.onShowMoreClose();
+    var { actionsMenuOpenOn } = this.state;
+    if (actionsMenuOpenOn) return this.onShowMoreClose();
     this.setState({
-      showMoreMenuOpenOn: e.target as Element
+      actionsMenuOpenOn: e.target as Element
     });
   }
 
   onShowMoreClose() {
-    this.setState({ showMoreMenuOpenOn: null });
+    this.setState({
+      actionsMenuOpenOn: null
+    });
   }
 
   getTitleHeader(dimension: Dimension): string {
@@ -335,7 +337,7 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
 
   renderShowMoreMenu() {
     const { dimension } = this.props;
-    const { showMoreMenuOpenOn, selectedGranularity } = this.state;
+    const { actionsMenuOpenOn, selectedGranularity } = this.state;
     if (!selectedGranularity) return;
     const granularities = dimension.granularities || DEFAULT_DURATION_GRANULARITIES.map(Duration.fromJS);
     var granularityElements = granularities.map((g) => {
@@ -350,7 +352,7 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
     });
 
     return <DimensionTileActions
-      openOn={showMoreMenuOpenOn}
+      openOn={actionsMenuOpenOn}
       onClose={this.onShowMoreClose.bind(this)}
     >
       { granularityElements }
@@ -359,7 +361,7 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
 
   render() {
     var { clicker, essence, dimension, sortOn, colors, onClose } = this.props;
-    var { loading, dataset, error, showSearch, showMoreMenuOpenOn, unfolded, foldable, fetchQueued, searchText } = this.state;
+    var { loading, dataset, error, showSearch, actionsMenuOpenOn, unfolded, foldable, fetchQueued, searchText } = this.state;
 
     var measure = sortOn.measure;
     var measureName = measure ? measure.name : null;
@@ -433,7 +435,7 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
 
         var row = <div
           className={className}
-          key={`${segmentValueStr}${i}`}
+          key={segmentValueStr}
           onClick={this.onRowClick.bind(this, segmentValue)}
         >
           <div className="segment-value" title={segmentValueStr}>
@@ -483,7 +485,7 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
         ref: 'more',
         onClick: this.toggleShowMore.bind(this),
         svg: require('../../icons/full-more.svg'),
-        active: Boolean(showMoreMenuOpenOn)
+        active: Boolean(actionsMenuOpenOn)
       }
     ] : [];
 
@@ -511,7 +513,7 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
       icons={icons}
       className={className}
       >
-      {showMoreMenuOpenOn ? this.renderShowMoreMenu() : null}
+      {actionsMenuOpenOn ? this.renderShowMoreMenu() : null}
       <div className="rows">
         {rows}
         {message}
