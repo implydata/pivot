@@ -270,7 +270,7 @@ export function formatTimeBasedOnGranularity(range: TimeRange, granularity: Dura
     case 'W':
       return `${formatTimeRange(range, timezone, DisplayYear.ALWAYS)}`;
     default:
-      return wallTimeHelper(wallTimeStart).toISOString();
+      return cleanISOString(wallTimeHelper(wallTimeStart).toISOString());
   }
 }
 
