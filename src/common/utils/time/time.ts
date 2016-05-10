@@ -235,15 +235,20 @@ export function getTimeBucketTitle(duration: Duration): string {
     }
 }
 
-export function formatTimeBasedOnGranularity(range: TimeRange, granularity: Duration, timezone: Timezone, locale: Locale): string {
-  const startISO = wallTimeHelper(WallTime.UTCToWallTime(range.start, timezone.toString()));
+function pad(input: number) {
+  if (input < 10) return `0${input}`;
+  return String(input);
+}
 
-  const year = startISO.getFullYear();
-  const month = startISO.getMonth();
-  const day = startISO.getUTCDate();
-  const hour = startISO.getHours();
-  const minute = startISO.getMinutes();
-  const second = startISO.getSeconds();
+export function formatTimeBasedOnGranularity(range: TimeRange, granularity: Duration, timezone: Timezone, locale: Locale): string {
+  const wallTimeStart = WallTime.UTCToWallTime(range.start, timezone.toString());
+
+  const year = wallTimeStart.getFullYear();
+  const month = wallTimeStart.getMonth();
+  const day = wallTimeStart.getDate();
+  const hour = wallTimeStart.getHours();
+  const minute = wallTimeStart.getMinutes();
+  const second = wallTimeStart.getSeconds();
 
   const monthString = locale.shortMonths[month];
   const hourToTwelve = hour % 12 === 0 ? 12 : hour % 12;
@@ -254,9 +259,10 @@ export function formatTimeBasedOnGranularity(range: TimeRange, granularity: Dura
 
   switch (unit) {
     case 'S':
-      return `${monthString} ${day}, ${hour}:${minute}:${second}`;
+      return `${monthString} ${day}, ${pad(hour)}:${pad(minute)}:${pad(second)}`;
     case 'M':
-      return `${monthString} ${day}, ${hourToTwelve}:${minute}${amPm}`;
+      var prefix = granularityString.substring(0, 2);
+      return prefix === "PT" ? `${monthString} ${day}, ${hourToTwelve}:${pad(minute)}${amPm}` : `${monthString}, ${year}`;
     case 'H':
       return `${monthString} ${day}, ${year}, ${hourToTwelve}${amPm}`;
     case 'D':
@@ -264,7 +270,7 @@ export function formatTimeBasedOnGranularity(range: TimeRange, granularity: Dura
     case 'W':
       return `${formatTimeRange(range, timezone, DisplayYear.ALWAYS)}`;
     default:
-      return startISO;
+      return wallTimeHelper(wallTimeStart).toISOString();
   }
 }
 
