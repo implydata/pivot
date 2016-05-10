@@ -8,6 +8,10 @@ $folder-box-height: 32px;
   min-height: 94px;
   overflow-y: hidden;
 
+  &.has-actions {
+    overflow-y: visible;
+  }
+
   &.has-folder .rows {
     bottom: $folder-box-height;
   }

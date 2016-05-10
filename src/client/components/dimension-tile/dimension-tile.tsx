@@ -301,18 +301,19 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
     });
     this.collectTriggerSearch();
   }
-
-  toggleActionsMenu(e: MouseEvent) {
+  onActionsMenuClose() {
     var { actionsMenuOpenOn } = this.state;
-    if (actionsMenuOpenOn) return this.onShowMoreClose();
+    if (!actionsMenuOpenOn) return;
     this.setState({
-      actionsMenuOpenOn: e.target as Element
+      actionsMenuOpenOn: null
     });
   }
 
-  onShowMoreClose() {
+  onActionsMenuClick(e: MouseEvent) {
+    var { actionsMenuOpenOn } = this.state;
+    if (actionsMenuOpenOn) return this.onActionsMenuClose();
     this.setState({
-      actionsMenuOpenOn: null
+      actionsMenuOpenOn: e.target as Element
     });
   }
 
@@ -330,37 +331,31 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
     var { essence, dimension, colors, sortOn } = this.props;
     var unfolded = this.updateFoldability(essence, dimension, colors);
     this.setState({ dataset: null });
-    this.onShowMoreClose();
+    this.onActionsMenuClose();
     this.fetchData(essence, dimension, sortOn, unfolded, selectedGranularity);
   }
 
   renderActionsMenu() {
     const { dimension } = this.props;
-    const { actionsMenuOpenOn, selectedGranularity } = this.state;
+    const { selectedGranularity, actionsMenuOpenOn } = this.state;
     if (!selectedGranularity) return;
     const granularities = dimension.granularities || DEFAULT_DURATION_GRANULARITIES.map(Duration.fromJS);
-    var granularityElements = granularities.map((g) => {
-      const granString = g.toString();
-      return <li
-        className={classNames({selected: granString === selectedGranularity.toJS()})}
-        key={granString}
-        onClick={this.onSelectGranularity.bind(this, g)}
-        >
-        {formatGranularity(granString)}
-      </li>;
-    });
-
     return <DimensionTileActions
+      selectedItem={selectedGranularity}
+      onSelect={this.onSelectGranularity.bind(this)}
+      onClose={this.onActionsMenuClose.bind(this)}
       openOn={actionsMenuOpenOn}
-      onClose={this.onShowMoreClose.bind(this)}
+      items={granularities}
     >
-      { granularityElements }
     </DimensionTileActions>;
+
+
   }
 
   render() {
     var { clicker, essence, dimension, sortOn, colors, onClose } = this.props;
     var { loading, dataset, error, showSearch, actionsMenuOpenOn, unfolded, foldable, fetchQueued, searchText, selectedGranularity } = this.state;
+
     var measure = sortOn.measure;
     var measureName = measure ? measure.name : null;
     var filterSet = essence.filter.getLiteralSet(dimension.expression);
@@ -470,7 +465,8 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
     const className = classNames(
       'dimension-tile',
       (folder ? 'has-folder' : 'no-folder'),
-      (colors ? 'has-colors' : 'no-colors')
+      (colors ? 'has-colors' : 'no-colors'),
+      (actionsMenuOpenOn ? 'has-actions' : 'no-actions')
     );
 
     const style = {
@@ -482,7 +478,7 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
       {
         name: 'more',
         ref: 'more',
-        onClick: this.toggleActionsMenu.bind(this),
+        onClick: this.onActionsMenuClick.bind(this),
         svg: require('../../icons/full-more.svg'),
         active: Boolean(actionsMenuOpenOn)
       }
