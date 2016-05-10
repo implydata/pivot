@@ -159,7 +159,7 @@ function cleanISOString(input: string) {
   return input.replace(/(\.\d\d\d)?Z?$/, '');
 }
 
-export function getBestGranularity(timeRange: TimeRange): Duration {
+export function getBestGranularityDuration(timeRange: TimeRange): Duration {
   var len = timeRange.end.valueOf() - timeRange.start.valueOf();
   if (len > 95 * day.canonicalLength) {
     return Duration.fromJS('P1W');

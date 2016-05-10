@@ -4,7 +4,7 @@ import * as React from 'react';
 import { Timezone, Duration } from 'chronoshift';
 import { TimeBucketAction, SortAction } from 'plywood';
 import { Fn, formatGranularity } from '../../../common/utils/index';
-import { Stage, Clicker, Essence, VisStrategy, SplitCombine, Colors, Dimension, SortOn } from '../../../common/models/index';
+import { Stage, Clicker, Essence, VisStrategy, SplitCombine, Colors, Dimension, SortOn, granularityFromJS} from '../../../common/models/index';
 import { STRINGS } from '../../config/constants';
 import { enterKey } from '../../utils/dom/dom';
 import { SvgIcon } from '../svg-icon/svg-icon';
@@ -150,7 +150,7 @@ export class SplitMenu extends React.Component<SplitMenuProps, SplitMenuState> {
     var { split } = this.state;
     var { dimension } = this.props;
     var selectedGran = (split.bucketAction as TimeBucketAction).duration.toString();
-    const granularities = dimension.granularities || GRANULARITIES.map(Duration.fromJS);
+    const granularities = dimension.granularities || GRANULARITIES.map(granularityFromJS);
     var buttons = granularities.map((g) => {
       const granularityStr = g.toString();
       return {

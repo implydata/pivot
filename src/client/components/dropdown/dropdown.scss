@@ -13,14 +13,6 @@
     }
   }
 
-  &.down .dropdown-menu {
-    top: 100%;
-  }
-
-  &.up .dropdown-menu {
-    bottom: 100%;
-  }
-
   .selected-item {
     @extend %input-cont;
     @include ellipsis;
@@ -43,6 +35,38 @@
 
     path {
       fill: $text-lighterish;
+    }
+  }
+
+  .dropdown-menu {
+    @extend %menu-cont;
+    position: absolute;
+    pointer-events: auto;
+    z-index: 800;
+    padding: 8px 0;
+    width: 100%;
+    line-height: 24px;
+  }
+
+  &.down .dropdown-menu {
+    top: 100%;
+  }
+
+  &.up .dropdown-menu {
+    bottom: 100%;
+  }
+
+  .dropdown-item {
+    @include ellipsis;
+    padding: 0 10px;
+    cursor: pointer;
+
+    &.selected {
+      background: $background-light;
+    }
+
+    &:hover {
+      background: $hover;
     }
   }
 }

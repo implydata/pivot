@@ -7,8 +7,6 @@ import { $, Expression, Executor, Dataset } from 'plywood';
 import { Stage, Essence, DataSource, Filter, Dimension, Measure } from '../../../common/models/index';
 import { isInside, escapeKey, classNames } from '../../utils/dom/dom';
 
-import { DropdownMenu } from '../dropdown-menu/dropdown-menu';
-
 function simpleEqual(item1: any, item2: any): boolean {
   return item1 === item2;
 }
@@ -76,9 +74,23 @@ export class Dropdown<T> extends React.Component<DropdownProps<T>, DropdownState
 
   renderMenu() {
     var { items, renderItem, keyItem, selectedItem, equal, onSelect } = this.props;
-    return React.createElement(DropdownMenu, {
-      items, renderItem, keyItem, selectedItem, equal, onSelect
+    if (!items || !items.length) return null;
+    if (!renderItem) renderItem = String;
+    if (!keyItem) keyItem = renderItem;
+    if (!equal) equal = simpleEqual;
+    var itemElements = items.map((item) => {
+      return <div
+        className={classNames('dropdown-item', equal(item, selectedItem) ? 'selected' : null)}
+        key={keyItem(item)}
+        onClick={() => onSelect(item)}
+      >
+        {renderItem(item)}
+      </div>;
     });
+
+    return <div className="dropdown-menu">
+      {itemElements}
+    </div>;
   }
 
   render() {

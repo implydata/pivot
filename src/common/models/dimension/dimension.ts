@@ -1,9 +1,8 @@
 import { List } from 'immutable';
 import { Class, Instance, isInstanceOf } from 'immutable-class';
-import { $, Expression, ExpressionJS, Action, NumberRangeJS } from 'plywood';
+import { $, Expression, ExpressionJS, Action, NumberRangeJS, ApplyAction } from 'plywood';
 import { verifyUrlSafeName, makeTitle } from '../../utils/general/general';
-import { Duration } from 'chronoshift';
-import { Granularity, GranularityJS, fromJS } from "../granularity/granularity";
+import { Granularity, GranularityJS, granularityFromJS } from "../granularity/granularity";
 
 var geoName = /continent|country|city|region/i;
 function isGeo(name: string): boolean {
@@ -60,10 +59,10 @@ export class Dimension implements Instance<DimensionValue, DimensionJS> {
     var granularities = parameters.granularities;
     if (granularities) {
       if (!Array.isArray(granularities) || granularities.length !== 5) {
-        throw new Error(" must have list of 5 granularities");
+        throw new Error("must have list of 5 granularities");
       }
       try {
-        value.granularities = granularities.map(fromJS);
+        value.granularities = granularities.map(granularityFromJS);
       } catch (e) {
         console.log(e);
       }
