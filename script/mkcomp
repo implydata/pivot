@@ -101,8 +101,6 @@ import { $, Expression } from 'plywood';
 
 import { DataSourceMock, EssenceMock } from '../../../common/models/mocks';
 
-import '../../utils/jsdom-setup';
-import '../../utils/require-extensions';
 import { findDOMNode } from '../../utils/test-utils/index';
 
 import { ${camelName} } from './${name}';
