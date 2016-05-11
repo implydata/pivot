@@ -12,7 +12,8 @@ export function granularityFromJS(input: GranularityJS): Granularity {
 
   if (typeof input === "object") {
     if (hasOwnProperty(input, 'duration')) return TimeBucketAction.fromJS(input);
-    return NumberBucketAction.fromJS(input as ActionJS);
+    if (hasOwnProperty(input, 'size')) return NumberBucketAction.fromJS(input as ActionJS);
+    throw new Error(`could not recognize actionJS for TimeBucket or NumberBucket`);
   }
 
   throw new Error(`input should be of type number, string, or ActionJS`);

@@ -196,7 +196,7 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
     var unfolded = this.updateFoldability(nextEssence, nextDimension, nextColors);
 
     // keep granularity selection if measures change or if autoupdate
-    var differentTimeFilterSelection = !essence.getTimeSelection().equals(nextEssence.getTimeSelection());
+    var differentTimeFilterSelection = essence.getTimeSelection() ? !essence.getTimeSelection().equals(nextEssence.getTimeSelection()) : Boolean(nextEssence.getTimeSelection());
     if (differentTimeFilterSelection) {
       // otherwise render will try to format exiting dataset based off of new granularity (before fetchData returns)
       this.setState({ dataset: null });
