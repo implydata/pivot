@@ -212,29 +212,6 @@ export function getTimeTicks(timeRange: TimeRange, timezone: Timezone): Date[] {
   return tickDuration.materialize(start, end, timezone);
 }
 
-export function getTimeBucketTitle(duration: Duration): string {
-    switch (duration.toString()) {
-      case 'PT1S':
-        return ' (Second)';
-      case 'PT5S':
-        return ' (5 Seconds)';
-      case 'PT1M':
-        return ' (Minute)';
-      case 'PT5M':
-        return ' (5 Minutes)';
-      case 'PT1H':
-        return ' (Hour)';
-      case 'PT6H':
-        return ' (6 Hours)';
-      case 'P1D':
-        return ' (Day)';
-      case 'P1W':
-        return ' (Week)';
-      default:
-        return '';
-    }
-}
-
 function pad(input: number) {
   if (input < 10) return `0${input}`;
   return String(input);

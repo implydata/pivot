@@ -6,17 +6,15 @@ export type GranularityJS = string | number | ActionJS
 
 export function granularityFromJS(input: GranularityJS): Granularity {
   if (typeof input === 'number') return NumberBucketAction.fromJS({ size: input });
-  if (typeof input === 'string') {
-    return TimeBucketAction.fromJS({ duration: input });
-  }
+  if (typeof input === 'string') return TimeBucketAction.fromJS({ duration: input });
 
   if (typeof input === "object") {
-    if (hasOwnProperty(input, 'duration')) return TimeBucketAction.fromJS(input);
-    if (hasOwnProperty(input, 'size')) return NumberBucketAction.fromJS(input as ActionJS);
-    throw new Error(`could not recognize actionJS for TimeBucket or NumberBucket`);
+    if (!hasOwnProperty(input, 'action')) {
+      throw new Error(`could not recognize object as action`);
+    }
+    return (Action.fromJS(input as GranularityJS) as Granularity);
   }
-
-  throw new Error(`input should be of type number, string, or ActionJS`);
+  throw new Error(`input should be of type number, string, or action`);
 }
 
 export function granularityToString(input: Granularity): string {
@@ -31,4 +29,18 @@ export function granularityToString(input: Granularity): string {
 
 export function granularityEquals(g1: Granularity, g2: Granularity) {
   return (g1 as Action).equals(g2 as Action);
+}
+
+export function granularityToJS(input: Granularity): GranularityJS {
+  var js = input.toJS();
+
+  if (js.action === 'timeBucket') {
+    if (Object.keys(js).length === 2) return js.duration;
+  }
+
+  if (js.action === 'numberBucket') {
+    if (Object.keys(js).length === 2) return js.size;
+  }
+
+  return js;
 }

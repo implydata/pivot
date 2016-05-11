@@ -3,7 +3,6 @@ import { Class, Instance, isInstanceOf } from 'immutable-class';
 import { Timezone, Duration, day, hour } from 'chronoshift';
 import { $, Expression, ChainExpression, ExpressionJS, Action, ActionJS, SortAction, LimitAction, TimeBucketAction, TimeRange } from 'plywood';
 import { Dimension } from '../dimension/dimension';
-import { getTimeBucketTitle } from "../../utils/time/time";
 
 export interface SplitCombineValue {
   expression: Expression;
@@ -172,9 +171,23 @@ export class SplitCombine implements Instance<SplitCombineValue, SplitCombineJS>
   }
 
   public getBucketTitle(): string {
-    if (this.bucketAction instanceof TimeBucketAction) {
-      var duration = (this.bucketAction as TimeBucketAction).duration;
-      return getTimeBucketTitle(duration);
+    var bucketAction = this.bucketAction;
+    if (bucketAction instanceof TimeBucketAction) {
+      var duration = bucketAction.duration.toString();
+      switch (duration) {
+        case 'PT1M':
+          return ' (Minute)';
+        case 'PT5M':
+          return ' (5 Minutes)';
+        case 'PT1H':
+          return ' (Hour)';
+        case 'P1D':
+          return ' (Day)';
+        case 'P1W':
+          return ' (Week)';
+        default:
+          return '';
+      }
     }
     return '';
   }

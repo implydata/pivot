@@ -12,14 +12,8 @@ if (!WallTime.rules) {
 describe('Granularity', () => {
   it('fromJSes appropriately', () => {
 
-    expect(() => {
-      granularityFromJS({ dataName: 'wikipedia' });
-    }).to.throw();
-    expect(() => {
-      granularityFromJS(false);
-    }).to.throw();
-
     var timeBucketAction1 = granularityFromJS({
+      action: 'timeBucket',
       duration: 'P1W',
       timezone: 'America/Tijuana'
     });
@@ -34,6 +28,7 @@ describe('Granularity', () => {
     expect((timeBucketAction2 as TimeBucketAction).duration).to.deep.equal(Duration.fromJS('PT1H'));
 
     var numberBucketAction1 = granularityFromJS({
+      action: 'numberBucket',
       size: 5,
       offset: 1
     });
@@ -52,21 +47,25 @@ describe('Granularity', () => {
 
   it('to strings appropriately', () => {
     var timeBucketAction1 = granularityFromJS({
+      action: 'timeBucket',
       duration: 'P1W',
       timezone: 'America/Tijuana'
     });
 
     var timeBucketAction2 = granularityFromJS({
+      action: 'timeBucket',
       duration: 'P1W',
       timezone: 'America/Tijuana'
     });
 
     var timeBucketAction3 = granularityFromJS({
+      action: 'timeBucket',
       duration: 'P1W',
       timezone: 'Asia/Kathmandu'
     });
 
     var timeBucketAction4 = granularityFromJS({
+      action: 'timeBucket',
       duration: 'P1D',
       timezone: 'Asia/Kathmandu'
     });
@@ -77,16 +76,19 @@ describe('Granularity', () => {
     expect(granularityToString(timeBucketAction4)).to.equal('P1D');
 
     var numberBucketAction1 = granularityFromJS({
+      action: 'numberBucket',
       size: 5,
       offset: 1
     });
 
     var numberBucketAction2 = granularityFromJS({
+      action: 'numberBucket',
       size: 5,
       offset: 1
     });
 
     var numberBucketAction3 = granularityFromJS({
+      action: 'numberBucket',
       size: 300000
     });
 
@@ -101,21 +103,25 @@ describe('Granularity', () => {
 
   it('equals appropriately', () => {
     var timeBucketAction1 = granularityFromJS({
+      action: 'timeBucket',
       duration: 'P1W',
       timezone: 'America/Tijuana'
     });
 
     var timeBucketAction2 = granularityFromJS({
+      action: 'timeBucket',
       duration: 'P1W',
       timezone: 'America/Tijuana'
     });
 
     var timeBucketAction3 = granularityFromJS({
+      action: 'timeBucket',
       duration: 'P1W',
       timezone: 'Asia/Kathmandu'
     });
 
     var timeBucketAction4 = granularityFromJS({
+      action: 'timeBucket',
       duration: 'P1D',
       timezone: 'Asia/Kathmandu'
     });
@@ -125,16 +131,19 @@ describe('Granularity', () => {
     expect(granularityEquals(timeBucketAction3, timeBucketAction4)).to.equal(false);
 
     var numberBucketAction1 = granularityFromJS({
+      action: 'numberBucket',
       size: 5,
       offset: 1
     });
 
     var numberBucketAction2 = granularityFromJS({
+      action: 'numberBucket',
       size: 5,
       offset: 1
     });
 
     var numberBucketAction3 = granularityFromJS({
+      action: 'numberBucket',
       size: 5
     });
 

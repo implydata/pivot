@@ -2,7 +2,8 @@ import { List } from 'immutable';
 import { Class, Instance, isInstanceOf } from 'immutable-class';
 import { $, Expression, ExpressionJS, Action, NumberRangeJS, ApplyAction } from 'plywood';
 import { verifyUrlSafeName, makeTitle } from '../../utils/general/general';
-import { Granularity, GranularityJS, granularityFromJS } from "../granularity/granularity";
+import { Granularity, GranularityJS, granularityFromJS, granularityToJS } from "../granularity/granularity";
+import { immutableArraysEqual } from "immutable-class";
 
 var geoName = /continent|country|city|region/i;
 function isGeo(name: string): boolean {
@@ -62,7 +63,13 @@ export class Dimension implements Instance<DimensionValue, DimensionJS> {
         throw new Error("must have list of 5 granularities");
       }
 
-      value.granularities = granularities.map(granularityFromJS);
+      var runningActionType: string = null;
+      value.granularities = granularities.map((g) => {
+        var granularity = granularityFromJS(g);
+        if (runningActionType === null) runningActionType = granularity.action;
+        if (granularity.action !== runningActionType) throw new Error("granularities must have the same type of actions");
+        return granularity;
+      });
     }
 
     return new Dimension(value);
@@ -119,7 +126,7 @@ export class Dimension implements Instance<DimensionValue, DimensionJS> {
       kind: this.kind
     };
     if (this.url) js.url = this.url;
-    if (this.granularities) js.granularities = this.granularities.map((g) => { return g.toJS(); });
+    if (this.granularities) js.granularities = this.granularities.map((g) => { return granularityToJS(g); });
     return js;
   }
 
@@ -138,10 +145,10 @@ export class Dimension implements Instance<DimensionValue, DimensionJS> {
       this.expression.equals(other.expression) &&
       this.kind === other.kind &&
       this.url === other.url &&
-      this.granularities === other.granularities;
+      immutableArraysEqual(this.granularities, other.granularities);
   }
 
-  public getIsContinuous() {
+  public isContinuous() {
     return this.kind === 'time';
     // more later?
   }
