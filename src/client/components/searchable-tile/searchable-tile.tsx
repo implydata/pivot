@@ -21,6 +21,7 @@ export interface SearchableTileProps extends React.Props<any> {
   className?: string;
   style: Lookup<any>;
   title: string;
+  titleRefFn?: (element: Element) => void;
   onDragStart?: Fn;
 }
 
@@ -39,6 +40,8 @@ export class SearchableTile extends React.Component<SearchableTileProps, Searcha
 
   componentDidMount() {
     this.mounted = true;
+    var { titleRefFn } = this.props;
+    if (titleRefFn) titleRefFn(ReactDOM.findDOMNode(this.refs['tile-header']));
     window.addEventListener('mousedown', this.globalMouseDownListener);
     window.addEventListener('keydown', this.globalKeyDownListener);
   }
@@ -86,8 +89,8 @@ export class SearchableTile extends React.Component<SearchableTileProps, Searcha
     var qualifiedClassName = "searchable-tile " + className;
     const header = <TileHeader
       title={title}
+      ref="tile-header"
       icons={icons}
-      ref="header"
       onDragStart={onDragStart}
     />;
     var searchBar: JSX.Element = null;

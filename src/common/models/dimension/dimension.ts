@@ -61,16 +61,12 @@ export class Dimension implements Instance<DimensionValue, DimensionJS> {
       if (!Array.isArray(granularities) || granularities.length !== 5) {
         throw new Error("must have list of 5 granularities");
       }
-      try {
-        value.granularities = granularities.map(granularityFromJS);
-      } catch (e) {
-        console.log(e);
-      }
+
+      value.granularities = granularities.map(granularityFromJS);
     }
 
     return new Dimension(value);
   }
-
 
   public name: string;
   public title: string;

@@ -1,6 +1,8 @@
 require('./dimension-tile.css');
 
 import * as React from 'react';
+import * as ReactDOM from 'react-dom';
+
 import { Duration } from 'chronoshift';
 import { $, r, Dataset, SortAction, TimeRange, RefExpression, ApplyAction, Expression, TimeBucketAction } from 'plywood';
 
@@ -25,7 +27,7 @@ import { BubbleMenu } from '../bubble-menu/bubble-menu';
 const TOP_N = 100;
 const FOLDER_BOX_HEIGHT = 30;
 
-const DEFAULT_DURATION_GRANULARITIES = ['PT1M', 'PT5M', 'PT1H', 'PT6H', 'P1D', 'P1W'];
+const DEFAULT_DURATION_GRANULARITIES = ['PT1M', 'PT5M', 'PT1H', 'PT6H', 'P1D', 'P1W'].map(granularityFromJS);
 const DEFAULT_DURATION_GRANULARITY = 'P1D';
 
 export interface DimensionTileProps extends React.Props<any> {
@@ -48,6 +50,7 @@ export interface DimensionTileState {
   showSearch?: boolean;
   searchText?: string;
   actionsMenuOpenOn?: Element;
+  actionsMenuAlignOn?: Element;
   selectedGranularity?: Granularity;
 }
 
@@ -102,7 +105,7 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
     var query: any = $('main')
       .filter(filterExpression);
 
-    var sort: Expression = null;
+    var sortExpression: Expression = null;
 
     if (dimension.kind === 'time') {
       const dimensionExpression = dimension.expression as RefExpression;
@@ -118,17 +121,17 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
       this.setState({ selectedGranularity });
 
       query = query.split($(attributeName).performAction(selectedGranularity), SEGMENT);
-      sort = $(SEGMENT);
+      sortExpression = $(SEGMENT);
     } else {
       query = query.split(dimension.expression, SEGMENT);
-      sort = sortOn.getExpression();
+      sortExpression = sortOn.getExpression();
     }
 
     if (sortOn.measure) {
       query = query.performAction(sortOn.measure.toApplyAction());
     }
 
-    query = query.sort(sort, SortAction.DESCENDING).limit(TOP_N + 1);
+    query = query.sort(sortExpression, SortAction.DESCENDING).limit(TOP_N + 1);
 
     this.setState({
       loading: true,
@@ -205,7 +208,7 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
       essence.differentEffectiveFilter(nextEssence, null, unfolded ? dimension : null) ||
       essence.differentColors(nextEssence) || !dimension.equals(nextDimension) || !sortOn.equals(nextSortOn) ||
       essence.differentTimezoneMatters(nextEssence) ||
-      (!essence.timezone.equals(nextEssence.timezone))  && dimension.kind === 'time' ||
+      (!essence.timezone.equals(nextEssence.timezone)) && dimension.kind === 'time' ||
       differentTimeFilterSelection
     ) {
       this.fetchData(nextEssence, nextDimension, nextSortOn, unfolded, persistedGranularity);
@@ -218,6 +221,11 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
 
   componentWillUnmount() {
     this.mounted = false;
+  }
+
+  setActionsMenuAlignOn(element: Element) {
+    if (!element) return;
+    this.setState({actionsMenuAlignOn: element});
   }
 
   onRowClick(value: any, e: MouseEvent) {
@@ -307,6 +315,7 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
     });
     this.collectTriggerSearch();
   }
+
   onActionsMenuClose() {
     var { actionsMenuOpenOn } = this.state;
     if (!actionsMenuOpenOn) return;
@@ -323,7 +332,8 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
     });
   }
 
-  getTitleHeader(dimension: Dimension): string {
+  getTitleHeader(): string {
+    const { dimension } = this.props;
     const { selectedGranularity } = this.state;
 
     if (dimension.kind === 'time' && selectedGranularity) {
@@ -344,9 +354,9 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
 
   renderActionsMenu() {
     const { dimension } = this.props;
-    const { selectedGranularity, actionsMenuOpenOn } = this.state;
+    const { selectedGranularity, actionsMenuOpenOn, actionsMenuAlignOn } = this.state;
     if (!selectedGranularity) return;
-    const granularities = dimension.granularities || DEFAULT_DURATION_GRANULARITIES.map(granularityFromJS);
+    const granularities = dimension.granularities || DEFAULT_DURATION_GRANULARITIES;
     var granularityElements = granularities.map((g: Granularity) => {
       const granString = granularityToString(g);
       return <li
@@ -358,7 +368,7 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
       </li>;
     });
 
-    var stage = Stage.fromSize(240, 200);
+    var stage = Stage.fromSize(180, 200);
 
     return <BubbleMenu
       align="end"
@@ -367,9 +377,10 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
       stage={stage}
       onClose={this.onActionsMenuClose.bind(this)}
       openOn={actionsMenuOpenOn}
+      alignOn={actionsMenuAlignOn}
     >
       <ul className="bubble-list">
-        { granularityElements }
+        {granularityElements}
       </ul>
     </BubbleMenu>;
 
@@ -488,8 +499,7 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
     const className = classNames(
       'dimension-tile',
       (folder ? 'has-folder' : 'no-folder'),
-      (colors ? 'has-colors' : 'no-colors'),
-      (actionsMenuOpenOn ? 'has-actions' : 'no-actions')
+      (colors ? 'has-colors' : 'no-colors')
     );
 
     const style = {
@@ -522,7 +532,8 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
 
     return <SearchableTile
       style={style}
-      title={this.getTitleHeader(dimension)}
+      title={this.getTitleHeader()}
+      titleRefFn={this.setActionsMenuAlignOn.bind(this)}
       toggleChangeFn={this.toggleSearch.bind(this)}
       onDragStart={this.onDragStart.bind(this)}
       onSearchChange={this.onSearchChange.bind(this)}
