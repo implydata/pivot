@@ -154,7 +154,7 @@ export class SearchableTile extends React.Component<SearchableTileProps, Searcha
       svg: require('../../icons/full-more.svg'),
       active: Boolean(actionsMenuOpenOn)
     }];
-    
+
     var tileIcons = hasMoreActions ? showMoreIcon.concat(icons) : icons;
     var qualifiedClassName = "searchable-tile " + className;
     const header = <TileHeader
