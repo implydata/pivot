@@ -144,11 +144,11 @@ export function wallTimeInclusiveEndEqual(d1: Date, d2: Date, timezone: Timezone
 }
 
 export function getWallTimeString(date: Date, timezone: Timezone, includeTime?: boolean, delimiter?: string): string {
-  const wallTimeISOString = wallTimeHelper(WallTime.UTCToWallTime(date, timezone.toString())).toISOString();
+  const wallTimeISOString = cleanISOString(wallTimeHelper(WallTime.UTCToWallTime(date, timezone.toString())).toISOString());
   if (includeTime) {
-    return cleanISOString(wallTimeISOString).replace('T', delimiter || ', ');
+    return wallTimeISOString.replace('T', delimiter || ', ');
   }
-  return cleanISOString(wallTimeISOString).replace( /:\d\d/, '').split('T')[0];
+  return wallTimeISOString.replace( /:\d\d/, '').split('T')[0];
 }
 
 function wallTimeHelper(wallTime: any) {

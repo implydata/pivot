@@ -5,7 +5,7 @@ export type Granularity = TimeBucketAction | NumberBucketAction;
 export type GranularityJS = string | number | ActionJS
 
 export function granularityFromJS(input: GranularityJS): Granularity {
-  if (typeof input === 'number') return NumberBucketAction.fromJS(input as ActionJS);
+  if (typeof input === 'number') return NumberBucketAction.fromJS({ size: input });
   if (typeof input === 'string') {
     return TimeBucketAction.fromJS({ duration: input });
   }
@@ -24,6 +24,7 @@ export function granularityToString(input: Granularity): string {
   } else if (input instanceof NumberBucketAction) {
     return input.size.toString();
   }
+
   throw new Error(`unrecognized granularity: must be of type TimeBucketAction or NumberBucketAction`);
 }
 
