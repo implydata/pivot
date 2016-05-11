@@ -28,6 +28,8 @@ export function granularityToString(input: Granularity): string {
 }
 
 export function granularityEquals(g1: Granularity, g2: Granularity) {
+  if (!Boolean(g1) === Boolean(g2)) return false;
+  if (g1 === g2 ) return true;
   return (g1 as Action).equals(g2 as Action);
 }
 

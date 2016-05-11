@@ -11,6 +11,13 @@ import { TileHeader, TileHeaderIcon } from '../tile-header/tile-header';
 import { ClearableInput } from '../clearable-input/clearable-input';
 import { BubbleMenu } from '../bubble-menu/bubble-menu';
 
+export interface TileAction {
+  selected: boolean;
+  onSelect: Fn;
+  keyString?: string;
+  displayValue?: string;
+}
+
 export interface SearchableTileProps extends React.Props<any> {
   toggleChangeFn: Fn;
   onSearchChange: (text: string) => void;
@@ -21,10 +28,7 @@ export interface SearchableTileProps extends React.Props<any> {
   style: Lookup<any>;
   title: string;
   onDragStart?: Fn;
-  hasMoreActions?: boolean;
-  onSelectGranularity?: (g: Granularity) => void;
-  granularities?: Granularity[];
-  selectedGranularity?: Granularity;
+  actions?: TileAction[];
 }
 
 export interface SearchableTileState {
@@ -100,23 +104,21 @@ export class SearchableTile extends React.Component<SearchableTileProps, Searcha
     });
   }
 
-  onSelectGranularity(g: Granularity) {
-    const { onSelectGranularity } = this.props;
+  onSelectGranularity(action: TileAction) {
     this.onActionsMenuClose();
-    onSelectGranularity(g);
+    action.onSelect();
   }
 
   renderGranularityElements() {
-    const { granularities, selectedGranularity } = this.props;
+    const { actions } = this.props;
 
-    return granularities.map((g: Granularity) => {
-      const granString = granularityToString(g);
+    return actions.map((action: TileAction) => {
       return <li
-        className={classNames({selected: granularityEquals(selectedGranularity, g)})}
-        key={granString}
-        onClick={this.onSelectGranularity.bind(this, g)}
+        className={classNames({selected: action.selected })}
+        key={action.keyString || action.toString()}
+        onClick={this.onSelectGranularity.bind(this, action)}
       >
-        {formatGranularity(granString)}
+        {action.displayValue || action.toString()}
       </li>;
     });
   }
@@ -144,18 +146,21 @@ export class SearchableTile extends React.Component<SearchableTileProps, Searcha
 
   render() {
     const { className, style, icons, title, onSearchChange, showSearch, searchText,
-      children, onDragStart, hasMoreActions } = this.props;
+      children, onDragStart, actions } = this.props;
     const { actionsMenuOpenOn } = this.state;
+    var tileIcons = icons;
 
-    var showMoreIcon: TileHeaderIcon[] = [{
-      name: 'more',
-      ref: 'more',
-      onClick: this.onActionsMenuClick.bind(this),
-      svg: require('../../icons/full-more.svg'),
-      active: Boolean(actionsMenuOpenOn)
-    }];
+    if (actions && actions.length > 0) {
+      tileIcons = [({
+        name: 'more',
+        ref: 'more',
+        onClick: this.onActionsMenuClick.bind(this),
+        svg: require('../../icons/full-more.svg'),
+        active: Boolean(actionsMenuOpenOn)
+      } as TileHeaderIcon)].concat(icons);
+    }
 
-    var tileIcons = hasMoreActions ? showMoreIcon.concat(icons) : icons;
+
     var qualifiedClassName = "searchable-tile " + className;
     const header = <TileHeader
       title={title}
