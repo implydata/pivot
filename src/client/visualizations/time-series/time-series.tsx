@@ -528,7 +528,6 @@ export class TimeSeries extends BaseVisualization<TimeSeriesState> {
           newState.scaleX = d3.time.scale()
             .domain([axisTimeRange.start, axisTimeRange.end])
             .range([0, stage.width - VIS_H_PADDING * 2 - Y_AXIS_WIDTH]);
-
           newState.xTicks = getTimeTicks(axisTimeRange, timezone);
         }
       }
