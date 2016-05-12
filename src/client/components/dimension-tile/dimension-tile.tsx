@@ -406,7 +406,6 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
 
         if (segmentValue instanceof TimeRange) {
           segmentValueStr = formatTimeBasedOnGranularity(segmentValue, (selectedGranularity as TimeBucketAction).duration, essence.timezone, getLocale());
-          className += ' continuous';
         }
 
         var measureValueElement: JSX.Element = null;

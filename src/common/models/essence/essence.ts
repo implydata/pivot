@@ -450,7 +450,7 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
     return filter.getSpecificFilter(new Date(), maxTime, timezone);
   }
 
-  public getTimeSelection() {
+  public getTimeSelection(): Expression {
     const timeAttribute = this.getTimeAttribute();
     return this.filter.getSelection(timeAttribute);
   }

@@ -510,7 +510,7 @@ export class TimeSeries extends BaseVisualization<TimeSeriesState> {
       if (registerDownloadableDataset) registerDownloadableDataset(dataset);
     }
 
-    var axisTimeRange = essence.getEffectiveFilter(TimeSeries.id).getTimeRange(essence.dataSource.timeAttribute);
+    var axisTimeRange = essence.getEffectiveFilter(TimeSeries.id).getExtent(essence.dataSource.timeAttribute) as TimeRange;
     if (axisTimeRange) {
       newState.axisTimeRange = axisTimeRange;
       newState.scaleX = d3.time.scale()
