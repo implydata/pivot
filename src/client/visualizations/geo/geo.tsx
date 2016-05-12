@@ -34,6 +34,6 @@ export class Geo extends BaseVisualization<GeoState> {
   componentWillReceiveProps(nextProps: VisualizationProps) {}
 
   renderInternals() {
-    return <div className="geo"></div>;
+    return <div className="internals"></div>;
   }
 }

@@ -17,8 +17,6 @@ import { TimeAxis } from '../../components/time-axis/time-axis';
 import { VerticalAxis } from '../../components/vertical-axis/vertical-axis';
 import { GridLines } from '../../components/grid-lines/grid-lines';
 import { Highlighter } from '../../components/highlighter/highlighter';
-import { Loader } from '../../components/loader/loader';
-import { QueryError } from '../../components/query-error/query-error';
 import { SegmentBubble } from '../../components/segment-bubble/segment-bubble';
 import { HoverMultiBubble, ColorEntry } from '../../components/hover-multi-bubble/hover-multi-bubble';
 
@@ -572,13 +570,11 @@ export class TimeSeries extends BaseVisualization<TimeSeriesState> {
       maxHeight: stage.height - X_AXIS_HEIGHT
     };
 
-    return <div className="time-series-inner">
+    return <div className="internals time-series-inner">
       <div className="measure-time-charts" style={measureChartsStyle} onScroll={this.onScroll.bind(this)}>
         {measureCharts}
       </div>
       {bottomAxis}
-      {datasetLoad.error ? <QueryError error={datasetLoad.error}/> : null}
-      {datasetLoad.loading ? <Loader/> : null}
     </div>;
   }
 }

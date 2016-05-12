@@ -461,7 +461,7 @@ export class BarChart extends BaseVisualization<BarChartState> {
       maxHeight: stage.height
     };
 
-    return <div className="measure-bar-charts" style={measureChartsStyle} onScroll={this.onScroll.bind(this)}>
+    return <div className="internals measure-bar-charts" style={measureChartsStyle} onScroll={this.onScroll.bind(this)}>
       {measureCharts}
     </div>;
   }

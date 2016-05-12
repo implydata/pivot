@@ -121,6 +121,10 @@ export class Totals extends BaseVisualization<BaseVisualizationState> {
       };
     }
 
-    return <div className="total-container" style={totalContainerStyle}>{totals}</div>;
+    return <div className="internals">
+      <div className="total-container" style={totalContainerStyle}>
+        {totals}
+      </div>
+    </div>;
   }
 }

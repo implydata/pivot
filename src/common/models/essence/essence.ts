@@ -456,12 +456,12 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
   }
 
   public isFixedMeasureMode(): boolean {
-    return Boolean(this.visualization.measureModeNeed);
+    return this.visualization.measureModeNeed !== 'any';
   }
 
   public getEffectiveMultiMeasureMode(): boolean {
     const { measureModeNeed } = this.visualization;
-    if (measureModeNeed) {
+    if (measureModeNeed !== 'any') {
       return measureModeNeed === 'multi';
     }
     return this.multiMeasureMode;

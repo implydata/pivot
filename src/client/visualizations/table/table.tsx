@@ -15,8 +15,6 @@ import { SvgIcon } from '../../components/svg-icon/svg-icon';
 import { SegmentBubble } from '../../components/segment-bubble/segment-bubble';
 import { Scroller } from '../../components/scroller/scroller';
 import { SimpleTable, InlineStyle } from '../../components/simple-table/simple-table';
-import { Loader } from '../../components/loader/loader';
-import { QueryError } from '../../components/query-error/query-error';
 
 import { CircumstancesHandler } from '../circumstances-handler/circumstances-handler';
 
@@ -387,11 +385,9 @@ export class Table extends BaseVisualization<TableState> {
         <div className="highlight" style={highlightStyle}>{highlighter}</div>
       </div>
       <div className="vertical-scroll-shadow" style={verticalScrollShadowStyle}></div>
-      {datasetLoad.error ? <QueryError error={datasetLoad.error}/> : null}
-      {datasetLoad.loading ? <Loader/> : null}
     </div>;
 
-    return <div className="table-inner">
+    return <div className="internals table-inner">
       <div className="corner">
         <div className="corner-wrap">{segmentTitle}</div>
         {cornerSortArrow}
@@ -415,7 +411,7 @@ export class Table extends BaseVisualization<TableState> {
         onMouseLeave={this.onMouseLeave.bind(this)}
         onMouseMove={this.onMouseMove.bind(this)}
         onClick={this.onClick.bind(this)}
-      />;
+      />
       {highlightBubble}
     </div>;
   }

@@ -1,3 +1,5 @@
+require('./base-visualization.css');
+
 import * as React from 'react';
 import { $, ply, TimeRange, Expression, Dataset } from 'plywood';
 import {
@@ -33,7 +35,7 @@ export class BaseVisualization<S extends BaseVisualizationState>
   public static id = 'base-visualization';
   public static title = 'Base Visualization';
 
-  public static measureModeNeed: MeasureModeNeeded = 'single';
+  public static measureModeNeed: MeasureModeNeeded = 'any';
 
   public static handleCircumstance(
     dataSource: DataSource, splits: Splits, colors: Colors, current: boolean
@@ -154,32 +156,6 @@ export class BaseVisualization<S extends BaseVisualizationState>
 
   private lastRenderResult: JSX.Element = null;
 
-  render() {
-    let { datasetLoad } = this.state;
-
-    if (datasetLoad.loading && !!this.lastRenderResult) {
-      return <div className={this.id}>
-        {this.lastRenderResult}
-        {datasetLoad.error ? <QueryError error={datasetLoad.error}/> : null}
-        {datasetLoad.loading ? <Loader/> : null}
-      </div>;
-    }
-
-    this.lastRenderResult = this.renderInternals();
-    return <div className={this.id}>
-      {this.lastRenderResult}
-      {datasetLoad.error ? <QueryError error={datasetLoad.error}/> : null}
-    </div>;
-  }
-
-  protected renderInternals(): JSX.Element {
-    return null;
-  }
-
-  protected precalculate(props: VisualizationProps, datasetLoad: DatasetLoad = null) {
-
-  }
-
   componentWillMount() {
     this.precalculate(this.props);
   }
@@ -227,5 +203,27 @@ export class BaseVisualization<S extends BaseVisualizationState>
       scrollLeft: target.scrollLeft,
       scrollTop: target.scrollTop
     } as BaseVisualizationState as S); // Geez, TypeScript
+  }
+
+  protected renderInternals(): JSX.Element {
+    return null;
+  }
+
+  protected precalculate(props: VisualizationProps, datasetLoad: DatasetLoad = null) {
+
+  }
+
+  render() {
+    let { datasetLoad } = this.state;
+
+    if (!datasetLoad.loading || !this.lastRenderResult) {
+      this.lastRenderResult = this.renderInternals();
+    }
+
+    return <div className={'base-visualization ' + this.id}>
+      {this.lastRenderResult}
+      {datasetLoad.error ? <QueryError error={datasetLoad.error}/> : null}
+      {datasetLoad.loading ? <Loader/> : null}
+    </div>;
   }
 }

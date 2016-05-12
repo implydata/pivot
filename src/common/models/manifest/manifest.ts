@@ -70,7 +70,7 @@ export class Resolve {
 }
 
 
-export type MeasureModeNeeded = 'single' | 'multi';
+export type MeasureModeNeeded = 'any' | 'single' | 'multi';
 
 export interface Manifest {
   id: string;
