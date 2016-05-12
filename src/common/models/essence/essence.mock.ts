@@ -1,6 +1,6 @@
 import { List } from 'immutable';
 
-import { CircumstancesHandlerMock } from '../../../client/visualizations/circumstances-handler/circumstances-handler.mock';
+import { CircumstancesHandlerMock } from '../../utils/circumstances-handler/circumstances-handler.mock';
 
 import { Essence, EssenceJS, EssenceContext } from './essence';
 import { DataSourceMock } from "../data-source/data-source.mock";

@@ -1,7 +1,7 @@
 import { $, SortAction } from 'plywood';
 import { List } from 'immutable';
 import { Splits, DataSource, Resolve, SplitCombine, Colors } from '../../../common/models/index';
-import { CircumstancesHandler } from '../circumstances-handler/circumstances-handler';
+import { CircumstancesHandler } from '../../../common/utils/circumstances-handler/circumstances-handler';
 
 export default CircumstancesHandler.EMPTY()
   .when(

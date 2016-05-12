@@ -16,7 +16,7 @@ import { Loader } from '../../components/loader/loader';
 import { QueryError } from '../../components/query-error/query-error';
 import { SegmentBubble } from '../../components/segment-bubble/segment-bubble';
 
-import { CircumstancesHandler } from '../circumstances-handler/circumstances-handler';
+import { CircumstancesHandler } from '../../../common/utils/circumstances-handler/circumstances-handler';
 
 const TEXT_SPACER = 36;
 const X_AXIS_HEIGHT = 84;

@@ -16,7 +16,7 @@ import { SegmentBubble } from '../../components/segment-bubble/segment-bubble';
 import { Scroller } from '../../components/scroller/scroller';
 import { SimpleTable, InlineStyle } from '../../components/simple-table/simple-table';
 
-import { CircumstancesHandler } from '../circumstances-handler/circumstances-handler';
+import { CircumstancesHandler } from '../../../common/utils/circumstances-handler/circumstances-handler';
 
 const HEADER_HEIGHT = 38;
 const SEGMENT_WIDTH = 300;

@@ -1,5 +1,5 @@
 import { r, $, ply, Executor, Expression, Dataset, Datum, TimeRange, TimeRangeJS, TimeBucketAction, SortAction } from 'plywood';
-import { Dimension, Essence, Splits, SplitCombine, Filter, FilterClause, Measure, DataSource, Resolve, Resolution, Colors } from '../../../common/models/index';
+import { Dimension, Essence, Splits, SplitCombine, Filter, FilterClause, Measure, DataSource, Resolve, Resolution, Colors } from '../../models/index';
 
 export type Configuration = (splits: Splits, dataSource?: DataSource) => boolean;
 export type Action = (splits?: Splits, dataSource?: DataSource, colors?: Colors, current?: boolean) => Resolve;
