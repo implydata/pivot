@@ -11,9 +11,10 @@
 
   .text {
     .segment {
-      color: $text-lighterish;
+      color: #999;
+      line-height: 17px;
       display: block;
-      padding-bottom: 3px;
+      padding-bottom: 2px;
       overflow: hidden;
       word-wrap: break-word;
     }
