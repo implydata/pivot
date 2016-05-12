@@ -124,6 +124,10 @@ export class Filter implements Instance<FilterValue, FilterJS> {
     }
   }
 
+  public isEmpty(): boolean {
+    return this.clauses.isEmpty();
+  }
+
   public isRelative(): boolean {
     return this.clauses.some(clause => clause.relative);
   }
@@ -149,7 +153,6 @@ export class Filter implements Instance<FilterValue, FilterJS> {
     var clauses = this.clauses;
     var index = this.indexOfClause(attribute);
     if (index === -1) return false;
-    console.log('clauses.get(index)', clauses.get(index));
     return clauses.get(index).getLiteralSet().contains(value);
   }
 

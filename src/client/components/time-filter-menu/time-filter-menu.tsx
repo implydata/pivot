@@ -84,7 +84,7 @@ export class TimeFilterMenu extends React.Component<TimeFilterMenuProps, TimeFil
 
     this.setState({
       timeSelection,
-      tab: filter.isRelative() ? 'relative' : 'specific',
+      tab: (filter.isEmpty() || filter.isRelative()) ? 'relative' : 'specific',
       startTime: selectedTimeRange ? day.floor(selectedTimeRange.start, timezone) : null,
       endTime: selectedTimeRange ? day.ceil(selectedTimeRange.end, timezone) : null
     });
@@ -193,7 +193,7 @@ export class TimeFilterMenu extends React.Component<TimeFilterMenuProps, TimeFil
     };
 
     var previewTimeRange = essence.evaluateSelection(hoverPreset ? hoverPreset.selection : timeSelection);
-    var previewText = formatTimeRange(previewTimeRange, timezone, DisplayYear.IF_DIFF);
+    var previewText = previewTimeRange ? formatTimeRange(previewTimeRange, timezone, DisplayYear.IF_DIFF) : STRINGS.noFilter;
 
     return <div className="cont">
       <div className="type">{STRINGS.latest}</div>
@@ -241,6 +241,7 @@ export class TimeFilterMenu extends React.Component<TimeFilterMenuProps, TimeFil
     var { dimension } = this.props;
     var { tab } = this.state;
     if (!dimension) return null;
+
     var tabs = ['relative', 'specific'].map((name) => {
       return {
         isSelected: tab === name,

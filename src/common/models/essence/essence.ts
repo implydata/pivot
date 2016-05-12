@@ -276,11 +276,15 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
 
     timezone = timezone || Timezone.UTC;
 
-    if (!filter && dataSource.timeAttribute) {
-      filter = dataSource.defaultFilter.setSelection(
-        dataSource.timeAttribute,
-        $(FilterClause.MAX_TIME_REF_NAME).timeRange(dataSource.defaultDuration, -1)
-      );
+    if (!filter) {
+      if (dataSource.timeAttribute) {
+        filter = dataSource.defaultFilter.setSelection(
+          dataSource.timeAttribute,
+          $(FilterClause.MAX_TIME_REF_NAME).timeRange(dataSource.defaultDuration, -1)
+        );
+      } else {
+        filter = Filter.EMPTY;
+      }
     }
 
     multiMeasureMode = Boolean(multiMeasureMode);
@@ -397,6 +401,7 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
 
   public toHash(): string {
     var js = this.toJS();
+
     var compressed: any[] = [
       js.timezone,         // 0
       js.filter,           // 1
