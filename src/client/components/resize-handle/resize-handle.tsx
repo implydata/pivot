@@ -3,6 +3,8 @@ require('./resize-handle.css');
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
+import { clamp } from '../../utils/dom/dom';
+
 import { SvgIcon } from '../svg-icon/svg-icon';
 import { getXFromEvent } from '../../utils/dom/dom';
 
@@ -39,7 +41,7 @@ export class ResizeHandle extends React.Component<ResizeHandleProps, ResizeHandl
 
   componentDidMount() {
     this.setState({
-      currentValue: this.props.initialValue
+      currentValue: this.constrainValue(this.props.initialValue)
     });
     this.mounted = true;
   }
@@ -72,7 +74,7 @@ export class ResizeHandle extends React.Component<ResizeHandleProps, ResizeHandl
   }
 
   constrainValue(value: number): number {
-    return Math.max(Math.min(value, this.props.max), this.props.min);
+    return clamp(value, this.props.min, this.props.max);
   }
 
   onGlobalMouseMove(event: MouseEvent) {

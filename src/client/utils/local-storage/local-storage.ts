@@ -1,24 +1,11 @@
-var isSupported = false;
-
-var mod = 'test';
-try {
-    localStorage.setItem(mod, mod);
-    localStorage.removeItem(mod);
-    isSupported = true;
-} catch (e) {
-    isSupported = false;
-}
-
-export function supported(): boolean {
-  return isSupported;
-}
-
 export function get(key: string): any {
-  if (!isSupported) {
-    throw new Error('LocalStorage not supported');
-  }
+  let value: any;
 
-  let value = localStorage[key];
+  try {
+    value = localStorage[key];
+  } catch (e) {
+    return undefined;
+  }
 
   if (value) {
     try {
@@ -33,9 +20,7 @@ export function get(key: string): any {
 }
 
 export function set(key: string, value: any) {
-  if (!isSupported) {
-    throw new Error('LocalStorage not supported');
-  }
-
-  localStorage[key] = JSON.stringify(value);
+  try {
+    localStorage[key] = JSON.stringify(value);
+  } catch (e) {}
 }
