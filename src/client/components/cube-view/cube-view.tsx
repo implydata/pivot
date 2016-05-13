@@ -323,7 +323,7 @@ export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
     localStorage.set('cube-view-layout', layout);
   }
 
-  onLeftPanelResize(value: number) {
+  onDimensionPanelResize(value: number) {
     let { layout } = this.state;
     layout.dimensionPanelWidth = value;
 
@@ -331,7 +331,7 @@ export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
     this.storeLayout(layout);
   }
 
-  onRightPanelResize(value: number) {
+  onPinboardPanelResize(value: number) {
     let { layout } = this.state;
     layout.pinboardWidth = value;
 
@@ -408,7 +408,7 @@ export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
         <ResizeHandle
           side="left"
           initialValue={layout.dimensionPanelWidth}
-          onResize={this.onLeftPanelResize.bind(this)}
+          onResize={this.onDimensionPanelResize.bind(this)}
           onResizeEnd={this.onPanelResizeEnd.bind(this)}
           min={MIN_PANEL_WIDTH}
           max={MAX_PANEL_WIDTH}
@@ -453,7 +453,7 @@ export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
         <ResizeHandle
           side="right"
           initialValue={layout.pinboardWidth}
-          onResize={this.onRightPanelResize.bind(this)}
+          onResize={this.onPinboardPanelResize.bind(this)}
           onResizeEnd={this.onPanelResizeEnd.bind(this)}
           min={MIN_PANEL_WIDTH}
           max={MAX_PANEL_WIDTH}
