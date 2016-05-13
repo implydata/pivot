@@ -1,0 +1,41 @@
+> .body-cont {
+  @include unpin-top($header-height);
+  left: $space-left + $segment-width;
+
+  > .body {
+    > .row {
+      @include row-style;
+      width: 100%;
+
+      > .measure {
+        white-space: nowrap;
+        padding-left: 6px;
+
+        overflow: hidden;
+        padding-top: 8px;
+
+        display: inline-block;
+        width: $measure-width;
+        height: 100%;
+
+        &.all-alone {
+          width: 100%;
+        }
+
+
+        > .background {
+          position: absolute;
+          top: 0;
+
+          height: 100%;
+
+          background-color: #ccebf8;
+        }
+
+        > .label {
+          padding-left: 4px;
+        }
+      }
+    }
+  }
+}
