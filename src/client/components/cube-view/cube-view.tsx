@@ -21,6 +21,7 @@ import { RawDataModal } from '../raw-data-modal/raw-data-modal';
 import { ResizeHandle } from '../resize-handle/resize-handle';
 
 import { visualizations } from '../../visualizations/index';
+import * as localStorage from '../../utils/local-storage/local-storage';
 
 export interface CubeViewProps extends React.Props<any> {
   maxFilters?: number;
@@ -56,13 +57,16 @@ export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
 
   constructor() {
     super();
+
     this.state = {
       essence: null,
       dragOver: false,
       showRawDataModal: false,
       downloadableDataset: null,
-      layout: {left: 240, right: 240}
+      layout: this.getStoredLayout()
     };
+
+    this.storeLayout = _.debounce(this.storeLayout, 100);
 
     var clicker = {
       changeFilter: (filter: Filter, colors?: Colors) => {
@@ -304,18 +308,40 @@ export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
     this.setState({ essence: newEsssence });
   }
 
-  onLeftResize(value: number) {
+  getStoredLayout(): any {
+    let defaultLayout: any = {left: 240, right: 240};
+    let storedLayout: any = undefined;
+    if (localStorage.supported()) {
+      storedLayout = localStorage.get('cube-layout');
+    }
+
+    return storedLayout || defaultLayout;
+  }
+
+  storeLayout(layout: any) {
+    if (localStorage.supported()) {
+      localStorage.set('cube-layout', layout);
+    }
+  }
+
+  onLeftPanelResize(value: number) {
     let { layout } = this.state;
     layout.left = value;
 
     this.setState({layout});
+    this.storeLayout(layout);
   }
 
-  onRightResize(value: number) {
+  onRightPanelResize(value: number) {
     let { layout } = this.state;
     layout.right = value;
 
     this.setState({layout});
+    this.storeLayout(layout);
+  }
+
+  onPanelResizeEnd() {
+    this.globalResizeListener();
   }
 
   render() {
@@ -380,7 +406,14 @@ export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
           getUrlPrefix={getUrlPrefix}
         />
 
-        <ResizeHandle side="left" initialValue={layout.left} onResize={this.onLeftResize.bind(this)}></ResizeHandle>
+        <ResizeHandle
+          side="left"
+          initialValue={layout.left}
+          onResize={this.onLeftPanelResize.bind(this)}
+          onResizeEnd={this.onPanelResizeEnd.bind(this)}
+          min={240}
+          max={400}
+        ></ResizeHandle>
 
         <div className='center-panel' style={styles.centerPanel}>
           <div className='center-top-bar'>
@@ -418,7 +451,14 @@ export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
           </div>
         </div>
 
-        <ResizeHandle side="right" initialValue={layout.right} onResize={this.onRightResize.bind(this)}></ResizeHandle>
+        <ResizeHandle
+          side="right"
+          initialValue={layout.right}
+          onResize={this.onRightPanelResize.bind(this)}
+          onResizeEnd={this.onPanelResizeEnd.bind(this)}
+          min={240}
+          max={400}
+        ></ResizeHandle>
 
         <PinboardPanel
           style={styles.pinboardPanel}

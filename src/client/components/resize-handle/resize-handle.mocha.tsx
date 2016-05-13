@@ -15,6 +15,8 @@ describe('ResizeHandle', () => {
     var renderedComponent = TestUtils.renderIntoDocument(
       <ResizeHandle
         side="left"
+        min={240}
+        max={400}
         initialValue={100}
       />
     );

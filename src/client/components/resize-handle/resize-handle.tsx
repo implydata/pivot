@@ -9,6 +9,8 @@ import { getXFromEvent } from '../../utils/dom/dom';
 
 export interface ResizeHandleProps extends React.Props<any> {
   side: 'left' | 'right';
+  min: number;
+  max: number;
   initialValue: number;
   onResize?: (newX: number) => void;
   onResizeEnd?: (newX: number) => void;
@@ -63,10 +65,14 @@ export class ResizeHandle extends React.Component<ResizeHandleProps, ResizeHandl
 
   getValueFromX(x: number): number {
     if (this.props.side !== 'right') {
-      return x;
+      return this.constrainValue(x);
     }
 
-    return window.innerWidth - x;
+    return this.constrainValue(window.innerWidth - x);
+  }
+
+  constrainValue(value: number): number {
+    return Math.max(Math.min(value, this.props.max), this.props.min);
   }
 
   onGlobalMouseMove(event: MouseEvent) {
