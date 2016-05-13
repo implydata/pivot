@@ -104,7 +104,7 @@ export class ResizeHandle extends React.Component<ResizeHandleProps, ResizeHandl
     let { side } = this.props;
 
     let style: React.CSSProperties = {};
-    style[side] = this.state.currentValue + 'px';
+    style[side] = this.state.currentValue ;
 
     let className = 'resize-handle ' + side;
 

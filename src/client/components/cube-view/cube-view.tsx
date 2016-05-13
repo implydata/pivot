@@ -66,8 +66,6 @@ export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
       layout: this.getStoredLayout()
     };
 
-    this.storeLayout = _.debounce(this.storeLayout, 100);
-
     var clicker = {
       changeFilter: (filter: Filter, colors?: Colors) => {
         var { essence } = this.state;
@@ -376,9 +374,9 @@ export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
     }
 
     var styles = {
-      dimensionMeasurePanel: {width: layout.left + 'px'},
-      centerPanel: {left: layout.left + 'px', right: layout.right + 'px'},
-      pinboardPanel: {width: layout.right + 'px'}
+      dimensionMeasurePanel: {width: layout.left},
+      centerPanel: {left: layout.left, right: layout.right},
+      pinboardPanel: {width: layout.right}
     };
 
     return <div className='cube-view'>
