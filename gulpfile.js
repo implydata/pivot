@@ -49,7 +49,7 @@ gulp.task('watch', ['all-minus-bundle'], function() {
   gulp.watch('./src/client/**/*.scss', ['style']);
   gulp.watch('./src/client/**/*.svg', ['icons']);
   gulp.watch(['./src/common/**/*.ts', './src/client/**/*.{ts,tsx}', './assets/icons/**'], function() {
-    runSequence('client:tsc', ['client:test', 'common:test']);
+    runSequence('client:tsc');//, ['client:test', 'common:test']);
   });
   gulp.watch(['./src/common/**/*.ts', './src/server/**'], ['server:tsc']);
   laborer.clientPackWatch()

@@ -79,7 +79,8 @@ export class TimeFilterMenu extends React.Component<TimeFilterMenuProps, TimeFil
     const { timezone } = essence;
 
     var timeSelection = filter.getSelection(dimension.expression);
-    var selectedTimeRange = essence.evaluateSelection(timeSelection);
+    var selectedTimeRangeSet = essence.getEffectiveFilter().getLiteralSet(dimension.expression);
+    var selectedTimeRange = (selectedTimeRangeSet && selectedTimeRangeSet.size() === 1) ? selectedTimeRangeSet.elements[0] : null;
 
     this.setState({
       timeSelection,
@@ -219,14 +220,13 @@ export class TimeFilterMenu extends React.Component<TimeFilterMenuProps, TimeFil
     if (!dimension) return null;
 
     if (!timeSelection) return null;
-    var { timezone } = essence;
 
     return <div>
       <DateRangePicker
         startTime={startTime}
         endTime={endTime}
-        maxTime={new Date(essence.evaluateSelection($maxTime).toString())}
-        timezone={timezone}
+        maxTime={essence.dataSource.getMaxTimeDate()}
+        timezone={essence.timezone}
         onStartChange={this.onStartChange.bind(this)}
         onEndChange={this.onEndChange.bind(this)}
       />

@@ -297,6 +297,18 @@ export class Filter implements Instance<FilterValue, FilterJS> {
     return hasChanged ? new Filter(List(clauses)) : this;
   }
 
+  public getDifferentAttributes(other: Filter): Expression[] {
+    var diff: Expression[] = [];
+    this.clauses.forEach((clause) => {
+      var clauseExpression = clause.expression;
+      var otherClause = other.clauseForExpression(clauseExpression);
+      if (!clause.equals(otherClause)) {
+        diff.push(clauseExpression);
+      }
+    });
+    return diff;
+  }
+
   public overQuery(duration: Duration, timezone: Timezone, timeAttribute: Expression): Filter {
     if (!timeAttribute) return this;
 

@@ -175,7 +175,7 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
     });
 
     if (defaultSplits) {
-      essence = essence.updateWithTimeRange();
+      essence = essence.updateSplitsWithFilter();
     }
 
     return essence;
@@ -649,16 +649,9 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
       value.highlight = null;
     }
 
-    var timeAttribute = this.getTimeAttribute();
-    if (timeAttribute) {
-      var oldTimeSelection = this.filter.getSelection(timeAttribute);
-      var newTimeSelection = filter.getSelection(timeAttribute);
-      if (newTimeSelection && !newTimeSelection.equals(oldTimeSelection)) {
-        value.splits = value.splits.updateWithTimeRange(timeAttribute, this.evaluateSelection(newTimeSelection), true);
-      }
-    }
-
-    return new Essence(value);
+    var differentAttributes = filter.getDifferentAttributes(this.filter);
+    value.splits = value.splits.removeBucketingFrom(differentAttributes);
+    return (new Essence(value)).updateSplitsWithFilter();
   }
 
   public changeTimezone(newTimezone: Timezone): Essence {
@@ -683,12 +676,9 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
   }
 
   public changeSplits(splits: Splits, strategy: VisStrategy): Essence {
-    var { visualizations, dataSource, visualization, visResolve, filter, colors, timezone } = this;
+    var { visualizations, dataSource, visualization, visResolve, colors } = this;
 
-    var timeAttribute = this.getTimeAttribute();
-    if (timeAttribute) {
-      splits = splits.updateWithTimeRange(timeAttribute, this.evaluateSelection(filter.getSelection(timeAttribute)));
-    }
+    splits = splits.updateWithFilter(this.getEffectiveFilter(), dataSource.dimensions);
 
     // If in manual mode stay there, keep the vis regardless of suggested strategy
     if (visResolve.isManual()) {
@@ -724,13 +714,9 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
     return this.changeSplits(splits.removeSplit(split), strategy);
   }
 
-  public updateWithTimeRange(): Essence {
-    var { filter, splits, timezone } = this;
-    var timeAttribute = this.getTimeAttribute();
-    if (!timeAttribute) return this;
-
+  public updateSplitsWithFilter(): Essence {
     var value = this.valueOf();
-    value.splits = splits.updateWithTimeRange(timeAttribute, this.evaluateSelection(filter.getSelection(timeAttribute)));
+    value.splits = value.splits.updateWithFilter(this.getEffectiveFilter(), this.dataSource.dimensions);
     return new Essence(value);
   }
 
