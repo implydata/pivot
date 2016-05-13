@@ -1,0 +1,28 @@
+@import '../../imports';
+
+.resize-handle {
+  $size: 20px;
+
+  z-index: 1;
+  width: $size;
+  position: absolute;
+  height: 100%;
+
+  cursor: ew-resize;
+
+  > .svg-icon {
+    position: absolute;
+    top: 50%;
+  }
+
+  &.left {
+    transform: translate(-50%, 0);
+    margin-left: -$tile-margin-h/2;
+  }
+
+  &.right {
+    transform: translate(50%, 0);
+    margin-right: -$tile-margin-h/2;
+  }
+
+}
