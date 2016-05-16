@@ -60,6 +60,7 @@ export interface PositionHover {
 export interface TableState extends BaseVisualizationState {
   flatData?: PseudoDatum[];
   hoverRow?: Datum;
+  bodyWidth?: number;
 }
 
 export class Table extends BaseVisualization<TableState> {
@@ -228,6 +229,14 @@ export class Table extends BaseVisualization<TableState> {
     }
   }
 
+  onSimpleTableSizeChange(dimensions: {bodyWidth: number}) {
+    let bodyWidth = dimensions.bodyWidth - SPACE_RIGHT;
+
+    if (this.state.bodyWidth !== bodyWidth) {
+      this.setState({bodyWidth});
+    }
+  }
+
   getScalesForColumns(essence: Essence, flatData: PseudoDatum[]): d3.scale.Linear<number, number>[] {
     var measuresArray = essence.getEffectiveMeasures().toArray();
     var splitLength = essence.splits.length();
@@ -253,7 +262,21 @@ export class Table extends BaseVisualization<TableState> {
     });
   }
 
+  getIdealMeasureWidth(availableWidth: number, essence: Essence): number {
+    var columnsCount = essence.getEffectiveMeasures().size;
+
+    if (columnsCount * MEASURE_WIDTH < availableWidth) {
+      return availableWidth / columnsCount;
+    }
+
+    return MEASURE_WIDTH;
+  }
+
   renderRowMeasures(essence: Essence, formatters: Formatter[], hScales: d3.scale.Linear<number, number>[], datum: PseudoDatum): JSX.Element[] {
+    if (isNaN(this.state.bodyWidth)) {
+      return null;
+    }
+
     var measuresArray = essence.getEffectiveMeasures().toArray();
     var splitLength = essence.splits.length();
     var isSingleMeasure = measuresArray.length === 1;
@@ -273,7 +296,13 @@ export class Table extends BaseVisualization<TableState> {
         isSingleMeasure ? 'all-alone' : null
       ].filter(Boolean);
 
-      return <div className={classNames.join(' ')} key={measure.name}>
+      var measureWidth = this.getIdealMeasureWidth(this.state.bodyWidth, essence);
+
+      return <div
+        className={classNames.join(' ')}
+        key={measure.name}
+        style={{width: measureWidth}}
+      >
         {background}
         <div className="label">{measureValueStr}</div>
       </div>;
@@ -290,6 +319,10 @@ export class Table extends BaseVisualization<TableState> {
   }
 
   renderHeaderColumns(essence: Essence, hoverMeasure: Measure): JSX.Element[] {
+    if (isNaN(this.state.bodyWidth)) {
+      return null;
+    }
+
     var splitDimension = essence.splits.get(0).getDimension(essence.dataSource.dimensions);
     var commonSort = essence.getCommonSort();
     var commonSortName = commonSort ? (commonSort.expression as RefExpression).name : null;
@@ -298,6 +331,8 @@ export class Table extends BaseVisualization<TableState> {
       svg: require('../../icons/sort-arrow.svg'),
       className: 'sort-arrow ' + commonSort.direction
     }) : null;
+
+    var measureWidth = this.getIdealMeasureWidth(this.state.bodyWidth, essence);
 
     return essence.getEffectiveMeasures().toArray().map((measure, i) => {
       let amISorted = commonSortName === measure.name;
@@ -310,6 +345,7 @@ export class Table extends BaseVisualization<TableState> {
       return <div
         className={classNames.join(' ')}
         key={measure.name}
+        style={{width: measureWidth}}
       >
         <div className="title-wrap">{measure.title}</div>
         {amISorted ? sortArrowIcon : null}
@@ -477,6 +513,7 @@ export class Table extends BaseVisualization<TableState> {
         rows={rows}
         rowLeftOffset={SEGMENT_WIDTH}
         postRows={postRows}
+        onSizeChange={this.onSimpleTableSizeChange.bind(this)}
       />
       <Scroller
         style={scrollerStyle}

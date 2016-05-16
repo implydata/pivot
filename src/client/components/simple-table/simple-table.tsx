@@ -21,6 +21,7 @@ export interface SimpleTableProps extends React.Props<any> {
   preRows?: JSX.Element;
   rowLeftOffset?: number;
   postRows?: JSX.Element;
+  onSizeChange?: (dimensions: {bodyWidth: number}) => void;
 }
 
 export interface SimpleTableState {
@@ -72,6 +73,13 @@ export class SimpleTable extends React.Component<SimpleTableProps, SimpleTableSt
     return horizontalScrollShadowStyle;
   }
 
+  componentDidUpdate() {
+    if (!!this.props.onSizeChange) {
+      let bodyWidth = (this.refs['body-cont'] as any).getBoundingClientRect().width;
+      this.props.onSizeChange({bodyWidth});
+    }
+  }
+
   render() {
     var { headerColumns, preRows, rows, postRows  } = this.props;
 
@@ -80,7 +88,7 @@ export class SimpleTable extends React.Component<SimpleTableProps, SimpleTableSt
         <div className="header" style={this.getHeaderStyle()}>{headerColumns}</div>
       </div>
       { preRows }
-      <div className="body-cont">
+      <div className="body-cont" ref="body-cont">
         <div className="body" style={this.getBodyStyle()}>{rows}</div>
       </div>
       { postRows }
