@@ -20,7 +20,7 @@
 
       > .measure {
         white-space: nowrap;
-        padding-left: 6px;
+        padding-left: $measure-column-padding-left;
 
         overflow: hidden;
         padding-top: 8px;

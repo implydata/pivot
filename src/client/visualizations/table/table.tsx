@@ -21,7 +21,7 @@ import { CircumstancesHandler } from '../../../common/utils/circumstances-handle
 const HEADER_HEIGHT = 38;
 const SEGMENT_WIDTH = 300;
 const INDENT_WIDTH = 25;
-const MEASURE_WIDTH = 100;
+const MEASURE_WIDTH = 130;
 const ROW_HEIGHT = 30;
 const SPACE_LEFT = 10;
 const SPACE_RIGHT = 10;
