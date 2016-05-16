@@ -70,7 +70,7 @@ export class Table extends BaseVisualization<TableState> {
   public static measureModeNeed: MeasureModeNeeded = 'multi';
 
   private static handler = CircumstancesHandler.EMPTY()
-    .needsAtLeastOneSplit()
+    .needsAtLeastOneSplit('The Table requires at least one split')
     .otherwise(
       (splits: Splits, dataSource: DataSource, colors: Colors, current: boolean) => {
         var autoChanged = false;
