@@ -519,7 +519,7 @@ export class TimeSeries extends BaseVisualization<TimeSeriesState> {
           console.log('myDataset', myDataset);
           axisTimeRange = new TimeRange({
             start: (myDataset.data[0][timeDimension.name] as TimeRange).start,
-            end: (myDataset.data[dataset.data.length - 1][timeDimension.name] as TimeRange).end
+            end: (myDataset.data[myDataset.data.length - 1][timeDimension.name] as TimeRange).end
           });
         }
 
