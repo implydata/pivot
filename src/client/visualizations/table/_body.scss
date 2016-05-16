@@ -7,6 +7,17 @@
       @include row-style;
       width: 100%;
 
+      &.hover,
+      &.selected {
+        > .measure {
+          > .background {
+            background-color: #bae3f7;
+            border-top: 1px solid #a6cfe3;
+            border-bottom: 1px solid #a6cfe3;
+          }
+        }
+      }
+
       > .measure {
         white-space: nowrap;
         padding-left: 6px;
@@ -16,7 +27,8 @@
 
         display: inline-block;
         width: $measure-width;
-        height: 100%;
+        height: calc(100% + 2px);
+        margin-top: -1px;
 
         &.all-alone {
           width: 100%;
@@ -29,7 +41,9 @@
 
           height: 100%;
 
-          background-color: #ccebf8;
+          background-color: #d2edfa;
+          border-top: 1px solid #bfd5df;
+          border-bottom: 1px solid #bfd5df;
         }
 
         > .label {

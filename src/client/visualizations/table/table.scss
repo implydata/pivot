@@ -2,7 +2,7 @@
 
 $header-height: 38px;
 $segment-width: 300px;
-$measure-width: 100px;
+$measure-width: 136px;
 $row-height: 30px;
 $space-left: 10px;
 
@@ -23,10 +23,6 @@ $header-padding-top: 12px;
 
     &.selected {
       background: $hover;
-    }
-
-    &.nest0 {
-      background: $background-lightest;
     }
 
     &.not-selected {
@@ -64,14 +60,5 @@ $header-padding-top: 12px;
       height: $header-height;
     }
   }
-
-
-  //   Couldn't find where this is used.
-  //   - Sébastien
-  // -------------------------
-  // .highlight-controls {
-  //   position: absolute;
-  //   right: 20px;
-  // }
 }
 
