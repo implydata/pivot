@@ -230,13 +230,12 @@ export class Table extends BaseVisualization<TableState> {
 
   getScalesForColumns(essence: Essence, flatData: PseudoDatum[]): d3.scale.Linear<number, number>[] {
     var measuresArray = essence.getEffectiveMeasures().toArray();
+    var splitLength = essence.splits.length();
 
     return measuresArray.map(measure => {
-      var measureName = measure.name;
-      var measureValues = flatData.map((d: Datum) => d[measureName] as number);
-
-      // So right now, the scales consider all the values.
-      // Maybe they should only consider the leaf values ?
+      var measureValues = flatData
+        .filter((d: Datum) => d['__nest'] === splitLength)
+        .map((d: Datum) => d[measure.name] as number);
 
       return d3.scale.linear()
         .domain(d3.extent(measureValues))
