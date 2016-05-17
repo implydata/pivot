@@ -100,7 +100,7 @@ export class BarChart extends BaseVisualization<BarChartState> {
           autoChanged = true;
         }
 
-        return autoChanged ? Resolve.automatic(5 + booleanBoost, { splits }) : Resolve.ready(current ? 10 : (7 + booleanBoost));
+        return autoChanged ? Resolve.automatic(5 + booleanBoost, { splits: Splits.fromSplitCombine(split) }) : Resolve.ready(current ? 10 : (7 + booleanBoost));
       }
     ).otherwise(
       (splits: Splits, dataSource: DataSource) => {
