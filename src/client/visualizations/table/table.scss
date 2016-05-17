@@ -27,12 +27,7 @@ $header-padding-top: 12px;
     }
 
     &.not-selected {
-      &:after {
-        @include pin-full;
-        background: $white;
-        opacity: 0.5;
-        content: '';
-      }
+      opacity: 0.5;
     }
   }
 
