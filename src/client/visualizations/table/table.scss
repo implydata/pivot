@@ -36,6 +36,15 @@ $header-padding-top: 12px;
     }
   }
 
+  @mixin sort-arrow {
+    width: 8px;
+    right: -4px;
+
+    &.ascending {
+      transform: rotate(180deg);
+    }
+  }
+
   .corner {
     position: absolute;
     left: $space-left;
@@ -46,8 +55,13 @@ $header-padding-top: 12px;
     padding: $header-padding-top 0 0 6px;
     border-bottom: 1px solid $border-extra-light;
 
+    > .corner-wrap {
+      display: inline-block;
+      max-width: calc(100% - 10px);
+    }
+
     .sort-arrow {
-      right: 2px;
+      @include sort-arrow;
     }
   }
 

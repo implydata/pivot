@@ -2,7 +2,7 @@ import { expect } from 'chai';
 
 import { CircumstancesHandler } from './circumstances-handler';
 
-describe.only('dimension kind matcher', () => {
+describe('dimension kind matcher', () => {
   let strictCompare = CircumstancesHandler.strictCompare;
 
   it('should work in various cases', () => {

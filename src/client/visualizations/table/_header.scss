@@ -29,12 +29,7 @@
       }
 
       > .sort-arrow {
-        width: 8px;
-        right: -4px;
-
-        &.ascending {
-          transform: rotate(180deg);
-        }
+        @include sort-arrow;
       }
     }
   }

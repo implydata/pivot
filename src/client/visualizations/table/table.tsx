@@ -10,7 +10,7 @@ import { formatterFromData, Formatter } from '../../../common/utils/formatter/fo
 import { Stage, Filter, FilterClause, Essence, VisStrategy, Splits, SplitCombine, Dimension,
   Measure, Colors, DataSource, VisualizationProps, DatasetLoad, Resolve, MeasureModeNeeded } from '../../../common/models/index';
 import { SPLIT } from '../../config/constants';
-import { getXFromEvent, getYFromEvent } from '../../utils/dom/dom';
+import { getXFromEvent, getYFromEvent, classNames } from '../../utils/dom/dom';
 import { SvgIcon } from '../../components/svg-icon/svg-icon';
 import { SegmentBubble } from '../../components/segment-bubble/segment-bubble';
 import { Scroller } from '../../components/scroller/scroller';
@@ -60,7 +60,6 @@ export interface PositionHover {
 export interface TableState extends BaseVisualizationState {
   flatData?: PseudoDatum[];
   hoverRow?: Datum;
-  bodyWidth?: number;
 }
 
 export class Table extends BaseVisualization<TableState> {
@@ -132,7 +131,8 @@ export class Table extends BaseVisualization<TableState> {
       if (x <= SEGMENT_WIDTH) return { what: 'corner' };
 
       x = x - SEGMENT_WIDTH + scrollLeft;
-      var measureIndex = Math.floor(x / MEASURE_WIDTH);
+      var measureWidth = this.getIdealMeasureWidth(this.props.essence);
+      var measureIndex = Math.floor(x / measureWidth);
       var measure = essence.getEffectiveMeasures().get(measureIndex);
       if (!measure) return { what: 'whitespace' };
       return { what: 'header', measure };
@@ -229,14 +229,6 @@ export class Table extends BaseVisualization<TableState> {
     }
   }
 
-  onSimpleTableSizeChange(dimensions: {bodyWidth: number}) {
-    let bodyWidth = dimensions.bodyWidth - SPACE_RIGHT;
-
-    if (this.state.bodyWidth !== bodyWidth) {
-      this.setState({bodyWidth});
-    }
-  }
-
   getScalesForColumns(essence: Essence, flatData: PseudoDatum[]): d3.scale.Linear<number, number>[] {
     var measuresArray = essence.getEffectiveMeasures().toArray();
     var splitLength = essence.splits.length();
@@ -262,7 +254,8 @@ export class Table extends BaseVisualization<TableState> {
     });
   }
 
-  getIdealMeasureWidth(availableWidth: number, essence: Essence): number {
+  getIdealMeasureWidth(essence: Essence): number {
+    var availableWidth = this.props.stage.width - SPACE_LEFT - SEGMENT_WIDTH - SPACE_RIGHT;
     var columnsCount = essence.getEffectiveMeasures().size;
 
     if (columnsCount * MEASURE_WIDTH < availableWidth) {
@@ -273,10 +266,6 @@ export class Table extends BaseVisualization<TableState> {
   }
 
   renderRowMeasures(essence: Essence, formatters: Formatter[], hScales: d3.scale.Linear<number, number>[], datum: PseudoDatum): JSX.Element[] {
-    if (isNaN(this.state.bodyWidth)) {
-      return null;
-    }
-
     var measuresArray = essence.getEffectiveMeasures().toArray();
     var splitLength = essence.splits.length();
     var isSingleMeasure = measuresArray.length === 1;
@@ -291,15 +280,10 @@ export class Table extends BaseVisualization<TableState> {
         background = <div className="background" style={{width: backgroundWidth + '%'}}></div>;
       }
 
-      var classNames = [
-        'measure',
-        isSingleMeasure ? 'all-alone' : null
-      ].filter(Boolean);
-
-      var measureWidth = this.getIdealMeasureWidth(this.state.bodyWidth, essence);
+      var measureWidth = this.getIdealMeasureWidth(essence);
 
       return <div
-        className={classNames.join(' ')}
+        className={classNames('measure', {'all-alone': !!isSingleMeasure})}
         key={measure.name}
         style={{width: measureWidth}}
       >
@@ -319,10 +303,6 @@ export class Table extends BaseVisualization<TableState> {
   }
 
   renderHeaderColumns(essence: Essence, hoverMeasure: Measure): JSX.Element[] {
-    if (isNaN(this.state.bodyWidth)) {
-      return null;
-    }
-
     var splitDimension = essence.splits.get(0).getDimension(essence.dataSource.dimensions);
     var commonSort = essence.getCommonSort();
     var commonSortName = commonSort ? (commonSort.expression as RefExpression).name : null;
@@ -332,18 +312,13 @@ export class Table extends BaseVisualization<TableState> {
       className: 'sort-arrow ' + commonSort.direction
     }) : null;
 
-    var measureWidth = this.getIdealMeasureWidth(this.state.bodyWidth, essence);
+    var measureWidth = this.getIdealMeasureWidth(essence);
 
     return essence.getEffectiveMeasures().toArray().map((measure, i) => {
       let amISorted = commonSortName === measure.name;
-      let classNames = [
-        'measure-name',
-        measure === hoverMeasure ? ' hover' : undefined,
-        amISorted ? 'sorted' : undefined
-      ].filter(Boolean);
 
       return <div
-        className={classNames.join(' ')}
+        className={classNames('measure-name', {hover: measure === hoverMeasure, sorted: amISorted})}
         key={measure.name}
         style={{width: measureWidth}}
       >
@@ -363,10 +338,10 @@ export class Table extends BaseVisualization<TableState> {
     var { splits, dataSource } = essence;
     var splitDimension = splits.get(0).getDimension(dataSource.dimensions);
     if ((commonSort.expression as RefExpression).name === splitDimension.name) {
-      return React.createElement(SvgIcon, {
-        svg: require('../../icons/sort-arrow.svg'),
-        className: 'sort-arrow ' + commonSort.direction
-      });
+      return <SvgIcon
+        svg={require('../../icons/sort-arrow.svg')}
+        className={'sort-arrow ' + commonSort.direction}
+      />;
     }
 
     return null;
@@ -455,7 +430,8 @@ export class Table extends BaseVisualization<TableState> {
       }
     }
 
-    var rowWidth = MEASURE_WIDTH * essence.getEffectiveMeasures().size + ROW_PADDING_RIGHT;
+    var measureWidth = this.getIdealMeasureWidth(essence);
+    var rowWidth = measureWidth * essence.getEffectiveMeasures().size + ROW_PADDING_RIGHT;
 
     // Extended so that the horizontal lines extend fully
     var rowWidthExtended = rowWidth;
@@ -513,7 +489,6 @@ export class Table extends BaseVisualization<TableState> {
         rows={rows}
         rowLeftOffset={SEGMENT_WIDTH}
         postRows={postRows}
-        onSizeChange={this.onSimpleTableSizeChange.bind(this)}
       />
       <Scroller
         style={scrollerStyle}
