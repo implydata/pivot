@@ -2,27 +2,26 @@ require('./pivot-application.css');
 
 import * as React from 'react';
 import * as ReactCSSTransitionGroup from 'react-addons-css-transition-group';
-import * as Clipboard from 'clipboard';
+import { helper } from 'plywood';
 
-import { List } from 'immutable';
-import { DataSource, LinkViewConfig, LinkViewConfigJS, User, Customization} from '../../../common/models/index';
+import { DataSource, LinkViewConfig, AppSettings, User } from '../../../common/models/index';
 
 import { AboutModal } from '../about-modal/about-modal';
 import { SideDrawer } from '../side-drawer/side-drawer';
 import { HomeView } from '../home-view/home-view';
 import { CubeView } from '../cube-view/cube-view';
 import { LinkView } from '../link-view/link-view';
+import { SettingsView } from '../settings-view/settings-view';
 
 import { visualizations } from '../../visualizations/index';
 
 export interface PivotApplicationProps extends React.Props<any> {
   version: string;
-  dataSources: List<DataSource>;
-  linkViewConfig?: LinkViewConfigJS;
   user?: User;
   maxFilters?: number;
   maxSplits?: number;
-  customization?: Customization;
+  readOnly?: boolean;
+  appSettings: AppSettings;
 }
 
 export interface PivotApplicationState {
@@ -30,6 +29,7 @@ export interface PivotApplicationState {
   ReactCSSTransitionGroupAsync?: typeof ReactCSSTransitionGroup;
   SideDrawerAsync?: typeof SideDrawer;
 
+  appSettings?: AppSettings;
   drawerOpen?: boolean;
   selectedDataSource?: DataSource;
   viewType?: ViewType;
@@ -38,11 +38,12 @@ export interface PivotApplicationState {
   showAboutModal?: boolean;
 }
 
-export type ViewType = "home" | "cube" | "link";
+export type ViewType = "home" | "cube" | "link" | "settings";
 
 export const HOME: ViewType = "home";
 export const CUBE: ViewType = "cube";
 export const LINK: ViewType = "link";
+export const SETTINGS: ViewType = "settings";
 
 export class PivotApplication extends React.Component<PivotApplicationProps, PivotApplicationState> {
   private hashUpdating: boolean = false;
@@ -50,8 +51,7 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
   constructor() {
     super();
     this.state = {
-      ReactCSSTransitionGroupAsync: null,
-      SideDrawerAsync: null,
+      appSettings: null,
       drawerOpen: false,
       selectedDataSource: null,
       viewType: null,
@@ -63,12 +63,13 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
   }
 
   componentWillMount() {
-    var { dataSources, linkViewConfig } = this.props;
-    if (!dataSources.size) throw new Error('must have data sources');
+    var { appSettings } = this.props;
+    var { dataSources } = appSettings;
+    if (!dataSources.length) throw new Error('must have data sources');
 
     var hash = window.location.hash;
     var viewType = this.getViewTypeFromHash(hash);
-    var selectedDataSource = this.getDataSourceFromHash(dataSources, hash);
+    var selectedDataSource = this.getDataSourceFromHash(appSettings.dataSources, hash);
     var viewHash = this.getViewHashFromHash(hash);
 
     // If datasource does not exit bounce to home
@@ -77,16 +78,17 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
       viewType = HOME;
     }
 
-    if (viewType === HOME && dataSources.size === 1) {
+    if (viewType === HOME && dataSources.length === 1) {
       viewType = CUBE;
-      selectedDataSource = dataSources.first();
+      selectedDataSource = dataSources[0];
     }
 
     this.setState({
       viewType,
       viewHash,
       selectedDataSource,
-      linkViewConfig: linkViewConfig ? LinkViewConfig.fromJS(linkViewConfig, { dataSources, visualizations }) : null
+      appSettings,
+      linkViewConfig: appSettings.linkViewConfig ? appSettings.linkViewConfig.attachVisualizations(visualizations) : null
     });
   }
 
@@ -95,7 +97,6 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
 
     require.ensure(['clipboard'], (require) => {
       var Clipboard = require('clipboard');
-
       var clipboard = new Clipboard('.clipboard');
 
       clipboard.on('success', (e: any) => {
@@ -127,7 +128,7 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
   }
 
   hashToState(hash: string) {
-    const { dataSources } = this.props;
+    const { dataSources } = this.state.appSettings;
     var viewType = this.getViewTypeFromHash(hash);
     var viewHash = this.getViewHashFromHash(hash);
     var newState: PivotApplicationState = {
@@ -137,7 +138,7 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
 
     if (viewType === CUBE) {
       var dataSource = this.getDataSourceFromHash(dataSources, hash);
-      if (!dataSource) dataSource = dataSources.first();
+      if (!dataSource) dataSource = dataSources[0];
       newState.selectedDataSource = dataSource;
     } else {
       newState.selectedDataSource = null;
@@ -153,18 +154,20 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
   }
 
   getViewTypeFromHash(hash: string): ViewType {
-    const { linkViewConfig } = this.props;
+    const { readOnly } = this.props;
+    const appSettings = this.state.appSettings || this.props.appSettings;
     var viewType = this.parseHash(hash)[0];
-    if (!viewType || viewType === HOME) return linkViewConfig ? LINK : HOME;
-    if (linkViewConfig && viewType === LINK) return LINK;
+    if (!viewType || viewType === HOME) return appSettings.linkViewConfig ? LINK : HOME;
+    if (viewType === SETTINGS) return readOnly ? HOME : SETTINGS;
+    if (appSettings.linkViewConfig && viewType === LINK) return LINK;
     return CUBE;
   }
 
-  getDataSourceFromHash(dataSources: List<DataSource>, hash: string): DataSource {
+  getDataSourceFromHash(dataSources: DataSource[], hash: string): DataSource {
     // can change header from hash
     var parts = this.parseHash(hash);
     var dataSourceName = parts.shift();
-    return dataSources.find((ds) => ds.name === dataSourceName);
+    return helper.findByName(dataSources, dataSourceName);
   }
 
   getViewHashFromHash(hash: string): string {
@@ -230,6 +233,12 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
     });
   }
 
+  onSettingsChange(newSettings: AppSettings) {
+    this.setState({
+      appSettings: newSettings
+    });
+  }
+
   renderAboutModal() {
     const { version } = this.props;
     const { AboutModalAsync, showAboutModal } = this.state;
@@ -241,8 +250,10 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
   }
 
   render() {
-    var { dataSources, maxFilters, maxSplits, user, customization } = this.props;
-    var { viewType, viewHash, selectedDataSource, ReactCSSTransitionGroupAsync, drawerOpen, SideDrawerAsync, linkViewConfig } = this.state;
+    var { maxFilters, maxSplits, user, version } = this.props;
+    var { viewType, viewHash, selectedDataSource, ReactCSSTransitionGroupAsync, drawerOpen, SideDrawerAsync, appSettings, linkViewConfig } = this.state;
+    var { dataSources, customization } = appSettings;
+
     var sideDrawer: JSX.Element = null;
     if (drawerOpen && SideDrawerAsync) {
       var closeSideDrawer: () => void = this.sideDrawerOpen.bind(this, false);
@@ -305,6 +316,16 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
           getUrlPrefix={this.getUrlPrefix.bind(this)}
           onNavClick={this.sideDrawerOpen.bind(this, true)}
           customization={customization}
+        />;
+        break;
+
+      case SETTINGS:
+        view = <SettingsView
+          user={user}
+          onNavClick={this.sideDrawerOpen.bind(this, true)}
+          onSettingsChange={this.onSettingsChange.bind(this)}
+          customization={customization}
+          version={version}
         />;
         break;
 

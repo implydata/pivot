@@ -2,46 +2,11 @@ import * as path from 'path';
 import * as Q from 'q';
 import * as nopt from 'nopt';
 import { DruidRequestDecorator } from 'plywood-druid-requester';
-import { DataSource, DataSourceJS, Dimension, Measure, LinkViewConfig, LinkViewConfigJS, Customization } from '../common/models/index';
+import { AppSettings, DataSource, DataSourceJS, SourceListScan, Cluster } from '../common/models/index';
 import { dataSourceToYAML } from '../common/utils/yaml-helper/yaml-helper';
-import { DataSourceManager, dataSourceManagerFactory, loadFileSync, properDruidRequesterFactory, dataSourceLoaderFactory, SourceListScan } from './utils/index';
+import { ServerSettings } from './models/server-settings/server-settings';
+import { loadFileSync, SettingsManager } from './utils/index';
 
-
-export interface ServerConfig {
-  iframe?: "allow" | "deny";
-}
-
-export interface PivotConfig {
-  port?: number;
-  verbose?: boolean;
-  brokerHost?: string;
-  druidHost?: string;
-  timeout?: number;
-  introspectionStrategy?: string;
-
-  pageMustLoadTimeout?: number;
-  sourceListScan?: SourceListScan;
-  sourceListRefreshOnLoad?: boolean;
-  sourceListRefreshInterval?: number;
-  sourceReintrospectOnLoad?: boolean;
-  sourceReintrospectInterval?: number;
-
-  auth?: string;
-  druidRequestDecorator?: string;
-  dataSources?: DataSourceJS[];
-  linkViewConfig?: LinkViewConfigJS;
-  serverConfig?: ServerConfig;
-
-  customization?: Customization;
-}
-
-export interface RequestDecoratorFactoryOptions {
-  config: any;
-}
-
-export interface DruidRequestDecoratorModule {
-  druidRequestDecorator: (log: (line: string) => void, options: RequestDecoratorFactoryOptions) => DruidRequestDecorator;
-}
 
 function errorExit(message: string): void {
   console.error(message);
@@ -80,11 +45,6 @@ Possible usage:
   -f, --file                   Start pivot on top of this file based data source (must be JSON, CSV, or TSV)
 
   -d, --druid                  The Druid broker node to connect to
-      --introspection-strategy Druid introspection strategy
-          Possible values:
-          * segment-metadata-fallback - (default) use the segmentMetadata and fallback to GET route
-          * segment-metadata-only     - only use the segmentMetadata query
-          * datasource-get            - only use GET /druid/v2/datasources/DATASOURCE route
 `
   );
 }
@@ -105,8 +65,7 @@ function parseArgs() {
 
       "file": String,
 
-      "druid": String,
-      "introspection-strategy": String
+      "druid": String
     },
     {
       "v": ["--verbose"],
@@ -132,19 +91,19 @@ if (parsedArgs['version']) {
   process.exit();
 }
 
-const DEFAULT_CONFIG: PivotConfig = {
+if (!parsedArgs['example'] && !parsedArgs['config'] && !parsedArgs['druid'] && !parsedArgs['file']) {
+  printUsage();
+  process.exit();
+}
+
+const DEFAULT_SETTINGS: any = {
   port: 9090,
   sourceListScan: 'auto',
   sourceListRefreshInterval: 10000,
   dataSources: []
 };
 
-if (!parsedArgs['example'] && !parsedArgs['config'] && !parsedArgs['druid'] && !parsedArgs['file']) {
-  printUsage();
-  process.exit();
-}
-
-var exampleConfig: PivotConfig = null;
+var exampleConfig: any = null;
 if (parsedArgs['example']) {
   delete parsedArgs['druid'];
   var example = parsedArgs['example'];
@@ -162,7 +121,7 @@ if (parsedArgs['example']) {
 
 var configFilePath = parsedArgs['config'];
 var configFileDir: string = null;
-var config: PivotConfig;
+var config: any;
 if (configFilePath) {
   configFileDir = path.dirname(configFilePath);
   try {
@@ -172,7 +131,7 @@ if (configFilePath) {
     errorExit(`Could not load config from '${configFilePath}': ${e.message}`);
   }
 } else {
-  config = DEFAULT_CONFIG;
+  config = DEFAULT_SETTINGS;
 }
 
 // If there is an example config take its dataSources
@@ -190,31 +149,23 @@ if (file) {
   });
 }
 
+if (parsedArgs['druid']) {
+  config.druidHost = parsedArgs['druid'];
+}
+
+var serverSettings = ServerSettings.fromJS(config, configFileDir);
+
+export const SERVER_SETTINGS = serverSettings;
+export const SETTINGS_MANAGER = new SettingsManager({
+  location: 'local',
+  readOnly: false, // ToDo: this should be true
+  uri: configFilePath
+});
+
+
 export const PRINT_CONFIG = Boolean(parsedArgs['print-config']);
 export const START_SERVER = !PRINT_CONFIG;
 export const VERBOSE = Boolean(parsedArgs['verbose'] || config.verbose);
-
-export const PORT = parseInt(parsedArgs['port'] || config.port, 10) || 9090;
-export const SERVER_ROOT: string = (config as any).serverRoot;
-export const DRUID_HOST = parsedArgs['druid'] || config.brokerHost || config.druidHost;
-export const TIMEOUT = parseInt(<any>config.timeout, 10) || 30000;
-
-export const INTROSPECTION_STRATEGY = String(parsedArgs["introspection-strategy"] || config.introspectionStrategy || 'segment-metadata-fallback');
-export const PAGE_MUST_LOAD_TIMEOUT = START_SERVER ? (parseInt(<any>config.pageMustLoadTimeout, 10) || 800) : 0;
-export const SOURCE_LIST_SCAN: SourceListScan = config.sourceListScan;
-
-export const SOURCE_LIST_REFRESH_ON_LOAD = START_SERVER ? Boolean(<any>config.sourceListRefreshOnLoad) : false;
-export const SOURCE_LIST_REFRESH_INTERVAL = START_SERVER ? (parseInt(<any>config.sourceListRefreshInterval, 10) || 15000) : 0;
-if (SOURCE_LIST_REFRESH_INTERVAL && SOURCE_LIST_REFRESH_INTERVAL < 1000) {
-  errorExit(`can not set sourceListRefreshInterval to < 1000 (is ${SOURCE_LIST_REFRESH_INTERVAL})`);
-}
-
-export const SOURCE_REINTROSPECT_ON_LOAD = START_SERVER ? Boolean(<any>config.sourceReintrospectOnLoad) : false;
-export const SOURCE_REINTROSPECT_INTERVAL = START_SERVER ? (parseInt(<any>config.sourceReintrospectInterval, 10) || 0) : 0;
-if (SOURCE_REINTROSPECT_INTERVAL && SOURCE_REINTROSPECT_INTERVAL < 1000) {
-  errorExit(`can not set sourceReintrospectInterval to < 1000 (is ${SOURCE_REINTROSPECT_INTERVAL})`);
-}
-
 
 var auth = config.auth;
 var authModule: any = null;
@@ -231,91 +182,20 @@ if (auth) {
 export const AUTH = authModule;
 
 
-var druidRequestDecorator = config.druidRequestDecorator;
-var druidRequestDecoratorModule: DruidRequestDecoratorModule = null;
-if (druidRequestDecorator) {
-  druidRequestDecorator = path.resolve(configFileDir, druidRequestDecorator);
-  console.log(`Using druidRequestDecorator ${druidRequestDecorator}`);
-  try {
-    druidRequestDecoratorModule = require(druidRequestDecorator);
-  } catch (e) {
-    errorExit(`error loading druidRequestDecorator module: ${e.message}`);
-  }
-  if (typeof druidRequestDecoratorModule.druidRequestDecorator !== 'function') errorExit('Invalid druidRequestDecorator module');
-}
-export const DRUID_REQUEST_DECORATOR = druidRequestDecoratorModule;
-
-
-export const DATA_SOURCES: DataSource[] = (config.dataSources || []).map((dataSourceJS: DataSourceJS, i: number) => {
-  if (typeof dataSourceJS !== 'object') errorExit(`DataSource ${i} is not valid`);
-  var dataSourceName = dataSourceJS.name;
-  if (typeof dataSourceName !== 'string') errorExit(`DataSource ${i} must have a name`);
-
-  // Convert maxTime into refreshRule if a maxTime exists
-  if (dataSourceJS.maxTime && (typeof dataSourceJS.maxTime === 'string' || (<any>dataSourceJS.maxTime).toISOString)) {
-    dataSourceJS.refreshRule = { rule: 'fixed', time: <any>dataSourceJS.maxTime };
-    console.warn('maxTime found in config, this is deprecated please convert it to a refreshRule like so:', dataSourceJS.refreshRule);
-    delete dataSourceJS.maxTime;
-  }
-
-  try {
-    return DataSource.fromJS(dataSourceJS);
-  } catch (e) {
-    errorExit(`Could not parse data source '${dataSourceJS.name}': ${e.message}`);
-    return;
-  }
-});
-
-export const LINK_VIEW_CONFIG = config.linkViewConfig || null;
-export const SERVER_CONFIG = config.serverConfig || {};
-export const CUSTOMIZATION = config.customization ? Customization.fromJS(config.customization) : null;
-
-
-var druidRequester: Requester.PlywoodRequester<any> = null;
-if (DRUID_HOST) {
-  var requestDecorator: DruidRequestDecorator = null;
-  if (druidRequestDecoratorModule) {
-    var logger = (str: string) => console.log(str);
-    requestDecorator = druidRequestDecoratorModule.druidRequestDecorator(logger, {
-      config
-    });
-  }
-
-  druidRequester = properDruidRequesterFactory({
-    druidHost: DRUID_HOST,
-    timeout: TIMEOUT,
-    verbose: VERBOSE,
-    concurrentLimit: 5,
-    requestDecorator
-  });
-}
-
-var configDirectory = configFileDir || path.join(__dirname, '../..');
+//var configDirectory = configFileDir || path.join(__dirname, '../..');
 
 if (!PRINT_CONFIG) {
   console.log(`Starting Pivot v${VERSION}`);
 }
 
-export const DATA_SOURCE_MANAGER: DataSourceManager = dataSourceManagerFactory({
-  dataSources: DATA_SOURCES,
-  druidRequester,
-  dataSourceLoader: dataSourceLoaderFactory(druidRequester, configDirectory, TIMEOUT, INTROSPECTION_STRATEGY),
-
-  pageMustLoadTimeout: PAGE_MUST_LOAD_TIMEOUT,
-  sourceListScan: SOURCE_LIST_SCAN,
-  sourceListRefreshOnLoad: SOURCE_LIST_REFRESH_ON_LOAD,
-  sourceListRefreshInterval: SOURCE_LIST_REFRESH_INTERVAL,
-  sourceReintrospectOnLoad: SOURCE_REINTROSPECT_ON_LOAD,
-  sourceReintrospectInterval: SOURCE_REINTROSPECT_INTERVAL,
-
-  log: PRINT_CONFIG ? null : (line: string) => console.log(line)
-});
-
 if (PRINT_CONFIG) {
   var withComments = Boolean(parsedArgs['with-comments']);
   var dataSourcesOnly = Boolean(parsedArgs['data-sources-only']);
 
-  DATA_SOURCE_MANAGER.getQueryableDataSources().then((dataSources) => {
+  SETTINGS_MANAGER.getSettings().then(appSettings => {
+    var { dataSources, clusters } = appSettings;
+    var cluster = clusters[0];
+
     if (!dataSources.length) throw new Error('Could not find any data sources please verify network connectivity');
 
     var lines = [
@@ -335,13 +215,13 @@ if (PRINT_CONFIG) {
       if (withComments) {
         lines.push("# The port on which the Pivot server will listen on");
       }
-      lines.push(`port: ${PORT}`, '');
+      lines.push(`port: ${serverSettings.port}`, '');
 
-      if (DRUID_HOST) {
+      if (cluster.host) {
         if (withComments) {
           lines.push("# A Druid broker node that can serve data (only used if you have Druid based data source)");
         }
-        lines.push(`druidHost: ${DRUID_HOST}`, '');
+        lines.push(`druidHost: ${cluster.host}`, '');
 
         if (withComments) {
           lines.push("# A timeout for the Druid queries in ms (default: 30000 = 30 seconds)");
@@ -349,11 +229,11 @@ if (PRINT_CONFIG) {
         }
       }
 
-      if (INTROSPECTION_STRATEGY !== 'segment-metadata-fallback') {
+      if (cluster.introspectionStrategy !== Cluster.DEFAULT_INTROSPECTION_STRATEGY) {
         if (withComments) {
           lines.push("# The introspection strategy for the Druid external");
         }
-        lines.push(`introspectionStrategy: ${INTROSPECTION_STRATEGY}`, '');
+        lines.push(`introspectionStrategy: ${cluster.introspectionStrategy}`, '');
       }
 
       if (withComments) {

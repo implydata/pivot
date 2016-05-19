@@ -76,7 +76,6 @@ export interface DataSourceValue {
   refreshRule: RefreshRule;
   maxTime?: MaxTime;
 
-  external?: External;
   executor?: Executor;
 }
 
@@ -120,7 +119,6 @@ export interface DataSourceOptions {
 
 export interface DataSourceContext {
   executor?: Executor;
-  external?: External;
 }
 
 export interface LongForm {
@@ -205,7 +203,7 @@ export class DataSource implements Instance<DataSourceValue, DataSourceJS> {
   }
 
   static fromJS(parameters: DataSourceJS, context: DataSourceContext = {}): DataSource {
-    const { executor, external } = context;
+    const { executor } = context;
     var engine = parameters.engine;
     var introspection = parameters.introspection;
     var attributeOverrideJSs = parameters.attributeOverrides;
@@ -303,7 +301,6 @@ export class DataSource implements Instance<DataSourceValue, DataSourceJS> {
       refreshRule,
       maxTime
     };
-    if (external) value.external = external;
     if (executor) value.executor = executor;
     return new DataSource(value);
   }
@@ -333,12 +330,13 @@ export class DataSource implements Instance<DataSourceValue, DataSourceJS> {
   public maxTime: MaxTime;
 
   public executor: Executor;
-  public external: External;
 
   constructor(parameters: DataSourceValue) {
     var name = parameters.name;
+    if (typeof name !== 'string') throw new Error(`DataSource must have a name`);
     verifyUrlSafeName(name);
     this.name = name;
+
     this.title = parameters.title || makeTitle(name);
     this.engine = parameters.engine || 'druid';
     this.source = parameters.source || name;
@@ -362,7 +360,6 @@ export class DataSource implements Instance<DataSourceValue, DataSourceJS> {
     this.maxTime = parameters.maxTime;
 
     this.executor = parameters.executor;
-    this.external = parameters.external;
 
     this._validateDefaults();
   }
@@ -393,7 +390,6 @@ export class DataSource implements Instance<DataSourceValue, DataSourceJS> {
       maxTime: this.maxTime
     };
     if (this.executor) value.executor = this.executor;
-    if (this.external) value.external = this.external;
     return value;
   }
 
@@ -476,7 +472,7 @@ export class DataSource implements Instance<DataSourceValue, DataSourceJS> {
     }
   }
 
-  public getMainTypeContext(): DatasetFullType { // ToDo: use external getFullType instead
+  public getMainTypeContext(): DatasetFullType {
     var { attributes, derivedAttributes } = this;
     if (!attributes) return null;
 
@@ -535,85 +531,14 @@ export class DataSource implements Instance<DataSourceValue, DataSourceJS> {
     return issues;
   }
 
-  public createExternal(requester: Requester.PlywoodRequester<any>, introspectionStrategy: string, timeout: number): DataSource {
-    if (this.engine !== 'druid') return; // Only Druid supported for now.
-    var value = this.valueOf();
+  public updateWithExternal(external: External): DataSource {
+    if (this.engine === 'native') return this;
 
-    var context = {
-      timeout
-    };
+    var executor = basicExecutorFactory({
+      datasets: { main: external }
+    });
 
-    if (this.introspection === 'none') {
-      value.external = new DruidExternal({
-        suppress: true,
-        dataSource: this.source,
-        rollup: this.rollup,
-        timeAttribute: this.timeAttribute.name,
-        customAggregations: this.options.customAggregations,
-        attributes: AttributeInfo.override(this.deduceAttributes(), this.attributeOverrides),
-        derivedAttributes: this.derivedAttributes,
-        introspectionStrategy,
-        filter: this.subsetFilter,
-        allowSelectQueries: true,
-        context,
-        requester
-      });
-    } else {
-      value.external = new DruidExternal({
-        suppress: true,
-        dataSource: this.source,
-        rollup: this.rollup,
-        timeAttribute: this.timeAttribute.name,
-        attributeOverrides: this.attributeOverrides,
-        derivedAttributes: this.derivedAttributes,
-        customAggregations: this.options.customAggregations,
-        introspectionStrategy,
-        filter: this.subsetFilter,
-        allowSelectQueries: true,
-        context,
-        requester
-      });
-    }
-
-    return new DataSource(value);
-  }
-
-  public introspect(): Q.Promise<DataSource> {
-    var { external } = this;
-    if (this.engine === 'native') return Q(this);
-    if (!external) throw new Error(`must have external to introspect in ${this.name}`);
-
-    var countDistinctReferences: string[] = [];
-    if (this.measures) {
-      countDistinctReferences = [].concat.apply([], this.measures.toArray().map((measure) => {
-        return Measure.getCountDistinctReferences(measure.expression);
-      }));
-    }
-
-    return external.introspect()
-      .then((introspectedExternal) => {
-        if (immutableArraysEqual(external.attributes, introspectedExternal.attributes)) return this;
-
-        if (!countDistinctReferences) {
-          var attributes = introspectedExternal.attributes;
-          for (var attribute of attributes) {
-            // This is a metric that should really be a HLL
-            if (attribute.type === 'NUMBER' && countDistinctReferences.indexOf(attribute.name) !== -1) {
-              introspectedExternal = introspectedExternal.updateAttribute(AttributeInfo.fromJS({
-                name: attribute.name,
-                special: 'unique'
-              }));
-            }
-          }
-        }
-
-        var value = this.addAttributes(introspectedExternal.attributes).valueOf();
-        value.external = introspectedExternal;
-        value.executor = basicExecutorFactory({
-          datasets: { main: introspectedExternal }
-        });
-        return new DataSource(value);
-      });
+    return this.addAttributes(external.attributes).attachExecutor(executor);
   }
 
   public attachExecutor(executor: Executor): DataSource {
@@ -638,6 +563,8 @@ export class DataSource implements Instance<DataSourceValue, DataSourceJS> {
 
     // No need for the overrides
     value.attributeOverrides = null;
+
+    value.options = null;
 
     return new DataSource(value);
   }

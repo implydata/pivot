@@ -25,3 +25,6 @@ export * from './customization/customization';
 export * from './external-view/external-view';
 export * from './drag-position/drag-position';
 export * from './granularity/granularity';
+
+export * from './cluster/cluster';
+export * from './app-settings/app-settings';

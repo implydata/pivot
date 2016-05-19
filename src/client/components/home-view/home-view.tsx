@@ -4,14 +4,13 @@ import * as React from 'react';
 import { Stage, DataSource, User, Customization } from '../../../common/models/index';
 import { STRINGS } from '../../config/constants';
 import { HomeHeaderBar } from '../home-header-bar/home-header-bar';
-import { List } from 'immutable';
 import { Fn } from '../../../common/utils/general/general';
 import { GoldenCenter } from '../golden-center/golden-center';
 import { NavLogo } from '../nav-logo/nav-logo';
 import { NavList } from '../nav-list/nav-list';
 
 export interface HomeViewProps extends React.Props<any> {
-  dataSources?: List<DataSource>;
+  dataSources?: DataSource[];
   user?: User;
   onNavClick?: Fn;
   onOpenAbout: Fn;
@@ -26,7 +25,7 @@ export class HomeView extends React.Component< HomeViewProps, HomeViewState> {
   render() {
     const { user, dataSources, onNavClick, onOpenAbout, customization } = this.props;
 
-    var navLinks = dataSources.toArray().map(ds => {
+    var navLinks = dataSources.map(ds => {
       return {
         name: ds.name,
         title: ds.title,
@@ -45,6 +44,7 @@ export class HomeView extends React.Component< HomeViewProps, HomeViewState> {
         user={user}
         onNavClick={onNavClick}
         customization={customization}
+        title={STRINGS.home}
       />
       <div className="container">
         <GoldenCenter>

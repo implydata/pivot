@@ -14,8 +14,8 @@ describe.skip('PivotApplication', () => {
   it('adds the correct class', () => {
     var renderedComponent = TestUtils.renderIntoDocument(
       <PivotApplication
-        dataSources={null}
         version={null}
+        appSettings={null}
       />
     );
 
