@@ -81,12 +81,6 @@ export class BarChart extends BaseVisualization<BarChartState> {
             split = split.changeSortAction(dataSource.getDefaultSortAction());
           }
           autoChanged = true;
-        } else if (split.sortAction.refName() === dataSource.getTimeDimension().name) {
-          split = split.changeSortAction(new SortAction({
-            expression: $(splitDimension.name),
-            direction: split.sortAction.direction
-          }));
-          autoChanged = true;
         }
 
         // ToDo: review this
