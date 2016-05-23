@@ -654,7 +654,8 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
       var oldTimeSelection = this.filter.getSelection(timeAttribute);
       var newTimeSelection = filter.getSelection(timeAttribute);
       if (newTimeSelection && !newTimeSelection.equals(oldTimeSelection)) {
-        value.splits = value.splits.updateWithTimeRange(timeAttribute, this.evaluateSelection(newTimeSelection), true);
+        var force = this.dataSource.getDimension(timeAttribute.name).granularities ? false : true;
+        value.splits = value.splits.updateWithTimeRange(timeAttribute, this.evaluateSelection(newTimeSelection), force);
       }
     }
 
