@@ -96,7 +96,8 @@ export class BarChart extends BaseVisualization<BarChartState> {
 
   private static handler = CircumstancesHandler.EMPTY()
     .needsAtLeastOneSplit('The Bar Chart requires at least one split')
-    .otherwise(
+    .when(
+      CircumstancesHandler.areExactSplitKinds('*'),
       (splits: Splits, dataSource: DataSource, colors: Colors, current: boolean) => {
         var booleanBoost = 0;
 
@@ -145,6 +146,23 @@ export class BarChart extends BaseVisualization<BarChartState> {
         }
 
         return Resolve.ready(current ? 10 : (7 + booleanBoost));
+      }
+    ).otherwise(
+      (splits: Splits, dataSource: DataSource) => {
+        let categoricalDimensions = dataSource.dimensions.filter((d) => d.kind !== 'time');
+
+        return Resolve.manual(
+          3,
+          'The Bar Chart needs one category split exactly',
+          categoricalDimensions.toArray().slice(0, 2).map((dimension: Dimension) => {
+            return {
+              description: `Split on ${dimension.title} instead`,
+              adjustment: {
+                splits: Splits.fromSplitCombine(SplitCombine.fromExpression(dimension.expression))
+              }
+            };
+          })
+        );
       }
     );
 
