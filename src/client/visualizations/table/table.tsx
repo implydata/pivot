@@ -13,7 +13,8 @@ import { SPLIT } from '../../config/constants';
 import { getXFromEvent, getYFromEvent, classNames } from '../../utils/dom/dom';
 import { SvgIcon } from '../../components/svg-icon/svg-icon';
 import { SegmentBubble } from '../../components/segment-bubble/segment-bubble';
-import { Scroller } from '../../components/scroller/scroller';
+// import { Scroller } from '../../components/scroller/scroller';
+import { SimpleScroller, SimpleScrollerLayout } from '../../components/scroller/simple-scroller';
 import { SimpleTable, InlineStyle } from '../../components/simple-table/simple-table';
 
 import { CircumstancesHandler } from '../../../common/utils/circumstances-handler/circumstances-handler';
@@ -117,12 +118,9 @@ export class Table extends BaseVisualization<TableState> {
     return s;
   }
 
-  calculateMousePosition(e: MouseEvent): PositionHover {
+  calculateMousePosition(x: number, y: number): PositionHover {
     var { essence } = this.props;
-    var { flatData, scrollLeft, scrollTop } = this.state;
-    var rect = ReactDOM.findDOMNode(this.refs['base']).getBoundingClientRect();
-    var x = getXFromEvent(e) - rect.left;
-    var y = getYFromEvent(e) - rect.top;
+    var { flatData } = this.state;
 
     if (x <= SPACE_LEFT) return { what: 'space-left' };
     x -= SPACE_LEFT;
@@ -130,7 +128,7 @@ export class Table extends BaseVisualization<TableState> {
     if (y <= HEADER_HEIGHT) {
       if (x <= SEGMENT_WIDTH) return { what: 'corner' };
 
-      x = x - SEGMENT_WIDTH + scrollLeft;
+      x = x - SEGMENT_WIDTH;
       var measureWidth = this.getIdealMeasureWidth(this.props.essence);
       var measureIndex = Math.floor(x / measureWidth);
       var measure = essence.getEffectiveMeasures().get(measureIndex);
@@ -138,28 +136,17 @@ export class Table extends BaseVisualization<TableState> {
       return { what: 'header', measure };
     }
 
-    y = y - HEADER_HEIGHT + scrollTop;
+    y = y - HEADER_HEIGHT;
     var rowIndex = Math.floor(y / ROW_HEIGHT);
     var datum = flatData ? flatData[rowIndex] : null;
     if (!datum) return { what: 'whitespace' };
     return { what: 'row', row: datum };
   }
 
-  onMouseMove(e: MouseEvent) {
-    var { hoverMeasure, hoverRow } = this.state;
-    var pos = this.calculateMousePosition(e);
-    if (hoverMeasure !== pos.measure || hoverRow !== pos.row) {
-      this.setState({
-        hoverMeasure: pos.measure,
-        hoverRow: pos.row
-      });
-    }
-  }
-
-  onClick(e: MouseEvent) {
+  onClick(x: number, y: number) {
     var { clicker, essence } = this.props;
     var { splits, dataSource } = essence;
-    var pos = this.calculateMousePosition(e);
+    var pos = this.calculateMousePosition(x, y);
 
     var splitDimension = splits.get(0).getDimension(dataSource.dimensions);
 
@@ -173,7 +160,6 @@ export class Table extends BaseVisualization<TableState> {
       })), VisStrategy.KeepAlways);
 
     } else if (pos.what === 'row') {
-      var nest = pos.row['__nest'] as number;
       var rowHighlight = getFilterFromDatum(essence.splits, pos.row, dataSource);
 
       if (!rowHighlight) return;
@@ -186,6 +172,27 @@ export class Table extends BaseVisualization<TableState> {
       }
 
       clicker.changeHighlight(Table.id, null, rowHighlight);
+    }
+  }
+
+  onMouseMove(x: number, y: number) {
+    var { hoverMeasure, hoverRow } = this.state;
+    var pos = this.calculateMousePosition(x, y);
+    if (hoverMeasure !== pos.measure || hoverRow !== pos.row) {
+      this.setState({
+        hoverMeasure: pos.measure,
+        hoverRow: pos.row
+      });
+    }
+  }
+
+  onMouseLeave() {
+    var { hoverMeasure, hoverRow } = this.state;
+    if (hoverMeasure || hoverRow) {
+      this.setState({
+        hoverMeasure: null,
+        hoverRow: null
+      });
     }
   }
 
@@ -217,16 +224,6 @@ export class Table extends BaseVisualization<TableState> {
     }
 
     this.setState(newState);
-  }
-
-  onMouseLeave() {
-    var { hoverMeasure, hoverRow } = this.state;
-    if (hoverMeasure || hoverRow) {
-      this.setState({
-        hoverMeasure: null,
-        hoverRow: null
-      });
-    }
   }
 
   getScalesForColumns(essence: Essence, flatData: PseudoDatum[]): d3.scale.Linear<number, number>[] {
@@ -265,32 +262,32 @@ export class Table extends BaseVisualization<TableState> {
     return MEASURE_WIDTH;
   }
 
-  renderRowMeasures(essence: Essence, formatters: Formatter[], hScales: d3.scale.Linear<number, number>[], datum: PseudoDatum): JSX.Element[] {
+  makeMeasuresRenderer(essence: Essence, formatters: Formatter[], hScales: d3.scale.Linear<number, number>[]): (datum: PseudoDatum) => JSX.Element[] {
     var measuresArray = essence.getEffectiveMeasures().toArray();
+    var idealWidth = this.getIdealMeasureWidth(essence);
+
     var splitLength = essence.splits.length();
     var isSingleMeasure = measuresArray.length === 1;
+    var className = classNames('measure', {'all-alone': !!isSingleMeasure});
 
-    return measuresArray.map((measure, i) => {
-      var measureValue = datum[measure.name];
-      var measureValueStr = formatters[i](measureValue);
+    return (datum: PseudoDatum): JSX.Element[] => {
 
-      var background: JSX.Element = null;
-      if (datum['__nest'] === splitLength) {
-        let backgroundWidth = hScales[i](measureValue);
-        background = <div className="background" style={{width: backgroundWidth + '%'}}></div>;
-      }
+      return measuresArray.map((measure, i) => {
+        var measureValue = datum[measure.name];
+        var measureValueStr = formatters[i](measureValue);
 
-      var measureWidth = this.getIdealMeasureWidth(essence);
+        var background: JSX.Element = null;
+        if (datum['__nest'] === splitLength) {
+          let backgroundWidth = hScales[i](measureValue);
+          background = <div className="background" style={{width: backgroundWidth + '%'}}></div>;
+        }
 
-      return <div
-        className={classNames('measure', {'all-alone': !!isSingleMeasure})}
-        key={measure.name}
-        style={{width: measureWidth}}
-      >
-        {background}
-        <div className="label">{measureValueStr}</div>
-      </div>;
-    });
+        return <div className={className} key={measure.name} style={{width: idealWidth}}>
+          {background}
+          <div className="label">{measureValueStr}</div>
+        </div>;
+      });
+    };
   }
 
   renderRow(index: number, rowMeasures: JSX.Element[], rowY: number, classes: string[]): JSX.Element {
@@ -303,7 +300,6 @@ export class Table extends BaseVisualization<TableState> {
   }
 
   renderHeaderColumns(essence: Essence, hoverMeasure: Measure): JSX.Element[] {
-    var splitDimension = essence.splits.get(0).getDimension(essence.dataSource.dimensions);
     var commonSort = essence.getCommonSort();
     var commonSortName = commonSort ? (commonSort.expression as RefExpression).name : null;
 
@@ -347,9 +343,22 @@ export class Table extends BaseVisualization<TableState> {
     return null;
   }
 
+  onSimpleScroll(scrollTop: number, scrollLeft: number) {
+    this.setState({scrollLeft, scrollTop});
+  }
+
+  getVisibleIndices(rowCount: number, height: number): number[] {
+    const { scrollTop } = this.state;
+
+    return [
+      Math.max(0, Math.floor(scrollTop / ROW_HEIGHT)),
+      Math.min(rowCount, Math.ceil((scrollTop + height) / ROW_HEIGHT))
+    ];
+  }
+
   renderInternals() {
     var { clicker, essence, stage, openRawDataModal } = this.props;
-    var { datasetLoad, flatData, scrollLeft, scrollTop, hoverMeasure, hoverRow } = this.state;
+    var { flatData, scrollTop, hoverMeasure, hoverRow } = this.state;
     var { splits, dataSource } = essence;
 
     var segmentTitle = splits.getTitle(essence.dataSource.dimensions);
@@ -371,8 +380,9 @@ export class Table extends BaseVisualization<TableState> {
         highlightDelta = essence.highlight.delta;
       }
 
-      const skipNumber = SimpleTable.getFirstElementToShow(ROW_HEIGHT, scrollTop);
-      const lastElementToShow = SimpleTable.getLastElementToShow(ROW_HEIGHT, flatData.length, scrollTop, stage.height);
+      const [skipNumber, lastElementToShow] = this.getVisibleIndices(flatData.length, stage.height);
+
+      const measuresRenderer = this.makeMeasuresRenderer(essence, formatters, hScales);
 
       var rowY = skipNumber * ROW_HEIGHT;
       for (var i = skipNumber; i < lastElementToShow; i++) {
@@ -402,7 +412,7 @@ export class Table extends BaseVisualization<TableState> {
           style={segmentStyle}
         >{segmentName}</div>);
 
-        let rowMeasures = this.renderRowMeasures(essence, formatters, hScales, d);
+        let rowMeasures = measuresRenderer(d);
         let rowClass = [nest, selectedClass, hoverClass];
         rows.push(this.renderRow(i, rowMeasures, rowY, rowClass));
 
@@ -431,73 +441,54 @@ export class Table extends BaseVisualization<TableState> {
     }
 
     var measureWidth = this.getIdealMeasureWidth(essence);
-    var rowWidth = measureWidth * essence.getEffectiveMeasures().size + ROW_PADDING_RIGHT;
 
-    // Extended so that the horizontal lines extend fully
-    var rowWidthExtended = rowWidth;
-    if (stage) {
-      rowWidthExtended = Math.max(
-        rowWidthExtended,
-        stage.width - (SPACE_LEFT + SEGMENT_WIDTH + SPACE_RIGHT)
-      );
-    }
+    const preRows = <div className="segments">{segments}</div>;
 
-    const segmentsStyle = {
-      top: -scrollTop
-    };
-
-    const bodyHeight = flatData ? flatData.length * ROW_HEIGHT : 0;
-
-    const highlightStyle = {
-      top: -scrollTop
-    };
-
-    var verticalScrollShadowStyle: any = { display: 'none' };
-    if (scrollLeft) {
-      verticalScrollShadowStyle = {};
-    }
-
-    const scrollerStyle = {
-      width: SPACE_LEFT + SEGMENT_WIDTH + rowWidth + SPACE_RIGHT,
-      height: HEADER_HEIGHT + bodyHeight + BODY_PADDING_BOTTOM
-    };
-
-    const preRows = <div className="segments-cont">
-      <div className="segments" style={segmentsStyle}>{segments}</div>
-    </div>;
     // added extra wrapping div for pin full and single parent
     const postRows = <div className="post-body">
       <div className="highlight-cont">
-        <div className="highlight" style={highlightStyle}>{highlighter}</div>
+        <div className="highlight">{highlighter}</div>
       </div>
-      <div className="vertical-scroll-shadow" style={verticalScrollShadowStyle}></div>
     </div>;
 
+    const corner = <div className="corner">
+      <div className="corner-wrap">{segmentTitle}</div>
+      {cornerSortArrow}
+    </div>;
+
+
+    const scrollerLayout: SimpleScrollerLayout = {
+      // Inner dimensions
+      bodyWidth: measureWidth * essence.getEffectiveMeasures().size + ROW_PADDING_RIGHT,
+      bodyHeight: flatData ? flatData.length * ROW_HEIGHT : 0,
+
+      // Gutters
+      top: HEADER_HEIGHT,
+      right: 0,
+      bottom: 0,
+      left: SEGMENT_WIDTH
+    };
+
     return <div className="internals table-inner">
-      <div className="corner">
-        <div className="corner-wrap">{segmentTitle}</div>
-        {cornerSortArrow}
-      </div>
-      <SimpleTable
-        scrollLeft={scrollLeft}
-        scrollTop={scrollTop}
-        rowHeight={ROW_HEIGHT}
-        dataLength={flatData ? flatData.length : 0}
-        headerColumns={headerColumns}
-        rowWidth={rowWidthExtended}
-        preRows={preRows}
-        rows={rows}
-        rowLeftOffset={SEGMENT_WIDTH}
-        postRows={postRows}
-      />
-      <Scroller
-        style={scrollerStyle}
-        ref="base"
-        onScroll={this.onScroll.bind(this)}
-        onMouseLeave={this.onMouseLeave.bind(this)}
-        onMouseMove={this.onMouseMove.bind(this)}
+      <SimpleScroller
+        ref="scroller"
+        layout={scrollerLayout}
+
+        topGutter={headerColumns}
+        leftGutter={preRows}
+
+        topLeftCorner={corner}
+
+        body={rows}
+        bodyOverlay={postRows}
+
         onClick={this.onClick.bind(this)}
+        onMouseMove={this.onMouseMove.bind(this)}
+        onMouseLeave={this.onMouseLeave.bind(this)}
+        onScroll={this.onSimpleScroll.bind(this)}
+
       />
+
       {highlightBubble}
     </div>;
   }

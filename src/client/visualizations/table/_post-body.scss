@@ -20,14 +20,4 @@
       }
     }
   }
-
-  > .vertical-scroll-shadow {
-    position: absolute;
-    left: $space-left;
-    top: 0;
-    bottom: 0;
-    width: $segment-width;
-    box-shadow: 4px 0 4px -3px hsla(0, 0, 0, 0.2);
-  }
-
 }
