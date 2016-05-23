@@ -227,7 +227,7 @@ export class BarChart extends BaseVisualization<BarChartState> {
     clicker.changeHighlight(BarChart.id, measure.name, rowHighlight);
   }
 
-  getYExtent(measure: Measure, data: Datum[]): number[] {
+  getYExtent(data: Datum[], measure: Measure): number[] {
     var measureName = measure.name;
     var getY = (d: Datum) => d[measureName] as number;
     return d3.extent(data, getY);
@@ -243,7 +243,7 @@ export class BarChart extends BaseVisualization<BarChartState> {
       parentName: '__parent'
     }).filter((d: Datum) => d['__nest'] === splitLength - 1);
 
-    var extentY = this.getYExtent(measure, leafData);
+    var extentY = this.getYExtent(leafData, measure);
 
     return d3.scale.linear()
       .domain([Math.min(extentY[0] * 1.1, 0), Math.max(extentY[1] * 1.1, 0)])
@@ -251,7 +251,7 @@ export class BarChart extends BaseVisualization<BarChartState> {
   }
 
   hasValidYExtent(measure: Measure, data: Datum[]): boolean {
-    let [yMin, yMax] = this.getYExtent(measure, data);
+    let [yMin, yMax] = this.getYExtent(data, measure);
     return !isNaN(yMin) && !isNaN(yMax);
   }
 
