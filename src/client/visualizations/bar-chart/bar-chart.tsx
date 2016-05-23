@@ -106,19 +106,8 @@ export class BarChart extends BaseVisualization<BarChartState> {
         splits = splits.map((split: SplitCombine) => {
           var splitDimension = dataSource.getDimensionByExpression(split.expression);
 
-        if (!split.sortAction) {
-          // Must sort boolean in deciding order!
-            booleanBoost = 2;
-          autoChanged = true;
-        } else if (splitDimension.isContinuous() && split.sortAction.refName() !== splitDimension.name) {
-          split = split.changeSortAction(new SortAction({
-            expression: $(splitDimension.name),
-            direction: split.sortAction.direction
-          }));
-          autoChanged = true;
-        }
-
           if (!split.sortAction) {
+            // Must sort boolean in deciding order!
             if (splitDimension.kind === 'boolean') {
               split = split.changeSortAction(new SortAction({
                 expression: $(splitDimension.name),
@@ -128,7 +117,14 @@ export class BarChart extends BaseVisualization<BarChartState> {
               split = split.changeSortAction(dataSource.getDefaultSortAction());
             }
             autoChanged = true;
+          } else if (splitDimension.isContinuous() && split.sortAction.refName() !== splitDimension.name) {
+            split = split.changeSortAction(new SortAction({
+              expression: $(splitDimension.name),
+              direction: split.sortAction.direction
+            }));
+            autoChanged = true;
           }
+
 
           // ToDo: review this
           if (!split.limitAction && (autoChanged || splitDimension.kind !== 'time')) {
