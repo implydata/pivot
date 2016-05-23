@@ -211,8 +211,6 @@ export class BarChart extends BaseVisualization<BarChartState> {
     const { essence, clicker } = this.props;
     const { splits, dataSource } = essence;
 
-    const dimension = splits.get(splitIndex).getDimension(dataSource.dimensions);
-
     var rowHighlight = getFilterFromDatum(splits, dataPath, dataSource);
 
     if (essence.highlightOn(BarChart.id, measure.name)) {
@@ -298,13 +296,10 @@ export class BarChart extends BaseVisualization<BarChartState> {
   }
 
   renderHoverBubble(hoverInfo: BubbleInfo): JSX.Element {
-    const { essence, stage, clicker, openRawDataModal } = this.props;
+    const { stage } = this.props;
     const { scrollTop } = this.state;
     const chartStage = this.getChartStage();
     const { measure, path, segmentLabel, chartIndex } = hoverInfo;
-
-    const { splits, dataSource } = essence;
-    const dimension = splits.get(hoverInfo.splitIndex).getDimension(dataSource.dimensions);
 
     const leftOffset = stage.x + VIS_H_PADDING + hoverInfo.x;
     const topOffset = chartStage.height * chartIndex - scrollTop + hoverInfo.y + TEXT_SPACER - HOVER_BUBBLE_V_OFFSET;
@@ -322,7 +317,6 @@ export class BarChart extends BaseVisualization<BarChartState> {
 
   isSelected(path: Datum[], measure: Measure): boolean {
     const { essence } = this.props;
-    const { selectionInfo } = this.state;
     const { splits, dataSource } = essence;
 
     if (essence.highlightOnDifferentMeasure(BarChart.id, measure.name)) return false;
@@ -376,7 +370,6 @@ export class BarChart extends BaseVisualization<BarChartState> {
       let subPath = path.concat(d);
 
       let bar: JSX.Element;
-      let ghost: JSX.Element;
       let highlight: JSX.Element = null;
       let bubble: JSX.Element = null;
       let subCoordinates = coordinates[i];
@@ -384,10 +377,7 @@ export class BarChart extends BaseVisualization<BarChartState> {
 
 
       if (splitIndex < essence.splits.length() - 1) {
-        let subSplit: SplitCombine = essence.splits.get(splitIndex + 1);
-        let subDimension = subSplit.getDimension(essence.dataSource.dimensions);
         let subData: Datum[] = (d[SPLIT] as Dataset).data;
-
         let result: any = this.renderBars(subData, measure, chartIndex, barStage, xAxisStage, subCoordinates.children, splitIndex + 1, subPath);
 
         bar = result.bars;
@@ -492,7 +482,6 @@ export class BarChart extends BaseVisualization<BarChartState> {
 
   renderChart(dataset: Dataset, coordinates: BarCoordinates[], measure: Measure, chartIndex: number, containerStage: Stage, chartStage: Stage, getX: any): JSX.Element {
     const { xTicks, scaleX } = this.state;
-    const { essence } = this.props;
     var mySplitDataset = dataset.data[0][SPLIT] as Dataset;
 
     // Invalid data, early return
@@ -505,7 +494,7 @@ export class BarChart extends BaseVisualization<BarChartState> {
 
     let { barStage, xAxisStage, yAxisStage } = this.getStages(chartStage);
 
-    var { yAxis, yGridLines, yScale } = this.getYAxisStuff(mySplitDataset, measure, chartStage, chartIndex);
+    var { yAxis, yGridLines } = this.getYAxisStuff(mySplitDataset, measure, chartStage, chartIndex);
 
     var { bars, labels } = this.renderBars(mySplitDataset.data, measure, chartIndex, barStage, xAxisStage, coordinates);
 
@@ -576,8 +565,8 @@ export class BarChart extends BaseVisualization<BarChartState> {
     const dimension = splits.get(0).getDimension(dataSource.dimensions);
 
     var chartStage = this.getChartStage();
-    let { barStage, xAxisStage, yAxisStage } = this.getStages(chartStage);
-    var { yAxis, yGridLines, yScale } = this.getYAxisStuff(dataset, measure, chartStage, chartIndex);
+    let { barStage, xAxisStage } = this.getStages(chartStage);
+    var { yScale } = this.getYAxisStuff(dataset, measure, chartStage, chartIndex);
 
     return this.getSubCoordinates(
       dataset.data,
@@ -623,7 +612,6 @@ export class BarChart extends BaseVisualization<BarChartState> {
       if (splitIndex < essence.splits.length() - 1) {
         let subStage: Stage = new Stage({x: x, y: barStage.y, width: barWidth, height: barStage.height});
         let subSplit: SplitCombine = essence.splits.get(splitIndex + 1);
-        let subDimension = subSplit.getDimension(essence.dataSource.dimensions);
         let subGetX: any = (d: Datum, i: number) => String(i);
         let subData: Datum[] = (d[SPLIT] as Dataset).data;
         let subScaleX = d3.scale.ordinal()
