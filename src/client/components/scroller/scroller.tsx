@@ -5,6 +5,9 @@ import * as ReactDOM from 'react-dom';
 import { classNames, getXFromEvent, getYFromEvent } from '../../utils/dom/dom';
 import { Fn } from '../../../common/utils/general/general';
 
+export type XSide = 'left' | 'right';
+export type YSide = 'top' | 'bottom';
+
 export interface ScrollerLayout {
   bodyWidth: number;
   bodyHeight: number;
@@ -55,132 +58,88 @@ export class Scroller extends React.Component<ScrollerProps, ScrollerState> {
     };
   }
 
-  getTopLeftCornerStyle(): React.CSSProperties {
+  private getGutterStyle(side: XSide | YSide): React.CSSProperties {
     const { layout } = this.props;
-    return {
-      width: layout.left,
-      height: layout.top,
-      left: 0
-    };
+    const { scrollLeft, scrollTop } = this.state;
+
+    switch (side) {
+      case "top":
+        return {
+          height: layout.top,
+          left: layout.left - scrollLeft,
+          right: layout.right
+        };
+
+      case "right":
+        return {
+          width: layout.right,
+          right: 0,
+          top: layout.top - scrollTop,
+          bottom: layout.bottom
+        };
+
+      case "bottom":
+        return {
+          height: layout.bottom,
+          left: layout.left - scrollLeft,
+          right: layout.right
+        };
+
+      case "left":
+        return {
+          width: layout.left,
+          left: 0,
+          top: layout.top - scrollTop,
+          bottom: layout.bottom
+        };
+
+      default:
+        throw new Error("Unknown side for shadow. This shouldn't happen.");
+    }
   }
 
-  getTopRightCornerStyle(): React.CSSProperties {
+  private getCornerStyle(yPos: YSide, xPos: XSide): React.CSSProperties {
     const { layout } = this.props;
-    return {
-      width: layout.right,
-      height: layout.top,
-      right: 0
-    };
+
+    var style: any = {};
+    if (xPos === 'left') {
+      style.left = 0;
+      style.width = layout.left;
+    } else {
+      style.right = 0;
+      style.width = layout.right;
+    }
+
+    if (yPos === 'top') {
+      style.top = 0;
+      style.height = layout.top;
+    } else {
+      style.height = layout.bottom;
+      style.bottom = 0;
+    }
+
+    return style;
   }
 
-  getBottomLeftCornerStyle(): React.CSSProperties {
-    const { layout } = this.props;
-    return {
-      width: layout.left,
-      height: layout.bottom,
-      bottom: 0
-    };
-  }
-
-  getBottomRightCornerStyle(): React.CSSProperties {
-    const { layout } = this.props;
-    return {
-      width: layout.right,
-      height: layout.bottom,
-      bottom: 0,
-      right: 0
-    };
-  }
-
-  getTopGutterStyle(): React.CSSProperties {
-    const { layout } = this.props;
-    const { scrollLeft } = this.state;
-
-    return {
-      height: layout.top,
-      left: layout.left - scrollLeft,
-      right: layout.right
-    };
-  }
-
-  getRightGutterStyle(): React.CSSProperties {
-    const { layout } = this.props;
-    const { scrollTop } = this.state;
-
-    return {
-      width: layout.right,
-      right: 0,
-      top: layout.top - scrollTop,
-      bottom: layout.bottom
-    };
-  }
-
-  getBottomGutterStyle(): React.CSSProperties {
-    const { layout } = this.props;
-    const { scrollLeft } = this.state;
-
-    return {
-      height: layout.bottom,
-      left: layout.left - scrollLeft,
-      right: layout.right
-    };
-  }
-
-  getLeftGutterStyle(): React.CSSProperties {
-    const { layout } = this.props;
-    const { scrollTop } = this.state;
-
-    return {
-      width: layout.left,
-      left: 0,
-      top: layout.top - scrollTop,
-      bottom: layout.bottom
-    };
-  }
-
-  getTopShadowStyle(): React.CSSProperties {
+  private getShadowStyle(side: XSide | YSide): React.CSSProperties {
     const { layout } = this.props;
 
-    return {
-      top: 0,
-      height: layout.top,
-      left: 0,
-      right: 0
-    };
-  }
+    switch (side) {
+      case "top":
+        return {top: 0, height: layout.top, left: 0, right: 0};
 
-  getRightShadowStyle(): React.CSSProperties {
-    const { layout } = this.props;
+      case "right":
+        return {width: layout.right, right: 0, top: 0, bottom: 0};
 
-    return {
-      width: layout.right,
-      right: 0,
-      top: 0,
-      bottom: 0
-    };
-  }
+      case "bottom":
+        return {height: layout.bottom, bottom: 0, left: 0, right: 0};
 
-  getBottomShadowStyle(): React.CSSProperties {
-    const { layout } = this.props;
+      case "left":
+        return {width: layout.left, left: 0, top: 0, bottom: 0};
 
-    return {
-      height: layout.bottom,
-      bottom: 0,
-      left: 0,
-      right: 0
-    };
-  }
-
-  getLeftShadowStyle(): React.CSSProperties {
-    const { layout } = this.props;
-    const { scrollTop } = this.state;
-
-    return {
-      width: layout.left,
-      left: 0,
-      top: 0,
-      bottom: 0
-    };
+      default:
+        throw new Error("Unknown side for shadow. This shouldn't happen.");
+    }
   }
 
   getBodyStyle(): React.CSSProperties {
@@ -203,8 +162,6 @@ export class Scroller extends React.Component<ScrollerProps, ScrollerState> {
     const { layout } = this.props;
 
     return {
-      top: 0,
-      left: 0,
       width: layout.bodyWidth + layout.left + layout.right,
       height: layout.bodyHeight + layout.top + layout.bottom
     };
@@ -274,26 +231,13 @@ export class Scroller extends React.Component<ScrollerProps, ScrollerState> {
     return str ? str.charAt(0).toUpperCase() + str.slice(1) : undefined;
   }
 
-  toKebabCase(str: string): string {
-    return str ? str.replace(/([A-Z])/g, (c) => `-${c.toLowerCase()}`) : undefined;
+  renderGutter(side: XSide | YSide): JSX.Element {
+    var element = (this.props as any)[`${side}Gutter`];
+
+    return <div className={`${side}-gutter`} style={this.getGutterStyle(side)}>{element}</div>;
   }
 
-  renderTile(id: string): JSX.Element {
-    var element = (this.props as any)[id];
-    var styler = (this as any)[`get${this.firstUp(id)}Style`].bind(this);
-
-    return <div className={this.toKebabCase(id)} style={styler()}>{element}</div>;
-  }
-
-  renderGutter(side: string): JSX.Element {
-    if (['top', 'bottom', 'left', 'right'].indexOf(side) === -1) {
-      throw new Error('Unknown gutter : ' + side);
-    }
-
-    return this.renderTile(side + 'Gutter');
-  }
-
-  shouldHaveShadow(side: string): boolean {
+  shouldHaveShadow(side: XSide | YSide): boolean {
     const { scrollLeft, scrollTop, viewportHeight, viewportWidth } = this.state;
 
     const { layout } = this.props;
@@ -306,27 +250,18 @@ export class Scroller extends React.Component<ScrollerProps, ScrollerState> {
     throw new Error('Unknow side for shadow : ' + side);
   }
 
-  renderShadow(side: string): JSX.Element {
-    if (['top', 'bottom', 'left', 'right'].indexOf(side) === -1) {
-      throw new Error('Unknown shadow : ' + side);
-    }
-
+  renderShadow(side: XSide | YSide): JSX.Element {
     if (!(this.props.layout as any)[side]) return null; // no gutter ? no shadow.
     if (!this.shouldHaveShadow(side)) return null;
 
-    const name = `${side}Shadow`;
-
-    var styler = (this as any)[`get${this.firstUp(name)}Style`].bind(this);
-
-    return <div className={this.toKebabCase(name)} style={styler()}/>;
+    return <div className={`${side}-shadow`} style={this.getShadowStyle(side)}/>;
   }
 
-  renderCorner(side: string): JSX.Element {
-    if (['topLeft', 'topRight', 'bottomLeft', 'bottomRight'].indexOf(side) === -1) {
-      throw new Error('Unknown corner : ' + side);
-    }
+  renderCorner(yPos: YSide, xPos: XSide): JSX.Element {
+    var style = this.getCornerStyle(yPos, xPos);
+    var element = (this.props as any)[yPos + this.firstUp(xPos) + 'Corner'];
 
-    return this.renderTile(side + 'Corner');
+    return <div className={[yPos, xPos, 'corner'].join('-')} style={style}>{element}</div>;
   }
 
   componentDidUpdate() {
@@ -353,10 +288,10 @@ export class Scroller extends React.Component<ScrollerProps, ScrollerState> {
       {this.renderGutter("bottom")}
       {this.renderGutter("left")}
 
-      {this.renderCorner("topLeft")}
-      {this.renderCorner("topRight")}
-      {this.renderCorner("bottomLeft")}
-      {this.renderCorner("bottomRight")}
+      {this.renderCorner("top", "left")}
+      {this.renderCorner("top", "right")}
+      {this.renderCorner("bottom", "left")}
+      {this.renderCorner("bottom", "right")}
 
       {this.renderShadow("top")}
       {this.renderShadow("right")}
