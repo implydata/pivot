@@ -14,7 +14,7 @@ import { getVisibleSegments } from '../../utils/sizing/sizing';
 import { STRINGS } from '../../config/constants';
 import { Modal } from '../modal/modal';
 import { Button } from '../button/button';
-import { SimpleScroller, SimpleScrollerLayout } from '../scroller/simple-scroller';
+import { Scroller, ScrollerLayout } from '../scroller/scroller';
 import { Loader } from '../loader/loader';
 import { QueryError } from '../query-error/query-error';
 
@@ -256,7 +256,7 @@ export class RawDataModal extends React.Component<RawDataModalProps, RawDataModa
 
     const filtersString = essence.getEffectiveFilter().getFileString(dataSource.timeAttribute);
 
-    const scrollerLayout: SimpleScrollerLayout = {
+    const scrollerLayout: ScrollerLayout = {
       // Inner dimensions
       bodyWidth: arraySum(dataSource.attributes.map(getColumnWidth)),
       bodyHeight: (dataset ? dataset.data.length : 0) * ROW_HEIGHT,
@@ -275,7 +275,7 @@ export class RawDataModal extends React.Component<RawDataModalProps, RawDataModa
     >
       <div className="content">
         <ul className="filters">{this.renderFilters()}</ul>
-        <SimpleScroller
+        <Scroller
           ref="table"
           layout={scrollerLayout}
           topGutter={this.renderHeader()}

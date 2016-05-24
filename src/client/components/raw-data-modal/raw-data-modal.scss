@@ -29,7 +29,7 @@ $row-height: 30px;
       }
     }
 
-    .simple-scroller {
+    .scroller {
       position: absolute;
       top: $control-height;
       bottom: $control-height + $modal-window-padding + $padding;

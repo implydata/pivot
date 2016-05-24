@@ -13,7 +13,7 @@ import { SPLIT } from '../../config/constants';
 import { getXFromEvent, getYFromEvent, classNames } from '../../utils/dom/dom';
 import { SvgIcon } from '../../components/svg-icon/svg-icon';
 import { SegmentBubble } from '../../components/segment-bubble/segment-bubble';
-import { SimpleScroller, SimpleScrollerLayout } from '../../components/scroller/simple-scroller';
+import { Scroller, ScrollerLayout } from '../../components/scroller/scroller';
 
 import { CircumstancesHandler } from '../../../common/utils/circumstances-handler/circumstances-handler';
 
@@ -454,7 +454,7 @@ export class Table extends BaseVisualization<TableState> {
     </div>;
 
 
-    const scrollerLayout: SimpleScrollerLayout = {
+    const scrollerLayout: ScrollerLayout = {
       // Inner dimensions
       bodyWidth: measureWidth * essence.getEffectiveMeasures().size + ROW_PADDING_RIGHT,
       bodyHeight: flatData ? flatData.length * ROW_HEIGHT : 0,
@@ -467,7 +467,7 @@ export class Table extends BaseVisualization<TableState> {
     };
 
     return <div className="internals table-inner">
-      <SimpleScroller
+      <Scroller
         ref="scroller"
         layout={scrollerLayout}
 
