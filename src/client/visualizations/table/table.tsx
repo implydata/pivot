@@ -416,7 +416,7 @@ export class Table extends BaseVisualization<TableState> {
 
         if (!highlighter && selected) {
           highlighterStyle = {
-            top: rowY,
+            top: rowY - scrollTop,
             left
           };
 
