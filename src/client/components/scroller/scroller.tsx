@@ -3,7 +3,6 @@ require('./scroller.css');
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { classNames, getXFromEvent, getYFromEvent } from '../../utils/dom/dom';
-import { Fn } from '../../../common/utils/general/general';
 
 export type XSide = 'left' | 'right';
 export type YSide = 'top' | 'bottom';
@@ -16,7 +15,7 @@ export interface ScrollerLayout {
   right: number;
   bottom: number;
   left: number;
-};
+}
 
 export interface ScrollerProps extends React.Props<any> {
   layout: ScrollerLayout;
@@ -36,7 +35,7 @@ export interface ScrollerProps extends React.Props<any> {
   bottomRightCorner?: JSX.Element | JSX.Element[];
   bottomLeftCorner?: JSX.Element | JSX.Element[];
   body?: JSX.Element[];
-  bodyOverlay?: JSX.Element | JSX.Element[];
+  overlay?: JSX.Element | JSX.Element[];
 }
 
 export interface ScrollerState {
@@ -154,10 +153,6 @@ export class Scroller extends React.Component<ScrollerProps, ScrollerState> {
     };
   }
 
-  getBodyOverlayStyle(): React.CSSProperties {
-    return this.getBodyStyle();
-  }
-
   getTargetStyle(): React.CSSProperties {
     const { layout } = this.props;
 
@@ -175,9 +170,6 @@ export class Scroller extends React.Component<ScrollerProps, ScrollerState> {
     var target = e.target as Element;
 
     if (this.props.onScroll !== undefined) {
-      const { top, bottom } = this.props.layout;
-      const rect = target.getBoundingClientRect();
-
       this.setState({
         scrollTop: target.scrollTop,
         scrollLeft: target.scrollLeft
@@ -188,7 +180,7 @@ export class Scroller extends React.Component<ScrollerProps, ScrollerState> {
   }
 
   getRelativeMouseCoordinates(event: MouseEvent): {x: number, y: number} {
-    const { top, right, bottom, left, bodyWidth, bodyHeight } = this.props.layout;
+    const { top, left, bodyWidth, bodyHeight } = this.props.layout;
     const container = this.getDOMElement('eventContainer');
     const { scrollLeft, scrollTop, viewportHeight, viewportWidth } = this.state;
     const rect = container.getBoundingClientRect();
@@ -233,21 +225,21 @@ export class Scroller extends React.Component<ScrollerProps, ScrollerState> {
 
   renderGutter(side: XSide | YSide): JSX.Element {
     var element = (this.props as any)[`${side}Gutter`];
+    if (!element) return null;
 
     return <div className={`${side}-gutter`} style={this.getGutterStyle(side)}>{element}</div>;
   }
 
   shouldHaveShadow(side: XSide | YSide): boolean {
-    const { scrollLeft, scrollTop, viewportHeight, viewportWidth } = this.state;
-
     const { layout } = this.props;
+    const { scrollLeft, scrollTop, viewportHeight, viewportWidth } = this.state;
 
     if (side === 'top') return scrollTop > 0;
     if (side === 'left') return scrollLeft > 0;
     if (side === 'bottom') return layout.bodyHeight - scrollTop > viewportHeight;
     if (side === 'right') return layout.bodyWidth - scrollLeft > viewportWidth;
 
-    throw new Error('Unknow side for shadow : ' + side);
+    throw new Error('Unknown side for shadow : ' + side);
   }
 
   renderShadow(side: XSide | YSide): JSX.Element {
@@ -260,6 +252,7 @@ export class Scroller extends React.Component<ScrollerProps, ScrollerState> {
   renderCorner(yPos: YSide, xPos: XSide): JSX.Element {
     var style = this.getCornerStyle(yPos, xPos);
     var element = (this.props as any)[yPos + this.firstUp(xPos) + 'Corner'];
+    if (!element) return null;
 
     return <div className={[yPos, xPos, 'corner'].join('-')} style={style}>{element}</div>;
   }
@@ -277,7 +270,7 @@ export class Scroller extends React.Component<ScrollerProps, ScrollerState> {
   }
 
   render() {
-    const { body, bodyOverlay, onMouseLeave } = this.props;
+    const { body, overlay, onMouseLeave } = this.props;
 
     return <div className="scroller" ref="Scroller">
 
@@ -298,7 +291,7 @@ export class Scroller extends React.Component<ScrollerProps, ScrollerState> {
       {this.renderShadow("bottom")}
       {this.renderShadow("left")}
 
-      <div className="body-overlay" style={this.getBodyOverlayStyle()}>{bodyOverlay}</div>
+      { overlay ? <div className="overlay">{overlay}</div> : null }
 
       <div
         className="event-container"

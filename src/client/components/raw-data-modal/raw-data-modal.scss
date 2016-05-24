@@ -42,6 +42,7 @@ $row-height: 30px;
       .row {
         height: $row-height;
         position: absolute;
+        border-bottom: 1px solid #dedede;
       }
 
       .header-cell,

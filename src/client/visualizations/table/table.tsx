@@ -288,9 +288,9 @@ export class Table extends BaseVisualization<TableState> {
     };
   }
 
-  renderRow(index: number, rowMeasures: JSX.Element[], rowY: number, classes: string[]): JSX.Element {
+  renderRow(index: number, rowMeasures: JSX.Element[], rowY: number, rowClass: string): JSX.Element {
     return <div
-      className={['row', 'nest'].concat(classes).join(' ')}
+      className={'row ' + rowClass}
       key={'_' + index}
       style={{top: rowY}}
     >{rowMeasures}</div>;
@@ -394,7 +394,7 @@ export class Table extends BaseVisualization<TableState> {
         var segmentName = nest ? formatSegment(segmentValue) : 'Total';
         var left = Math.max(0, nest - 1) * INDENT_WIDTH;
         var segmentStyle = { left: left, width: SEGMENT_WIDTH - left, top: rowY };
-        var hoverClass = d === hoverRow ? ' hover' : '';
+        var hoverClass = d === hoverRow ? 'hover' : null;
 
         var selected = false;
         var selectedClass = '';
@@ -403,14 +403,15 @@ export class Table extends BaseVisualization<TableState> {
           selectedClass = selected ? 'selected' : 'not-selected';
         }
 
+        var nestClass = `nest${nest}`;
         segments.push(<div
-          className={'segment nest' + nest + ' ' + selectedClass + hoverClass}
+          className={classNames('segment', nestClass, selectedClass, hoverClass)}
           key={'_' + i}
           style={segmentStyle}
         >{segmentName}</div>);
 
         let rowMeasures = measuresRenderer(d);
-        let rowClass = [nest, selectedClass, hoverClass];
+        let rowClass = classNames(nestClass, selectedClass, hoverClass);
         rows.push(this.renderRow(i, rowMeasures, rowY, rowClass));
 
         if (!highlighter && selected) {
@@ -439,13 +440,11 @@ export class Table extends BaseVisualization<TableState> {
 
     var measureWidth = this.getIdealMeasureWidth(essence);
 
-    const preRows = <div className="segments">{segments}</div>;
+    const segmentLabels = <div className="segment-labels">{segments}</div>;
 
     // added extra wrapping div for pin full and single parent
-    const postRows = <div className="post-body">
-      <div className="highlight-cont">
-        <div className="highlight">{highlighter}</div>
-      </div>
+    const overlay = <div className="highlight-cont">
+      <div className="highlight">{highlighter}</div>
     </div>;
 
     const corner = <div className="corner">
@@ -472,12 +471,12 @@ export class Table extends BaseVisualization<TableState> {
         layout={scrollerLayout}
 
         topGutter={headerColumns}
-        leftGutter={preRows}
+        leftGutter={segmentLabels}
 
         topLeftCorner={corner}
 
         body={rows}
-        bodyOverlay={postRows}
+        overlay={overlay}
 
         onClick={this.onClick.bind(this)}
         onMouseMove={this.onMouseMove.bind(this)}
