@@ -13,9 +13,7 @@ import { SPLIT } from '../../config/constants';
 import { getXFromEvent, getYFromEvent, classNames } from '../../utils/dom/dom';
 import { SvgIcon } from '../../components/svg-icon/svg-icon';
 import { SegmentBubble } from '../../components/segment-bubble/segment-bubble';
-// import { Scroller } from '../../components/scroller/scroller';
 import { SimpleScroller, SimpleScrollerLayout } from '../../components/scroller/simple-scroller';
-import { SimpleTable, InlineStyle } from '../../components/simple-table/simple-table';
 
 import { CircumstancesHandler } from '../../../common/utils/circumstances-handler/circumstances-handler';
 
@@ -291,11 +289,10 @@ export class Table extends BaseVisualization<TableState> {
   }
 
   renderRow(index: number, rowMeasures: JSX.Element[], rowY: number, classes: string[]): JSX.Element {
-    var rowStyle = SimpleTable.getRowStyle(rowY);
     return <div
       className={['row', 'nest'].concat(classes).join(' ')}
       key={'_' + index}
-      style={rowStyle}
+      style={{top: rowY}}
     >{rowMeasures}</div>;
   }
 
