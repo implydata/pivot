@@ -1,6 +1,6 @@
 import * as d3 from 'd3';
 import { Timezone, Duration, WallTime, month, day, hour, minute } from 'chronoshift';
-import { TimeRange } from 'plywood';
+import { TimeRange, TimeBucketAction } from 'plywood';
 
 const FORMAT_WITH_YEAR = d3.time.format('%b %-d, %Y');
 const FORMAT_WITHOUT_YEAR = d3.time.format('%b %-d');
@@ -157,25 +157,6 @@ function wallTimeHelper(wallTime: any) {
 
 function cleanISOString(input: string) {
   return input.replace(/(\.\d\d\d)?Z?$/, '');
-}
-
-export function getBestGranularityDuration(timeRange: TimeRange): Duration {
-  var len = timeRange.end.valueOf() - timeRange.start.valueOf();
-  if (len > 95 * day.canonicalLength) {
-    return Duration.fromJS('P1W');
-
-  } else if (len > 8 * day.canonicalLength) {
-    return Duration.fromJS('P1D');
-
-  } else if (len > 8 * hour.canonicalLength) {
-    return Duration.fromJS('PT1H');
-
-  } else if (len > 3 * hour.canonicalLength) {
-    return Duration.fromJS('PT5M');
-
-  } else {
-    return Duration.fromJS('PT1M');
-  }
 }
 
 export function getTickDuration(timeRange: TimeRange): Duration {
