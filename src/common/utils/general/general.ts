@@ -76,3 +76,20 @@ export function arraySum(inputArray: number[]) {
     return pV + cV;
   }, 0);
 }
+
+export function findFirstBiggerIndex<T>(array: T[], granularityToFind: T, valueOf: (input: T) => number) {
+  if (!granularityToFind) return -1;
+  return List(array).findIndex(g => valueOf(g) > valueOf(granularityToFind));
+}
+
+export function findExactIndex<T>(array: T[], granularityToFind: T, valueOf: (input: T) => number) {
+  return List(array).findIndex(g => valueOf(g) === valueOf(granularityToFind));
+}
+
+export function findMaxValueIndex<T>(array: T[], valueOf: (input: T) => number) {
+  return array.reduce((currMax, cV, cIdx, arr) => valueOf(cV) > valueOf(arr[currMax]) ? cIdx : currMax, 0);
+}
+
+export function findMinValueIndex<T>(array: T[], valueOf: (input: T) => number) {
+  return array.reduce((currMax, cV, cIdx, arr) => valueOf(cV) < valueOf(arr[currMax]) ? cIdx : currMax, 0);
+}
