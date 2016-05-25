@@ -82,7 +82,8 @@ export class Scroller extends React.Component<ScrollerProps, ScrollerState> {
         return {
           height: layout.bottom,
           left: layout.left - scrollLeft,
-          right: layout.right
+          right: layout.right,
+          bottom: 0
         };
 
       case "left":
@@ -174,8 +175,11 @@ export class Scroller extends React.Component<ScrollerProps, ScrollerState> {
       this.setState({
         scrollTop: target.scrollTop,
         scrollLeft: target.scrollLeft
-      }, () => {
-        this.props.onScroll(target.scrollTop, target.scrollLeft);
+      }, () => this.props.onScroll(target.scrollTop, target.scrollLeft));
+    } else {
+      this.setState({
+        scrollTop: target.scrollTop,
+        scrollLeft: target.scrollLeft
       });
     }
   }
@@ -267,7 +271,9 @@ export class Scroller extends React.Component<ScrollerProps, ScrollerState> {
   }
 
   render() {
-    const { body, overlay, onMouseLeave } = this.props;
+    const { body, overlay, onMouseLeave, layout } = this.props;
+
+    if (!layout) return null;
 
     return <div className="scroller" ref="Scroller">
 
