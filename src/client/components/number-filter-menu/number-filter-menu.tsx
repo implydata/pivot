@@ -38,7 +38,6 @@ function isBeyondMax(max: number, end: number) {
   return max && end > max && (Math.abs(end - max)) > 1;
 }
 
-
 export interface MinMaxFunctions {
   minToAny: (n: number) => number;
   maxToAny: (n: number) => number;
