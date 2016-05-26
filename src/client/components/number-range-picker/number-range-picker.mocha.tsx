@@ -17,6 +17,8 @@ describe('NumberRangePicker', () => {
         stepSize={2}
         onRangeStartChange={null}
         onRangeEndChange={null}
+        min={200}
+        max={1000}
       />
     );
 

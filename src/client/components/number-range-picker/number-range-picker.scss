@@ -4,9 +4,9 @@
   margin: $padding-mini 0;
 
   .range-bar {
+    position: absolute;
     top: 6px;
     height: 6px;
-    position: absolute;
 
     &.left,
     &.right {

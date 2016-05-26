@@ -13,6 +13,7 @@ describe('RangeHandle', () => {
       <RangeHandle
         positionLeft={20}
         onChange={() => {}}
+        isAny={false}
       />
     );
     expect(TestUtils.isCompositeComponent(renderedComponent), 'should be composite').to.equal(true);

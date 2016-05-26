@@ -14,4 +14,27 @@ $nub-size: 16px;
   &.empty {
     background: $white;
   }
+
+  &.beyond::before {
+    border-style: solid;
+    border-color: $background-light;
+    border-width: 2.5px 2.5px 0 0;
+    content: '';
+    display: inline-block;
+    height: 4px;
+    position: relative;
+    top: 2.5px;
+    vertical-align: top;
+    width: 4px;
+  }
+
+  &.beyond.min::before {
+    left: 4px;
+    transform: rotate(-135deg);
+  }
+
+  &.beyond.max::before {
+    left: 2px;
+    transform: rotate(45deg);
+  }
 }

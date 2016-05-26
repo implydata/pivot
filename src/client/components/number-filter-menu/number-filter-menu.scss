@@ -16,6 +16,7 @@
 
   input {
     @extend %input-field;
+    margin-top: 6px;
 
     &.gray {
       color: $gray;
