@@ -238,12 +238,11 @@ export class BarChart extends BaseVisualization<BarChartState> {
 
   getSingleChartStage(): Stage {
     const { essence, stage } = this.props;
-    const { datasetLoad, scaleX } = this.state;
+    const { scaleX } = this.state;
 
-    const firstSplitData = (datasetLoad.dataset.data[0][SPLIT] as Dataset).data;
-    const { stepWidth, barWidth, barOffset } = this.getBarDimensions(scaleX.rangeBand());
-    const extraSpace = scaleX(scaleX.domain()[0]) * 2;
-    const width = firstSplitData.length * stepWidth + extraSpace;
+    const { stepWidth } = this.getBarDimensions(scaleX.rangeBand());
+    const xTicks = scaleX.domain();
+    const width = roundToPx(scaleX(xTicks[xTicks.length - 1])) + stepWidth;
 
     const measures = essence.getEffectiveMeasures().toArray();
     const availableHeight = stage.height - X_AXIS_HEIGHT;
@@ -252,7 +251,7 @@ export class BarChart extends BaseVisualization<BarChartState> {
     return new Stage({
       x: 0,
       y: CHART_TOP_PADDING,
-      width, //: stage.width - Y_AXIS_WIDTH - VIS_H_PADDING * 2,
+      width,
       height: height - CHART_TOP_PADDING
     });
   }
