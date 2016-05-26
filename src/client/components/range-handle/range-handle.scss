@@ -1,0 +1,17 @@
+@import '../../imports';
+
+$nub-size: 16px;
+
+.range-handle {
+  display: inline-block;
+  width: $nub-size;
+  height: $nub-size;
+  background: $brand;
+  border-radius: 50%;
+  border: 2px solid $brand;
+  z-index: 2;
+
+  &.empty {
+    background: $white;
+  }
+}

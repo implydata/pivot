@@ -1,0 +1,20 @@
+@import '../../imports';
+
+.number-range-picker {
+  margin: $padding-mini 0;
+
+  .range-bar {
+    top: 6px;
+    height: 6px;
+    position: absolute;
+
+    &.left,
+    &.right {
+      background-color: $background-medium;
+    }
+
+    &.middle {
+      background-color: $brand;
+    }
+  }
+}
