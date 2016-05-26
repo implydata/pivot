@@ -169,19 +169,19 @@ export class Splits implements Instance<SplitsValue, SplitsJS> {
       var splitExpression = splitCombine.expression;
       var splitDimension = dimensions.find(d => splitExpression.equals(d.expression));
       var splitKind = splitDimension.kind;
-      console.log('here', splitDimension);
       if (!splitDimension || !(splitKind === 'time' || splitKind === 'number')) return splitCombine;
       changed = true;
 
-      var selctionSet = filter.getLiteralSet(splitExpression);
-      var extent = selctionSet ? selctionSet.extent() : null;
+      var selectionSet = filter.getLiteralSet(splitExpression);
+      var extent = selectionSet ? selectionSet.extent() : null;
 
       if (splitKind === 'time') {
         return splitCombine.changeBucketAction(new TimeBucketAction({
           duration: TimeRange.isTimeRange(extent) ? getBestGranularityDuration(extent) : DEFAULT_GRANULARITY
         }));
       } else if (splitKind === 'number') {
-        throw new Error('nothing here yet');
+        return splitCombine; // ToDo: temp
+        //throw new Error('nothing here yet');
       }
 
       throw new Error('unknown extent type');
