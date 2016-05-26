@@ -1,12 +1,16 @@
 require('./range-handle.css');
 
 import * as React from 'react';
-import { getXFromEvent, classNames } from '../../utils/dom/dom';
+import { getXFromEvent, classNames, clamp } from '../../utils/dom/dom';
 
 export interface RangeHandleProps extends React.Props<any> {
   positionLeft: number;
-  onChange: Function;
-  isAny?: boolean;
+  onChange: (x: number) => void;
+  isAny: boolean;
+  isBeyondMin?: boolean;
+  isBeyondMax?: boolean;
+  rightBound?: number;
+  leftBound?: number;
 }
 
 export interface RangeHandleState {
@@ -24,9 +28,9 @@ export class RangeHandle extends React.Component<RangeHandleProps, RangeHandleSt
   }
 
   onGlobalMouseMove(event: MouseEvent) {
-    const { onChange } = this.props;
+    const { onChange, leftBound, rightBound } = this.props;
     let newX = getXFromEvent(event);
-    onChange(newX);
+    onChange(clamp(newX, leftBound, rightBound));
   }
 
   onMouseDown(event: MouseEvent) {
@@ -35,16 +39,16 @@ export class RangeHandle extends React.Component<RangeHandleProps, RangeHandleSt
     event.preventDefault();
   }
 
-  onGlobalMouseUp(event: MouseEvent) {
+  onGlobalMouseUp() {
     window.removeEventListener('mouseup', this.onGlobalMouseUp);
     window.removeEventListener('mousemove', this.onGlobalMouseMove);
   }
 
   render() {
-    const { positionLeft, isAny } = this.props;
+    const { positionLeft, isAny, isBeyondMin, isBeyondMax } = this.props;
     var style = { left: positionLeft };
     return <div
-      className={classNames("range-handle", { empty: isAny })}
+      className={classNames("range-handle", { empty: isAny, "beyond min": isBeyondMin, "beyond max": isBeyondMax })}
       style={style}
       onMouseDown={this.onMouseDown.bind(this)}
     />;

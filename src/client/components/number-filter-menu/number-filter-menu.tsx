@@ -7,37 +7,56 @@ import { Set, NumberRange, LiteralExpression, $, Dataset, ply } from 'plywood';
 import { FilterClause, Clicker, Essence, Filter, Dimension } from '../../../common/models/index';
 import { Fn } from '../../../common/utils/general/general';
 import { STRINGS } from '../../config/constants';
-import { enterKey, classNames } from '../../utils/dom/dom';
+import { enterKey } from '../../utils/dom/dom';
 
 import { Loader } from '../loader/loader';
 import { QueryError } from '../query-error/query-error';
 import { Button } from '../button/button';
 import { NumberRangePicker } from '../number-range-picker/number-range-picker';
 
-
-function round(n: number, digits: number) {
-  var mult = Math.pow(10,
-    digits - Math.floor(Math.log(n) / Math.LN10) - digits);
-  return Math.round(n * mult) / mult;
-}
-
-
-export function minToAny(min: number) {
+function minToAny(min: number) {
   return min - 1;
 }
-export function maxToAny(max: number) {
+
+function maxToAny(max: number) {
   return max + 1;
+}
+
+function isStartAny(min: number, start: number) {
+  return min && (Math.abs(min) === Math.abs(start) - 1);
+}
+
+function isBeyondMin(min: number, start: number) {
+  return min && start < min && Math.abs(min - start) > 1;
+}
+
+function isEndAny(max: number, end: number) {
+  return max && (Math.abs(end) === Math.abs(max) + 1);
+}
+
+function isBeyondMax(max: number, end: number) {
+  return max && end > max && (Math.abs(end - max)) > 1;
+}
+
+
+export interface MinMaxFunctions {
+  minToAny: (n: number) => number;
+  maxToAny: (n: number) => number;
+  isStartAny: (min: number, start: number) => boolean;
+  isBeyondMin: (min: number, start: number) => boolean;
+  isEndAny: (n: number, start: number) => boolean;
+  isBeyondMax: (min: number, start: number) => boolean;
 }
 
 export function startToString(start: number, min: number): string {
   if (isNaN(start)) return `` + start;
-  if (min && start < min) return STRINGS.any;
+  if (isStartAny(min, start)) return STRINGS.any;
   return `` + start;
 }
 
 export function endToString(end: number, max: number) {
   if (isNaN(end)) return `` + end;
-  if (max && end > max) return STRINGS.any;
+  if (isEndAny(max, end)) return STRINGS.any;
   return `` + end;
 }
 
@@ -77,7 +96,6 @@ export class NumberFilterMenu extends React.Component<NumberFilterMenuProps, Num
       endInput: "",
       loading: false,
       error: null
-
     };
 
     this.globalKeyDownListener = this.globalKeyDownListener.bind(this);
@@ -109,12 +127,12 @@ export class NumberFilterMenu extends React.Component<NumberFilterMenuProps, Num
     var { dataSource } = essence;
     var filterExpression = essence.getEffectiveFilter(null, dimension).toExpression();
     var valueSet = essence.filter.getLiteralSet(dimension.expression);
-    var hasStartEnd = valueSet && valueSet.elements.length !== 0;
+    var hasRange = valueSet && valueSet.elements.length !== 0;
     var $main = $('main');
     var query = ply()
       .apply('main', $main.filter(filterExpression))
-      .apply('Min', $('main').min($(dimension.name)))
-      .apply('Max', $('main').max($(dimension.name)));
+      .apply('Min', $main.min($(dimension.name)))
+      .apply('Max', $main.max($(dimension.name)));
     this.setState({
       loading: true
     });
@@ -129,7 +147,7 @@ export class NumberFilterMenu extends React.Component<NumberFilterMenuProps, Num
             loading: false
           };
 
-          if (hasStartEnd) {
+          if (hasRange) {
             var range = valueSet.elements[0];
             var { start, end } = range;
             newState.startInput = startToString(start, min);
@@ -146,7 +164,11 @@ export class NumberFilterMenu extends React.Component<NumberFilterMenuProps, Num
           this.setState(newState);
         },
         (error) => {
-          console.log(' err ', error);
+          if (!this.mounted) return;
+          this.setState({
+            loading: false,
+            error
+          });
         }
       );
   }
@@ -233,8 +255,7 @@ export class NumberFilterMenu extends React.Component<NumberFilterMenuProps, Num
   render() {
     const { rightBound, leftOffset, endInput, startInput, error, loading, end, start } = this.state;
     const { min, max } = this.state;
-    var step = round((max - min) / rightBound, 2);
-    var remainder = (max - min) % rightBound;
+    var step =  (max - min) / rightBound;
 
     return <div className="number-filter-menu" ref="number-filter-menu">
       <div className="side-by-side">
@@ -253,12 +274,12 @@ export class NumberFilterMenu extends React.Component<NumberFilterMenuProps, Num
         onRangeStartChange={this.onRangeStartChange.bind(this)}
         offSet={leftOffset}
         stepSize={step}
-        remainder={remainder}
         rightBound={rightBound}
         start={start}
         end={end}
         min={min}
         max={max}
+        minMaxFunctions={{ minToAny, maxToAny, isStartAny, isBeyondMin, isEndAny, isBeyondMax }}
       />
 
       {loading ? <Loader/> : null}

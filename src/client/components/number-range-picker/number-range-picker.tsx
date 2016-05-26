@@ -1,35 +1,42 @@
 require('./number-range-picker.css');
 
 import * as React from 'react';
+import { getXFromEvent, clamp } from '../../utils/dom/dom';
+
+import { MinMaxFunctions } from '../number-filter-menu/number-filter-menu';
 import { RangeHandle } from '../range-handle/range-handle';
-import { clamp, getXFromEvent } from '../../utils/dom/dom';
 
 export const NUB_SIZE = 16;
 
-export function getAdjustedEnd(end: number) {
-  return end > NUB_SIZE ? end - NUB_SIZE : end;
-}
-
-export function getAdjustedStart(start: number) {
+function getAdjustedStart(start: number) {
   return start + NUB_SIZE;
 }
 
+function getAdjustedEnd(end: number) {
+  return end - NUB_SIZE;
+}
+
+function toSignificanDigits(n: number, digits: number) {
+  var multiplier = Math.pow(10, digits - Math.floor(Math.log(n) / Math.LN10) - 1);
+  return Math.round(n * multiplier) / multiplier;
+}
+
 // offset the bar a little because a rectangle at the same position as a circle will peek through
-export function getAdjustedStartHalf(start: number) {
+function getAdjustedStartHalf(start: number) {
   return start + NUB_SIZE / 2;
 }
 
 export interface NumberRangePickerProps extends React.Props<any> {
-  start?: number;
-  end?: number;
-  min?: number;
-  max?: number;
-  rightBound?: number;
-  offSet?: number;
-  onRangeStartChange?: (n: number) => void;
-  onRangeEndChange?: (rangeEnd: number) => void;
-  stepSize?: number;
-  remainder?: number;
+  start: number;
+  end: number;
+  min: number;
+  max: number;
+  rightBound: number;
+  offSet: number;
+  stepSize: number;
+  onRangeStartChange: (n: number) => void;
+  onRangeEndChange: (rangeEnd: number) => void;
+  minMaxFunctions?: MinMaxFunctions;
 }
 
 export interface NumberRangePickerState {
@@ -48,44 +55,37 @@ export class NumberRangePicker extends React.Component<NumberRangePickerProps, N
   }
 
   componentWillMount() {
-    const { start, remainder } = this.props;
-    if (start < 0) {
+    const { min } = this.props;
+    if (min < 0) {
       this.setState({
-        valueAdder: Math.abs(start)
+        valueAdder: Math.abs(min)
       });
     }
   };
 
   componentWillReceiveProps(nextProps: NumberRangePickerProps) {
-    const { end, start, rightBound, remainder } = nextProps;
-    var newRightBound = this.relativePositionToValue(rightBound);
-    if (start < 0) {
+    const { min } = nextProps;
+    if (min < 0) {
       this.setState({
-        valueAdder: Math.abs(start)
-      });
-    } else if (start > newRightBound && newRightBound > 0) {
-      var correction = Math.max(end - start, start);
-      this.setState({
-        valueAdder: -correction
+        valueAdder: Math.abs(min)
       });
     }
   }
 
   relativePositionToValue(position: number) {
-    const { stepSize, rightBound } = this.props;
+    const { stepSize, rightBound, min, max, minMaxFunctions } = this.props;
     const { valueAdder } = this.state;
-    var relativePosition = (position * stepSize) - valueAdder;
-    if (relativePosition === rightBound) {
-      return this.props.max + 1;
-    }
-
-    return (position * stepSize) - valueAdder;
+    if (position === 0) return minMaxFunctions.minToAny(min);
+    if (position === rightBound) return minMaxFunctions.maxToAny(max);
+    var significantDigits = min - max > 1000 ? 6 : 3;
+    return (toSignificanDigits(position * stepSize, significantDigits)) - valueAdder;
   }
 
+
   valueToRelativePosition(value: number) {
-    if (value < 0) return 0;
-    const { stepSize } = this.props;
     const { valueAdder } = this.state;
+    const { stepSize } = this.props;
+
     return (value + valueAdder) / stepSize;
   }
 
@@ -94,64 +94,59 @@ export class NumberRangePicker extends React.Component<NumberRangePickerProps, N
     this.updateStart(newStart);
   }
 
-  getValue(value: number, min: number, max: number) {
-    return this.relativePositionToValue(clamp(value, min, max));
-  }
-
   onRightBarClick(e: MouseEvent) {
     var newEnd = getXFromEvent(e);
     this.updateEnd(newEnd);
   }
 
   updateStart(absolutePosition: number) {
-    const { onRangeStartChange, end, offSet } = this.props;
-
+    const { onRangeStartChange, offSet } = this.props;
     var relativePosition = absolutePosition - offSet;
-    var max = getAdjustedEnd(this.valueToRelativePosition(end));
-    var newValue = this.getValue(relativePosition, 0, max);
+    var newValue = this.relativePositionToValue(relativePosition);
     onRangeStartChange(newValue);
   }
 
   updateEnd(absolutePosition: number) {
-    const { onRangeEndChange, start, rightBound, offSet, max } = this.props;
+    const { onRangeEndChange, offSet } = this.props;
     var relativePosition = absolutePosition - offSet;
-    var min = getAdjustedStart(this.valueToRelativePosition(start));
-    var maxPosition = getAdjustedEnd(rightBound);
-    var newValue = this.getValue(relativePosition, min, maxPosition);
-
-    if (newValue === getAdjustedEnd(rightBound)) {
-      onRangeEndChange(max + 1);
-    } else {
-      onRangeEndChange(newValue);
-    }
+    var newValue = this.relativePositionToValue(relativePosition);
+    onRangeEndChange(newValue);
   }
 
   render() {
-    const { start, end, rightBound, stepSize, min, max } = this.props;
+    const { start, end, rightBound, stepSize, min, max, offSet, minMaxFunctions } = this.props;
+    if (!rightBound || !stepSize || !min || !max) return null;
 
-    if (!rightBound || !stepSize) return null;
-    var endLimitPosition = getAdjustedEnd(rightBound);
-    var relativeEnd = end < max ? clamp(this.valueToRelativePosition(end), 0, endLimitPosition) : endLimitPosition;
+    var relativeEnd = end < max ? this.valueToRelativePosition(end) : rightBound;
+    var adjustedEnd = clamp(getAdjustedEnd(relativeEnd), getAdjustedStart(0), rightBound);
+    var positionEnd = getAdjustedEnd(adjustedEnd);
 
-    var positionEnd = getAdjustedEnd(relativeEnd);
     var positionStart = start ? clamp(this.valueToRelativePosition(start), 0, positionEnd) : 0;
 
     var rangeBarLeft = { left: 0, width: positionStart };
-    var rangeBarMiddle = { left: getAdjustedStartHalf(positionStart), width: relativeEnd - positionStart };
-    var rangeBarRight = { left: relativeEnd, width: rightBound - relativeEnd };
-    var isEndAny = end > max;
+    var rangeBarMiddle = { left: getAdjustedStartHalf(positionStart), width: adjustedEnd - positionStart };
+    var rangeBarRight = { left: adjustedEnd, width: rightBound - adjustedEnd };
+
+    var absoluteRightBound = offSet + rightBound;
+
     return <div className="number-range-picker">
       <div className="range-bar left" style={rangeBarLeft} onClick={this.onLeftBarClick.bind(this)} />
       <RangeHandle
         positionLeft={positionStart}
         onChange={this.updateStart.bind(this)}
-        isAny={start < min}
+        isAny={minMaxFunctions.isStartAny(min, start)}
+        isBeyondMin={minMaxFunctions.isBeyondMin(min, start)}
+        leftBound={offSet}
+        rightBound={offSet + positionEnd}
       />
       <div className="range-bar middle" style={rangeBarMiddle} />
       <RangeHandle
         positionLeft={positionEnd}
         onChange={this.updateEnd.bind(this)}
-        isAny={isEndAny}
+        isAny={minMaxFunctions.isEndAny(max, end)}
+        isBeyondMax={minMaxFunctions.isBeyondMax(max, end)}
+        leftBound={offSet + getAdjustedStart(positionStart)}
+        rightBound={absoluteRightBound}
       />
       <div className="range-bar right" style={rangeBarRight} onClick={this.onRightBarClick.bind(this)} />
     </div>;
