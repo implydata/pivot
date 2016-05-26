@@ -38,6 +38,18 @@ function isBeyondMax(max: number, end: number) {
   return max && end > max && (Math.abs(end - max)) > 1;
 }
 
+function startToString(start: number, min: number): string {
+  if (isNaN(start)) return `` + start;
+  if (isStartAny(min, start)) return STRINGS.any;
+  return `` + start;
+}
+
+function endToString(end: number, max: number) {
+  if (isNaN(end)) return `` + end;
+  if (isEndAny(max, end)) return STRINGS.any;
+  return `` + end;
+}
+
 export interface MinMaxFunctions {
   minToAny: (n: number) => number;
   maxToAny: (n: number) => number;
@@ -45,18 +57,6 @@ export interface MinMaxFunctions {
   isBeyondMin: (min: number, start: number) => boolean;
   isEndAny: (n: number, start: number) => boolean;
   isBeyondMax: (min: number, start: number) => boolean;
-}
-
-export function startToString(start: number, min: number): string {
-  if (isNaN(start)) return `` + start;
-  if (isStartAny(min, start)) return STRINGS.any;
-  return `` + start;
-}
-
-export function endToString(end: number, max: number) {
-  if (isNaN(end)) return `` + end;
-  if (isEndAny(max, end)) return STRINGS.any;
-  return `` + end;
 }
 
 export interface NumberFilterMenuProps extends React.Props<any> {
