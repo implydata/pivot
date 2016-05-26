@@ -123,8 +123,8 @@ export class BarChart extends BaseVisualization<BarChartState> {
     var chartStage = this.getSingleChartStage();
     var chartHeight = this.getOuterChartHeight(chartStage);
 
-    if (y > chartHeight * measures.length) return; // on x axis
-    if (x > chartStage.width) return; // on y axis
+    if (y >= chartHeight * measures.length) return; // on x axis
+    if (x >= chartStage.width) return; // on y axis
 
 
     var chartIndex = Math.floor(y / chartHeight);
@@ -237,17 +237,22 @@ export class BarChart extends BaseVisualization<BarChartState> {
   }
 
   getSingleChartStage(): Stage {
-    var { essence, stage } = this.props;
-    var measures = essence.getEffectiveMeasures().toArray();
+    const { essence, stage } = this.props;
+    const { datasetLoad, scaleX } = this.state;
 
-    var availableHeight = stage.height - X_AXIS_HEIGHT;
+    const firstSplitData = (datasetLoad.dataset.data[0][SPLIT] as Dataset).data;
+    const { stepWidth, barWidth, barOffset } = this.getBarDimensions(scaleX.rangeBand());
+    const extraSpace = scaleX(scaleX.domain()[0]) * 2;
+    const width = firstSplitData.length * stepWidth + extraSpace;
 
-    var height = Math.max(MIN_CHART_HEIGHT, Math.floor(availableHeight / measures.length));
+    const measures = essence.getEffectiveMeasures().toArray();
+    const availableHeight = stage.height - X_AXIS_HEIGHT;
+    const height = Math.max(MIN_CHART_HEIGHT, Math.floor(availableHeight / measures.length));
 
     return new Stage({
       x: 0,
       y: CHART_TOP_PADDING,
-      width: stage.width - Y_AXIS_WIDTH - VIS_H_PADDING * 2,
+      width, //: stage.width - Y_AXIS_WIDTH - VIS_H_PADDING * 2,
       height: height - CHART_TOP_PADDING
     });
   }
@@ -296,6 +301,13 @@ export class BarChart extends BaseVisualization<BarChartState> {
     return chartsAboveMe - scrollTop + y - HOVER_BUBBLE_V_OFFSET + CHART_TOP_PADDING;
   }
 
+  getBubbleLeftOffset(x: number): number {
+    const { stage } = this.props;
+    const { scrollLeft } = this.state;
+
+    return stage.x + VIS_H_PADDING + x - scrollLeft;
+  }
+
   renderSelectionBubble(hoverInfo: BubbleInfo): JSX.Element {
     const { essence, stage, clicker, openRawDataModal } = this.props;
     const chartStage = this.getSingleChartStage();
@@ -304,7 +316,7 @@ export class BarChart extends BaseVisualization<BarChartState> {
     const { splits, dataSource } = essence;
     const dimension = splits.get(hoverInfo.splitIndex).getDimension(dataSource.dimensions);
 
-    const leftOffset = stage.x + VIS_H_PADDING + coordinates.middleX;
+    const leftOffset = this.getBubbleLeftOffset(coordinates.middleX);
     const topOffset = this.getBubbleTopOffset(coordinates.y, chartIndex, chartStage);
 
     if (topOffset <= 0) return null;
@@ -330,7 +342,7 @@ export class BarChart extends BaseVisualization<BarChartState> {
     const chartStage = this.getSingleChartStage();
     const { measure, path, chartIndex, segmentLabel, coordinates } = hoverInfo;
 
-    const leftOffset = stage.x + VIS_H_PADDING + coordinates.middleX;
+    const leftOffset = this.getBubbleLeftOffset(coordinates.middleX);
     const topOffset = this.getBubbleTopOffset(coordinates.y, chartIndex, chartStage);
 
     if (topOffset <= 0) return null;
