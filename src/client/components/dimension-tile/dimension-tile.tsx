@@ -408,6 +408,10 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
           segmentValueStr = formatTimeBasedOnGranularity(segmentValue, (selectedGranularity as TimeBucketAction).duration, essence.timezone, getLocale());
         }
 
+        if (dimension.isContinuous()) {
+          className += ' continuous';
+        }
+
         var measureValueElement: JSX.Element = null;
         if (measure) {
           measureValueElement = <div className="measure-value">{formatter(d[measureName] as number)}</div>;

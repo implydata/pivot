@@ -49,14 +49,6 @@ export function dataSourceLoaderFactory(druidRequester: Requester.PlywoodRequest
             });
 
             return dataSource.addAttributes(dataset.attributes).attachExecutor(executor);
-              // .then(dataSourceWithExternal => {
-              //   if (dataSourceWithExternal.shouldUpdateMaxTime()) {
-              //     console.log('here');
-              //     return DataSource.updateMaxTime(dataSourceWithExternal);
-              //   } else {
-              //     return dataSourceWithExternal;
-              //   }
-              // })
           });
 
       case 'druid':
