@@ -105,11 +105,10 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
 
       const filterSelection: Expression = essence.filter.getSelection(dimensionExpression);
 
-      let selectedGranularity: Granularity = granularity;
       if (!selectedGranularity) {
         if (filterSelection) {
           var range = dimension.kind === 'time' ? essence.evaluateSelection(filterSelection) : filterSelection.getLiteralValue().extent();
-          selectedGranularity = getBestGranularityForRange(range, dimension.bucketedBy, dimension.granularities);
+          selectedGranularity = getBestGranularityForRange(range, true, dimension.bucketedBy, dimension.granularities);
         } else {
           selectedGranularity = getDefaultGranularityForKind(dimension.kind, dimension.bucketedBy);
         }
@@ -337,7 +336,7 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
   getGranularityActions() {
     const { dimension } = this.props;
     const { selectedGranularity } = this.state;
-    var granularities = dimension.granularities || getGranularities(dimension.kind, dimension.bucketedBy);
+    var granularities = dimension.granularities || getGranularities(dimension.kind, dimension.bucketedBy, true);
     return granularities.map((g) => {
       var granularityStr = granularityToString(g);
       return {
@@ -357,6 +356,8 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
     var measureName = measure ? measure.name : null;
     var filterSet = essence.filter.getLiteralSet(dimension.expression);
     var maxHeight = PIN_TITLE_HEIGHT;
+    var continuous = dimension.isContinuous();
+
 
     var rows: Array<JSX.Element> = [];
     var folder: JSX.Element = null;
@@ -398,7 +399,7 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
 
         var className = 'row';
         var checkbox: JSX.Element = null;
-        if ((filterSet || colors) && dimension.kind !== 'time') {
+        if ((filterSet || colors) && !continuous) {
           var selected: boolean;
           if (colors) {
             selected = false;
@@ -461,7 +462,8 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
     const className = classNames(
       'dimension-tile',
       (folder ? 'has-folder' : 'no-folder'),
-      (colors ? 'has-colors' : 'no-colors')
+      (colors ? 'has-colors' : 'no-colors'),
+      {continuous}
     );
 
     const style = {
@@ -492,7 +494,7 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
       showSearch={showSearch}
       icons={icons}
       className={className}
-      actions={dimension.isContinuous() ? this.getGranularityActions() : null}
+      actions={continuous ? this.getGranularityActions() : null}
       >
       <div className="rows">
         {rows}

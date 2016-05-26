@@ -176,13 +176,13 @@ export class Splits implements Instance<SplitsValue, SplitsJS> {
 
       if (splitKind === 'time') {
         return splitCombine.changeBucketAction(new TimeBucketAction({
-          duration: TimeRange.isTimeRange(extent) ? (getBestBucketUnitForRange(extent, splitDimension.bucketedBy, splitDimension.granularities) as Duration) :
+          duration: TimeRange.isTimeRange(extent) ? (getBestBucketUnitForRange(extent, false, splitDimension.bucketedBy, splitDimension.granularities) as Duration) :
             (getDefaultGranularityForKind('time', splitDimension.bucketedBy) as TimeBucketAction).duration
         }));
 
       } else if (splitKind === 'number') {
         return splitCombine.changeBucketAction(new NumberBucketAction({
-          size: extent ? (getBestBucketUnitForRange(extent, splitDimension.bucketedBy) as number) :
+          size: extent ? (getBestBucketUnitForRange(extent, false, splitDimension.bucketedBy) as number) :
             (getDefaultGranularityForKind('number', splitDimension.bucketedBy) as NumberBucketAction).size
         }));
 
