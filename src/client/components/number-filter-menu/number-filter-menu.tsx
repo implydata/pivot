@@ -140,8 +140,9 @@ export class NumberFilterMenu extends React.Component<NumberFilterMenuProps, Num
     const { end } = this.state;
     var startInput = (e.target as HTMLInputElement).value;
     this.setState({ startInput });
+
     var start = stringToStart(startInput);
-    if (!isNaN(start) && start !== null ? start < end : !isNaN(start)) {
+    if (start !== null && start < end || start === null) {
       this.setState({ start });
     }
   }
@@ -150,8 +151,8 @@ export class NumberFilterMenu extends React.Component<NumberFilterMenuProps, Num
     const { start } = this.state;
     var endInput = (e.target as HTMLInputElement).value;
     this.setState({ endInput });
-    var end = stringToEnd(endInput);
 
+    var end = stringToEnd(endInput);
     if (end !== null && end > start || end === null) {
       this.setState({ end });
     }
