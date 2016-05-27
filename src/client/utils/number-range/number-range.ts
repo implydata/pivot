@@ -21,3 +21,7 @@ export function isBeyondMin(min: number, start: number) {
 export function isBeyondMax(max: number, end: number) {
   return max && end > max && (Math.abs(end - max)) > 1;
 }
+
+export function getNumberOfWholeDigits(n: number) {
+  return Math.floor(Math.log(n) / Math.log(10)) + 1;
+}
