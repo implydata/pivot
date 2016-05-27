@@ -137,7 +137,7 @@ export class FilterClause implements Instance<FilterClauseValue, FilterClauseJS>
     const { expression, selection } = this;
     var ex: ChainExpression = null;
     var selectionType = selection.type;
-    if (selectionType === 'TIME_RANGE' || selectionType === 'SET/TIME_RANGE' || selectionType === 'SET/NUMBER_RANGE') {
+    if (selectionType === 'TIME_RANGE' || selectionType === 'SET/TIME_RANGE' || selectionType === 'NUMBER_RANGE' || selectionType === 'SET/NUMBER_RANGE') {
       ex = expression.in(selection);
     } else {
       ex = expression.overlap(selection);
