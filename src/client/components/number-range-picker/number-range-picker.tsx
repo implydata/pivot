@@ -2,8 +2,8 @@ require('./number-range-picker.css');
 
 import * as React from 'react';
 import { getXFromEvent, clamp } from '../../utils/dom/dom';
+import { minToAny, maxToAny, isStartAny, isBeyondMin, isEndAny, isBeyondMax } from '../../utils/number-range/number-range';
 
-import { MinMaxFunctions } from '../number-filter-menu/number-filter-menu';
 import { RangeHandle } from '../range-handle/range-handle';
 
 export const NUB_SIZE = 16;
@@ -36,7 +36,6 @@ export interface NumberRangePickerProps extends React.Props<any> {
   stepSize: number;
   onRangeStartChange: (n: number) => void;
   onRangeEndChange: (rangeEnd: number) => void;
-  minMaxFunctions?: MinMaxFunctions;
 }
 
 export interface NumberRangePickerState {
@@ -73,10 +72,10 @@ export class NumberRangePicker extends React.Component<NumberRangePickerProps, N
   }
 
   relativePositionToValue(position: number) {
-    const { stepSize, rightBound, min, max, minMaxFunctions } = this.props;
+    const { stepSize, rightBound, min, max } = this.props;
     const { valueAdder } = this.state;
-    if (position === 0) return minMaxFunctions.minToAny(min);
-    if (position === rightBound) return minMaxFunctions.maxToAny(max);
+    if (position === 0) return minToAny();
+    if (position === rightBound) return maxToAny();
     var significantDigits = min - max > 1000 ? 6 : 3;
     return (toSignificanDigits(position * stepSize, significantDigits)) - valueAdder;
   }
@@ -114,10 +113,12 @@ export class NumberRangePicker extends React.Component<NumberRangePickerProps, N
   }
 
   render() {
-    const { start, end, rightBound, stepSize, min, max, offSet, minMaxFunctions } = this.props;
-    if (!rightBound || !stepSize || !min || !max) return null;
-
-    var relativeEnd = end < max ? this.valueToRelativePosition(end) : rightBound;
+    const { start, end, rightBound, stepSize, min, max, offSet } = this.props;
+    if (!rightBound || !stepSize || !min || !max) {
+      return <div className="number-range-picker" />;
+    }
+    
+    var relativeEnd = end && end < max ? this.valueToRelativePosition(end) : rightBound;
     var adjustedEnd = clamp(getAdjustedEnd(relativeEnd), getAdjustedStart(0), rightBound);
     var positionEnd = getAdjustedEnd(adjustedEnd);
 
@@ -134,8 +135,8 @@ export class NumberRangePicker extends React.Component<NumberRangePickerProps, N
       <RangeHandle
         positionLeft={positionStart}
         onChange={this.updateStart.bind(this)}
-        isAny={minMaxFunctions.isStartAny(min, start)}
-        isBeyondMin={minMaxFunctions.isBeyondMin(min, start)}
+        isAny={isStartAny(start)}
+        isBeyondMin={isBeyondMin(min, start)}
         leftBound={offSet}
         rightBound={offSet + positionEnd}
       />
@@ -143,8 +144,8 @@ export class NumberRangePicker extends React.Component<NumberRangePickerProps, N
       <RangeHandle
         positionLeft={positionEnd}
         onChange={this.updateEnd.bind(this)}
-        isAny={minMaxFunctions.isEndAny(max, end)}
-        isBeyondMax={minMaxFunctions.isBeyondMax(max, end)}
+        isAny={isEndAny(end)}
+        isBeyondMax={isBeyondMax(max, end)}
         leftBound={offSet + getAdjustedStart(positionStart)}
         rightBound={absoluteRightBound}
       />
