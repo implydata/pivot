@@ -249,7 +249,7 @@ export class BarChart extends BaseVisualization<BarChartState> {
     return new Stage({
       x: 0,
       y: CHART_TOP_PADDING,
-      width,
+      width: Math.max(width, stage.width - Y_AXIS_WIDTH - VIS_H_PADDING * 2),
       height: height - CHART_TOP_PADDING - CHART_BOTTOM_PADDING
     });
   }
