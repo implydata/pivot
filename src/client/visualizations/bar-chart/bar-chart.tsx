@@ -312,8 +312,6 @@ export class BarChart extends BaseVisualization<BarChartState> {
     const { scrollTop, scrollLeft } = this.state;
     const chartStage = this.getSingleChartStage();
 
-    console.log(leftOffset);
-
     if (topOffset <= 0) return false;
     if (topOffset > stage.height - X_AXIS_HEIGHT) return false;
     if (leftOffset - stage.x <= 0) return false;
@@ -380,6 +378,11 @@ export class BarChart extends BaseVisualization<BarChartState> {
     }
 
     return false;
+  }
+
+  isFaded(): boolean {
+    const { essence } = this.props;
+    return essence.highlightOn(BarChart.id);
   }
 
   hasAnySelectionGoingOn(): boolean {
@@ -450,6 +453,7 @@ export class BarChart extends BaseVisualization<BarChartState> {
         }
 
         let selected = this.isSelected(subPath, measure);
+        let faded = this.isFaded();
         if (selected) {
           bubble = this.renderSelectionBubble(bubbleInfo);
           highlight = <rect
@@ -465,7 +469,7 @@ export class BarChart extends BaseVisualization<BarChartState> {
         }
 
         bar = <g
-          className={classNames('bar', { selected: selected, 'not-selected': (!!selectionInfo && !selected), isHovered })}
+          className={classNames('bar', { selected: selected, 'not-selected': (!selected && faded), isHovered })}
           key={segmentValueStr}
           transform={`translate(${roundToPx(x)}, 0)`}
           >
