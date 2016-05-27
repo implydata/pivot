@@ -399,12 +399,11 @@ export class BarChart extends BaseVisualization<BarChartState> {
     coordinates: BarCoordinates[],
     splitIndex = 0,
     path: Datum[] = []
-  ): {bars: JSX.Element[], labels: JSX.Element[], bubble?: JSX.Element} {
+  ): JSX.Element[] {
     const { essence } = this.props;
     const { selectionInfo } = this.state;
 
-    var bars: JSX.Element[] = [];
-    var labels: JSX.Element[] = [];
+    var bars: any[] = [];
 
     const dimension = essence.splits.get(splitIndex).getDimension(essence.dataSource.dimensions);
     const splitLength = essence.splits.length();
@@ -414,7 +413,7 @@ export class BarChart extends BaseVisualization<BarChartState> {
       let segmentValueStr = String(segmentValue);
       let subPath = path.concat(d);
 
-      let bar: JSX.Element;
+      let bar: any;
       let highlight: JSX.Element = null;
       let bubble: JSX.Element = null;
       let subCoordinates = coordinates[i];
@@ -423,9 +422,7 @@ export class BarChart extends BaseVisualization<BarChartState> {
 
       if (splitIndex < splitLength - 1) {
         let subData: Datum[] = (d[SPLIT] as Dataset).data;
-        let result: any = this.renderBars(subData, measure, chartIndex, chartStage, xAxisStage, subCoordinates.children, splitIndex + 1, subPath);
-
-        bar = result.bars;
+        bar = this.renderBars(subData, measure, chartIndex, chartStage, xAxisStage, subCoordinates.children, splitIndex + 1, subPath);
       } else {
 
         let bubbleInfo: BubbleInfo = {
@@ -476,17 +473,9 @@ export class BarChart extends BaseVisualization<BarChartState> {
       }
 
       bars.push(bar);
-
-      if (splitIndex === 0) {
-        labels.push(<div
-          className="slanty-label"
-          key={segmentValueStr}
-          style={{ right: xAxisStage.width - (x + stepWidth / 2) }}
-        >{segmentValueStr}</div>);
-      }
     });
 
-    return { bars, labels };
+    return bars;
   }
 
   renderXAxis(data: Datum[], coordinates: BarCoordinates[], xAxisStage: Stage): JSX.Element {
@@ -555,6 +544,25 @@ export class BarChart extends BaseVisualization<BarChartState> {
     return { yGridLines, yAxis, yScale };
   }
 
+  isChartVisible(chartIndex: number, xAxisStage: Stage): boolean {
+    const { stage } = this.props;
+    const { scrollTop } = this.state;
+
+    const chartStage = this.getSingleChartStage();
+    const chartHeight = this.getOuterChartHeight(chartStage);
+
+    const viewPortHeight = stage.height - xAxisStage.height;
+
+    const topY = chartIndex * chartHeight;
+    const bottomY = topY + chartHeight;
+
+    const hiddenAtTop = bottomY < scrollTop;
+
+    const hiddenAtBottom = topY - scrollTop >= viewPortHeight;
+
+    return !hiddenAtTop && !hiddenAtBottom;
+  }
+
   renderChart(dataset: Dataset, coordinates: BarCoordinates[], measure: Measure, chartIndex: number, chartStage: Stage, getX: any): {yAxis: JSX.Element, chart: JSX.Element} {
     const { xTicks, xScale } = this.state;
     var mySplitDataset = dataset.data[0][SPLIT] as Dataset;
@@ -575,7 +583,11 @@ export class BarChart extends BaseVisualization<BarChartState> {
 
     var { yAxis, yGridLines } = this.getYAxisStuff(mySplitDataset, measure, chartStage, chartIndex);
 
-    var { bars, labels } = this.renderBars(mySplitDataset.data, measure, chartIndex, chartStage, xAxisStage, coordinates);
+    var bars: any;
+    if (this.isChartVisible(chartIndex, xAxisStage)) {
+       bars = this.renderBars(mySplitDataset.data, measure, chartIndex, chartStage, xAxisStage, coordinates);
+    }
+
 
     var chart = <div className="measure-bar-chart" key={measure.name}>
       <svg style={chartStage.getWidthHeight(0, CHART_BOTTOM_PADDING)} viewBox={chartStage.getViewBox(0, CHART_BOTTOM_PADDING)}>
@@ -760,7 +772,6 @@ export class BarChart extends BaseVisualization<BarChartState> {
       let chartStage = this.getSingleChartStage();
       let { xAxisStage, yAxisStage } = this.getAxisStages(chartStage);
       xAxis = this.renderXAxis((datasetLoad.dataset.data[0][SPLIT] as Dataset).data, this.getBarsCoordinates(0, xScale), xAxisStage);
-
 
       measures.forEach((measure, chartIndex) => {
         let mySplitDataset = datasetLoad.dataset.data[0][SPLIT] as Dataset;
