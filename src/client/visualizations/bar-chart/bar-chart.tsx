@@ -169,15 +169,23 @@ export class BarChart extends BaseVisualization<BarChartState> {
       }
     }
 
-    return {path: [], coordinates: null };
+    return { path: [], coordinates: null };
   }
 
   onSimpleScroll(scrollTop: number, scrollLeft: number) {
-    this.setState({scrollLeft, scrollTop});
+    this.setState({
+      hoverInfo: null,
+      scrollLeft,
+      scrollTop
+    });
   }
 
   onMouseMove(x: number, y: number) {
     this.setState({hoverInfo: this.calculateMousePosition(x, y)});
+  }
+
+  onMouseLeave() {
+    this.setState({hoverInfo: null});
   }
 
   onClick(x: number, y: number) {
@@ -299,10 +307,25 @@ export class BarChart extends BaseVisualization<BarChartState> {
     return stage.x + VIS_H_PADDING + x - scrollLeft;
   }
 
+  canShowBubble(leftOffset: number, topOffset: number): boolean {
+    const { stage } = this.props;
+    const { scrollTop, scrollLeft } = this.state;
+    const chartStage = this.getSingleChartStage();
+
+    console.log(leftOffset);
+
+    if (topOffset <= 0) return false;
+    if (topOffset > stage.height - X_AXIS_HEIGHT) return false;
+    if (leftOffset - stage.x <= 0) return false;
+    if (leftOffset > stage.x + stage.width - Y_AXIS_WIDTH - VIS_H_PADDING) return false;
+
+    return true;
+  }
+
   renderSelectionBubble(hoverInfo: BubbleInfo): JSX.Element {
     const { essence, stage, clicker, openRawDataModal } = this.props;
-    const chartStage = this.getSingleChartStage();
     const { measure, path, chartIndex, segmentLabel, coordinates } = hoverInfo;
+    const chartStage = this.getSingleChartStage();
 
     const { splits, dataSource } = essence;
     const dimension = splits.get(hoverInfo.splitIndex).getDimension(dataSource.dimensions);
@@ -310,7 +333,7 @@ export class BarChart extends BaseVisualization<BarChartState> {
     const leftOffset = this.getBubbleLeftOffset(coordinates.middleX);
     const topOffset = this.getBubbleTopOffset(coordinates.y, chartIndex, chartStage);
 
-    if (topOffset <= 0) return null;
+    if (!this.canShowBubble(leftOffset, topOffset)) return null;
 
     return <SegmentBubble
       left={leftOffset}
@@ -336,7 +359,7 @@ export class BarChart extends BaseVisualization<BarChartState> {
     const leftOffset = this.getBubbleLeftOffset(coordinates.middleX);
     const topOffset = this.getBubbleTopOffset(coordinates.y, chartIndex, chartStage);
 
-    if (topOffset <= 0) return null;
+    if (!this.canShowBubble(leftOffset, topOffset)) return null;
 
     return <SegmentBubble
       top={stage.y + topOffset}
@@ -683,10 +706,7 @@ export class BarChart extends BaseVisualization<BarChartState> {
     var usedWidth = stepWidth * maxNumberOfLeaves[0];
     var padLeft = Math.max(BARS_MIN_PAD_LEFT, (overallWidth - usedWidth) / 2);
 
-    return {
-      padLeft,
-      usedWidth
-    };
+    return {padLeft, usedWidth};
   }
 
   getBarsCoordinates(chartIndex: number, xScale: d3.scale.Ordinal<string, number>): BarCoordinates[] {
@@ -819,6 +839,7 @@ export class BarChart extends BaseVisualization<BarChartState> {
 
         onClick={this.onClick.bind(this)}
         onMouseMove={this.onMouseMove.bind(this)}
+        onMouseLeave={this.onMouseLeave.bind(this)}
         onScroll={this.onSimpleScroll.bind(this)}
 
       />

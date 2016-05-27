@@ -8,7 +8,6 @@ export default CircumstancesHandler.EMPTY()
 
   .when(CircumstancesHandler.areExactSplitKinds('*'))
   .or(CircumstancesHandler.areExactSplitKinds('*', '*'))
-  .or(CircumstancesHandler.areExactSplitKinds('*', '*', '*'))
   .then((splits: Splits, dataSource: DataSource, colors: Colors, current: boolean) => {
     var booleanBoost = 0;
 
