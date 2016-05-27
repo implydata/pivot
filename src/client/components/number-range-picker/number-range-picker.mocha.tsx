@@ -5,6 +5,7 @@ import * as TestUtils from 'react-addons-test-utils';
 import { findDOMNode } from '../../utils/test-utils/index';
 
 import { NumberRangePicker } from './number-range-picker';
+import { EssenceMock, DimensionMock } from '../../../common/models/mocks';
 
 describe('NumberRangePicker', () => {
   it('adds the correct class', () => {
@@ -13,8 +14,8 @@ describe('NumberRangePicker', () => {
         start={2}
         end={10}
         onRangeStartChange={null}
-        essence={null}
-        dimension={null}
+        essence={EssenceMock.wiki()}
+        dimension={DimensionMock.countryURL()}
         onRangeEndChange={null}
       />
     );
