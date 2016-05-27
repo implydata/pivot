@@ -18,6 +18,10 @@
     }
   }
 
+  .range-handle {
+    display: inline-block;
+  }
+
   .loader,
   .query-error {
     @include pin-full;
