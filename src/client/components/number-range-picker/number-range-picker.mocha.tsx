@@ -12,12 +12,11 @@ describe('NumberRangePicker', () => {
       <NumberRangePicker
         start={2}
         end={10}
-        rightBound={100}
-        offSet={600}
         onRangeStartChange={null}
         essence={null}
         dimension={null}
         onRangeEndChange={null}
+        onSignificantDigitsKnown={null}
       />
     );
 

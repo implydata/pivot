@@ -8,7 +8,7 @@ import { FilterClause, Clicker, Essence, Filter, Dimension } from '../../../comm
 import { Fn } from '../../../common/utils/general/general';
 import { STRINGS } from '../../config/constants';
 import { enterKey } from '../../utils/dom/dom';
-import { minToAny, maxToAny, isStartAny, isEndAny } from '../../utils/number-range/number-range';
+import { minToAny, maxToAny, isStartAny, isEndAny, getNumberOfWholeDigits } from '../../utils/number-range/number-range';
 
 import { Button } from '../button/button';
 import { NumberRangePicker } from '../number-range-picker/number-range-picker';
@@ -47,6 +47,7 @@ export interface NumberFilterMenuState {
   startInput?: string;
   end?: number;
   endInput?: string;
+  significantDigits?: number;
 }
 
 export class NumberFilterMenu extends React.Component<NumberFilterMenuProps, NumberFilterMenuState> {
@@ -87,11 +88,6 @@ export class NumberFilterMenu extends React.Component<NumberFilterMenuProps, Num
   }
 
   componentDidMount() {
-    this.mounted = true;
-    var node = ReactDOM.findDOMNode(this.refs['number-filter-menu']);
-    var rect =  node.getBoundingClientRect();
-
-    this.setState({ leftOffset: rect.left, rightBound: rect.width });
     window.addEventListener('keydown', this.globalKeyDownListener);
   }
 
@@ -104,7 +100,12 @@ export class NumberFilterMenu extends React.Component<NumberFilterMenuProps, Num
     var { start, end } = this.state;
     var { filter } = essence;
 
-    var validFilter = start !== null || end !== null;
+    var validFilter = false;
+    if ((start !== null && end !== null)) {
+      validFilter = start < end;
+    } else {
+      validFilter = (!isNaN(start) && !(isNaN(end))) && (start !== null || end !== null);
+    }
 
     if (validFilter) {
       var newSet = Set.fromJS({ setType: "NUMBER_RANGE", elements: [NumberRange.fromJS({ start, end })] });
@@ -173,7 +174,7 @@ export class NumberFilterMenu extends React.Component<NumberFilterMenuProps, Num
 
   render() {
     const { essence, dimension } = this.props;
-    const { rightBound, leftOffset, endInput, startInput, end, start } = this.state;
+    const { endInput, startInput, end, start } = this.state;
 
     return <div className="number-filter-menu" ref="number-filter-menu">
       <div className="side-by-side">
@@ -187,11 +188,10 @@ export class NumberFilterMenu extends React.Component<NumberFilterMenuProps, Num
         </div>
       </div>
 
+
       <NumberRangePicker
         onRangeEndChange={this.onRangeEndChange.bind(this)}
         onRangeStartChange={this.onRangeStartChange.bind(this)}
-        offSet={leftOffset}
-        rightBound={rightBound}
         start={start}
         end={end}
         dimension={dimension}
