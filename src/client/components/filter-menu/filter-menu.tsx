@@ -45,7 +45,7 @@ export class FilterMenu extends React.Component<FilterMenuProps, FilterMenuState
         essence={essence}
         onClose={onClose}
       />;
-  } else if (dimension.kind === 'number') {
+    } else if (dimension.kind === 'number') {
       menuSize = Stage.fromSize(250, 274);
       menuCont = <NumberFilterMenu
         clicker={clicker}

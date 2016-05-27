@@ -6,7 +6,7 @@ import { findDOMNode } from '../../utils/test-utils/index';
 
 import { NumberRangePicker } from './number-range-picker';
 
-describe.skip('NumberRangePicker', () => {
+describe('NumberRangePicker', () => {
   it('adds the correct class', () => {
     var renderedComponent = TestUtils.renderIntoDocument(
       <NumberRangePicker
