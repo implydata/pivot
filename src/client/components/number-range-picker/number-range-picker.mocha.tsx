@@ -14,11 +14,10 @@ describe('NumberRangePicker', () => {
         end={10}
         rightBound={100}
         offSet={600}
-        stepSize={2}
         onRangeStartChange={null}
+        essence={null}
+        dimension={null}
         onRangeEndChange={null}
-        min={200}
-        max={1000}
       />
     );
 

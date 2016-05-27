@@ -17,4 +17,9 @@
       background-color: $brand;
     }
   }
+
+  .loader,
+  .query-error {
+    @include pin-full;
+  }
 }
