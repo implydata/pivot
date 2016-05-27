@@ -16,7 +16,6 @@ describe('NumberRangePicker', () => {
         essence={null}
         dimension={null}
         onRangeEndChange={null}
-        onSignificantDigitsKnown={null}
       />
     );
 
