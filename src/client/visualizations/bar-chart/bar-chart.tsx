@@ -604,17 +604,17 @@ export class BarChart extends BaseVisualization<BarChartState> {
 
     var { dataset } = datasetLoad;
     if (dataset && splits.length()) {
+      let firstSplitDataSet = dataset.data[0][SPLIT] as Dataset;
       if (registerDownloadableDataset) registerDownloadableDataset(dataset);
-      let flatData = dataset.flatten({
+      let flatData = firstSplitDataSet.flatten({
         order: 'preorder',
         nestingName: '__nest',
         parentName: '__parent'
       });
 
       var maxima = splits.toArray().map(() => 0); // initializing maxima to 0
-      this.maxNumberOfLeaves((dataset.data[0][SPLIT] as Dataset).data, maxima, 0);
+      this.maxNumberOfLeaves(firstSplitDataSet.data, maxima, 0);
 
-      console.log(maxima);
       newState.maxNumberOfLeaves = maxima;
 
       newState.flatData = flatData;
@@ -668,10 +668,18 @@ export class BarChart extends BaseVisualization<BarChartState> {
     const { essence, stage } = this.props;
     var overallWidth = stage.width - VIS_H_PADDING * 2 - Y_AXIS_WIDTH;
 
-    var stepWidth = MIN_STEP_WIDTH * maxNumberOfLeaves.slice(1).reduce(((a, b) => a * b), 1);
+    var numPrimarySteps = maxNumberOfLeaves[0];
+    var minStepWidth = MIN_STEP_WIDTH * maxNumberOfLeaves.slice(1).reduce(((a, b) => a * b), 1);
 
-    // var maxAvailableWidth = overallWidth - BARS_MIN_PAD_LEFT - BARS_MIN_PAD_RIGHT;
-    // var stepWidth = Math.max(Math.min(maxAvailableWidth / numSteps, MAX_STEP_WIDTH * essence.splits.length()), MIN_STEP_WIDTH);
+    var maxAvailableWidth = overallWidth - BARS_MIN_PAD_LEFT - BARS_MIN_PAD_RIGHT;
+
+    var stepWidth: number;
+    if (minStepWidth * numPrimarySteps < maxAvailableWidth) {
+      stepWidth = Math.max(Math.min(maxAvailableWidth / numPrimarySteps, MAX_STEP_WIDTH * essence.splits.length()), MIN_STEP_WIDTH);
+    } else {
+      stepWidth = minStepWidth;
+    }
+
     var usedWidth = stepWidth * maxNumberOfLeaves[0];
     var padLeft = Math.max(BARS_MIN_PAD_LEFT, (overallWidth - usedWidth) / 2);
 
