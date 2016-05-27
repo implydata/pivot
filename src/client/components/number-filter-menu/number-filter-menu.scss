@@ -22,9 +22,4 @@
       color: $gray;
     }
   }
-
-  .loader,
-  .query-error {
-    @include pin-full;
-  }
 }
