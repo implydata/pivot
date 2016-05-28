@@ -2,6 +2,7 @@
 
 .number-range-picker {
   margin: $padding-mini 0;
+  height: 25px;
 
   .range-bar {
     position: absolute;
@@ -19,7 +20,7 @@
   }
 
   .range-handle {
-    display: inline-block;
+    position: absolute;
   }
 
   .loader,

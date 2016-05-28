@@ -133,36 +133,35 @@ export class NumberRangePicker extends React.Component<NumberRangePickerProps, N
 
   onClick(positionStart: number, positionEnd: number, e: MouseEvent) {
     const { leftOffset } = this.state;
-    var startNub = NUB_SIZE;
-    var endNub = NUB_SIZE;
+
+    var clickPadding = 5;
     var absoluteX = getXFromEvent(e);
     var relativeX = absoluteX - leftOffset;
 
-    var startNubPosition = positionStart;
-    var endNubPosition = positionEnd + startNub;
-    var endNubRightBound = endNubPosition + endNub;
+    var startNubPosition = getAdjustedStart(positionStart) + clickPadding;
+    var endNubPosition = getAdjustedEnd(positionEnd) + clickPadding;
 
-    var isBeforeStart = relativeX < startNubPosition;
-    var isAfterEnd = relativeX > endNubRightBound;
-    var inBetween = (relativeX < endNubPosition) && relativeX > getAdjustedStart(positionStart);
+    var isBeforeStart = relativeX < positionStart;
+    var isAfterEnd = relativeX > positionEnd;
+    var inBetween = (relativeX < endNubPosition) && relativeX > startNubPosition;
 
     if (isBeforeStart) {
-      this.updateStart(absoluteX);
+      //this.updateStart(absoluteX);
     } else if (isAfterEnd) {
-      this.updateEnd(absoluteX);
+      //this.updateEnd(absoluteX);
     } else if (inBetween) {
 
       var distanceFromEnd = endNubPosition - relativeX;
-      var distanceFromStart = relativeX - getAdjustedStart(positionStart);
+      var distanceFromStart = relativeX - startNubPosition;
 
       if (distanceFromEnd < distanceFromStart) {
-        this.updateEnd(endNubPosition + leftOffset - distanceFromEnd + endNub);
+        //this.updateEnd(endNubPosition + leftOffset - distanceFromEnd);
       } else {
-        this.updateStart(startNubPosition + leftOffset + distanceFromStart);
+        //this.updateStart(positionStart + leftOffset + distanceFromStart);
       }
 
     } else if (isBeforeStart) {
-      this.updateStart(absoluteX);
+      //this.updateStart(absoluteX);
     } else {
       return;
     }
@@ -194,22 +193,23 @@ export class NumberRangePicker extends React.Component<NumberRangePickerProps, N
 
     if (rightBound && step) {
       var relativeEnd = end && end < max ? this.valueToRelativePosition(end) : rightBound;
-      var adjustedEnd = clamp(getAdjustedEnd(relativeEnd), getAdjustedStart(this.valueToRelativePosition(start)), getAdjustedEnd(rightBound));
+      var relativeStart = this.valueToRelativePosition(start);
+      var adjustedRightBound = getAdjustedEnd(rightBound);
 
-      // the handles display inline-block so subtract NUB_SIZE again to account for start nub as well
-      var positionEnd = getAdjustedEnd(adjustedEnd);
-      var positionStart = start ? clamp(this.valueToRelativePosition(start), 0, positionEnd) : 0;
+      var positionEnd = clamp(relativeEnd, 0, adjustedRightBound);
+      var positionStart = start ? clamp(relativeStart, 0, positionEnd) : 0;
+
+      positionEnd = clamp(positionEnd, getAdjustedStart(positionStart), adjustedRightBound);
 
       var rangeBarLeft = { left: 0, width: positionStart };
-      var rangeBarMiddle = { left: getAdjustedStartHalf(positionStart), width: adjustedEnd - positionStart };
-      var rangeBarRight = { left: adjustedEnd, width: rightBound - adjustedEnd };
+      var rangeBarMiddle = { left: getAdjustedStartHalf(positionStart), width: positionEnd - positionStart };
+      var rangeBarRight = { left: positionEnd, width: rightBound - positionEnd };
 
       var absoluteRightBound = leftOffset + rightBound;
 
       content = <div className="range-slider" onClick={this.onClick.bind(this, positionStart, positionEnd)}>
         <div className="range-bar left" style={rangeBarLeft} />
         <RangeHandle
-          type="start"
           positionLeft={positionStart}
           onChange={this.updateStart.bind(this)}
           isAny={isStartAny(start)}
@@ -217,11 +217,9 @@ export class NumberRangePicker extends React.Component<NumberRangePickerProps, N
           leftBound={leftOffset}
           rightBound={leftOffset + positionEnd}
           offset={leftOffset}
-          size={NUB_SIZE}
         />
         <div className="range-bar middle" style={rangeBarMiddle} />
         <RangeHandle
-          type="end"
           positionLeft={positionEnd}
           onChange={this.updateEnd.bind(this)}
           isAny={isEndAny(end)}
@@ -229,7 +227,6 @@ export class NumberRangePicker extends React.Component<NumberRangePickerProps, N
           leftBound={leftOffset + getAdjustedStart(positionStart)}
           rightBound={absoluteRightBound}
           offset={leftOffset}
-          size={NUB_SIZE}
         />
         <div className="range-bar right" style={rangeBarRight} />
       </div>;
