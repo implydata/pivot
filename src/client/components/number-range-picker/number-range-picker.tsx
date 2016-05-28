@@ -142,27 +142,23 @@ export class NumberRangePicker extends React.Component<NumberRangePickerProps, N
     var endNubPosition = getAdjustedEnd(positionEnd) + clickPadding;
 
     var isBeforeStart = relativeX < positionStart;
-    var isAfterEnd = relativeX > positionEnd;
-    var inBetween = (relativeX < endNubPosition) && relativeX > startNubPosition;
+    var isAfterEnd = relativeX > positionEnd + NUB_SIZE;
+    var inBetween = (relativeX < positionEnd) && relativeX > startNubPosition;
 
     if (isBeforeStart) {
-      //this.updateStart(absoluteX);
+      this.updateStart(absoluteX);
     } else if (isAfterEnd) {
-      //this.updateEnd(absoluteX);
+      this.updateEnd(absoluteX);
     } else if (inBetween) {
 
       var distanceFromEnd = endNubPosition - relativeX;
       var distanceFromStart = relativeX - startNubPosition;
 
       if (distanceFromEnd < distanceFromStart) {
-        //this.updateEnd(endNubPosition + leftOffset - distanceFromEnd);
+        this.updateEnd(endNubPosition + leftOffset - distanceFromEnd);
       } else {
-        //this.updateStart(positionStart + leftOffset + distanceFromStart);
+        this.updateStart(startNubPosition + leftOffset + distanceFromStart);
       }
-
-    } else if (isBeforeStart) {
-      //this.updateStart(absoluteX);
-    } else {
       return;
     }
   }
