@@ -12,8 +12,6 @@ export interface RangeHandleProps extends React.Props<any> {
   rightBound?: number;
   leftBound?: number;
   offset: number;
-  size: number;
-  type: "start" | "end";
 }
 
 export interface RangeHandleState {
@@ -34,15 +32,15 @@ export class RangeHandle extends React.Component<RangeHandleProps, RangeHandleSt
   }
 
   onGlobalMouseMove(event: MouseEvent) {
-    const { onChange, leftBound, rightBound, size, type } = this.props;
+    const { onChange, leftBound, rightBound } = this.props;
     const { anchor } = this.state;
-    let newX = getXFromEvent(event) + (type === "end" ? size - anchor : -anchor);
+    let newX = getXFromEvent(event) - anchor;
 
     onChange(clamp(newX, leftBound, rightBound));
   }
 
   onMouseDown(event: MouseEvent) {
-    const { offset, size, positionLeft, type } = this.props;
+    const { offset, positionLeft } = this.props;
 
     window.addEventListener('mouseup', this.onGlobalMouseUp);
     window.addEventListener('mousemove', this.onGlobalMouseMove);
@@ -50,7 +48,6 @@ export class RangeHandle extends React.Component<RangeHandleProps, RangeHandleSt
 
     let x = getXFromEvent(event);
     var anchor = x - offset - positionLeft;
-    if (type === "end") anchor = anchor - size;
 
     this.setState({
       anchor
