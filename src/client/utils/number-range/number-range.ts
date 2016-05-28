@@ -15,10 +15,12 @@ export function isEndAny(end: number) {
 }
 
 export function isBeyondMin(min: number, start: number) {
+  if (start === null) return false;
   return min && start < min && Math.abs(min - start) > 1;
 }
 
 export function isBeyondMax(max: number, end: number) {
+  if (end === null) return false;
   return max && end > max && (Math.abs(end - max)) > 1;
 }
 
