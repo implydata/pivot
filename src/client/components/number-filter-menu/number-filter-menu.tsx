@@ -1,14 +1,13 @@
 require('./number-filter-menu.css');
 
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
 import { Set, NumberRange, LiteralExpression } from 'plywood';
 
 import { FilterClause, Clicker, Essence, Filter, Dimension } from '../../../common/models/index';
 import { Fn } from '../../../common/utils/general/general';
 import { STRINGS } from '../../config/constants';
 import { enterKey } from '../../utils/dom/dom';
-import { minToAny, maxToAny, isStartAny, isEndAny, getNumberOfWholeDigits } from '../../utils/number-range/number-range';
+import { minToAny, maxToAny, isStartAny, isEndAny } from '../../utils/number-range/number-range';
 
 import { Button } from '../button/button';
 import { NumberRangePicker } from '../number-range-picker/number-range-picker';
