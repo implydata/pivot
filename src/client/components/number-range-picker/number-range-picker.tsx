@@ -6,9 +6,11 @@ import * as ReactDOM from 'react-dom';
 import { $, Dataset, ply } from 'plywood';
 
 import { Essence, Dimension } from '../../../common/models/index';
+import { toSignificantDigits, getNumberOfWholeDigits } from '../../../common/utils/general/general';
+
 
 import { getXFromEvent, clamp } from '../../utils/dom/dom';
-import { minToAny, maxToAny, isStartAny, isBeyondMin, isEndAny, isBeyondMax, getNumberOfWholeDigits } from '../../utils/number-range/number-range';
+import { minToAny, maxToAny, isStartAny, isBeyondMin, isEndAny, isBeyondMax } from '../../utils/number-range/number-range';
 
 import { Loader } from '../loader/loader';
 import { QueryError } from '../query-error/query-error';
@@ -28,11 +30,6 @@ function getNumberOfDigitsToShow(n: number) {
   // divide n by granularity later?
   var totalDigits = getNumberOfWholeDigits(n);
   return totalDigits > 3 ? Math.min(totalDigits, 4) : 3;
-}
-
-function toSignificantDigits(n: number, digits: number) {
-  var multiplier = Math.pow(10, digits - Math.floor(Math.log(n) / Math.LN10) - 1);
-  return Math.round(n * multiplier) / multiplier;
 }
 
 // offset the bar a little because a rectangle at the same position as a circle will peek through

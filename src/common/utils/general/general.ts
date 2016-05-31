@@ -93,3 +93,12 @@ export function findMaxValueIndex<T>(array: T[], valueOf: (input: T) => number) 
 export function findMinValueIndex<T>(array: T[], valueOf: (input: T) => number) {
   return array.reduce((currMax, cV, cIdx, arr) => valueOf(cV) < valueOf(arr[currMax]) ? cIdx : currMax, 0);
 }
+
+export function toSignificantDigits(n: number, digits: number) {
+  var multiplier = Math.pow(10, digits - Math.floor(Math.log(n) / Math.LN10) - 1);
+  return Math.round(n * multiplier) / multiplier;
+}
+
+export function getNumberOfWholeDigits(n: number) {
+  return Math.floor(Math.log(n) / Math.log(10)) + 1;
+}

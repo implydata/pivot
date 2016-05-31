@@ -1,86 +1,131 @@
-import { day, hour, minute } from 'chronoshift';
 import { TimeBucketAction, NumberBucketAction, ActionJS, Action, ActionValue, TimeRange, Duration, PlywoodRange } from 'plywood';
+import { day, hour, minute } from 'chronoshift';
 
-import { hasOwnProperty, findFirstBiggerIndex, findExactIndex, findMaxValueIndex, findMinValueIndex } from '../../../common/utils/general/general';
+import {
+  hasOwnProperty, findFirstBiggerIndex, findExactIndex, findMaxValueIndex, findMinValueIndex,
+  toSignificantDigits, getNumberOfWholeDigits
+} from '../../../common/utils/general/general';
 
-interface Preset {
-  getSupportedGranularities?: () => Granularity[];
-  defaultGranularities?: Granularity[];
-  bigGranularities?: Granularity[];
-  granularityComputer?: GranularityComputer;
-}
-
-interface GranularityComputer {
-  checkers: ((rangeLength: number, bucketLength: number) => Granularity)[];
-  bigCheckers?: ((rangeLength: number, bucketLength: number) => Granularity)[];
-  defaultGranularity: Granularity;
-  minGranularity: Granularity;
-}
-
-
-var initCheck = (checkPoint: number, value?: GranularityJS) => {
-  return (rangeLength: number, bucketLength: number) => {
-    var returnValue = value || Math.round(rangeLength / 10) * 10;
-    if (rangeLength > checkPoint || bucketLength > checkPoint) return granularityFromJS(returnValue);
-    return null;
-  };
-};
-
-function days(value: number) {
-  return value * day.canonicalLength;
-}
-
-function hours(value: number) {
-  return value * hour.canonicalLength;
-}
-
-function minutes(value: number) {
-  return value * minute.canonicalLength;
-}
-
-const PRESETS: Lookup<Preset> = {
-  time: {
-    getSupportedGranularities: () => {
-      return ['PT1S', 'PT1M', 'PT5M', 'PT15M', 'PT1H', 'PT6H', 'PT8H', 'PT12H', 'P1D', 'P1W', 'P1M', 'P3M', 'P6M', 'P1Y', 'P2Y'].map(granularityFromJS);
-    },
-    defaultGranularities: ['PT1M', 'PT5M', 'PT1H', 'P1D', 'P1W'].map(granularityFromJS),
-    bigGranularities: ['P1M', 'P1W', 'P1D', 'PT12H', 'PT6H', 'PT1H', 'PT5M'].map(granularityFromJS),
-    granularityComputer: {
-      checkers: [initCheck(days(95), 'P1W'), initCheck(days(8), 'P1D'), initCheck(hours(8), 'PT1H'), initCheck(hours(3), 'PT5M')],
-      bigCheckers: [
-        initCheck(days(95), 'P1M'),
-        initCheck(days(20), 'P1W'),
-        initCheck(days(6), 'P1D'),
-        initCheck(days(2), 'PT12H'),
-        initCheck(hours(23), 'PT6H'),
-        initCheck(hours(3), 'PT1H'),
-        initCheck(minutes(30), 'PT5M')
-      ],
-      defaultGranularity: granularityFromJS('P1D'),
-      minGranularity: granularityFromJS('PT1M')
-    }
-  },
-
-  number: {
-    getSupportedGranularities: () => {
-      var vals: Granularity[] = [];
-      for (var i = 0; i < 10; i++) {
-        vals.push(granularityFromJS(Math.pow(10, i)));
-      }
-      return vals;
-    },
-    defaultGranularities: [1, 10, 50, 1000, 10000].map(granularityFromJS),
-    granularityComputer: {
-      checkers: [initCheck(10000), initCheck(1000), initCheck(500), initCheck(100)],
-      defaultGranularity: granularityFromJS(10),
-      minGranularity: granularityFromJS(1)
-    }
-  }
-};
+const MENU_LENGTH = 5;
 
 export type Granularity = TimeBucketAction | NumberBucketAction;
 export type GranularityJS = string | number | ActionJS;
 export type BucketUnit = Duration | number;
+export type DimensionKind = 'time' | 'number';
+
+export interface Checker {
+  checkPoint: number;
+  returnValue: GranularityJS;
+}
+
+function makeCheckpoint(checkPoint: number, returnValue: GranularityJS): Checker {
+  return {
+    checkPoint,
+    returnValue
+  };
+}
+
+function makeNumberBuckets(centerAround: number, count: number, coarse?: boolean): Granularity[] {
+  var granularities: Granularity[] = [];
+  var logTen = Math.log(centerAround) / Math.LN10;
+  var digits = getNumberOfWholeDigits(centerAround);
+  while (granularities.length <= count) {
+    if (!coarse) {
+      var halfStep = toSignificantDigits(5 * Math.pow(10, logTen - 1), digits + 2);
+      granularities.push(granularityFromJS(halfStep));
+    }
+    if (granularities.length >= count) break;
+    var wholeStep = toSignificantDigits(Math.pow(10, logTen), digits = 2);
+    granularities.push(granularityFromJS(wholeStep));
+    logTen++;
+  }
+
+  return granularities;
+}
+
+function days(count: number) {
+  return count * day.canonicalLength;
+}
+
+function hours(count: number) {
+  return count * hour.canonicalLength;
+}
+
+function minutes(count: number) {
+  return count * minute.canonicalLength;
+}
+
+
+export interface Helper {
+  dimensionKind: DimensionKind;
+  minGranularity: Granularity;
+  defaultGranularity: Granularity;
+  defaultGranularities: Granularity[];
+  supportedGranularities: Granularity[];
+  checkers: Checker[];
+  coarseCheckers?: Checker[];
+  coarseGranularities?: Granularity[];
+}
+
+export class TimeHelper {
+  static dimensionKind: DimensionKind = 'time';
+
+  static minGranularity = granularityFromJS('PT1M');
+  static defaultGranularity = granularityFromJS('P1D');
+
+  static supportedGranularities = function(bucketedBy: Granularity) {
+    return [
+        'PT1S', 'PT1M', 'PT5M', 'PT15M',
+        'PT1H', 'PT6H', 'PT8H', 'PT12H',
+        'P1D', 'P1W', 'P1M', 'P3M', 'P6M',
+        'P1Y', 'P2Y'
+      ].map(granularityFromJS);
+  };
+
+  static checkers = [
+    makeCheckpoint(days(95), 'P1W'),
+    makeCheckpoint(days(8), 'P1D'),
+    makeCheckpoint(hours(8), 'PT1H'),
+    makeCheckpoint(hours(3), 'PT5M')];
+
+  static coarseCheckers = [
+    makeCheckpoint(days(95), 'P1M'),
+    makeCheckpoint(days(20), 'P1W'),
+    makeCheckpoint(days(6), 'P1D'),
+    makeCheckpoint(days(2), 'PT12H'),
+    makeCheckpoint(hours(23), 'PT6H'),
+    makeCheckpoint(hours(3), 'PT1H'),
+    makeCheckpoint(minutes(30), 'PT5M')
+  ];
+
+  static defaultGranularities = TimeHelper.checkers.map((c) => { return granularityFromJS(c.returnValue); }).concat(TimeHelper.minGranularity);
+  static coarseGranularities = TimeHelper.coarseCheckers.map((c) => { return granularityFromJS(c.returnValue); }).concat(TimeHelper.minGranularity);
+}
+
+export class NumberHelper {
+  static dimensionKind: DimensionKind = 'number';
+  static minGranularity = granularityFromJS(1);
+  static defaultGranularity = granularityFromJS(10);
+
+  static checkers = makeNumberBuckets(10, MENU_LENGTH).map((v: NumberBucketAction) => makeCheckpoint(v.size, v));
+  static defaultGranularities = NumberHelper.checkers.map((c: any) => { return granularityFromJS(c.checkPoint); });
+  static coarseGranularities: Granularity[] = null;
+  static coarseCheckers: Checker[] = null;
+
+  static supportedGranularities = function(bucketedBy: Granularity) {
+    return makeNumberBuckets(getBucketSize(bucketedBy), 10);
+  };
+}
+
+function getHelperForKind(kind: DimensionKind) {
+  if (kind === 'time') return TimeHelper;
+  return NumberHelper;
+}
+
+function getHelperForRange(input: PlywoodRange) {
+  if (input instanceof TimeRange) return TimeHelper;
+  return NumberHelper;
+}
 
 function getBucketSize(input: Granularity): number {
   if (input instanceof TimeBucketAction) return input.duration.getCanonicalLength();
@@ -125,8 +170,7 @@ function findBestMatch(array: Granularity[], target: Granularity) {
 
 function generateGranularitySet(allGranularities: Granularity[], bucketedBy: Granularity) {
   var start = findFirstBiggerIndex(allGranularities, bucketedBy, getBucketSize);
-  var length = 5;
-  var returnGranularities = allGranularities.slice(start, start + length);
+  var returnGranularities = allGranularities.slice(start, start + MENU_LENGTH);
   // makes sure the bucket is part of the list
   if (findExactIndex(returnGranularities, bucketedBy, getBucketSize) === -1) {
     returnGranularities = [bucketedBy].concat(returnGranularities.slice(0, returnGranularities.length - 1));
@@ -192,18 +236,18 @@ export function updateBucketSize(existing: Granularity, newInput: Granularity): 
   throw new Error(`unrecognized granularity: ${newInput} must be of type TimeBucket or NumberBucket`);
 }
 
-export function getGranularities(kind: string, bucketedBy?: Granularity, big?: boolean): Granularity[] {
-  var bigGranularities = PRESETS[kind]['bigGranularities'];
-  if (!bucketedBy) return big && bigGranularities ? bigGranularities : PRESETS[kind]['defaultGranularities'];
-
+export function getGranularities(kind: DimensionKind, bucketedBy?: Granularity, coarse?: boolean): Granularity[] {
+  var helper = getHelperForKind(kind);
+  var coarseGranularities = helper.coarseGranularities;
+  if (!bucketedBy) return coarse && coarseGranularities ? coarseGranularities : helper.defaultGranularities;
   // make list that makes most sense with bucket
-  var allGranularities = PRESETS[kind].getSupportedGranularities();
+  var allGranularities = helper.supportedGranularities(bucketedBy);
   return generateGranularitySet(allGranularities, bucketedBy);
 }
 
-export function getDefaultGranularityForKind(kind: string, bucketedBy?: Granularity): Granularity {
+export function getDefaultGranularityForKind(kind: DimensionKind, bucketedBy?: Granularity): Granularity {
   if (bucketedBy) return bucketedBy;
-  return PRESETS[kind].granularityComputer.defaultGranularity;
+  return getHelperForKind(kind).defaultGranularity;
 }
 
 export function getBestGranularityForRange(inputRange: PlywoodRange, bigChecker: boolean, bucketedBy?: Granularity, customGranularities?: Granularity[]): Granularity {
@@ -212,18 +256,17 @@ export function getBestGranularityForRange(inputRange: PlywoodRange, bigChecker:
 
 export function getBestBucketUnitForRange(inputRange: PlywoodRange, bigChecker: boolean, bucketedBy?: Granularity, customGranularities?: Granularity[]): BucketUnit {
   var rangeLength = endValue(inputRange) - startValue(inputRange);
-  var isTime = inputRange instanceof TimeRange;
-  var lookup = isTime ? PRESETS['time'] : PRESETS['number'];
+  var helper = getHelperForRange(inputRange);
   var bucketLength = bucketedBy ? getBucketSize(bucketedBy) : 0;
-  var helper = lookup.granularityComputer;
-  var checkPoints = bigChecker && helper.bigCheckers ? helper.bigCheckers : helper.checkers;
+  var checkPoints = bigChecker && helper.coarseCheckers ? helper.coarseCheckers : helper.checkers;
 
   for (var i = 0; i < checkPoints.length; i++) {
-    var check = checkPoints[i];
-    var returnVal = check(rangeLength, bucketLength);
-    if (returnVal !== null) {
+    var checkPoint = checkPoints[i].checkPoint;
+    var returnVal = granularityFromJS(checkPoints[i].returnValue);
+    if (rangeLength > checkPoint || bucketLength > checkPoint) {
+
       if (bucketedBy) {
-        var granArray = customGranularities || getGranularities(isTime ? 'time' : 'number', bucketedBy);
+        var granArray = customGranularities || getGranularities(helper.dimensionKind, bucketedBy);
         var biggerThanBucketed =  findFirstBiggerIndex(granArray, bucketedBy, getBucketSize);
         // this could happen if bucketedBy were very big or if custom granularities are smaller than maker action
         if (biggerThanBucketed === -1) return getBucketUnit(helper.defaultGranularity);
