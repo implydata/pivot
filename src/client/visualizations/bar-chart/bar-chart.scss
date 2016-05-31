@@ -16,6 +16,15 @@
     }
   }
 
+  .selection-highlight-container {
+    position: absolute;
+
+    .selection-highlight {
+      pointer-events: none;
+      border: 1px dashed $brand;
+    }
+  }
+
   .x-axis {
     stroke: $gray;
     stroke-width: 2px;
@@ -70,12 +79,6 @@
         > rect.mouse-event-target {
           fill: $white;
           fill-opacity: 0.001;
-        }
-
-        .selection {
-          pointer-events: none;
-          fill: none;
-          stroke: $brand;
         }
       }
     }
