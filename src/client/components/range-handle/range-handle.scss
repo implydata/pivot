@@ -28,6 +28,7 @@ $nub-size: 16px;
   }
 
   &.beyond.min::before {
+    top: 4px;
     left: 4px;
     transform: rotate(-135deg);
   }

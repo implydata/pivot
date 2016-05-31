@@ -138,22 +138,24 @@ export class NumberFilterMenu extends React.Component<NumberFilterMenuProps, Num
 
   onRangeInputStartChange(e: KeyboardEvent) {
     const { end } = this.state;
-    var startInput = (e.target as HTMLInputElement).value;
-    this.setState({ startInput });
 
+    var startInput = (e.target as HTMLInputElement).value;
     var start = stringToStart(startInput);
-    if (start !== null && !isNaN(start) && start < end || start === null) {
+    if (!(start > end) || end === null) {
+      this.setState({ startInput });
+    }
+
+    if ((start !== null && !isNaN(start)) || start === null) {
       this.setState({ start });
     }
   }
 
   onRangeInputEndChange(e: KeyboardEvent) {
-    const { start } = this.state;
     var endInput = (e.target as HTMLInputElement).value;
     this.setState({ endInput });
 
     var end = stringToEnd(endInput);
-    if (end !== null && !isNaN(end) && end > start || end === null) {
+    if (end !== null && !isNaN(end) || end === null) {
       this.setState({ end });
     }
   }
