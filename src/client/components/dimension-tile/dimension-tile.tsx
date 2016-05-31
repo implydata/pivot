@@ -8,7 +8,7 @@ import { $, r, Dataset, SortAction, TimeRange, RefExpression, Expression, TimeBu
 import { formatterFromData, collect, formatGranularity, formatTimeBasedOnGranularity } from '../../../common/utils/index';
 import { Fn } from '../../../common/utils/general/general';
 import { Clicker, Essence, VisStrategy, Dimension, SortOn, SplitCombine,
-  Colors, Granularity, getBestGranularityForRange, granularityEquals, granularityToString, getDefaultGranularityForKind, getGranularities } from '../../../common/models/index';
+  Colors, Granularity, DimensionKind, getBestGranularityForRange, granularityEquals, granularityToString, getDefaultGranularityForKind, getGranularities } from '../../../common/models/index';
 
 import { setDragGhost, classNames } from '../../utils/dom/dom';
 import { DragManager } from '../../utils/drag-manager/drag-manager';
@@ -110,7 +110,7 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
           var range = dimension.kind === 'time' ? essence.evaluateSelection(filterSelection) : filterSelection.getLiteralValue().extent();
           selectedGranularity = getBestGranularityForRange(range, true, dimension.bucketedBy, dimension.granularities);
         } else {
-          selectedGranularity = getDefaultGranularityForKind(dimension.kind, dimension.bucketedBy);
+          selectedGranularity = getDefaultGranularityForKind(dimension.kind as DimensionKind, dimension.bucketedBy);
         }
       }
 
@@ -336,7 +336,7 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
   getGranularityActions() {
     const { dimension } = this.props;
     const { selectedGranularity } = this.state;
-    var granularities = dimension.granularities || getGranularities(dimension.kind, dimension.bucketedBy, true);
+    var granularities = dimension.granularities || getGranularities(dimension.kind as DimensionKind, dimension.bucketedBy, true);
     return granularities.map((g) => {
       var granularityStr = granularityToString(g);
       return {

@@ -16,7 +16,8 @@ import {
   Granularity,
   granularityToString,
   updateBucketSize,
-  getGranularities
+  getGranularities,
+  DimensionKind
 } from "../../../common/models/index";
 import { STRINGS } from "../../config/constants";
 import { enterKey } from "../../utils/dom/dom";
@@ -152,7 +153,7 @@ export class SplitMenu extends React.Component<SplitMenuProps, SplitMenuState> {
     return SortOn.fromSortAction(split.sortAction, essence.dataSource, dimension);
   }
 
-  renderGranularityPicker(type: 'time' | 'number') {
+  renderGranularityPicker(type: DimensionKind) {
     var { split } = this.state;
     var { dimension } = this.props;
     var selectedGran = granularityToString(split.bucketAction as Granularity);
