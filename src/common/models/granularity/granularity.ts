@@ -3,7 +3,7 @@ import { day, hour, minute } from 'chronoshift';
 
 import {
   hasOwnProperty, findFirstBiggerIndex, findExactIndex, findMaxValueIndex, findMinValueIndex,
-  toSignificantDigits, getNumberOfWholeDigits
+  toSignificantDigits, getNumberOfWholeDigits, getNumberOfDigits
 } from '../../../common/utils/general/general';
 
 const MENU_LENGTH = 5;
@@ -31,11 +31,11 @@ function makeNumberBuckets(centerAround: number, count: number, coarse?: boolean
   var digits = getNumberOfWholeDigits(centerAround);
   while (granularities.length <= count) {
     if (!coarse) {
-      var halfStep = toSignificantDigits(5 * Math.pow(10, logTen - 1), digits + 2);
+      var halfStep = toSignificantDigits(5 * Math.pow(10, logTen - 1), digits);
       granularities.push(granularityFromJS(halfStep));
     }
     if (granularities.length >= count) break;
-    var wholeStep = toSignificantDigits(Math.pow(10, logTen), digits = 2);
+    var wholeStep = toSignificantDigits(Math.pow(10, logTen), digits);
     granularities.push(granularityFromJS(wholeStep));
     logTen++;
   }
@@ -54,7 +54,6 @@ function hours(count: number) {
 function minutes(count: number) {
   return count * minute.canonicalLength;
 }
-
 
 export interface Helper {
   dimensionKind: DimensionKind;
@@ -107,7 +106,7 @@ export class NumberHelper {
   static minGranularity = granularityFromJS(1);
   static defaultGranularity = granularityFromJS(10);
 
-  static checkers = makeNumberBuckets(10, MENU_LENGTH).map((v: NumberBucketAction) => makeCheckpoint(v.size, v));
+  static checkers = makeNumberBuckets(1, MENU_LENGTH).map((v: NumberBucketAction) => makeCheckpoint(v.size, v));
   static defaultGranularities = NumberHelper.checkers.map((c: any) => { return granularityFromJS(c.checkPoint); });
   static coarseGranularities: Granularity[] = null;
   static coarseCheckers: Checker[] = null;

@@ -102,3 +102,7 @@ export function toSignificantDigits(n: number, digits: number) {
 export function getNumberOfWholeDigits(n: number) {
   return Math.floor(Math.log(n) / Math.log(10)) + 1;
 }
+
+export function getNumberOfDigits(x: number) {
+  return String(x).replace(/\./, '').length;
+}

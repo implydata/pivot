@@ -23,6 +23,7 @@ export interface ResizeHandleState {
 
   startValue?: number;
   currentValue?: number;
+  anchor?: number;
 }
 
 export class ResizeHandle extends React.Component<ResizeHandleProps, ResizeHandleState> {
@@ -51,15 +52,19 @@ export class ResizeHandle extends React.Component<ResizeHandleProps, ResizeHandl
   }
 
   onMouseDown(event: MouseEvent) {
+    const { side } = this.props;
     window.addEventListener('mouseup', this.onGlobalMouseUp);
     window.addEventListener('mousemove', this.onGlobalMouseMove);
 
     var newX = this.state.currentValue;
+    var eventX = getXFromEvent(event);
+    var subtractAmount = side === 'right' ?  window.innerWidth - eventX : eventX;
 
     this.setState({
       dragging: true,
       startValue: newX,
-      currentValue: newX
+      currentValue: newX,
+      anchor: newX - subtractAmount
     });
 
     event.preventDefault();
@@ -78,14 +83,18 @@ export class ResizeHandle extends React.Component<ResizeHandleProps, ResizeHandl
   }
 
   onGlobalMouseMove(event: MouseEvent) {
-    let newX = this.getValueFromX(getXFromEvent(event));
+    const { side, onResize } = this.props;
+    const { anchor } = this.state;
+
+    let signedAnchor = side === 'right' ? -anchor : anchor;
+    let newX = this.getValueFromX(getXFromEvent(event) + signedAnchor);
 
     this.setState({
       currentValue: newX
     });
 
-    if (!!this.props.onResize) {
-      this.props.onResize(newX);
+    if (!!onResize) {
+      onResize(newX);
     }
   }
 

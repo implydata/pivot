@@ -6,12 +6,12 @@ import { getXFromEvent, classNames, clamp } from '../../utils/dom/dom';
 export interface RangeHandleProps extends React.Props<any> {
   positionLeft: number;
   onChange: (x: number) => void;
+  offset: number;
   isAny: boolean;
   isBeyondMin?: boolean;
   isBeyondMax?: boolean;
   rightBound?: number;
   leftBound?: number;
-  offset: number;
 }
 
 export interface RangeHandleState {
@@ -42,17 +42,17 @@ export class RangeHandle extends React.Component<RangeHandleProps, RangeHandleSt
   onMouseDown(event: MouseEvent) {
     const { offset, positionLeft } = this.props;
 
-    window.addEventListener('mouseup', this.onGlobalMouseUp);
-    window.addEventListener('mousemove', this.onGlobalMouseMove);
-
-
     let x = getXFromEvent(event);
     var anchor = x - offset - positionLeft;
 
     this.setState({
       anchor
     });
+
     event.preventDefault();
+    window.addEventListener('mouseup', this.onGlobalMouseUp);
+    window.addEventListener('mousemove', this.onGlobalMouseMove);
+
   }
 
   onGlobalMouseUp() {
