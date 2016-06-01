@@ -568,15 +568,11 @@ export class BarChart extends BaseVisualization<BarChartState> {
 
     var axisStage = yAxisStage.changeY(yAxisStage.y + (chartStage.height + CHART_TOP_PADDING + CHART_BOTTOM_PADDING) * chartIndex);
 
-    var topLineExtend = 0;
-    if (chartIndex !== 0) topLineExtend += CHART_BOTTOM_PADDING + CHART_TOP_PADDING;
-
     var yAxis: JSX.Element = <VerticalAxis
       key={measure.name}
       stage={axisStage}
       ticks={yTicks}
       scale={yScale}
-      topLineExtend={topLineExtend}
       hideZero={true}
     />;
 
@@ -613,7 +609,7 @@ export class BarChart extends BaseVisualization<BarChartState> {
     // Invalid data, early return
     if (!this.hasValidYExtent(measure, mySplitDataset.data)) {
       return {
-        chart: <div className="measure-bar-chart" key={measure.name}>
+        chart: <div className="measure-bar-chart" key={measure.name} style={{width: chartStage.width}}>
           <svg style={chartStage.getWidthHeight(0, CHART_BOTTOM_PADDING)} viewBox={chartStage.getViewBox(0, CHART_BOTTOM_PADDING)}/>
           <VisMeasureLabel measure={measure} datum={dataset.data[0]}/>
         </div>,
@@ -635,7 +631,7 @@ export class BarChart extends BaseVisualization<BarChartState> {
        highlight = renderedChart.highlight;
     }
 
-    var chart = <div className="measure-bar-chart" key={measure.name}>
+    var chart = <div className="measure-bar-chart" key={measure.name} style={{width: chartStage.width}}>
       <svg style={chartStage.getWidthHeight(0, CHART_BOTTOM_PADDING)} viewBox={chartStage.getViewBox(0, CHART_BOTTOM_PADDING)}>
         {yGridLines}
         <g className="bars" transform={chartStage.getTransform()}>{bars}</g>
