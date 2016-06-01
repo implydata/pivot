@@ -247,9 +247,9 @@ export class BarChart extends BaseVisualization<BarChartState> {
     const xTicks = xScale.domain();
     const width = roundToPx(xScale(xTicks[xTicks.length - 1])) + stepWidth;
 
-    const measures = essence.getEffectiveMeasures().toArray();
+    const measures = essence.getEffectiveMeasures();
     const availableHeight = stage.height - X_AXIS_HEIGHT;
-    const height = Math.max(MIN_CHART_HEIGHT, Math.floor(availableHeight / measures.length));
+    const height = Math.max(MIN_CHART_HEIGHT, Math.floor(availableHeight / measures.size));
 
     return new Stage({
       x: 0,
@@ -257,6 +257,15 @@ export class BarChart extends BaseVisualization<BarChartState> {
       width: Math.max(width, stage.width - Y_AXIS_WIDTH - VIS_H_PADDING * 2),
       height: height - CHART_TOP_PADDING - CHART_BOTTOM_PADDING
     });
+  }
+
+  hasVerticalScroll(): boolean {
+    const { essence, stage } = this.props;
+
+    const measures = essence.getEffectiveMeasures();
+    const availableHeight = stage.height - X_AXIS_HEIGHT;
+
+    return Math.floor(availableHeight / measures.size) < MIN_CHART_HEIGHT;
   }
 
   hasHorizontalScroll(): boolean {
@@ -845,9 +854,12 @@ export class BarChart extends BaseVisualization<BarChartState> {
     var overlay: JSX.Element;
 
     var hasHorizontalScroll = false;
+    var hasVerticalScroll = false;
 
     if (datasetLoad.dataset && splits.length()) {
       hasHorizontalScroll = this.hasHorizontalScroll();
+      hasVerticalScroll = this.hasVerticalScroll();
+      console.log(hasVerticalScroll);
 
       let xScale = this.getPrimaryXScale();
       let yAxes: JSX.Element[] = [];
@@ -880,6 +892,7 @@ export class BarChart extends BaseVisualization<BarChartState> {
        <Scroller
         layout={scrollerLayout}
         blockHorizontalScroll={!hasHorizontalScroll}
+        blockVerticalScroll={!hasVerticalScroll}
 
         bottomGutter={xAxis}
         rightGutter={rightGutter}

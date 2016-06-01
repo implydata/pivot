@@ -21,6 +21,10 @@
       overflow-x: hidden;
     }
 
+    &.no-y-scroll {
+      overflow-y: hidden;
+    }
+
     > .event-target {
       background: $white;
       opacity: 0.001;
