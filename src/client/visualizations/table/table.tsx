@@ -276,7 +276,9 @@ export class Table extends BaseVisualization<TableState> {
         var background: JSX.Element = null;
         if (datum['__nest'] === splitLength) {
           let backgroundWidth = hScales[i](measureValue);
-          background = <div className="background" style={{width: backgroundWidth + '%'}}></div>;
+          background = <div className="background-container">
+            <div className="background" style={{width: backgroundWidth + '%'}}></div>
+          </div>;
         }
 
         return <div className={className} key={measure.name} style={{width: idealWidth}}>

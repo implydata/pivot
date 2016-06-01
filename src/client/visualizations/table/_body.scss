@@ -5,10 +5,12 @@
   &.hover,
   &.selected {
     > .measure {
-      > .background {
-        background-color: #a8dbf5;
-        border-top: 1px solid #98cbe5;
-        border-bottom: 1px solid #98cbe5;
+      > .background-container {
+        > .background {
+          background-color: #a8dbf5;
+          border-top: 1px solid #98cbe5;
+          border-bottom: 1px solid #98cbe5;
+        }
       }
     }
   }
@@ -30,15 +32,20 @@
     }
 
 
-    > .background {
+    > .background-container {
       position: absolute;
       top: 0;
+      left: $measure-column-padding-left;
+      right: 0;
+      bottom: 0;
 
-      height: 100%;
+      > .background {
+        height: 100%;
 
-      background-color: #d2edfa;
-      border-top: 1px solid #bed9e6;
-      border-bottom: 1px solid #bed9e6;
+        background-color: #d2edfa;
+        border-top: 1px solid #bed9e6;
+        border-bottom: 1px solid #bed9e6;
+      }
     }
 
     > .label {
