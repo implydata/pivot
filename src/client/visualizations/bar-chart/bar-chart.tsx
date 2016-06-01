@@ -546,13 +546,6 @@ export class BarChart extends BaseVisualization<BarChartState> {
     return <div className="x-axis" style={{width: xAxisStage.width}}>
       <svg style={xAxisStage.getWidthHeight()} viewBox={xAxisStage.getViewBox()}>
         <BucketMarks stage={xAxisStage} ticks={xTicks} scale={xScale}/>
-        <line
-          className="vis-bottom"
-          x1="0"
-          x2={xAxisStage.width}
-          y1="0"
-          y2="0"
-        />
       </svg>
       {labels}
     </div>;
@@ -859,7 +852,6 @@ export class BarChart extends BaseVisualization<BarChartState> {
     if (datasetLoad.dataset && splits.length()) {
       hasHorizontalScroll = this.hasHorizontalScroll();
       hasVerticalScroll = this.hasVerticalScroll();
-      console.log(hasVerticalScroll);
 
       let xScale = this.getPrimaryXScale();
       let yAxes: JSX.Element[] = [];

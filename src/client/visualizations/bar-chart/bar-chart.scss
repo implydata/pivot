@@ -27,7 +27,7 @@
 
   .x-axis {
     stroke: $gray;
-    stroke-width: 2px;
+    stroke-width: 1px;
 
     .slanty-labels {
       position: absolute;
@@ -50,7 +50,7 @@
   }
 
   .measure-bar-chart {
-    &:not(:last-child):after {
+    &:after {
       content: '';
       position: absolute;
       left: 0;
