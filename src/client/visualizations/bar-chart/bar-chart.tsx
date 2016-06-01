@@ -187,6 +187,9 @@ export class BarChart extends BaseVisualization<BarChartState> {
 
   onClick(x: number, y: number) {
     const selectionInfo = this.calculateMousePosition(x, y);
+
+    if (!selectionInfo) return;
+
     const { essence, clicker } = this.props;
 
     if (!selectionInfo.coordinates) {
