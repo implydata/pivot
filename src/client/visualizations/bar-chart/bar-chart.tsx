@@ -262,25 +262,25 @@ export class BarChart extends BaseVisualization<BarChartState> {
     });
   }
 
-  hasVerticalScroll(): boolean {
-    const { essence, stage } = this.props;
+  // hasVerticalScroll(): boolean {
+  //   const { essence, stage } = this.props;
 
-    const measures = essence.getEffectiveMeasures();
-    const availableHeight = stage.height - X_AXIS_HEIGHT;
+  //   const measures = essence.getEffectiveMeasures();
+  //   const availableHeight = stage.height - X_AXIS_HEIGHT;
 
-    return Math.floor(availableHeight / measures.size) < MIN_CHART_HEIGHT;
-  }
+  //   return Math.floor(availableHeight / measures.size) < MIN_CHART_HEIGHT;
+  // }
 
-  hasHorizontalScroll(): boolean {
-    const xScale = this.getPrimaryXScale();
-    const { essence, stage } = this.props;
+  // hasHorizontalScroll(): boolean {
+  //   const xScale = this.getPrimaryXScale();
+  //   const { essence, stage } = this.props;
 
-    const { stepWidth } = this.getBarDimensions(xScale.rangeBand());
-    const xTicks = xScale.domain();
-    const width = roundToPx(xScale(xTicks[xTicks.length - 1])) + stepWidth;
+  //   const { stepWidth } = this.getBarDimensions(xScale.rangeBand());
+  //   const xTicks = xScale.domain();
+  //   const width = roundToPx(xScale(xTicks[xTicks.length - 1])) + stepWidth;
 
-    return width > stage.width - Y_AXIS_WIDTH - VIS_H_PADDING * 2;
-  }
+  //   return width > stage.width - Y_AXIS_WIDTH - VIS_H_PADDING * 2;
+  // }
 
   getOuterChartHeight(chartStage: Stage): number {
     return chartStage.height + CHART_TOP_PADDING + CHART_BOTTOM_PADDING;
@@ -845,13 +845,7 @@ export class BarChart extends BaseVisualization<BarChartState> {
     var rightGutter: JSX.Element;
     var overlay: JSX.Element;
 
-    var hasHorizontalScroll = false;
-    var hasVerticalScroll = false;
-
     if (datasetLoad.dataset && splits.length()) {
-      hasHorizontalScroll = this.hasHorizontalScroll();
-      hasVerticalScroll = this.hasVerticalScroll();
-
       let xScale = this.getPrimaryXScale();
       let yAxes: JSX.Element[] = [];
       let highlights: JSX.Element[] = [];
@@ -882,8 +876,6 @@ export class BarChart extends BaseVisualization<BarChartState> {
     return <div className="internals measure-bar-charts" style={{maxHeight: stage.height}}>
        <Scroller
         layout={scrollerLayout}
-        blockHorizontalScroll={!hasHorizontalScroll}
-        blockVerticalScroll={!hasVerticalScroll}
 
         bottomGutter={xAxis}
         rightGutter={rightGutter}

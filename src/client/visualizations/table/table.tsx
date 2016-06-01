@@ -248,18 +248,11 @@ export class Table extends BaseVisualization<TableState> {
     });
   }
 
-  hasHorizontalScroll(essence: Essence): boolean {
-    var availableWidth = this.props.stage.width - SPACE_LEFT - SEGMENT_WIDTH;
-    var columnsCount = essence.getEffectiveMeasures().size;
-
-    return columnsCount * MEASURE_WIDTH >= availableWidth;
-  }
-
   getIdealMeasureWidth(essence: Essence): number {
     var availableWidth = this.props.stage.width - SPACE_LEFT - SEGMENT_WIDTH;
     var columnsCount = essence.getEffectiveMeasures().size;
 
-    return this.hasHorizontalScroll(essence) ? MEASURE_WIDTH : availableWidth / columnsCount;
+    return columnsCount * MEASURE_WIDTH >= availableWidth ? MEASURE_WIDTH : availableWidth / columnsCount;
   }
 
   makeMeasuresRenderer(essence: Essence, formatters: Formatter[], hScales: d3.scale.Linear<number, number>[]): (datum: PseudoDatum) => JSX.Element[] {
@@ -485,8 +478,6 @@ export class Table extends BaseVisualization<TableState> {
 
         body={rows}
         overlay={overlay}
-
-        blockHorizontalScroll={!this.hasHorizontalScroll(essence)}
 
         onClick={this.onClick.bind(this)}
         onMouseMove={this.onMouseMove.bind(this)}

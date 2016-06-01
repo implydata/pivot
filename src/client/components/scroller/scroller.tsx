@@ -2,7 +2,7 @@ require('./scroller.css');
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { classNames, getXFromEvent, getYFromEvent } from '../../utils/dom/dom';
+import { clamp, classNames, getXFromEvent, getYFromEvent } from '../../utils/dom/dom';
 import { firstUp } from '../../utils/string/string';
 
 export type XSide = 'left' | 'right';
@@ -20,9 +20,6 @@ export interface ScrollerLayout {
 
 export interface ScrollerProps extends React.Props<any> {
   layout: ScrollerLayout;
-
-  blockHorizontalScroll?: boolean;
-  blockVerticalScroll?: boolean;
 
   onClick?: (x: number, y: number) => void;
   onMouseMove?: (x: number, y: number) => void;
@@ -172,17 +169,22 @@ export class Scroller extends React.Component<ScrollerProps, ScrollerState> {
   }
 
   private onScroll(e: UIEvent) {
+    const { bodyWidth, bodyHeight } = this.props.layout;
+    const { viewportWidth, viewportHeight } = this.state;
     var target = e.target as Element;
-
+​
+    var scrollLeft = clamp(target.scrollLeft, 0, Math.max(bodyWidth - viewportWidth, 0));
+    var scrollTop = clamp(target.scrollTop, 0, Math.max(bodyHeight - viewportHeight, 0));
+​
     if (this.props.onScroll !== undefined) {
       this.setState({
-        scrollTop: target.scrollTop,
-        scrollLeft: target.scrollLeft
-      }, () => this.props.onScroll(target.scrollTop, target.scrollLeft));
+        scrollTop,
+        scrollLeft
+      }, () => this.props.onScroll(scrollTop, scrollLeft));
     } else {
       this.setState({
-        scrollTop: target.scrollTop,
-        scrollLeft: target.scrollLeft
+        scrollTop,
+        scrollLeft
       });
     }
   }
@@ -274,9 +276,14 @@ export class Scroller extends React.Component<ScrollerProps, ScrollerState> {
   }
 
   render() {
-    const { body, overlay, onMouseLeave, layout, blockHorizontalScroll, blockVerticalScroll } = this.props;
+    const { viewportWidth, viewportHeight } = this.state;
+    const { body, overlay, onMouseLeave, layout } = this.props;
 
     if (!layout) return null;
+
+    const { bodyWidth, bodyHeight } = layout;
+    let blockHorizontalScroll = bodyWidth <= viewportWidth;
+    let blockVerticalScroll = bodyHeight <= viewportHeight;
 
     return <div className="scroller" ref="Scroller">
 
