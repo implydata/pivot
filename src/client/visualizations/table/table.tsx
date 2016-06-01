@@ -249,7 +249,7 @@ export class Table extends BaseVisualization<TableState> {
   }
 
   getIdealMeasureWidth(essence: Essence): number {
-    var availableWidth = this.props.stage.width - SPACE_LEFT - SEGMENT_WIDTH - SPACE_RIGHT;
+    var availableWidth = this.props.stage.width - SPACE_LEFT - SEGMENT_WIDTH;
     var columnsCount = essence.getEffectiveMeasures().size;
 
     if (columnsCount * MEASURE_WIDTH < availableWidth) {
