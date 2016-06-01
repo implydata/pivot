@@ -21,6 +21,8 @@ export interface ScrollerLayout {
 export interface ScrollerProps extends React.Props<any> {
   layout: ScrollerLayout;
 
+  blockHorizontalScroll?: boolean;
+
   onClick?: (x: number, y: number) => void;
   onMouseMove?: (x: number, y: number) => void;
   onMouseLeave?: () => void;
@@ -271,7 +273,7 @@ export class Scroller extends React.Component<ScrollerProps, ScrollerState> {
   }
 
   render() {
-    const { body, overlay, onMouseLeave, layout } = this.props;
+    const { body, overlay, onMouseLeave, layout, blockHorizontalScroll } = this.props;
 
     if (!layout) return null;
 
@@ -297,7 +299,7 @@ export class Scroller extends React.Component<ScrollerProps, ScrollerState> {
       { overlay ? <div className="overlay">{overlay}</div> : null }
 
       <div
-        className="event-container"
+        className={classNames('event-container', {'no-x-scroll': blockHorizontalScroll})}
         ref="eventContainer"
         onScroll={this.onScroll.bind(this)}
         onClick={this.onClick.bind(this)}
