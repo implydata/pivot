@@ -259,13 +259,31 @@ export class BarChart extends BaseVisualization<BarChartState> {
     });
   }
 
+  hasHorizontalScroll(): boolean {
+    const xScale = this.getPrimaryXScale();
+    const { essence, stage } = this.props;
+
+    const { stepWidth } = this.getBarDimensions(xScale.rangeBand());
+    const xTicks = xScale.domain();
+    const width = roundToPx(xScale(xTicks[xTicks.length - 1])) + stepWidth;
+
+    return width > stage.width - Y_AXIS_WIDTH - VIS_H_PADDING * 2;
+  }
+
   getOuterChartHeight(chartStage: Stage): number {
     return chartStage.height + CHART_TOP_PADDING + CHART_BOTTOM_PADDING;
   }
 
   getAxisStages(chartStage: Stage): {xAxisStage: Stage, yAxisStage: Stage} {
+    const { essence, stage } = this.props;
+
+    const xHeight = Math.max(
+      stage.height - (CHART_TOP_PADDING + CHART_BOTTOM_PADDING + chartStage.height) * essence.getEffectiveMeasures().size,
+      X_AXIS_HEIGHT
+    );
+
     return {
-      xAxisStage: new Stage({x: chartStage.x, y: 0, height: X_AXIS_HEIGHT, width: chartStage.width}),
+      xAxisStage: new Stage({x: chartStage.x, y: 0, height: xHeight, width: chartStage.width}),
       yAxisStage: new Stage({x: 0, y: chartStage.y, height: chartStage.height, width: Y_AXIS_WIDTH + VIS_H_PADDING})
     };
   }
@@ -826,7 +844,11 @@ export class BarChart extends BaseVisualization<BarChartState> {
     var rightGutter: JSX.Element;
     var overlay: JSX.Element;
 
+    var hasHorizontalScroll = false;
+
     if (datasetLoad.dataset && splits.length()) {
+      hasHorizontalScroll = this.hasHorizontalScroll();
+
       let xScale = this.getPrimaryXScale();
       let yAxes: JSX.Element[] = [];
       let highlights: JSX.Element[] = [];
@@ -851,11 +873,13 @@ export class BarChart extends BaseVisualization<BarChartState> {
 
       scrollerLayout = this.getScrollerLayout(chartStage, xAxisStage, yAxisStage);
       rightGutter = this.renderRightGutter(measures, chartStage, yAxes);
+
     }
 
     return <div className="internals measure-bar-charts" style={{maxHeight: stage.height}}>
        <Scroller
         layout={scrollerLayout}
+        blockHorizontalScroll={!hasHorizontalScroll}
 
         bottomGutter={xAxis}
         rightGutter={rightGutter}

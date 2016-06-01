@@ -50,6 +50,15 @@
   }
 
   .measure-bar-chart {
+    &:not(:last-child):after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-bottom: 1px solid $gray;
+    }
+
     .vis-measure-label {
       position: absolute;
       left: 6px;
