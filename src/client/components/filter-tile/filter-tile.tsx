@@ -397,13 +397,16 @@ export class FilterTile extends React.Component<FilterTileProps, FilterTileState
     </BubbleMenu>;
   }
 
-  renderOverflow(overflowItemBlanks: ItemBlank[]): JSX.Element {
+  renderOverflow(overflowItemBlanks: ItemBlank[], itemX: number): JSX.Element {
+    var style = transformStyle(itemX, 0);
     return <div
       className="overflow"
       ref="overflow"
+      key="overflow"
+      style={style}
       onClick={this.overflowButtonClick.bind(this)}
     >
-      {'+' + overflowItemBlanks.length}
+      <div className="count">{'+' + overflowItemBlanks.length}</div>
       {this.renderOverflowMenu(overflowItemBlanks)}
     </div>;
   }
@@ -548,7 +551,8 @@ export class FilterTile extends React.Component<FilterTileProps, FilterTileState
 
     var overflowIndicator: JSX.Element = null;
     if (overflowItemBlanks.length) {
-      overflowIndicator = this.renderOverflow(overflowItemBlanks);
+      var overFlowStart = filterItems.length * sectionWidth;
+      filterItems.push(this.renderOverflow(overflowItemBlanks, overFlowStart));
     }
 
     return <div
@@ -560,7 +564,6 @@ export class FilterTile extends React.Component<FilterTileProps, FilterTileState
       <div className="items" ref="items">
         {filterItems}
       </div>
-      {overflowIndicator}
       {dragPosition ? <FancyDragIndicator dragPosition={dragPosition}/> : null}
       {dragPosition ? <div
         className="drag-mask"
