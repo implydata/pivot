@@ -74,7 +74,7 @@ dataSources:
       - name: sometimeLater
         type: TIME
 
-      - name:
+      - name: commentLength
         type: NUMBER
 
       - name: deltaBucket100
@@ -101,10 +101,6 @@ dataSources:
         type: TIME
         kind: time
         expression: $time
-
-    #  - name: sometimeLater
-    #    title: Sometime Later
-    #    kind: time
 
       - name: channel
         title: Channel
