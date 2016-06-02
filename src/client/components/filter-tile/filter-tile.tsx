@@ -21,6 +21,8 @@ import { BubbleMenu } from '../bubble-menu/bubble-menu';
 const FILTER_CLASS_NAME = 'filter';
 const ANIMATION_DURATION = 400;
 const OVERFLOW_WIDTH = 40;
+const VIS_SELECTOR_WIDTH = 79;
+
 
 export interface ItemBlank {
   dimension: Dimension;
@@ -30,6 +32,12 @@ export interface ItemBlank {
 
 function formatLabelDummy(dimension: Dimension): string {
   return dimension.title;
+}
+
+
+function getMaxItemsNoOverflowAdjustment(stageWidth: number) {
+  var sectionWidth = CORE_ITEM_WIDTH + CORE_ITEM_GAP;
+  return stageWidth - BAR_TITLE_WIDTH - VIS_SELECTOR_WIDTH + CORE_ITEM_GAP / sectionWidth;
 }
 
 export interface FilterTileProps extends React.Props<any> {
@@ -85,7 +93,7 @@ export class FilterTile extends React.Component<FilterTileProps, FilterTileState
     const sectionWidth = CORE_ITEM_WIDTH + CORE_ITEM_GAP;
 
     if (menuStage) {
-      var newMaxItems = Math.floor((menuStage.width - BAR_TITLE_WIDTH - OVERFLOW_WIDTH - 79 + CORE_ITEM_GAP) / sectionWidth); // 79 = vis selector width
+      var newMaxItems = Math.floor((menuStage.width - BAR_TITLE_WIDTH - OVERFLOW_WIDTH - VIS_SELECTOR_WIDTH + CORE_ITEM_GAP) / sectionWidth);
       if (newMaxItems !== this.state.maxItems) {
         this.setState({
           menuOpenOn: null,
@@ -473,7 +481,7 @@ export class FilterTile extends React.Component<FilterTileProps, FilterTileState
   }
 
   render() {
-    var { essence } = this.props;
+    var { essence, menuStage } = this.props;
     var { dragPosition, possibleDimension, possiblePosition, maxItems } = this.state;
     var { dataSource, filter, highlight } = essence;
 
@@ -535,9 +543,11 @@ export class FilterTile extends React.Component<FilterTileProps, FilterTileState
     }
 
     var overflowItemBlanks: ItemBlank[];
-    if (maxItems < itemBlanks.length) {
-      overflowItemBlanks = itemBlanks.slice(maxItems);
-      itemBlanks = itemBlanks.slice(0, maxItems);
+    var itemBlanksLength = itemBlanks.length;
+    if (maxItems < itemBlanksLength) {
+      var sliceIndex = itemBlanksLength - maxItems === 1 ? Math.floor(getMaxItemsNoOverflowAdjustment(menuStage.width)) : maxItems;
+      overflowItemBlanks = itemBlanks.slice(sliceIndex);
+      itemBlanks = itemBlanks.slice(0, sliceIndex);
     } else {
       overflowItemBlanks = [];
     }
