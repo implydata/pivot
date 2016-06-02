@@ -40,11 +40,7 @@ $overflow-width: 40px;
     position: absolute;
     left: 0;
     padding: 0 10px;
-    width: 40px;
-
-    &.all-continuous {
-      background: $item-continuous;
-    }
+    width: auto;
 
     .count {
       pointer-events: none;
