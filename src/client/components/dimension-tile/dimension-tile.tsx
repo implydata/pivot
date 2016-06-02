@@ -8,7 +8,8 @@ import { $, r, Dataset, SortAction, TimeRange, RefExpression, Expression, TimeBu
 import { formatterFromData, collect, formatGranularity, formatTimeBasedOnGranularity } from '../../../common/utils/index';
 import { Fn } from '../../../common/utils/general/general';
 import { Clicker, Essence, VisStrategy, Dimension, SortOn, SplitCombine,
-  Colors, Granularity, ContinuousDimensionKind, getBestGranularityForRange, granularityEquals, granularityToString, getDefaultGranularityForKind, getGranularities } from '../../../common/models/index';
+  Colors, Granularity, ContinuousDimensionKind, getBestGranularityForRange, granularityEquals,
+  granularityToString, getDefaultGranularityForKind, getGranularities } from '../../../common/models/index';
 
 import { setDragGhost, classNames } from '../../utils/dom/dom';
 import { DragManager } from '../../utils/drag-manager/drag-manager';
