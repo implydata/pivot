@@ -37,7 +37,7 @@ function formatLabelDummy(dimension: Dimension): string {
 
 function getMaxItemsNoOverflowAdjustment(stageWidth: number) {
   var sectionWidth = CORE_ITEM_WIDTH + CORE_ITEM_GAP;
-  return stageWidth - BAR_TITLE_WIDTH - VIS_SELECTOR_WIDTH + CORE_ITEM_GAP / sectionWidth;
+  return (stageWidth - BAR_TITLE_WIDTH - VIS_SELECTOR_WIDTH + CORE_ITEM_GAP) / sectionWidth;
 }
 
 export interface FilterTileProps extends React.Props<any> {
