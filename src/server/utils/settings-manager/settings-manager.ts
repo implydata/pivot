@@ -218,7 +218,7 @@ export class SettingsManager {
         var initPromises = this.clusterManagers.map(clusterManager => clusterManager.init());
 
         // Also make a FileManager for the local files
-
+        // this.appSettings.getDataSourcesForCluster('native')
 
         return Q.all(initPromises);
       });
