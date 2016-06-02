@@ -34,7 +34,7 @@ dataSources:
     # GitHub does not like large files so only a sampled file is checked in
     # There is also a non-sampled file with the filter: isAnonymous == true applied, to use it set:
     # source: assets/data/wikiticker-2015-09-12-anonymous.json
-    # Run `assets/data-raw/process-wikiticker-2015-09-12` to get the full example file
+    # Run `resources/data/process-wikiticker-2015-09-12` to get the full example file
 
     # The subset filter that is applied to the data. This essentially restricts the data to only the rows that match the filter
     # This is useful if you are providing Pivot to people who should have restricted access. Must be an AND of INs (or just a single IN)
