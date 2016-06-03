@@ -36,6 +36,13 @@ export default CircumstancesHandler.EMPTY()
         autoChanged = true;
       }
 
+      if (splitDimension.isContinuous()) {
+        booleanBoost = 2;
+        split = split.changeSortAction(new SortAction({
+          expression: $(splitDimension.name),
+          direction: SortAction.ASCENDING
+        }));
+      }
 
       // ToDo: review this
       if (!split.limitAction && (autoChanged || splitDimension.kind !== 'time')) {
