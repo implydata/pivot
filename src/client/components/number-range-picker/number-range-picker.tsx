@@ -127,10 +127,10 @@ export class NumberRangePicker extends React.Component<NumberRangePickerProps, N
     this.mounted = false;
   }
 
-  relativePositionToValue(position: number) {
+  relativePositionToValue(position: number, type: 'start' | 'end') {
     const { step, min, max, rightBound } = this.state;
-    if (position === addNubSize(0)) return minToAny();
-    if (position === rightBound) return maxToAny();
+    if (position === addNubSize(0) && type === 'start') return minToAny();
+    if (position === rightBound && type === 'end') return maxToAny();
 
     var range = max - min !== 0 ? max - min : Math.abs(max);
     return toSignificantDigits(position * step, getNumberOfDigitsToShow(range));
@@ -180,7 +180,7 @@ export class NumberRangePicker extends React.Component<NumberRangePickerProps, N
     const { leftOffset } = this.state;
 
     var relativePosition = absolutePosition - leftOffset;
-    var newValue = this.relativePositionToValue(addNubSize(relativePosition));
+    var newValue = this.relativePositionToValue(addNubSize(relativePosition), 'start');
     onRangeStartChange(newValue);
   }
 
@@ -189,7 +189,7 @@ export class NumberRangePicker extends React.Component<NumberRangePickerProps, N
     const { leftOffset } = this.state;
 
     var relativePosition = absolutePosition - leftOffset;
-    var newValue = this.relativePositionToValue(relativePosition);
+    var newValue = this.relativePositionToValue(relativePosition, 'end');
 
     onRangeEndChange(newValue);
   }
