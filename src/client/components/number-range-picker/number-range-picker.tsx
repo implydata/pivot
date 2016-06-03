@@ -211,7 +211,7 @@ export class NumberRangePicker extends React.Component<NumberRangePickerProps, N
 
       var rangeBarLeft = { left: addNubSize(0), width: positionStart };
       var rangeBarMiddle = { left: getAdjustedStartHalf(positionStart), width: positionEnd - positionStart };
-      var rangeBarRight = { left: getAdjustedStartHalf(positionEnd), width: subtractNubSize(adjustedRightBound) - positionEnd };
+      var rangeBarRight = { left: getAdjustedStartHalf(positionEnd), width: adjustedRightBound - positionEnd };
 
       var absoluteRightBound = leftOffset + rightBound;
 
