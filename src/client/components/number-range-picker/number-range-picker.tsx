@@ -158,7 +158,7 @@ export class NumberRangePicker extends React.Component<NumberRangePickerProps, N
     var inBetween = (relativeX < positionEnd) && relativeX > startNubPosition;
 
     if (isBeforeStart) {
-      this.updateStart(absoluteX);
+      this.updateStart(absoluteX - NUB_SIZE);
     } else if (isAfterEnd) {
       this.updateEnd(absoluteX);
     } else if (inBetween) {
@@ -169,7 +169,7 @@ export class NumberRangePicker extends React.Component<NumberRangePickerProps, N
       if (distanceFromEnd < distanceFromStart) {
         this.updateEnd(endNubPosition + leftOffset - distanceFromEnd);
       } else {
-        this.updateStart(startNubPosition + leftOffset + distanceFromStart);
+        this.updateStart(startNubPosition + leftOffset + distanceFromStart - NUB_SIZE);
       }
       return;
     }
@@ -211,7 +211,7 @@ export class NumberRangePicker extends React.Component<NumberRangePickerProps, N
 
       var rangeBarLeft = { left: addNubSize(0), width: positionStart };
       var rangeBarMiddle = { left: getAdjustedStartHalf(positionStart), width: positionEnd - positionStart };
-      var rangeBarRight = { left: getAdjustedStartHalf(positionEnd), width: adjustedRightBound - positionEnd };
+      var rangeBarRight = { left: getAdjustedStartHalf(positionEnd), width: adjustedRightBound - getAdjustedStartHalf(positionEnd) };
 
       var absoluteRightBound = leftOffset + rightBound;
 

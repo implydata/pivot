@@ -107,7 +107,9 @@ export class NumberFilterMenu extends React.Component<NumberFilterMenuProps, Num
     }
 
     if (validFilter) {
-      var newSet = Set.fromJS({ setType: "NUMBER_RANGE", elements: [NumberRange.fromJS({ start, end })] });
+
+      var bounds = start === end ? '[]' : '[)';
+      var newSet = Set.fromJS({ setType: "NUMBER_RANGE", elements: [NumberRange.fromJS({ start, end, bounds })] });
       var clause = new FilterClause({
         expression: dimension.expression,
         selection: new LiteralExpression({ type: "SET/NUMBER_RANGE", value: newSet })
