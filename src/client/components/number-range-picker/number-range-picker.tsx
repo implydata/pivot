@@ -8,17 +8,16 @@ import { $, Dataset, ply } from 'plywood';
 import { Essence, Dimension } from '../../../common/models/index';
 import { toSignificantDigits, getNumberOfWholeDigits } from '../../../common/utils/general/general';
 
-
 import { getXFromEvent, clamp } from '../../utils/dom/dom';
-import { minToAny, maxToAny, isStartAny, isBeyondMin, isEndAny, isBeyondMax } from '../../utils/number-range/number-range';
 
 import { Loader } from '../loader/loader';
 import { QueryError } from '../query-error/query-error';
 import { RangeHandle } from '../range-handle/range-handle';
 
-export const NUB_SIZE = 16;
-// this is how many steps we want to represent in the slider bar
-export const GRANULARITY_IN_BAR = 300;
+export const ANY_VALUE: any = null;
+
+const NUB_SIZE = 16;
+const GRANULARITY_IN_BAR = 300; // this is how many steps we want to represent in the slider bar
 
 function addNubSize(value: number) {
   return value + NUB_SIZE;
@@ -129,8 +128,8 @@ export class NumberRangePicker extends React.Component<NumberRangePickerProps, N
 
   relativePositionToValue(position: number, type: 'start' | 'end') {
     const { step, min, max, rightBound } = this.state;
-    if (position === addNubSize(0) && type === 'start') return minToAny();
-    if (position === rightBound && type === 'end') return maxToAny();
+    if (position <= addNubSize(0) && type === 'start') return ANY_VALUE;
+    if (position >= rightBound && type === 'end') return ANY_VALUE;
 
     var range = max - min !== 0 ? max - min : Math.abs(max);
     return toSignificantDigits(position * step, getNumberOfDigitsToShow(range));
@@ -201,42 +200,38 @@ export class NumberRangePicker extends React.Component<NumberRangePickerProps, N
     var content: JSX.Element = null;
 
     if (rightBound && step && isFinite(max) && isFinite(min)) {
-      var relativeEnd = isEndAny(end) ? rightBound : this.valueToRelativePosition(end);
-      var relativeStart = subtractNubSize(this.valueToRelativePosition(start));
+      var relativeStart = start === ANY_VALUE ? 0 : subtractNubSize(this.valueToRelativePosition(start));
+      var relativeEnd = end === ANY_VALUE ? rightBound : this.valueToRelativePosition(end);
       var adjustedRightBound = subtractNubSize(rightBound);
 
       var positionEnd = clamp(relativeEnd, addNubSize(relativeStart), adjustedRightBound);
-
       var positionStart = start ? clamp(relativeStart, 0, subtractNubSize(positionEnd)) : 0;
 
-      var rangeBarLeft = { left: addNubSize(0), width: positionStart };
-      var rangeBarMiddle = { left: getAdjustedStartHalf(positionStart), width: positionEnd - positionStart };
-      var rangeBarRight = { left: getAdjustedStartHalf(positionEnd), width: adjustedRightBound - getAdjustedStartHalf(positionEnd) };
+      var rangeBarSelected = { left: getAdjustedStartHalf(positionStart), width: positionEnd - positionStart };
 
       var absoluteRightBound = leftOffset + rightBound;
 
       content = <div className="range-slider" onMouseDown={this.onBarClick.bind(this, positionStart, positionEnd)}>
-        <div className="range-bar left" style={rangeBarLeft} />
+        <div className="range-bar full"/>
+        <div className="range-bar selected" style={rangeBarSelected} />
         <RangeHandle
           positionLeft={positionStart}
           onChange={this.updateStart.bind(this)}
-          isAny={isStartAny(start)}
-          isBeyondMin={isBeyondMin(min, start)}
+          isAny={start === ANY_VALUE}
+          isBeyondMin={start !== ANY_VALUE && start < min}
           leftBound={leftOffset}
           rightBound={leftOffset + subtractNubSize(positionEnd)}
           offset={leftOffset}
         />
-        <div className="range-bar middle" style={rangeBarMiddle} />
         <RangeHandle
           positionLeft={positionEnd}
           onChange={this.updateEnd.bind(this)}
-          isAny={isEndAny(end)}
-          isBeyondMax={isBeyondMax(max, end)}
+          isAny={end === ANY_VALUE}
+          isBeyondMax={end !== ANY_VALUE && max < end}
           leftBound={leftOffset + addNubSize(positionStart)}
           rightBound={absoluteRightBound}
           offset={leftOffset}
         />
-        <div className="range-bar right" style={rangeBarRight} />
       </div>;
     }
 

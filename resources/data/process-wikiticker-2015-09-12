@@ -35,11 +35,11 @@ gzcat wikiticker-2015-09-12.gz \
       deleted: [-.delta, 0] | max,
       deltaByTen: (.delta / 10)
     }' \
-  > ../data/wikiticker-2015-09-12-large.json
+  > ../../assets/data/wikiticker-2015-09-12-large.json
 
-perl -ne'print if $. % 10 == 0' ../data/wikiticker-2015-09-12-large.json \
-  > ../data/wikiticker-2015-09-12-sampled.json
+perl -ne'print if $. % 10 == 0' ../../assets/data/wikiticker-2015-09-12-large.json \
+  > ../../assets/data/wikiticker-2015-09-12-sampled.json
 
-cat ../data/wikiticker-2015-09-12-large.json \
+cat ../../assets/data/wikiticker-2015-09-12-large.json \
   | jq -c 'select(.isAnonymous)' \
-  > ../data/wikiticker-2015-09-12-anonymous.json
+  > ../../assets/data/wikiticker-2015-09-12-anonymous.json

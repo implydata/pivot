@@ -7,29 +7,18 @@ import { FilterClause, Clicker, Essence, Filter, Dimension } from '../../../comm
 import { Fn } from '../../../common/utils/general/general';
 import { STRINGS } from '../../config/constants';
 import { enterKey } from '../../utils/dom/dom';
-import { minToAny, maxToAny, isStartAny, isEndAny } from '../../utils/number-range/number-range';
 
 import { Button } from '../button/button';
-import { NumberRangePicker } from '../number-range-picker/number-range-picker';
+import { NumberRangePicker, ANY_VALUE } from '../number-range-picker/number-range-picker';
 
-function startToString(start: number): string {
-  if (isStartAny(start)) return STRINGS.any;
-  return `` + start;
+function numberOrAnyToString(start: number): string {
+  if (start === ANY_VALUE) return STRINGS.any;
+  return '' + start;
 }
 
-function endToString(end: number) {
-  if (isEndAny(end)) return STRINGS.any;
-  return `` + end;
-}
-
-function stringToStart(startInput: string) {
-  if (startInput === STRINGS.any) return minToAny();
-  return parseFloat(startInput);
-}
-
-function stringToEnd(endInput: string) {
-  if (endInput === STRINGS.any) return maxToAny();
-  return parseFloat(endInput);
+function stringToNumberOrAny(startInput: string): number {
+  var parse = parseFloat(startInput);
+  return isNaN(parse) ? ANY_VALUE : parse;
 }
 
 export interface NumberFilterMenuProps extends React.Props<any> {
@@ -79,8 +68,8 @@ export class NumberFilterMenu extends React.Component<NumberFilterMenuProps, Num
     }
 
     this.setState({
-      startInput: startToString(start),
-      endInput: endToString(end),
+      startInput: numberOrAnyToString(start),
+      endInput: numberOrAnyToString(end),
       start,
       end
     });
@@ -139,35 +128,27 @@ export class NumberFilterMenu extends React.Component<NumberFilterMenuProps, Num
   }
 
   onRangeInputStartChange(e: KeyboardEvent) {
-    const { end } = this.state;
-
     var startInput = (e.target as HTMLInputElement).value;
-    var start = stringToStart(startInput);
-    if (!(start > end) || end === null) {
-      this.setState({ startInput });
-    }
-
-    if ((start !== null && !isNaN(start)) || start === null) {
-      this.setState({ start });
-    }
+    this.setState({
+      startInput,
+      start: stringToNumberOrAny(startInput)
+    });
   }
 
   onRangeInputEndChange(e: KeyboardEvent) {
     var endInput = (e.target as HTMLInputElement).value;
-    this.setState({ endInput });
-
-    var end = stringToEnd(endInput);
-    if (end !== null && !isNaN(end) || end === null) {
-      this.setState({ end });
-    }
+    this.setState({
+      endInput,
+      end: stringToNumberOrAny(endInput)
+    });
   }
 
   onRangeStartChange(newStart: number) {
-    this.setState({ startInput: startToString(newStart), start: newStart });
+    this.setState({ startInput: numberOrAnyToString(newStart), start: newStart });
   }
 
   onRangeEndChange(newEnd: number) {
-    this.setState({ endInput: endToString(newEnd), end: newEnd });
+    this.setState({ endInput: numberOrAnyToString(newEnd), end: newEnd });
   }
 
   actionEnabled() {
