@@ -20,12 +20,12 @@ export const NUB_SIZE = 16;
 // this is how many steps we want to represent in the slider bar
 export const GRANULARITY_IN_BAR = 300;
 
-function getAdjustedStart(start: number) {
-  return start + NUB_SIZE;
+function addNubSize(value: number) {
+  return value + NUB_SIZE;
 }
 
-function getAdjustedEnd(end: number) {
-  return end && end > NUB_SIZE ? end - NUB_SIZE : 0;
+function subtractNubSize(value: number) {
+  return value && value > NUB_SIZE ? value - NUB_SIZE : 0;
 }
 
 function getNumberOfDigitsToShow(n: number) {
@@ -129,7 +129,7 @@ export class NumberRangePicker extends React.Component<NumberRangePickerProps, N
 
   relativePositionToValue(position: number) {
     const { step, min, max, rightBound } = this.state;
-    if (position === 0) return minToAny();
+    if (position === addNubSize(0)) return minToAny();
     if (position === rightBound) return maxToAny();
 
     var range = max - min !== 0 ? max - min : Math.abs(max);
@@ -150,8 +150,8 @@ export class NumberRangePicker extends React.Component<NumberRangePickerProps, N
     if (relativeX < NUB_SIZE / 2) return this.updateStart(leftOffset);
 
 
-    var startNubPosition = getAdjustedStart(positionStart) + clickPadding;
-    var endNubPosition = getAdjustedEnd(positionEnd) + clickPadding;
+    var startNubPosition = addNubSize(positionStart) + clickPadding;
+    var endNubPosition = subtractNubSize(positionEnd) + clickPadding;
 
     var isBeforeStart = relativeX < positionStart;
     var isAfterEnd = relativeX > positionEnd + NUB_SIZE;
@@ -180,7 +180,7 @@ export class NumberRangePicker extends React.Component<NumberRangePickerProps, N
     const { leftOffset } = this.state;
 
     var relativePosition = absolutePosition - leftOffset;
-    var newValue = this.relativePositionToValue(relativePosition);
+    var newValue = this.relativePositionToValue(addNubSize(relativePosition));
     onRangeStartChange(newValue);
   }
 
@@ -202,16 +202,16 @@ export class NumberRangePicker extends React.Component<NumberRangePickerProps, N
 
     if (rightBound && step && isFinite(max) && isFinite(min)) {
       var relativeEnd = isEndAny(end) ? rightBound : this.valueToRelativePosition(end);
-      var relativeStart = this.valueToRelativePosition(start);
-      var adjustedRightBound = getAdjustedEnd(rightBound);
+      var relativeStart = subtractNubSize(this.valueToRelativePosition(start));
+      var adjustedRightBound = subtractNubSize(rightBound);
 
-      var positionEnd = clamp(relativeEnd, getAdjustedStart(relativeStart), adjustedRightBound);
+      var positionEnd = clamp(relativeEnd, addNubSize(relativeStart), adjustedRightBound);
 
-      var positionStart = start ? clamp(relativeStart, 0, getAdjustedEnd(positionEnd)) : 0;
+      var positionStart = start ? clamp(relativeStart, 0, subtractNubSize(positionEnd)) : 0;
 
-      var rangeBarLeft = { left: 0, width: positionStart };
+      var rangeBarLeft = { left: addNubSize(0), width: positionStart };
       var rangeBarMiddle = { left: getAdjustedStartHalf(positionStart), width: positionEnd - positionStart };
-      var rangeBarRight = { left: getAdjustedStartHalf(positionEnd), width: getAdjustedEnd(rightBound) - positionEnd };
+      var rangeBarRight = { left: getAdjustedStartHalf(positionEnd), width: subtractNubSize(adjustedRightBound) - positionEnd };
 
       var absoluteRightBound = leftOffset + rightBound;
 
@@ -223,7 +223,7 @@ export class NumberRangePicker extends React.Component<NumberRangePickerProps, N
           isAny={isStartAny(start)}
           isBeyondMin={isBeyondMin(min, start)}
           leftBound={leftOffset}
-          rightBound={leftOffset + getAdjustedEnd(positionEnd)}
+          rightBound={leftOffset + subtractNubSize(positionEnd)}
           offset={leftOffset}
         />
         <div className="range-bar middle" style={rangeBarMiddle} />
@@ -232,7 +232,7 @@ export class NumberRangePicker extends React.Component<NumberRangePickerProps, N
           onChange={this.updateEnd.bind(this)}
           isAny={isEndAny(end)}
           isBeyondMax={isBeyondMax(max, end)}
-          leftBound={leftOffset + getAdjustedStart(positionStart)}
+          leftBound={leftOffset + addNubSize(positionStart)}
           rightBound={absoluteRightBound}
           offset={leftOffset}
         />

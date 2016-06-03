@@ -315,13 +315,9 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
     const { dimension } = this.props;
     const { selectedGranularity } = this.state;
 
-    if (selectedGranularity) {
-      if (dimension.kind === 'time') {
-        var duration = (selectedGranularity as TimeBucketAction).duration;
-        return `${dimension.title} (${duration.getDescription()})`;
-      } else if (dimension.kind === 'number') {
-        return `${dimension.title} (by ${(selectedGranularity as NumberBucketAction).size})`;
-      }
+    if (selectedGranularity && dimension.kind === 'time') {
+      var duration = (selectedGranularity as TimeBucketAction).duration;
+      return `${dimension.title} (${duration.getDescription()})`;
     }
     return dimension.title;
   }

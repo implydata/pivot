@@ -265,7 +265,7 @@ export function getBestGranularityForRange(inputRange: PlywoodRange, bigChecker:
 }
 
 export function getBestBucketUnitForRange(inputRange: PlywoodRange, bigChecker: boolean, bucketedBy?: Granularity, customGranularities?: Granularity[]): BucketUnit {
-  var rangeLength = endValue(inputRange) - startValue(inputRange);
+  var rangeLength = Math.abs(endValue(inputRange) - startValue(inputRange));
 
   var helper = getHelperForRange(inputRange);
   var bucketLength = bucketedBy ? getBucketSize(bucketedBy) : 0;

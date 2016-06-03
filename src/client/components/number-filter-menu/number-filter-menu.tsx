@@ -101,7 +101,7 @@ export class NumberFilterMenu extends React.Component<NumberFilterMenuProps, Num
 
     var validFilter = false;
     if ((start !== null && end !== null)) {
-      validFilter = start < end;
+      validFilter = start <= end;
     } else {
       validFilter = (!isNaN(start) && !(isNaN(end))) && (start !== null || end !== null);
     }
