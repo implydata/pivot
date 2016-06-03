@@ -35,9 +35,8 @@ function formatLabelDummy(dimension: Dimension): string {
 }
 
 
-function getMaxItemsNoOverflowAdjustment(stageWidth: number) {
-  var sectionWidth = CORE_ITEM_WIDTH + CORE_ITEM_GAP;
-  return (stageWidth - BAR_TITLE_WIDTH - VIS_SELECTOR_WIDTH + CORE_ITEM_GAP) / sectionWidth;
+function getWidthNoOverflowAdjustment(stageWidth: number) {
+  return (stageWidth - BAR_TITLE_WIDTH - VIS_SELECTOR_WIDTH + CORE_ITEM_GAP);
 }
 
 export interface FilterTileProps extends React.Props<any> {
@@ -542,10 +541,21 @@ export class FilterTile extends React.Component<FilterTileProps, FilterTileState
       }
     }
 
-    var overflowItemBlanks: ItemBlank[];
     var itemBlanksLength = itemBlanks.length;
+    var overflowItemBlanks: ItemBlank[];
     if (maxItems < itemBlanksLength) {
-      var sliceIndex = itemBlanksLength - maxItems === 1 ? Math.floor(getMaxItemsNoOverflowAdjustment(menuStage.width)) : maxItems;
+      var maxWidth = menuStage ? getWidthNoOverflowAdjustment(menuStage.width) : null;
+      var actualWidth = maxItems * sectionWidth + OVERFLOW_WIDTH + CORE_ITEM_GAP;
+
+      var sliceIndex: number = null;
+      if (actualWidth > maxWidth) {
+        sliceIndex = maxItems - 1;
+      } else if (itemBlanksLength - maxItems === 1) {
+        sliceIndex = Math.floor(getWidthNoOverflowAdjustment(menuStage.width) / sectionWidth);
+      } else {
+        sliceIndex = maxItems;
+      }
+
       overflowItemBlanks = itemBlanks.slice(sliceIndex);
       itemBlanks = itemBlanks.slice(0, sliceIndex);
     } else {
@@ -559,14 +569,13 @@ export class FilterTile extends React.Component<FilterTileProps, FilterTileState
       return this.renderItemBlank(itemBlank, style);
     });
 
-    var overflowIndicator: JSX.Element = null;
-    if (overflowItemBlanks.length) {
+    if (overflowItemBlanks.length > 0) {
       var overFlowStart = filterItems.length * sectionWidth;
       filterItems.push(this.renderOverflow(overflowItemBlanks, overFlowStart));
     }
 
     return <div
-      className={classNames('filter-tile', (overflowIndicator ? 'has-overflow' : 'no-overflow'))}
+      className='filter-tile'
       onDragEnter={this.dragEnter.bind(this)}
 
     >
