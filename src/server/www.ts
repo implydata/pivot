@@ -2,7 +2,7 @@ import * as debugModule from 'debug';
 import * as http from 'http';
 
 import * as app from './app';
-import { START_SERVER, PORT } from './config';
+import { START_SERVER, PORT, HOST } from './config';
 
 if (START_SERVER) {
   var debug = debugModule('pivot:www');
@@ -37,5 +37,5 @@ if (START_SERVER) {
   });
 
   app.set('port', PORT);
-  server.listen(PORT);
+  server.listen(PORT, HOST);
 }
