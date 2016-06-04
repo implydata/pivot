@@ -8,7 +8,7 @@ import { STRINGS, BAR_TITLE_WIDTH, CORE_ITEM_WIDTH, CORE_ITEM_GAP } from '../../
 import { Stage, Clicker, Essence, DataSource, Filter, FilterClause, Dimension, DragPosition } from '../../../common/models/index';
 import { formatFilterClause } from '../../../common/utils/formatter/formatter';
 import {
-  findParentWithClass, setDragGhost, uniqueId, isInside, transformStyle, getXFromEvent,
+  findParentWithClass, setDragGhost, uniqueId, isInside, transformStyle, getXFromEvent
 } from '../../utils/dom/dom';
 import { DragManager } from '../../utils/drag-manager/drag-manager';
 
@@ -72,7 +72,6 @@ function separateOverflowFromItems(maxItems: number, maxWidth: number, items: It
     items,
     overflow
   };
-
 }
 
 export interface FilterTileProps extends React.Props<any> {
@@ -517,8 +516,8 @@ export class FilterTile extends React.Component<FilterTileProps, FilterTileState
   }
 
   renderItemBlanks() {
-    var { essence, menuStage } = this.props;
-    var { dragPosition, possibleDimension, possiblePosition, maxItems } = this.state;
+    var { essence } = this.props;
+    var { possibleDimension, possiblePosition, maxItems } = this.state;
 
     var { dataSource, filter, highlight } = essence;
 
