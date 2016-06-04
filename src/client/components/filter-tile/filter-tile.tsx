@@ -36,7 +36,7 @@ function formatLabelDummy(dimension: Dimension): string {
 
 
 function getWidthNoOverflowAdjustment(stageWidth: number) {
-  return (stageWidth - BAR_TITLE_WIDTH - VIS_SELECTOR_WIDTH + CORE_ITEM_GAP);
+  return stageWidth - BAR_TITLE_WIDTH - VIS_SELECTOR_WIDTH + CORE_ITEM_GAP;
 }
 
 interface SeparatedPills {
