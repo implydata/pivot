@@ -42,6 +42,10 @@ $overflow-width: 40px;
     padding: 0 10px;
     width: 40px;
 
+    &.all-continuous {
+      background: $item-continuous;
+    }
+
     .count {
       pointer-events: none;
       white-space: nowrap;
