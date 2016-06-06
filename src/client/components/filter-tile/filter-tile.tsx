@@ -8,7 +8,7 @@ import { STRINGS, BAR_TITLE_WIDTH, CORE_ITEM_WIDTH, CORE_ITEM_GAP } from '../../
 import { Stage, Clicker, Essence, DataSource, Filter, FilterClause, Dimension, DragPosition } from '../../../common/models/index';
 import { formatFilterClause } from '../../../common/utils/formatter/formatter';
 import {
-  findParentWithClass, setDragGhost, uniqueId, isInside, transformStyle, getXFromEvent
+  findParentWithClass, setDragGhost, uniqueId, isInside, transformStyle, getXFromEvent, classNames
 } from '../../utils/dom/dom';
 import { DragManager } from '../../utils/drag-manager/drag-manager';
 
@@ -39,39 +39,27 @@ function getWidthNoOverflowAdjustment(stageWidth: number) {
   return stageWidth - BAR_TITLE_WIDTH - VIS_SELECTOR_WIDTH + CORE_ITEM_GAP;
 }
 
-interface SeparatedPills {
-  items: ItemBlank[];
-  overflow: ItemBlank[];
-}
+function getMaxItems(stageWidth: number, itemsLength: number): number {
+  var maxWidth = getWidthNoOverflowAdjustment(stageWidth);
+  var includedItems = itemsLength;
+  var initialMax = Math.floor((maxWidth - OVERFLOW_WIDTH ) / SECTION_WIDTH);
 
-function separateOverflowFromItems(maxItems: number, maxWidth: number, items: ItemBlank[]): SeparatedPills {
-  var includedItems = items.length;
-  var overflow: ItemBlank[];
+  if (initialMax < includedItems) {
 
-  if (maxItems < includedItems) {
-
-    var widthPlusOverflow = maxItems * SECTION_WIDTH + OVERFLOW_WIDTH + CORE_ITEM_GAP;
-    var sliceIndex: number = null;
+    var widthPlusOverflow = initialMax * SECTION_WIDTH + OVERFLOW_WIDTH + CORE_ITEM_GAP;
+    var maxItems: number = null;
 
     if (maxWidth < widthPlusOverflow) {
-      sliceIndex = maxItems - 1;
-    } else if (includedItems - maxItems === 1) {
-      sliceIndex = Math.floor(maxWidth / SECTION_WIDTH);
+      maxItems = initialMax - 1;
+    } else if (includedItems - initialMax === 1) {
+      maxItems = Math.floor(maxWidth / SECTION_WIDTH);
     } else {
-      sliceIndex = maxItems;
+      maxItems = initialMax;
     }
-
-    overflow = items.slice(sliceIndex);
-    items = items.slice(0, sliceIndex);
-
+    return maxItems;
   } else {
-    overflow = [];
+    return itemsLength;
   }
-
-  return {
-    items,
-    overflow
-  };
 }
 
 export interface FilterTileProps extends React.Props<any> {
@@ -127,9 +115,8 @@ export class FilterTile extends React.Component<FilterTileProps, FilterTileState
     const { menuStage } = nextProps;
 
     if (menuStage) {
-      var newMaxWidth = getWidthNoOverflowAdjustment(menuStage.width);
-      var newMaxItems = Math.floor((newMaxWidth - OVERFLOW_WIDTH ) / SECTION_WIDTH);
-      if (newMaxItems !== this.state.maxItems || newMaxWidth !== this.state.maxWidth) {
+      var newMaxItems = getMaxItems(menuStage.width, this.getItemBlanks().length);
+      if (newMaxItems !== this.state.maxItems) {
         this.setState({
           menuOpenOn: null,
           menuDimension: null,
@@ -137,8 +124,7 @@ export class FilterTile extends React.Component<FilterTileProps, FilterTileState
           possibleDimension: null,
           possiblePosition: null,
           overflowMenuOpenOn: null,
-          maxItems: newMaxItems,
-          maxWidth: newMaxWidth
+          maxItems: newMaxItems
         });
       }
     }
@@ -443,8 +429,9 @@ export class FilterTile extends React.Component<FilterTileProps, FilterTileState
 
   renderOverflow(overflowItemBlanks: ItemBlank[], itemX: number): JSX.Element {
     var style = transformStyle(itemX, 0);
+
     return <div
-      className="overflow"
+      className={classNames('overflow', { 'all-continuous': overflowItemBlanks.every(item => item.dimension.isContinuous()) })}
       ref="overflow"
       key="overflow"
       style={style}
@@ -515,7 +502,7 @@ export class FilterTile extends React.Component<FilterTileProps, FilterTileState
     }
   }
 
-  renderItemBlanks() {
+  getItemBlanks(): ItemBlank[] {
     var { essence } = this.props;
     var { possibleDimension, possiblePosition, maxItems } = this.state;
 
@@ -580,18 +567,17 @@ export class FilterTile extends React.Component<FilterTileProps, FilterTileState
   }
 
   render() {
-    var { dragPosition, maxItems, maxWidth } = this.state;
-    var itemBlanks = this.renderItemBlanks();
-    var separatedPills = separateOverflowFromItems(maxItems, maxWidth, itemBlanks);
+    var { dragPosition, maxItems } = this.state;
+    var itemBlanks = this.getItemBlanks();
 
     var itemX = 0;
-    var filterItems = separatedPills.items.map((item) => {
+    var filterItems = itemBlanks.slice(0, maxItems).map((item) => {
       var style = transformStyle(itemX, 0);
       itemX += SECTION_WIDTH;
       return this.renderItemBlank(item, style);
     });
 
-    var overflow = separatedPills.overflow;
+    var overflow = itemBlanks.slice(maxItems);
     if (overflow.length > 0) {
       var overFlowStart = filterItems.length * SECTION_WIDTH;
       filterItems.push(this.renderOverflow(overflow, overFlowStart));
