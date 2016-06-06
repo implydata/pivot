@@ -17,8 +17,9 @@ import { SvgIcon } from '../../components/svg-icon/svg-icon';
 import { ButtonGroup } from '../../components/button-group/button-group';
 import { Router, Route } from '../../components/router/router';
 
-
 import { AppSettings, AppSettingsJS } from '../../../common/models/index';
+
+import { General } from './general/general';
 
 export interface SettingsViewProps extends React.Props<any> {
   version: string;
@@ -31,7 +32,7 @@ export interface SettingsViewProps extends React.Props<any> {
 export interface SettingsViewState {
   errorText?: string;
   messageText?: string;
-  settingsText?: string;
+  settings?: AppSettings;
   breadCrumbs?: string[];
 }
 
@@ -48,8 +49,7 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
     super();
     this.state = {
       errorText: '',
-      messageText: 'Welcome to the world of settings!',
-      settingsText: 'Loading...'
+      messageText: 'Welcome to the world of settings!'
     };
   }
 
@@ -65,7 +65,7 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
           this.setState({
             errorText: '',
             messageText: '',
-            settingsText: JSON.stringify(resp.appSettings, null, 2)
+            settings: AppSettings.fromJS(resp.appSettings)
           });
         },
         (xhr: XMLHttpRequest) => {
@@ -83,43 +83,15 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
     this.mounted = false;
   }
 
-  onChange(event: any) {
-    this.setState({
-      messageText: '',
-      settingsText: event.target.value
-    });
-  }
-
-  onSave() {
+  onSave(settings: AppSettings) {
     const { version, onSettingsChange } = this.props;
-    const { settingsText } = this.state;
-
-    try {
-      var appSettingsJS: AppSettingsJS = JSON.parse(settingsText);
-    } catch (e) {
-      this.setState({
-        errorText: `Could not parse: ${e.message}`,
-        messageText: ''
-      });
-      return;
-    }
-
-    try {
-      var appSettings = AppSettings.fromJS(appSettingsJS);
-    } catch (e) {
-      this.setState({
-        errorText: `Invalid settings: ${e.message}`,
-        messageText: ''
-      });
-      return;
-    }
 
     Qajax({
       method: "POST",
       url: 'settings',
       data: {
         version: version,
-        appSettings: appSettings
+        appSettings: settings
       }
     })
       .then(Qajax.filterSuccess)
@@ -129,10 +101,12 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
           if (!this.mounted) return;
           this.setState({
             errorText: '',
-            messageText: 'Saved.'
+            messageText: 'Saved.',
+            settings
           });
+
           if (onSettingsChange) {
-            onSettingsChange(appSettings.toClientSettings().attachExecutors((dataSource: DataSource) => {
+            onSettingsChange(settings.toClientSettings().attachExecutors((dataSource: DataSource) => {
               return queryUrlExecutorFactory(dataSource.name, 'plywood', version);
             }));
           }
@@ -172,7 +146,7 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
 
   render() {
     const { user, onNavClick, customization } = this.props;
-    const { errorText, messageText, settingsText, breadCrumbs } = this.state;
+    const { errorText, messageText, settings, breadCrumbs } = this.state;
 
     return <div className="settings-view">
       <HomeHeaderBar
@@ -193,7 +167,7 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
          rootFragment="settings"
        >
          <Route fragment="general">
-           <div>general</div>
+           <General settings={settings} onSave={this.onSave.bind(this)}/>
          </Route>
          <Route fragment="clusters">
            <div>clusters</div>

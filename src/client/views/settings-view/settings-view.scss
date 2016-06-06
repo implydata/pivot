@@ -31,5 +31,6 @@
   .main-panel {
     @include unpin-top($header-height);
     left: $left-panel-width;
+    background-color: $white;
   }
 }

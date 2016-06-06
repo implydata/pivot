@@ -1,0 +1,44 @@
+@import '../../../imports';
+
+.general {
+  .title-bar {
+    height: 60px;
+    background-color: $white;
+    border-bottom: 1px solid $border-light;
+    margin-bottom: 20px;
+    padding-left: 20px;
+
+    .title {
+      font-size: 1.8em;
+      margin-top: 16px;
+    }
+
+    .button {
+      position: absolute;
+      top: 12px;
+      right: 10px;
+    }
+
+    > * {
+      display: inline-block;
+    }
+  }
+
+  .main {
+    padding: 0 10px;
+    width: 300px;
+
+    form {
+
+      &.vertical {
+        > * {
+          display: block;
+        }
+      }
+
+      input {
+        @extend %default-input;
+      }
+    }
+  }
+}

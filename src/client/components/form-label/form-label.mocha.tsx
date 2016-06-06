@@ -8,18 +8,18 @@ import { DataSourceMock, EssenceMock } from '../../../common/models/mocks';
 
 import { findDOMNode } from '../../utils/test-utils/index';
 
-import { Router } from './router';
+import { FormLabel } from './form-label';
 
-describe.only('Router', () => {
+describe('FormLabel', () => {
   it('adds the correct class', () => {
     var renderedComponent = TestUtils.renderIntoDocument(
-      <Router
+      <FormLabel
 
       />
     );
 
     expect(TestUtils.isCompositeComponent(renderedComponent), 'should be composite').to.equal(true);
-    expect((findDOMNode(renderedComponent) as any).className, 'should contain class').to.contain('router');
+    expect((findDOMNode(renderedComponent) as any).className, 'should contain class').to.contain('form-label');
   });
 
 });

@@ -90,6 +90,14 @@ export class Customization implements Instance<CustomizationValue, Customization
   public getTitle(version: string): string {
     return this.title.replace(/%v/g, version);
   }
+
+  public changeTitle(title: string): Customization {
+    var value = this.toJS();
+
+    value.title = title;
+
+    return Customization.fromJS(value);
+  }
 }
 
 check = Customization;
