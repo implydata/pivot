@@ -10,12 +10,12 @@ import { Colors, Clicker, Essence, Filter, FilterClause, Stage, Measure,
 
 import * as localStorage from '../../utils/local-storage/local-storage';
 
-import { LinkHeaderBar } from '../link-header-bar/link-header-bar';
-import { ManualFallback } from '../manual-fallback/manual-fallback';
-import { PinboardPanel } from '../pinboard-panel/pinboard-panel';
-import { ButtonGroup } from '../button-group/button-group';
-import { Preset } from '../time-filter-menu/time-filter-menu';
-import { ResizeHandle } from '../resize-handle/resize-handle';
+import { LinkHeaderBar } from '../../components/link-header-bar/link-header-bar';
+import { ManualFallback } from '../../components/manual-fallback/manual-fallback';
+import { PinboardPanel } from '../../components/pinboard-panel/pinboard-panel';
+import { ButtonGroup } from '../../components/button-group/button-group';
+import { Preset } from '../../components/time-filter-menu/time-filter-menu';
+import { ResizeHandle } from '../../components/resize-handle/resize-handle';
 
 var $maxTime = $(FilterClause.MAX_TIME_REF_NAME);
 var latestPresets: Preset[] = [

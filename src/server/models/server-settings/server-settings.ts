@@ -54,7 +54,7 @@ export class ServerSettings implements Instance<ServerSettingsValue, ServerSetti
       druidRequestDecorator
     } = parameters;
 
-    if (serverRoot[0] !== '/') serverRoot = '/' + serverRoot;
+    if (serverRoot && serverRoot[0] !== '/') serverRoot = '/' + serverRoot;
 
     var druidRequestDecoratorModule: DruidRequestDecoratorModule = null;
     if (configFileDir && druidRequestDecorator) {

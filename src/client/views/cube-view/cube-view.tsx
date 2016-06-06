@@ -9,16 +9,16 @@ import { DragManager } from '../../utils/drag-manager/drag-manager';
 import { Colors, Clicker, DataSource, Dimension, Essence, Filter, Stage, Manifest, Measure,
   SplitCombine, Splits, VisStrategy, VisualizationProps, User, Customization} from '../../../common/models/index';
 
-import { CubeHeaderBar } from '../cube-header-bar/cube-header-bar';
-import { DimensionMeasurePanel } from '../dimension-measure-panel/dimension-measure-panel';
-import { FilterTile } from '../filter-tile/filter-tile';
-import { SplitTile } from '../split-tile/split-tile';
-import { VisSelector } from '../vis-selector/vis-selector';
-import { ManualFallback } from '../manual-fallback/manual-fallback';
-import { DropIndicator } from '../drop-indicator/drop-indicator';
-import { PinboardPanel } from '../pinboard-panel/pinboard-panel';
-import { RawDataModal } from '../raw-data-modal/raw-data-modal';
-import { ResizeHandle } from '../resize-handle/resize-handle';
+import { CubeHeaderBar } from '../../components/cube-header-bar/cube-header-bar';
+import { DimensionMeasurePanel } from '../../components/dimension-measure-panel/dimension-measure-panel';
+import { FilterTile } from '../../components/filter-tile/filter-tile';
+import { SplitTile } from '../../components/split-tile/split-tile';
+import { VisSelector } from '../../components/vis-selector/vis-selector';
+import { ManualFallback } from '../../components/manual-fallback/manual-fallback';
+import { DropIndicator } from '../../components/drop-indicator/drop-indicator';
+import { PinboardPanel } from '../../components/pinboard-panel/pinboard-panel';
+import { RawDataModal } from '../../components/raw-data-modal/raw-data-modal';
+import { ResizeHandle } from '../../components/resize-handle/resize-handle';
 
 import { visualizations } from '../../visualizations/index';
 import * as localStorage from '../../utils/local-storage/local-storage';
@@ -175,9 +175,9 @@ export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
     window.addEventListener('resize', this.globalResizeListener);
     window.addEventListener('keydown', this.globalKeyDownListener);
     this.globalResizeListener();
-    require.ensure(['../raw-data-modal/raw-data-modal'], (require) => {
+    require.ensure(['../../components/raw-data-modal/raw-data-modal'], (require) => {
       this.setState({
-        RawDataModalAsync: require('../raw-data-modal/raw-data-modal').RawDataModal
+        RawDataModalAsync: require('../../components/raw-data-modal/raw-data-modal').RawDataModal
       });
     }, 'raw-data-modal');
   }

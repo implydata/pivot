@@ -14,11 +14,10 @@ import { WallTime } from 'chronoshift';
 var tzData = require('../../../../node_modules/chronoshift/lib/walltime/walltime-data.js');
 WallTime.init(tzData.rules, tzData.zones);
 
-import { DimensionMeasurePanel } from '../dimension-measure-panel/dimension-measure-panel';
-import { FilterTile } from '../filter-tile/filter-tile';
-import { SplitTile } from '../split-tile/split-tile';
+import { DimensionMeasurePanel } from '../../components/dimension-measure-panel/dimension-measure-panel';
+import { FilterTile } from '../../components/filter-tile/filter-tile';
+import { SplitTile } from '../../components/split-tile/split-tile';
 import * as localStorage from '../../utils/local-storage/local-storage';
-
 
 describe('CubeView', () => {
   before(() => {

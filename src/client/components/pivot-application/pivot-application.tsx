@@ -8,10 +8,11 @@ import { DataSource, LinkViewConfig, AppSettings, User } from '../../../common/m
 
 import { AboutModal } from '../about-modal/about-modal';
 import { SideDrawer } from '../side-drawer/side-drawer';
-import { HomeView } from '../home-view/home-view';
-import { CubeView } from '../cube-view/cube-view';
-import { LinkView } from '../link-view/link-view';
-import { SettingsView } from '../settings-view/settings-view';
+
+import { HomeView } from '../../views/home-view/home-view';
+import { LinkView } from '../../views/link-view/link-view';
+import { CubeView } from '../../views/cube-view/cube-view';
+import { SettingsView } from '../../views/settings-view/settings-view';
 
 import { visualizations } from '../../visualizations/index';
 

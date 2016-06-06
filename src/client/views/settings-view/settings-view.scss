@@ -1,0 +1,35 @@
+@import '../../imports';
+
+.settings-view {
+  $left-panel-width: 170px;
+
+  .home-header-bar {
+    @include pin-top($header-height);
+  }
+
+  .left-panel {
+    @include unpin-top($header-height);
+
+    width: $left-panel-width;
+    padding: 10px 5px;
+
+    background-color: $background-brand-light;
+
+    button {
+      background-color: transparent;
+      display: block;
+      width: 100%;
+      margin-bottom: 10px;
+      text-align: left;
+
+      &.active {
+        background-color: $brand;
+      }
+    }
+  }
+
+  .main-panel {
+    @include unpin-top($header-height);
+    left: $left-panel-width;
+  }
+}

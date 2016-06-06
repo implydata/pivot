@@ -6,12 +6,16 @@ import { User, Customization } from '../../../common/models/index';
 import { $, Expression, Executor, Dataset } from 'plywood';
 import { Stage, Clicker, Essence, DataSource, Filter, Dimension, Measure } from '../../../common/models/index';
 import { STRINGS } from '../../config/constants';
-import { HomeHeaderBar } from '../home-header-bar/home-header-bar';
 import { Fn } from '../../../common/utils/general/general';
 import { queryUrlExecutorFactory } from '../../utils/ajax/ajax';
-import { Button } from '../button/button';
 
-import { SvgIcon } from '../svg-icon/svg-icon';
+import { classNames } from '../../utils/dom/dom';
+
+import { HomeHeaderBar } from '../../components/home-header-bar/home-header-bar';
+import { Button } from '../../components/button/button';
+import { SvgIcon } from '../../components/svg-icon/svg-icon';
+import { ButtonGroup } from '../../components/button-group/button-group';
+import { Router, Route } from '../../components/router/router';
 
 
 import { AppSettings, AppSettingsJS } from '../../../common/models/index';
@@ -28,7 +32,14 @@ export interface SettingsViewState {
   errorText?: string;
   messageText?: string;
   settingsText?: string;
+  breadCrumbs?: string[];
 }
+
+const VIEWS = [
+  {label: 'General', value: 'general'},
+  {label: 'Clusters', value: 'clusters'},
+  {label: 'Data Cubes', value: 'data_cubes'}
+];
 
 export class SettingsView extends React.Component<SettingsViewProps, SettingsViewState> {
   public mounted: boolean;
@@ -40,16 +51,12 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
       messageText: 'Welcome to the world of settings!',
       settingsText: 'Loading...'
     };
-
   }
 
   componentDidMount() {
     this.mounted = true;
 
-    Qajax({
-      method: "GET",
-      url: 'settings'
-    })
+    Qajax({method: "GET", url: 'settings'})
       .then(Qajax.filterSuccess)
       .then(Qajax.toJSON)
       .then(
@@ -74,10 +81,6 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
 
   componentWillUnmount() {
     this.mounted = false;
-  }
-
-  componentWillReceiveProps(nextProps: SettingsViewProps) {
-
   }
 
   onChange(event: any) {
@@ -143,12 +146,33 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
           });
         }
       );
+  }
 
+  selectTab(value: string) {
+    this.setState({breadCrumbs: [value]});
+  }
+
+  renderLeftButtons(breadCrumbs: string[]): JSX.Element[] {
+    if (!breadCrumbs || !breadCrumbs.length) return [];
+
+    return VIEWS.map(({label, value}) => {
+      return <Button
+        className={classNames({active: breadCrumbs[0] === value})}
+        title={label}
+        type="primary"
+        key={value}
+        onClick={this.selectTab.bind(this, value)}
+      />;
+    });
+  }
+
+  onURLChange(breadCrumbs: string[]) {
+    this.setState({breadCrumbs});
   }
 
   render() {
     const { user, onNavClick, customization } = this.props;
-    const { errorText, messageText, settingsText } = this.state;
+    const { errorText, messageText, settingsText, breadCrumbs } = this.state;
 
     return <div className="settings-view">
       <HomeHeaderBar
@@ -157,14 +181,29 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
         customization={customization}
         title={STRINGS.settings}
       />
-      <div className="container">
-        <div className="text-input">
-          <textarea value={settingsText} onChange={this.onChange.bind(this)}/>
-        </div>
-        {errorText ? <div className="error">{errorText}</div> : null}
-        {messageText ? <div className="message">{messageText}</div> : null}
-        <Button type="primary" onClick={this.onSave.bind(this)} title="Jesus Saves"/>
-      </div>
+     <div className="left-panel">
+       {this.renderLeftButtons(breadCrumbs)}
+     </div>
+
+     <div className="main-panel">
+
+       <Router
+         onURLChange={this.onURLChange.bind(this)}
+         breadCrumbs={breadCrumbs}
+         rootFragment="settings"
+       >
+         <Route fragment="general">
+           <div>general</div>
+         </Route>
+         <Route fragment="clusters">
+           <div>clusters</div>
+         </Route>
+         <Route fragment="data_cubes">
+           <div>data_cubes</div>
+         </Route>
+
+       </Router>
+     </div>
     </div>;
   }
 }

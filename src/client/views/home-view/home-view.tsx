@@ -3,11 +3,12 @@ require('./home-view.css');
 import * as React from 'react';
 import { Stage, DataSource, User, Customization } from '../../../common/models/index';
 import { STRINGS } from '../../config/constants';
-import { HomeHeaderBar } from '../home-header-bar/home-header-bar';
 import { Fn } from '../../../common/utils/general/general';
-import { GoldenCenter } from '../golden-center/golden-center';
-import { NavLogo } from '../nav-logo/nav-logo';
-import { NavList } from '../nav-list/nav-list';
+
+import { HomeHeaderBar } from '../../components/home-header-bar/home-header-bar';
+import { GoldenCenter } from '../../components/golden-center/golden-center';
+import { NavLogo } from '../../components/nav-logo/nav-logo';
+import { NavList } from '../../components/nav-list/nav-list';
 
 export interface HomeViewProps extends React.Props<any> {
   dataSources?: DataSource[];
