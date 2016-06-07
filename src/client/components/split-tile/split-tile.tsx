@@ -33,7 +33,6 @@ export interface SplitTileState {
   overflowMenuOpenOn?: Element;
   maxItems?: number;
   menuInside?: Element;
-  overflowMenuId?: string;
 }
 
 export class SplitTile extends React.Component<SplitTileProps, SplitTileState> {
@@ -48,8 +47,7 @@ export class SplitTile extends React.Component<SplitTileProps, SplitTileState> {
       menuOpenOn: null,
       menuDimension: null,
       dragPosition: null,
-      maxItems: null,
-      overflowMenuId: null
+      maxItems: null
     };
   }
 
@@ -72,8 +70,7 @@ export class SplitTile extends React.Component<SplitTileProps, SplitTileState> {
           menuOpenOn: null,
           menuDimension: null,
           overflowMenuOpenOn: null,
-          maxItems: newMaxItems,
-          overflowMenuId: null
+          maxItems: newMaxItems
         });
       }
     }
