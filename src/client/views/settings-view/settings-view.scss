@@ -3,6 +3,8 @@
 .settings-view {
   $left-panel-width: 170px;
 
+  $title-bar-height: 60px;
+
   .home-header-bar {
     @include pin-top($header-height);
   }
@@ -24,6 +26,7 @@
 
       &.active {
         background-color: $brand;
+        color: $white;
       }
     }
   }
@@ -32,5 +35,38 @@
     @include unpin-top($header-height);
     left: $left-panel-width;
     background-color: $white;
+
+    > * {
+      height: 100%;
+
+      .title-bar {
+        height: $title-bar-height;
+        background-color: $white;
+        border-bottom: 1px solid $border-light;
+        margin-bottom: 20px;
+        padding-left: 20px;
+
+        .title {
+          font-size: 1.8em;
+          margin-top: 16px;
+        }
+
+        .button {
+          position: absolute;
+          top: 12px;
+          right: 10px;
+        }
+
+        > * {
+          display: inline-block;
+        }
+      }
+
+      .main {
+        @include unpin-top($title-bar-height);
+
+        padding: 20px 30px;
+      }
+    }
   }
 }

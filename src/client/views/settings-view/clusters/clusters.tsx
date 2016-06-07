@@ -1,4 +1,4 @@
-require('./general.css');
+require('./clusters.css');
 
 import { Instance } from 'immutable-class';
 
@@ -11,26 +11,28 @@ import { SvgIcon } from '../../../components/svg-icon/svg-icon';
 import { FormLabel } from '../../../components/form-label/form-label';
 import { Button } from '../../../components/button/button';
 
-import { AppSettings, AppSettingsJS } from '../../../../common/models/index';
+import { AppSettings, Cluster } from '../../../../common/models/index';
 
-export interface GeneralProps extends React.Props<any> {
+import { SimpleList, SimpleListColumn, SimpleListAction } from '../../../components/simple-list/simple-list';
+
+export interface ClustersProps extends React.Props<any> {
   settings?: AppSettings;
   onSave?: (settings: AppSettings) => void;
 }
 
-export interface GeneralState {
+export interface ClustersState {
   newSettings?: AppSettings;
   hasChanged?: boolean;
 }
 
-export class General extends React.Component<GeneralProps, GeneralState> {
+export class Clusters extends React.Component<ClustersProps, ClustersState> {
   constructor() {
     super();
 
     this.state = {hasChanged: false};
   }
 
-  componentWillReceiveProps(nextProps: GeneralProps) {
+  componentWillReceiveProps(nextProps: ClustersProps) {
     if (nextProps.settings) this.setState({
       newSettings: nextProps.settings,
       hasChanged: false
@@ -81,30 +83,53 @@ export class General extends React.Component<GeneralProps, GeneralState> {
     }
   }
 
-  render() {
-    // Put this in i18n, probably
-    const helpTexts: any = {
-      title: 'The title as it will appear in your browser\'s title bar. Use %v to show the version.'
-    };
+  edit(cluster: Cluster) {
+    console.log(cluster);
+  }
 
+  moar(cluster: Cluster) {
+    this.edit(cluster);
+  }
+
+  render() {
     const { hasChanged, newSettings } = this.state;
 
     if (!newSettings) return null;
 
-    return <div className="general">
+    const columns: SimpleListColumn[] = [
+      {label: 'Name', field: 'name', width: 400, cellIcon: 'cluster'},
+      {label: 'Host', field: 'host', width: 400},
+      {label: 'Strategy', field: 'introspectionStrategy', width: 300}
+    ];
+
+    const actions: SimpleListAction[] = [
+      {icon: 'full-edit-brand', callback: this.edit.bind(this)},
+      {icon: 'full-more-brand', callback: this.moar.bind(this)}
+    ];
+
+    var rows = newSettings.clusters;
+
+    // This is for debug purposes only
+    for (let i = 0; i < 10; i++) {
+      let c = new Cluster(newSettings.clusters[0].valueOf());
+
+      c.name = c.name.split('').sort(() => 0.5 - Math.random()).join('');
+      c.introspectionStrategy = c.introspectionStrategy.split('').sort(() => 0.5 - Math.random()).join('');
+
+      rows.push(c);
+    }
+
+    return <div className="clusters">
       <div className="title-bar">
-        <div className="title">General</div>
+        <div className="title">Clusters</div>
         {hasChanged ? <Button title="Save" type="primary" onClick={this.save.bind(this)}/> : null}
       </div>
       <div className="main">
-        <form className="vertical">
-          <FormLabel label="Title" helpText={helpTexts.title}></FormLabel>
-          <input
-            type="text"
-            value={newSettings.customization.title}
-            onChange={this.onChange.bind(this, 'customization.title')}
-          />
-        </form>
+      <SimpleList
+        columns={columns}
+        rows={rows}
+        actions={actions}
+      ></SimpleList>
       </div>
     </div>;
   }

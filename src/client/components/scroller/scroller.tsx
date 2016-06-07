@@ -56,6 +56,12 @@ export class Scroller extends React.Component<ScrollerProps, ScrollerState> {
       viewportHeight: 0,
       viewportWidth: 0
     };
+
+    this.globalResizeListener = this.globalResizeListener.bind(this);
+  }
+
+  globalResizeListener() {
+    this.updateViewport();
   }
 
   private getGutterStyle(side: XSide | YSide): React.CSSProperties {
@@ -263,7 +269,20 @@ export class Scroller extends React.Component<ScrollerProps, ScrollerState> {
     return <div className={[yPos, xPos, 'corner'].join('-')} style={style}>{element}</div>;
   }
 
+  componentDidMount() {
+    window.addEventListener('resize', this.globalResizeListener);
+    this.updateViewport();
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.globalResizeListener);
+  }
+
   componentDidUpdate() {
+    this.updateViewport();
+  }
+
+  updateViewport() {
     const rect = this.getDOMElement('Scroller').getBoundingClientRect();
     const { top, right, bottom, left } = this.props.layout;
 

@@ -10,7 +10,6 @@ export interface FormLabelProps extends React.Props<any> {
   label?: string;
   helpText?: string;
   errorText?: string;
-  inError?: boolean;
 }
 
 export interface FormLabelState {

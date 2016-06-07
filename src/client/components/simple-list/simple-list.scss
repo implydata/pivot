@@ -1,0 +1,68 @@
+@import '../../imports';
+
+.simple-list {
+  width: 100%;
+  height: 100%;
+
+  .scroller {
+    height: 100%;
+
+    .column-headers {
+      font-size: 1.2em;
+      border-bottom: 1px solid $border-light;
+      height: 100%;
+
+      background-color: $white;
+
+      > * {
+        display: inline-block;
+      }
+
+      .sort-arrow {
+        width: 10px;
+        margin-left: 10px;
+
+        &.ascending {
+          transform: rotate(180deg);
+        }
+      }
+    }
+
+    .top-right-corner {
+      border-bottom: 1px solid $border-light;
+      background-color: $white;
+    }
+
+    .row {
+      padding: 12px 0 5px 0;
+      border-bottom: 1px solid $border-light;
+      white-space: nowrap;
+
+      > * {
+        display: inline-block;
+      }
+
+      .cell {
+        &.has-icon {
+          padding-left: 25px;
+        }
+
+        .icon {
+          position: absolute;
+          top: -3px;
+          left: 0;
+          width: 20px;
+        }
+      }
+
+      &.action {
+        cursor: pointer;
+
+        .icon {
+          width: 20px;
+          height: 20px;
+        }
+      }
+    }
+  }
+}

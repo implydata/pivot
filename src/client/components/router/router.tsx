@@ -114,8 +114,12 @@ export class Router extends React.Component<RouterProps, RouterState> {
   render() {
     const { children } = this.props;
 
-    return <div className="router">
-      {(children as any[]).filter(this.qualifyForCurrentRoute.bind(this))}
-    </div>;
+    var qualifiedChildren = (children as JSX.Element[]).filter(this.qualifyForCurrentRoute.bind(this));
+
+    if (qualifiedChildren.length > 1) {
+      throw new Error('Several children qualify to the same route');
+    }
+
+    return qualifiedChildren[0] || null;
   }
 }

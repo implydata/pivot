@@ -20,6 +20,7 @@ import { Router, Route } from '../../components/router/router';
 import { AppSettings, AppSettingsJS } from '../../../common/models/index';
 
 import { General } from './general/general';
+import { Clusters } from './clusters/clusters';
 
 export interface SettingsViewProps extends React.Props<any> {
   version: string;
@@ -76,7 +77,7 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
             messageText: ''
           });
         }
-      );
+      ).done();
   }
 
   componentWillUnmount() {
@@ -119,7 +120,7 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
             messageText: ''
           });
         }
-      );
+      ).done();
   }
 
   selectTab(value: string) {
@@ -170,7 +171,7 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
            <General settings={settings} onSave={this.onSave.bind(this)}/>
          </Route>
          <Route fragment="clusters">
-           <div>clusters</div>
+           <Clusters settings={settings} onSave={this.onSave.bind(this)}/>
          </Route>
          <Route fragment="data_cubes">
            <div>data_cubes</div>
