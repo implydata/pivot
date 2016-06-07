@@ -1,6 +1,8 @@
 import * as numeral from 'numeral';
-import { NumberRange } from 'plywood';
-import { Dimension, FilterClause, Essence } from '../../models/index';
+import { NumberRange, TimeRange } from 'plywood';
+import { Timezone } from 'chronoshift';
+
+import { Dimension, FilterClause } from '../../models/index';
 import { DisplayYear, formatTimeRange } from '../../utils/time/time';
 
 export interface Formatter {
@@ -80,13 +82,13 @@ export function formatValue(value: any): string {
 export interface LabelFormatOptions {
   dimension: Dimension;
   clause: FilterClause;
-  essence: Essence;
+  timeRange?: TimeRange;
+  timezone?: Timezone;
   verbose?: boolean;
 }
 
 export function formatFilterClause(options: LabelFormatOptions): string {
-  const { dimension, clause, essence, verbose } = options;
-  // ToDo: get essence out of here
+  const { dimension, clause, verbose } = options;
   var label = dimension.title;
 
   switch (dimension.kind) {
@@ -102,12 +104,12 @@ export function formatFilterClause(options: LabelFormatOptions): string {
       break;
 
     case 'time':
-      var timeSelection = clause.selection;
-      var timeRange = essence.evaluateSelection(timeSelection);
+      var timezone = options.timezone;
+      var timeRange = options.timeRange;
       if (verbose) {
-        label += `: ${formatTimeRange(timeRange, essence.timezone, DisplayYear.IF_DIFF)}`;
+        label += `: ${formatTimeRange(timeRange, timezone, DisplayYear.IF_DIFF)}`;
       } else {
-        label = formatTimeRange(timeRange, essence.timezone, DisplayYear.IF_DIFF);
+        label = formatTimeRange(timeRange, timezone, DisplayYear.IF_DIFF);
       }
       break;
 

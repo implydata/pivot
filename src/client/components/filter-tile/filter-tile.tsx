@@ -6,7 +6,7 @@ import * as Q from 'q';
 import { Timezone, Duration, hour, day, week } from 'chronoshift';
 import { STRINGS, BAR_TITLE_WIDTH, CORE_ITEM_WIDTH, CORE_ITEM_GAP } from '../../config/constants';
 import { Stage, Clicker, Essence, DataSource, Filter, FilterClause, Dimension, DragPosition } from '../../../common/models/index';
-import { formatFilterClause } from '../../../common/utils/formatter/formatter';
+import { formatFilterClause, LabelFormatOptions } from '../../../common/utils/formatter/formatter';
 import {
   findParentWithClass, setDragGhost, uniqueId, isInside, transformStyle, getXFromEvent, classNames
 } from '../../utils/dom/dom';
@@ -463,6 +463,23 @@ export class FilterTile extends React.Component<FilterTileProps, FilterTileState
 
     var className = classNames.join(' ');
 
+    var formattingOptions: LabelFormatOptions = null;
+    if (dimension.kind === 'time') {
+      var timeSelection = clause.selection;
+      var timeRange = essence.evaluateSelection(timeSelection);
+      formattingOptions = {
+        dimension,
+        clause,
+        timeRange,
+        timezone: essence.timezone
+      };
+    } else {
+      formattingOptions = {
+        dimension,
+        clause
+      };
+    }
+
     if (source === 'from-highlight') {
       return <div
         className={className}
@@ -471,7 +488,7 @@ export class FilterTile extends React.Component<FilterTileProps, FilterTileState
         onClick={clicker.acceptHighlight.bind(clicker)}
         style={style}
       >
-        <div className="reading">{formatFilterClause({dimension, clause, essence})}</div>
+        <div className="reading">{formatFilterClause(formattingOptions)}</div>
         {this.renderRemoveButton(itemBlank)}
       </div>;
     }
@@ -486,7 +503,7 @@ export class FilterTile extends React.Component<FilterTileProps, FilterTileState
         onDragStart={this.dragStart.bind(this, dimension, clause)}
         style={style}
       >
-        <div className="reading">{formatFilterClause({dimension, clause, essence})}</div>
+        <div className="reading">{formatFilterClause(formattingOptions)}</div>
         {this.renderRemoveButton(itemBlank)}
       </div>;
     } else {

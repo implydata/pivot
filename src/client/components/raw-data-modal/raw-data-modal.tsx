@@ -8,7 +8,7 @@ import { Essence, Stage, DataSource } from '../../../common/models/index';
 
 import { Fn, makeTitle, arraySum } from '../../../common/utils/general/general';
 import { download, makeFileName } from '../../utils/download/download';
-import { formatFilterClause } from '../../../common/utils/formatter/formatter';
+import { formatFilterClause, LabelFormatOptions } from '../../../common/utils/formatter/formatter';
 import { classNames } from '../../utils/dom/dom';
 import { getVisibleSegments } from '../../utils/sizing/sizing';
 import { STRINGS } from '../../config/constants';
@@ -18,9 +18,6 @@ import { Scroller, ScrollerLayout } from '../scroller/scroller';
 import { Loader } from '../loader/loader';
 import { QueryError } from '../query-error/query-error';
 
-const SPACE_RIGHT = 10;
-const SPACE_LEFT = 10;
-const BODY_PADDING_BOTTOM = 90;
 const HEADER_HEIGHT = 30;
 const ROW_HEIGHT = 30;
 const LIMIT = 100;
@@ -134,7 +131,23 @@ export class RawDataModal extends React.Component<RawDataModalProps, RawDataModa
     return essence.getEffectiveFilter().clauses.map((clause, i) => {
       const dimension = dataSource.getDimensionByExpression(clause.expression);
       if (!dimension) return null;
-      return formatFilterClause({ dimension, clause, essence, verbose: true });
+      var formattingOptions: LabelFormatOptions = null;
+      if (dimension.kind === 'time') {
+        var timeSelection = clause.selection;
+        var timeRange = essence.evaluateSelection(timeSelection);
+        formattingOptions = {
+          dimension,
+          clause,
+          timeRange,
+          timezone: essence.timezone
+        };
+      } else {
+        formattingOptions = {
+          dimension,
+          clause
+        };
+      }
+      return formatFilterClause(formattingOptions);
     }).toList();
   }
 
