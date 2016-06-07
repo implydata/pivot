@@ -84,11 +84,7 @@ export class Clusters extends React.Component<ClustersProps, ClustersState> {
   }
 
   edit(cluster: Cluster) {
-    console.log(cluster);
-  }
 
-  moar(cluster: Cluster) {
-    this.edit(cluster);
   }
 
   render() {
@@ -103,8 +99,7 @@ export class Clusters extends React.Component<ClustersProps, ClustersState> {
     ];
 
     const actions: SimpleListAction[] = [
-      {icon: 'full-edit-brand', callback: this.edit.bind(this)},
-      {icon: 'full-more-brand', callback: this.moar.bind(this)}
+      {icon: 'full-edit-brand', callback: this.edit.bind(this)}
     ];
 
     var rows = newSettings.clusters;

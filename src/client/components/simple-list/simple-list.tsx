@@ -230,11 +230,9 @@ export class SimpleList extends React.Component<SimpleListProps, SimpleListState
   }
 
   onHeaderClick(column: SimpleListColumn) {
-    var newSortAscending = this.state.sortColumn === column ? !this.state.sortAscending : true;
-
     this.setState({
       sortColumn: column,
-      sortAscending: newSortAscending
+      sortAscending: this.state.sortColumn === column ? !this.state.sortAscending : true
     });
   }
 
