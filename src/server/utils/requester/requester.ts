@@ -2,8 +2,7 @@ import { $, helper } from 'plywood';
 import { druidRequesterFactory, DruidRequestDecorator } from 'plywood-druid-requester';
 import { mySqlRequesterFactory } from 'plywood-mysql-requester';
 import { postgresRequesterFactory } from 'plywood-postgres-requester';
-
-export type SupportedTypes = 'druid' | 'mysql' | 'postgres';
+import { SupportedTypes } from '../../../common/models/index';
 
 export interface ProperRequesterOptions {
   type: SupportedTypes;
@@ -60,6 +59,9 @@ export function properRequesterFactory(options: ProperRequesterOptions): Request
         password: options.password
       });
       break;
+
+    default:
+      throw new Error(`unknown requester type ${type}`);
   }
 
   if (retry) {

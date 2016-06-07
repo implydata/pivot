@@ -32,10 +32,10 @@ if (START_SERVER) {
 
   server.on('listening', () => {
     var address = server.address();
-    console.log('Listening on ' + address.port);
-    debug('Listening on ' + address.port);
+    console.log(`Listening on address ${address.address}, port ${address.port}`);
+    debug(`Listening on address ${address.address}, port ${address.port}`);
   });
 
   app.set('port', SERVER_SETTINGS.port);
-  server.listen(SERVER_SETTINGS.port);
+  server.listen(SERVER_SETTINGS.port, SERVER_SETTINGS.serverHost);
 }

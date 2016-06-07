@@ -14,6 +14,7 @@ export type Iframe = "allow" | "deny";
 
 export interface ServerSettingsValue {
   port?: number;
+  serverHost?: string;
   serverRoot?: string;
   pageMustLoadTimeout?: number;
   iframe?: Iframe;
@@ -24,6 +25,7 @@ export interface ServerSettingsValue {
 
 export interface ServerSettingsJS {
   port?: number;
+  serverHost?: string;
   serverRoot?: string;
   pageMustLoadTimeout?: number;
   iframe?: Iframe;
@@ -48,6 +50,7 @@ export class ServerSettings implements Instance<ServerSettingsValue, ServerSetti
   static fromJS(parameters: ServerSettingsJS, configFileDir?: string): ServerSettings {
     var {
       port,
+      serverHost,
       serverRoot,
       pageMustLoadTimeout,
       iframe,
@@ -55,6 +58,7 @@ export class ServerSettings implements Instance<ServerSettingsValue, ServerSetti
     } = parameters;
 
     if (serverRoot && serverRoot[0] !== '/') serverRoot = '/' + serverRoot;
+    if (serverRoot === '/') serverRoot = null;
 
     var druidRequestDecoratorModule: DruidRequestDecoratorModule = null;
     if (configFileDir && druidRequestDecorator) {
@@ -68,6 +72,7 @@ export class ServerSettings implements Instance<ServerSettingsValue, ServerSetti
 
     return new ServerSettings({
       port: parseIntFromPossibleString(port),
+      serverHost,
       serverRoot,
       pageMustLoadTimeout,
       iframe,
@@ -77,6 +82,7 @@ export class ServerSettings implements Instance<ServerSettingsValue, ServerSetti
   }
 
   public port: number;
+  public serverHost: string;
   public serverRoot: string;
   public pageMustLoadTimeout: number;
   public iframe: Iframe;
@@ -89,6 +95,7 @@ export class ServerSettings implements Instance<ServerSettingsValue, ServerSetti
     if (typeof port !== 'number') throw new Error(`port must be a number`);
     this.port = port;
 
+    this.serverHost = parameters.serverHost;
     this.serverRoot = parameters.serverRoot || ServerSettings.DEFAULT_SERVER_ROOT;
     this.pageMustLoadTimeout = parameters.pageMustLoadTimeout || ServerSettings.DEFAULT_PAGE_MUST_LOAD_TIMEOUT;
     this.iframe = parameters.iframe || ServerSettings.DEFAULT_IFRAME;
@@ -100,6 +107,7 @@ export class ServerSettings implements Instance<ServerSettingsValue, ServerSetti
   public valueOf(): ServerSettingsValue {
     return {
       port: this.port,
+      serverHost: this.serverHost,
       serverRoot: this.serverRoot,
       pageMustLoadTimeout: this.pageMustLoadTimeout,
       iframe: this.iframe,
@@ -109,12 +117,14 @@ export class ServerSettings implements Instance<ServerSettingsValue, ServerSetti
   }
 
   public toJS(): ServerSettingsJS {
-    var js: ServerSettingsJS = {};
-    if (this.port !== ServerSettings.DEFAULT_PORT) js.port = this.port;
+    var js: ServerSettingsJS = {
+      port: this.port
+    };
+    if (this.serverHost) js.serverHost = this.serverHost;
     if (this.serverRoot !== ServerSettings.DEFAULT_SERVER_ROOT) js.serverRoot = this.serverRoot;
-    js.pageMustLoadTimeout = this.pageMustLoadTimeout;
-    js.iframe = this.iframe;
-    js.druidRequestDecorator = this.druidRequestDecorator;
+    if (this.pageMustLoadTimeout !== ServerSettings.DEFAULT_PAGE_MUST_LOAD_TIMEOUT) js.pageMustLoadTimeout = this.pageMustLoadTimeout;
+    if (this.iframe !== ServerSettings.DEFAULT_IFRAME) js.iframe = this.iframe;
+    if (this.druidRequestDecorator) js.druidRequestDecorator = this.druidRequestDecorator;
     return js;
   }
 
@@ -129,6 +139,7 @@ export class ServerSettings implements Instance<ServerSettingsValue, ServerSetti
   public equals(other: ServerSettings): boolean {
     return ServerSettings.isServerSettings(other) &&
       this.port === other.port &&
+      this.serverHost === other.serverHost &&
       this.serverRoot === other.serverRoot &&
       this.pageMustLoadTimeout === other.pageMustLoadTimeout &&
       this.iframe === other.iframe &&

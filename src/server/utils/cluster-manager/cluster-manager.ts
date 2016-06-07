@@ -1,8 +1,8 @@
 import * as Q from 'q';
-import { External, DruidExternal, helper } from 'plywood';
+import { External, DruidExternal, MySQLExternal, PostgresExternal, helper } from 'plywood';
 import { DruidRequestDecorator } from 'plywood-druid-requester';
-import { properRequesterFactory, SupportedTypes } from '../requester/requester';
-import { Cluster } from '../../../common/models/index';
+import { properRequesterFactory } from '../requester/requester';
+import { Cluster, SupportedTypes } from '../../../common/models/index';
 import { Logger } from '../logger/logger';
 
 // For each external we want to maintain its source and weather it should introspect at all
@@ -46,8 +46,6 @@ export class ClusterManager {
     this.onExternalChange = options.onExternalChange || noop;
     this.generateExternalName = options.generateExternalName || sourceAsName;
 
-    var clusterType: SupportedTypes = 'druid'; // ToDo: cluster.type
-
     var druidRequestDecorator: DruidRequestDecorator = null;
     // if (clusterType === 'druid' && serverSettings.druidRequestDecoratorModule) {
     //   var logger = (str: string) => console.log(str);
@@ -57,17 +55,17 @@ export class ClusterManager {
     // }
 
     var requester = properRequesterFactory({
-      type: clusterType,
+      type: cluster.type,
       host: cluster.host,
       timeout: cluster.timeout,
       verbose: this.verbose,
       concurrentLimit: 5,
 
-      druidRequestDecorator
+      druidRequestDecorator,
 
-      // database: cluster.database,
-      // user: cluster.user,
-      // password: cluster.password
+      database: cluster.database,
+      user: cluster.user,
+      password: cluster.password
     });
     this.requester = requester;
 
@@ -85,8 +83,11 @@ export class ClusterManager {
     // Get the version if needed
     if (!this.version) {
       progress = progress
-        .delay(30000)
-        .then(() => DruidExternal.getVersion(requester))
+        //.delay(30000)
+        .then(() => {
+          if (cluster.type !== 'druid') return '1.2.3-lol';
+          return DruidExternal.getVersion(requester);
+        })
         .then(
           (version) => {
             this.version = version;
@@ -101,9 +102,18 @@ export class ClusterManager {
     // If desired scan for other sources
     if (cluster.sourceListScan) {
       progress = progress
-        .then(() => DruidExternal.getSourceList(requester))
+        .then(() => {
+          switch (cluster.type) {
+            case 'druid': return DruidExternal.getSourceList(requester);
+            case 'mysql': return MySQLExternal.getSourceList(requester);
+            case 'postgres': return PostgresExternal.getSourceList(requester);
+            default: throw new Error(`unknown requester type ${cluster.type}`);
+          }
+
+        })
         .then(
           (sources) => {
+            this.logger.log(`For cluster '${cluster.name}' got sources: [${sources.join(', ')}]`);
             // For every un-accounted source: make an external and add it to the managed list.
             for (var source of sources) {
               if (this.managedExternals.filter(managedExternal => (managedExternal.external as any).dataSource === source).length) continue;
@@ -116,7 +126,7 @@ export class ClusterManager {
             }
           },
           (e) => {
-            this.logger.error(`Failed to get source list from cluster ${cluster.name} because ${e.message}`);
+            this.logger.error(`Failed to get source list from cluster '${cluster.name}' because ${e.message}`);
           }
         );
     }

@@ -3,10 +3,12 @@ import { External, ExternalValue, AttributeInfo } from 'plywood';
 import { DataSource } from '../data-source/data-source';
 import { RefreshRule } from '../refresh-rule/refresh-rule';
 
+export type SupportedTypes = 'druid' | 'mysql' | 'postgres';
 export type SourceListScan = "disable" | "auto";
 
 export interface ClusterValue {
   name: string;
+  type?: SupportedTypes;
   host?: string;
   version?: string;
   timeout?: number;
@@ -16,10 +18,14 @@ export interface ClusterValue {
   sourceListRefreshInterval?: number;
   sourceReintrospectOnLoad?: boolean;
   sourceReintrospectInterval?: number;
+  database?: string;
+  user?: string;
+  password?: string;
 }
 
 export interface ClusterJS {
   name: string;
+  type?: SupportedTypes;
   host?: string;
   version?: string;
   timeout?: number;
@@ -29,6 +35,9 @@ export interface ClusterJS {
   sourceListRefreshInterval?: number;
   sourceReintrospectOnLoad?: boolean;
   sourceReintrospectInterval?: number;
+  database?: string;
+  user?: string;
+  password?: string;
 }
 
 function parseIntFromPossibleString(x: any) {
@@ -48,6 +57,7 @@ export class Cluster implements Instance<ClusterValue, ClusterJS> {
   static fromJS(parameters: ClusterJS): Cluster {
     var {
       name,
+      type,
       host,
       version,
       timeout,
@@ -56,7 +66,10 @@ export class Cluster implements Instance<ClusterValue, ClusterJS> {
       sourceListRefreshOnLoad,
       sourceListRefreshInterval,
       sourceReintrospectOnLoad,
-      sourceReintrospectInterval
+      sourceReintrospectInterval,
+      database,
+      user,
+      password
     } = parameters;
 
     name = name || (parameters as any).clusterName || 'druid';
@@ -66,6 +79,7 @@ export class Cluster implements Instance<ClusterValue, ClusterJS> {
 
     var value: ClusterValue = {
       name,
+      type,
       host,
       version,
       timeout: parseIntFromPossibleString(timeout),
@@ -74,13 +88,17 @@ export class Cluster implements Instance<ClusterValue, ClusterJS> {
       sourceListRefreshOnLoad: sourceListRefreshOnLoad,
       sourceListRefreshInterval: parseIntFromPossibleString(sourceListRefreshInterval),
       sourceReintrospectOnLoad: sourceReintrospectOnLoad,
-      sourceReintrospectInterval: parseIntFromPossibleString(sourceReintrospectInterval)
+      sourceReintrospectInterval: parseIntFromPossibleString(sourceReintrospectInterval),
+      database,
+      user,
+      password
     };
     return new Cluster(value);
   }
 
 
   public name: string;
+  public type: SupportedTypes;
   public host: string;
   public version: string;
   public timeout: number;
@@ -90,6 +108,9 @@ export class Cluster implements Instance<ClusterValue, ClusterJS> {
   public sourceListRefreshInterval: number;
   public sourceReintrospectOnLoad: boolean;
   public sourceReintrospectInterval: number;
+  public database: string;
+  public user: string;
+  public password: string;
 
   constructor(parameters: ClusterValue) {
     var name = parameters.name;
@@ -97,6 +118,7 @@ export class Cluster implements Instance<ClusterValue, ClusterJS> {
     if (name === 'native') throw new Error("cluster can not be called 'native'");
     this.name = name;
 
+    this.type = parameters.type;
     this.host = parameters.host;
 
     this.version = parameters.version;
@@ -116,11 +138,16 @@ export class Cluster implements Instance<ClusterValue, ClusterJS> {
     if (this.sourceReintrospectInterval && this.sourceReintrospectInterval < 1000) {
       throw new Error(`can not set sourceReintrospectInterval to < 1000 (is ${this.sourceReintrospectInterval})`);
     }
+
+    this.database = parameters.database;
+    this.user = parameters.user;
+    this.password = parameters.password;
   }
 
   public valueOf(): ClusterValue {
     return {
       name: this.name,
+      type: this.type,
       host: this.host,
       version: this.version,
       timeout: this.timeout,
@@ -129,7 +156,10 @@ export class Cluster implements Instance<ClusterValue, ClusterJS> {
       sourceListRefreshOnLoad: this.sourceListRefreshOnLoad,
       sourceListRefreshInterval: this.sourceListRefreshInterval,
       sourceReintrospectOnLoad: this.sourceReintrospectOnLoad,
-      sourceReintrospectInterval: this.sourceReintrospectInterval
+      sourceReintrospectInterval: this.sourceReintrospectInterval,
+      database: this.database,
+      user: this.user,
+      password: this.password
     };
   }
 
@@ -137,6 +167,7 @@ export class Cluster implements Instance<ClusterValue, ClusterJS> {
     var js: ClusterJS = {
       name: this.name
     };
+    if (this.type) js.type = this.type;
     if (this.host) js.host = this.host;
     if (this.version) js.version = this.version;
     js.timeout = this.timeout;
@@ -146,6 +177,9 @@ export class Cluster implements Instance<ClusterValue, ClusterJS> {
     js.sourceListRefreshInterval = this.sourceListRefreshInterval;
     js.sourceReintrospectOnLoad = this.sourceReintrospectOnLoad;
     js.sourceReintrospectInterval = this.sourceReintrospectInterval;
+    if (this.database) js.database = this.database;
+    if (this.user) js.user = this.user;
+    if (this.password) js.password = this.password;
     return js;
   }
 
@@ -154,12 +188,13 @@ export class Cluster implements Instance<ClusterValue, ClusterJS> {
   }
 
   public toString(): string {
-    return `[Cluster ${this.host}]`;
+    return `[Cluster ${this.name}]`;
   }
 
   public equals(other: Cluster): boolean {
     return Cluster.isCluster(other) &&
       this.name === other.name &&
+      this.type === other.type &&
       this.host === other.host &&
       this.version === other.version &&
       this.introspectionStrategy === other.introspectionStrategy &&
@@ -167,7 +202,10 @@ export class Cluster implements Instance<ClusterValue, ClusterJS> {
       this.sourceListRefreshOnLoad === other.sourceListRefreshOnLoad &&
       this.sourceListRefreshInterval === other.sourceListRefreshInterval &&
       this.sourceReintrospectOnLoad === other.sourceReintrospectOnLoad &&
-      this.sourceReintrospectInterval === other.sourceReintrospectInterval;
+      this.sourceReintrospectInterval === other.sourceReintrospectInterval &&
+      this.database === other.database &&
+      this.user === other.user &&
+      this.password === other.password;
   }
 
   public toClientCluster(): Cluster {
@@ -178,9 +216,11 @@ export class Cluster implements Instance<ClusterValue, ClusterJS> {
 
   public makeExternalFromSourceName(source: string, version?: string): External {
     return External.fromValue({
-      engine: 'druid',
+      engine: this.type,
       dataSource: source,
+      table: source,
       version: version,
+
       allowSelectQueries: true,
       allowEternity: false
     });
@@ -192,9 +232,10 @@ export class Cluster implements Instance<ClusterValue, ClusterJS> {
     };
 
     var externalValue: ExternalValue = {
-      engine: 'druid',
+      engine: this.type,
       suppress: true,
       dataSource: dataSource.source,
+      table: dataSource.source,
       version: version,
       rollup: dataSource.rollup,
       timeAttribute: dataSource.timeAttribute.name,
@@ -221,7 +262,7 @@ export class Cluster implements Instance<ClusterValue, ClusterJS> {
     var dataSource = DataSource.fromJS({
       name: dataSourceName,
       engine: this.name,
-      source: (external as any).dataSource, // ToDo: !!!
+      source: (external as any).dataSource || (external as any).table, // ToDo: !!!
       refreshRule: RefreshRule.query().toJS()
     });
 
