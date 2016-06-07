@@ -42,7 +42,7 @@ export class DateRangePicker extends React.Component<DateRangePickerProps, DateR
     var { startTime, endTime, timezone } = this.props;
 
     if (startTime && !datesEqual(startTime, day.floor(startTime, timezone))) throw new Error("start time must be round");
-    if (endTime && endTime && !datesEqual(endTime, day.floor(endTime, timezone))) throw new Error("end time must be round");
+    if (endTime && !datesEqual(endTime, day.floor(endTime, timezone))) throw new Error("end time must be round");
     const flooredStart = month.floor(startTime || new Date(), timezone);
     this.setState({
       activeMonthStartDate: flooredStart,
