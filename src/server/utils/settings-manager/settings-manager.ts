@@ -1,9 +1,12 @@
+import * as path from 'path';
 import * as Q from 'q';
-import { External, Dataset, DruidExternal, helper, basicExecutorFactory } from 'plywood';
-import { DruidRequestDecorator } from 'plywood-druid-requester';
+import { External, Dataset, basicExecutorFactory } from 'plywood';
+import { Logger } from '../logger/logger';
 import { loadFileSync } from '../file/file';
-import { properRequesterFactory, SupportedTypes } from '../requester/requester';
+import { FileManager } from '../file-manager/file-manager';
+import { ClusterManager } from '../cluster-manager/cluster-manager';
 import { AppSettings, Cluster, DataSource } from '../../../common/models/index';
+
 
 export interface SettingsLocation {
   location: 'local';
@@ -11,181 +14,33 @@ export interface SettingsLocation {
   uri: string;
 }
 
-export class FileManager {
-  public datasets: Dataset[] = [];
-}
-
-
-// For each external we want to maintain its source and weather it should introspect at all
-export interface ManagedExternal {
-  name: string;
-  external: External;
-  autoDiscovered?: boolean;
-  suppressIntrospection?: boolean;
-}
-
-export interface ClusterManagerOptions {
+export interface SettingsManagerOptions {
+  logger: Logger;
   verbose?: boolean;
-  initialExternals?: ManagedExternal[];
-  onExternalChange?: (name: string, external: External) => void;
-  generateExternalName?: (external: External) => string;
+  initialLoadTimeout?: number;
 }
-
-function noop() {}
-
-function sourceAsName(external: External) {
-  return (external as any).dataSource;
-}
-
-export class ClusterManager {
-  public cluster: Cluster;
-  public version: string;
-  public requester: Requester.PlywoodRequester<any>;
-  public managedExternals: ManagedExternal[] = [];
-  public verbose: boolean;
-  public onExternalChange: (name: string, external: External) => void;
-  public generateExternalName: (external: External) => string;
-
-  constructor(cluster: Cluster, options: ClusterManagerOptions = {}) {
-    if (!cluster) throw new Error('must have cluster');
-    this.cluster = cluster;
-    this.verbose = Boolean(options.verbose);
-    this.managedExternals = options.initialExternals || [];
-    this.onExternalChange = options.onExternalChange || noop;
-    this.generateExternalName = options.generateExternalName || sourceAsName;
-
-    var clusterType: SupportedTypes = 'druid'; // ToDo: cluster.type
-
-    var druidRequestDecorator: DruidRequestDecorator = null;
-    // if (clusterType === 'druid' && serverSettings.druidRequestDecoratorModule) {
-    //   var logger = (str: string) => console.log(str);
-    //   druidRequestDecorator = serverSettings.druidRequestDecoratorModule.druidRequestDecorator(logger, {
-    //     config
-    //   });
-    // }
-
-    var requester = properRequesterFactory({
-      type: clusterType,
-      host: cluster.host,
-      timeout: cluster.timeout,
-      verbose: this.verbose,
-      concurrentLimit: 5,
-
-      druidRequestDecorator
-
-      // database: cluster.database,
-      // user: cluster.user,
-      // password: cluster.password
-    });
-    this.requester = requester;
-
-    for (var managedExternal of this.managedExternals) {
-      managedExternal.external = managedExternal.external.attachRequester(requester);
-    }
-  }
-
-  // Do initialization
-  public init(): Q.Promise<any> {
-    const { cluster, requester } = this;
-
-    var progress: Q.Promise<any> = Q(null);
-
-    // Get the version if needed
-    if (!this.version) {
-      progress = progress
-        .then(() => DruidExternal.getVersion(requester))
-        .then(
-          (version) => {
-            this.version = version;
-          },
-          (e) => {
-            throw new Error(`Field to get version from cluster ${cluster.name} because ${e.message}`);
-          }
-        );
-    }
-
-    // If desired scan for other sources
-    if (cluster.sourceListScan) {
-      progress = progress
-        .then(() => DruidExternal.getSourceList(requester))
-        .then(
-          (sources) => {
-            // For every un-accounted source: make an external and add it to the managed list.
-            for (var source of sources) {
-              if (this.managedExternals.filter(managedExternal => (managedExternal.external as any).dataSource === source).length) continue;
-              var external = cluster.makeExternalFromSourceName(source, this.version).attachRequester(requester);
-              this.managedExternals.push({
-                name: this.generateExternalName(external),
-                external: external,
-                autoDiscovered: true
-              });
-            }
-          },
-          (e) => {
-            throw new Error(`Failed to get source list from cluster ${cluster.name} because ${e.message}`);
-          }
-        );
-    }
-
-    // Go over all managed externals and introspect them if needed also set up intersection for the cluster
-    progress = progress
-      .then(() => {
-        var initialIntrospectionTasks: Q.Promise<any>[] = [];
-        this.managedExternals.forEach((managedExternal) => {
-          if (managedExternal.suppressIntrospection) return;
-          initialIntrospectionTasks.push(
-            managedExternal.external.introspect()
-              .then(introspectedExternal => {
-                if (introspectedExternal.equals(managedExternal.external)) return;
-                managedExternal.external = introspectedExternal;
-                this.onExternalChange(managedExternal.name, introspectedExternal);
-              })
-          );
-        });
-        return Q.all(initialIntrospectionTasks);
-      });
-
-    // Set up timers to reintrospect the sources and reintrospect the
-
-    return progress;
-  }
-
-  // See if any new sources were added to the cluster
-  public refreshSourceList(): Q.Promise<any> {
-    var progress: Q.Promise<any> = Q(null);
-
-    return progress;
-  }
-
-  // See if any new dimensions or measures were added to the existing externals
-  public reintrospectSources(): Q.Promise<any> {
-    var progress: Q.Promise<any> = Q(null);
-
-    return progress;
-  }
-
-  // Refresh the cluster now, will trigger onExternalUpdate and then return an empty promise when done
-  public refresh(): Q.Promise<any> {
-    return this.refreshSourceList().then(() => this.reintrospectSources());
-  }
-
-  public getExternalByName(name: string): External {
-    var managedExternal = helper.findByName(this.managedExternals, name);
-    return managedExternal ? managedExternal.external : null;
-  }
-
-}
-
 
 export class SettingsManager {
+  public logger: Logger;
+  public verbose: boolean;
   public settingsLocation: SettingsLocation;
   public appSettings: AppSettings;
+  public fileManager: FileManager;
   public clusterManagers: ClusterManager[];
   public initialLoad: Q.Promise<any>;
+  public initialLoadTimeout: number;
 
-  constructor(settingsLocation: SettingsLocation, log?: (line: string) => void) {
+  constructor(settingsLocation: SettingsLocation, options: SettingsManagerOptions) {
+    var logger = options.logger;
+    this.logger = logger;
+    var verbose = Boolean(options.verbose);
+    this.verbose = verbose;
+
     this.settingsLocation = settingsLocation;
+    this.fileManager = null;
     this.clusterManagers = [];
+
+    this.initialLoadTimeout = options.initialLoadTimeout || 30000;
 
     this.initialLoad = Q.fcall(() => {
       var progress: Q.Promise<any> = Q(null);
@@ -210,6 +65,8 @@ export class SettingsManager {
 
           // Make a cluster manager for each cluster and assign the correct initial externals to it.
           this.clusterManagers.push(new ClusterManager(cluster, {
+            logger,
+            verbose,
             initialExternals,
             onExternalChange: this.onExternalChange.bind(this, cluster)
           }));
@@ -218,6 +75,27 @@ export class SettingsManager {
         var initPromises = this.clusterManagers.map(clusterManager => clusterManager.init());
 
         // Also make a FileManager for the local files
+        var initialDatasets = this.appSettings.getDataSourcesForCluster('native').map(dataSource => {
+          var uri = dataSource.source;
+          if (settingsLocation.location === 'local') uri = path.resolve(path.dirname(settingsLocation.uri), uri);
+          return {
+            name: dataSource.name,
+            uri,
+            subsetFilter: dataSource.subsetFilter
+          };
+        });
+
+        if (initialDatasets.length) {
+          this.fileManager = new FileManager({
+            logger,
+            verbose,
+            initialDatasets,
+            onDatasetChange: this.onDatasetChange.bind(this)
+          });
+
+          initPromises.push(this.fileManager.init());
+        }
+
         // this.appSettings.getDataSourcesForCluster('native')
 
         return Q.all(initPromises);
@@ -225,9 +103,14 @@ export class SettingsManager {
 
       return progress;
     })
+      .then(() => {
+        logger.log(`Initial load and introspection complete.`);
+      })
       .catch(e => {
-        console.log("Error:", e);
+        logger.error(`Fatal initialization error: ${e.message}`);
       });
+
+    this.makeMaxTimeCheckTimer();
   }
 
   getDataSource(dataSourceName: string): Q.Promise<DataSource> {
@@ -236,6 +119,10 @@ export class SettingsManager {
 
   getSettings(): Q.Promise<AppSettings> {
     return this.initialLoad
+      .timeout(this.initialLoadTimeout)
+      .catch(e => {
+        this.logger.error(`Initial load timeout hit, continuing`);
+      })
       .then(() => {
         return Q.all(this.clusterManagers.map(clusterManager => clusterManager.refresh()));
       })
@@ -266,14 +153,43 @@ export class SettingsManager {
     return Q(null); // ToDo: actual work
   }
 
+  onDatasetChange(dataSourceName: string, changedDataset: Dataset): void {
+    if (this.verbose) this.logger.log(`Got native dataset update for ${dataSourceName}`);
+
+    var dataSource = this.appSettings.getDataSource(dataSourceName);
+    if (!dataSource) throw new Error(`Unknown dataset ${dataSourceName}`);
+    this.appSettings = this.appSettings.addOrUpdateDataSource(dataSource.updateWithDataset(changedDataset));
+  }
+
   onExternalChange(cluster: Cluster, dataSourceName: string, changedExternal: External): void {
-    //console.log('onExternalChange', dataSourceName);
+    if (this.verbose) this.logger.log(`Got external dataset update for ${dataSourceName} in cluster ${cluster.name}`);
+
     var dataSource = this.appSettings.getDataSource(dataSourceName);
     if (!dataSource) {
        dataSource = cluster.makeDataSourceFromExternal(dataSourceName, changedExternal);
     }
     this.appSettings = this.appSettings.addOrUpdateDataSource(dataSource.updateWithExternal(changedExternal));
+  }
 
+  makeMaxTimeCheckTimer() {
+    // Periodically check if max time needs to be updated
+    setInterval(() => {
+      var appSettings = this.appSettings;
+      appSettings.dataSources.forEach((dataSource) => {
+        if (dataSource.refreshRule.isQuery() && dataSource.shouldUpdateMaxTime()) {
+          DataSource.updateMaxTime(dataSource)
+            .then(
+              (updatedDataSource) => {
+                this.logger.log(`Getting the latest MaxTime for '${updatedDataSource.name}'`);
+                this.appSettings = this.appSettings.addOrUpdateDataSource(updatedDataSource);
+              },
+              (e) => {
+                this.logger.error(`Error getting MaxTime for ${dataSource.name}: ${e.message}`);
+              }
+            );
+        }
+      });
+    }, 1000).unref();
   }
 
 }

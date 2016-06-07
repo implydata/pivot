@@ -531,8 +531,18 @@ export class DataSource implements Instance<DataSourceValue, DataSourceJS> {
     return issues;
   }
 
+  public updateWithDataset(dataset: Dataset): DataSource {
+    if (this.engine !== 'native') throw new Error('must be native to have a dataset');
+
+    var executor = basicExecutorFactory({
+      datasets: { main: dataset }
+    });
+
+    return this.addAttributes(dataset.attributes).attachExecutor(executor);
+  }
+
   public updateWithExternal(external: External): DataSource {
-    if (this.engine === 'native') return this;
+    if (this.engine === 'native') throw new Error('can not be native and have an external');
 
     var executor = basicExecutorFactory({
       datasets: { main: external }

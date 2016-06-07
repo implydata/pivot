@@ -1,11 +1,9 @@
 import * as path from 'path';
-import * as Q from 'q';
 import * as nopt from 'nopt';
-import { DruidRequestDecorator } from 'plywood-druid-requester';
-import { AppSettings, DataSource, DataSourceJS, SourceListScan, Cluster } from '../common/models/index';
+import { Cluster } from '../common/models/index';
 import { dataSourceToYAML } from '../common/utils/yaml-helper/yaml-helper';
 import { ServerSettings } from './models/server-settings/server-settings';
-import { loadFileSync, SettingsManager } from './utils/index';
+import { loadFileSync, SettingsManager, CONSOLE_LOGGER } from './utils/index';
 
 
 function errorExit(message: string): void {
@@ -155,17 +153,20 @@ if (parsedArgs['druid']) {
 
 var serverSettings = ServerSettings.fromJS(config, configFileDir);
 
+export const PRINT_CONFIG = Boolean(parsedArgs['print-config']);
+export const START_SERVER = !PRINT_CONFIG;
+export const VERBOSE = Boolean(parsedArgs['verbose'] || config.verbose);
+
 export const SERVER_SETTINGS = serverSettings;
 export const SETTINGS_MANAGER = new SettingsManager({
   location: 'local',
   readOnly: false, // ToDo: this should be true
   uri: configFilePath
+}, {
+  logger: CONSOLE_LOGGER,
+  verbose: VERBOSE,
+  initialLoadTimeout: SERVER_SETTINGS.pageMustLoadTimeout
 });
-
-
-export const PRINT_CONFIG = Boolean(parsedArgs['print-config']);
-export const START_SERVER = !PRINT_CONFIG;
-export const VERBOSE = Boolean(parsedArgs['verbose'] || config.verbose);
 
 var auth = config.auth;
 var authModule: any = null;
