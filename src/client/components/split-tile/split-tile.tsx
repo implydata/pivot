@@ -7,7 +7,10 @@ import * as Q from 'q';
 import { SvgIcon } from '../svg-icon/svg-icon';
 import { STRINGS, CORE_ITEM_WIDTH, CORE_ITEM_GAP } from '../../config/constants';
 import { Stage, Clicker, Essence, VisStrategy, DataSource, Filter, SplitCombine, Dimension, DragPosition } from '../../../common/models/index';
-import { findParentWithClass, setDragGhost, transformStyle, getXFromEvent, isInside, uniqueId } from '../../utils/dom/dom';
+import {
+  findParentWithClass, setDragGhost, transformStyle, getXFromEvent, isInside, uniqueId,
+  classNames
+} from '../../utils/dom/dom';
 import { getMaxItems, SECTION_WIDTH } from '../../utils/pill-tile/pill-tile';
 
 import { DragManager } from '../../utils/drag-manager/drag-manager';
@@ -305,10 +308,13 @@ export class SplitTile extends React.Component<SplitTileProps, SplitTileState> {
   }
 
   renderOverflow(items: SplitCombine[], itemX: number): JSX.Element {
+    var { essence } = this.props;
+    var { dataSource } = essence;
+
     var style = transformStyle(itemX, 0);
 
     return <div
-      className="overflow"
+      className={classNames('overflow', { 'all-continuous': items.every(item => item.getDimension(dataSource.dimensions).isContinuous()) })}
       ref="overflow"
       key="overflow"
       style={style}
