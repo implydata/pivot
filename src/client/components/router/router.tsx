@@ -102,24 +102,47 @@ export class Router extends React.Component<RouterProps, RouterState> {
     return children.map((c) => c.props.fragment as string);
   }
 
-  // This'll be put into the Route class later
-  qualifyForCurrentRoute(child: JSX.Element): boolean {
-    const { breadCrumbs } = this.props;
+  getQualifiedChild(candidates: JSX.Element[], crumbs: string[]): JSX.Element {
+    var cloneChild = (child: JSX.Element, crumb: string, fragment: string): JSX.Element => {
+      if (fragment.charAt(0) !== ':') return child;
 
-    if (!breadCrumbs || !breadCrumbs.length) return false;
+      let newProps: any = {};
+      newProps[fragment.slice(1)] = crumb;
+      return React.cloneElement(child, newProps);
+    };
 
-    return child.props.fragment === breadCrumbs[0];
+    var isRoute = (element: JSX.Element) => element.type === Route;
+
+    for (let i = 0; i < candidates.length; i++) {
+      let candidate = candidates[i];
+      let fragment = candidate.props.fragment;
+      let child: JSX.Element;
+
+      if (!fragment) continue;
+
+      if (crumbs[0] === fragment || fragment.charAt(0) === ':') {
+        if (!(candidate.props.children instanceof Array)) {
+          child = isRoute(candidate) ? candidate.props.children : candidate;
+        } else if (crumbs.length === 1) {
+          child = candidate.props.children.filter((child: JSX.Element) => !isRoute(child))[0];
+        } else {
+          child = this.getQualifiedChild(candidate.props.children, crumbs.slice(1));
+        }
+
+        if (child) return cloneChild(child, crumbs[0], fragment);
+      }
+    }
+
+    return null;
   }
 
   render() {
-    const { children } = this.props;
+    const { children, breadCrumbs } = this.props;
 
-    var qualifiedChildren = (children as JSX.Element[]).filter(this.qualifyForCurrentRoute.bind(this));
+    if (!breadCrumbs || !breadCrumbs.length) return null;
 
-    if (qualifiedChildren.length > 1) {
-      throw new Error('Several children qualify to the same route');
-    }
+    var qualifiedChild = this.getQualifiedChild(children as JSX.Element[], breadCrumbs);
 
-    return qualifiedChildren[0] || null;
+    return qualifiedChild ? qualifiedChild : null;
   }
 }

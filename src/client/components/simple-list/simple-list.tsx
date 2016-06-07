@@ -12,7 +12,7 @@ import { Scroller } from '../scroller/scroller';
 
 export interface SimpleListColumn {
   label: string;
-  field: string;
+  field: string | ((row: any) => any);
   width: number;
   cellIcon?: string;
 }
@@ -35,7 +35,7 @@ export interface SimpleListState {
 }
 
 const ROW_HEIGHT = 35;
-const HEADER_HEIGHT = 50;
+const HEADER_HEIGHT = 40;
 const ACTION_WIDTH = 30;
 
 export class SimpleList extends React.Component<SimpleListProps, SimpleListState> {
@@ -89,6 +89,14 @@ export class SimpleList extends React.Component<SimpleListProps, SimpleListState
     return items;
   }
 
+  labelizer(column: SimpleListColumn): (row: any) => any {
+    if (typeof column.field === 'string') {
+      return (row: any) => row[column.field as string];
+    }
+
+    return column.field as (row: any) => any;
+  }
+
   renderRow(row: any, columns: SimpleListColumn[], index: number): JSX.Element {
     var items: JSX.Element[] = [];
 
@@ -101,7 +109,7 @@ export class SimpleList extends React.Component<SimpleListProps, SimpleListState
         className={classNames('cell', {'has-icon': !!col.cellIcon})}
         style={{width: col.width}}
         key={`cell-${i}`}
-      >{icon}{row[col.field]}</div>);
+      >{icon}{this.labelizer(col)(row)}</div>);
     }
 
     return <div className="row" key={`row-${index}`} style={{height: ROW_HEIGHT}}>
@@ -112,11 +120,13 @@ export class SimpleList extends React.Component<SimpleListProps, SimpleListState
   sortRows(rows: any[], sortColumn: SimpleListColumn, sortAscending: boolean): any[] {
     if (!sortColumn) return rows;
 
+    var labelize = this.labelizer(sortColumn);
+
     if (sortAscending) {
       return rows.sort((a: any, b: any) => {
-        if (a[sortColumn.field] < b[sortColumn.field]) {
+        if (labelize(a) < labelize(b)) {
           return -1;
-        } else if (a[sortColumn.field] > b[sortColumn.field]) {
+        } else if (labelize(a) > labelize(b)) {
           return 1;
         } else {
           return 0;
@@ -125,9 +135,9 @@ export class SimpleList extends React.Component<SimpleListProps, SimpleListState
     }
 
     return rows.sort((a: any, b: any) => {
-      if (a[sortColumn.field] < b[sortColumn.field]) {
+      if (labelize(a) < labelize(b)) {
         return 1;
-      } else if (a[sortColumn.field] > b[sortColumn.field]) {
+      } else if (labelize(a) > labelize(b)) {
         return -1;
       } else {
         return 0;

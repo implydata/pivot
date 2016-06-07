@@ -1,4 +1,4 @@
-require('./general.css');
+require('./data-cubes.css');
 
 import * as React from 'react';
 import { Fn } from '../../../../common/utils/general/general';
@@ -9,26 +9,28 @@ import { SvgIcon } from '../../../components/svg-icon/svg-icon';
 import { FormLabel } from '../../../components/form-label/form-label';
 import { Button } from '../../../components/button/button';
 
-import { AppSettings, AppSettingsJS } from '../../../../common/models/index';
+import { AppSettings, Cluster, DataSource} from '../../../../common/models/index';
 
-export interface GeneralProps extends React.Props<any> {
+import { SimpleList, SimpleListColumn, SimpleListAction } from '../../../components/simple-list/simple-list';
+
+export interface DataCubesProps extends React.Props<any> {
   settings?: AppSettings;
   onSave?: (settings: AppSettings) => void;
 }
 
-export interface GeneralState {
+export interface DataCubesState {
   newSettings?: AppSettings;
   hasChanged?: boolean;
 }
 
-export class General extends React.Component<GeneralProps, GeneralState> {
+export class DataCubes extends React.Component<DataCubesProps, DataCubesState> {
   constructor() {
     super();
 
     this.state = {hasChanged: false};
   }
 
-  componentWillReceiveProps(nextProps: GeneralProps) {
+  componentWillReceiveProps(nextProps: DataCubesProps) {
     if (nextProps.settings) this.setState({
       newSettings: nextProps.settings,
       hasChanged: false
@@ -79,30 +81,37 @@ export class General extends React.Component<GeneralProps, GeneralState> {
     }
   }
 
-  render() {
-    // Put this in i18n, probably
-    const helpTexts: any = {
-      title: 'The title as it will appear in your browser\'s title bar. Use %v to show the version.'
-    };
+  edit(cube: DataSource) {
+    window.location.hash += `/${cube.name}`;
+  }
 
+  render() {
     const { hasChanged, newSettings } = this.state;
 
     if (!newSettings) return null;
 
-    return <div className="general">
+    const columns: SimpleListColumn[] = [
+      {label: 'Name', field: 'title', width: 170, cellIcon: 'full-cube-grey'},
+      {label: 'Source', field: 'source', width: 400},
+      {label: 'Dimensions', field: (cube: DataSource) => cube.dimensions.size, width: 120},
+      {label: 'Measures', field: (cube: DataSource) => cube.measures.size, width: 80}
+    ];
+
+    const actions: SimpleListAction[] = [
+      {icon: 'full-edit-brand', callback: this.edit.bind(this)}
+    ];
+
+    return <div className="data-cubes">
       <div className="title-bar">
-        <div className="title">General</div>
+        <div className="title">Data Cubes</div>
         {hasChanged ? <Button title="Save" type="primary" onClick={this.save.bind(this)}/> : null}
       </div>
       <div className="main">
-        <form className="vertical">
-          <FormLabel label="Title" helpText={helpTexts.title}></FormLabel>
-          <input
-            type="text"
-            value={newSettings.customization.title}
-            onChange={this.onChange.bind(this, 'customization.title')}
-          />
-        </form>
+      <SimpleList
+        columns={columns}
+        rows={newSettings.dataSources}
+        actions={actions}
+      ></SimpleList>
       </div>
     </div>;
   }

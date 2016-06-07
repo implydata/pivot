@@ -21,6 +21,9 @@ import { AppSettings, AppSettingsJS } from '../../../common/models/index';
 
 import { General } from './general/general';
 import { Clusters } from './clusters/clusters';
+import { DataCubes } from './data-cubes/data-cubes';
+import { DataCubeEdit } from './data-cube-edit/data-cube-edit';
+
 
 export interface SettingsViewProps extends React.Props<any> {
   version: string;
@@ -167,16 +170,23 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
          breadCrumbs={breadCrumbs}
          rootFragment="settings"
        >
+
          <Route fragment="general">
            <General settings={settings} onSave={this.onSave.bind(this)}/>
          </Route>
+
          <Route fragment="clusters">
            <Clusters settings={settings} onSave={this.onSave.bind(this)}/>
          </Route>
-         <Route fragment="data_cubes">
-           <div>data_cubes</div>
-         </Route>
 
+         <Route fragment="data_cubes">
+           <DataCubes settings={settings} onSave={this.onSave.bind(this)}/>
+
+           <Route fragment=":cubeId">
+             <DataCubeEdit settings={settings}/>
+           </Route>
+
+         </Route>
        </Router>
      </div>
     </div>;

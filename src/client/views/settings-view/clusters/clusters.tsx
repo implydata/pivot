@@ -1,7 +1,5 @@
 require('./clusters.css');
 
-import { Instance } from 'immutable-class';
-
 import * as React from 'react';
 import { Fn } from '../../../../common/utils/general/general';
 import { classNames } from '../../../utils/dom/dom';
@@ -39,44 +37,6 @@ export class Clusters extends React.Component<ClustersProps, ClustersState> {
     });
   }
 
-  changeOnPath(path: string, instance: any, newValue: any): any {
-    var bits = path.split('.');
-    var lastObject = newValue;
-    var currentObject: any;
-
-    var getLastObject = () => {
-      let o: any = instance;
-
-      for (let i = 0; i < bits.length; i++) {
-        o = o[bits[i]];
-      }
-
-      return o;
-    };
-
-    while (bits.length) {
-      let bit = bits.pop();
-
-      currentObject = getLastObject();
-
-      lastObject = currentObject[`change${firstUp(bit)}`](lastObject);
-    }
-
-    return lastObject;
-  }
-
-  onChange(propertyPath: string, e: KeyboardEvent) {
-    const settings: AppSettings = this.props.settings;
-
-    var newValue: any = (e.target as HTMLInputElement).value;
-    var newSettings = this.changeOnPath(propertyPath, settings, newValue);
-
-    this.setState({
-      newSettings,
-      hasChanged: !settings.equals(newSettings)
-    });
-  }
-
   save() {
     if (this.props.onSave) {
       this.props.onSave(this.state.newSettings);
@@ -93,7 +53,7 @@ export class Clusters extends React.Component<ClustersProps, ClustersState> {
     if (!newSettings) return null;
 
     const columns: SimpleListColumn[] = [
-      {label: 'Name', field: 'name', width: 400, cellIcon: 'cluster'},
+      {label: 'Name', field: 'name', width: 400, cellIcon: 'cluster-grey'},
       {label: 'Host', field: 'host', width: 400},
       {label: 'Strategy', field: 'introspectionStrategy', width: 300}
     ];
@@ -101,18 +61,6 @@ export class Clusters extends React.Component<ClustersProps, ClustersState> {
     const actions: SimpleListAction[] = [
       {icon: 'full-edit-brand', callback: this.edit.bind(this)}
     ];
-
-    var rows = newSettings.clusters;
-
-    // This is for debug purposes only
-    for (let i = 0; i < 10; i++) {
-      let c = new Cluster(newSettings.clusters[0].valueOf());
-
-      c.name = c.name.split('').sort(() => 0.5 - Math.random()).join('');
-      c.introspectionStrategy = c.introspectionStrategy.split('').sort(() => 0.5 - Math.random()).join('');
-
-      rows.push(c);
-    }
 
     return <div className="clusters">
       <div className="title-bar">
@@ -122,7 +70,7 @@ export class Clusters extends React.Component<ClustersProps, ClustersState> {
       <div className="main">
       <SimpleList
         columns={columns}
-        rows={rows}
+        rows={newSettings.clusters}
         actions={actions}
       ></SimpleList>
       </div>
