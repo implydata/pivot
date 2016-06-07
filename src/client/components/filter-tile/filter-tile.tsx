@@ -19,7 +19,6 @@ import { SvgIcon } from '../svg-icon/svg-icon';
 import { FancyDragIndicator } from '../fancy-drag-indicator/fancy-drag-indicator';
 import { FilterMenu } from '../filter-menu/filter-menu';
 import { BubbleMenu } from '../bubble-menu/bubble-menu';
-import { PillOverflowProps, PillOverflow } from "../pill-overflow/pill-overflow";
 
 const FILTER_CLASS_NAME = 'filter';
 const ANIMATION_DURATION = 400;
@@ -399,13 +398,19 @@ export class FilterTile extends React.Component<FilterTileProps, FilterTileState
     </BubbleMenu>;
   }
 
-  renderOverflow(items: ItemBlank[], x: number): JSX.Element {
-    return React.createElement(PillOverflow, {
-      key: "pill-overflow",
-      items,
-      renderItemFn: this.renderItemBlank.bind(this),
-      x
-    } as PillOverflowProps<ItemBlank>);
+  renderOverflow(overflowItemBlanks: ItemBlank[], itemX: number): JSX.Element {
+    var style = transformStyle(itemX, 0);
+
+    return <div
+      className={classNames('overflow', { 'all-continuous': overflowItemBlanks.every(item => item.dimension.isContinuous()) })}
+      ref="overflow"
+      key="overflow"
+      style={style}
+      onClick={this.overflowButtonClick.bind(this)}
+    >
+      <div className="count">{'+' + overflowItemBlanks.length}</div>
+      {this.renderOverflowMenu(overflowItemBlanks)}
+    </div>;
   }
 
   renderRemoveButton(itemBlank: ItemBlank) {

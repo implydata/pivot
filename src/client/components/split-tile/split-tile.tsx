@@ -2,16 +2,18 @@ require('./split-tile.css');
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import * as Q from 'q';
+
 import { SvgIcon } from '../svg-icon/svg-icon';
 import { STRINGS, CORE_ITEM_WIDTH, CORE_ITEM_GAP } from '../../config/constants';
 import { Stage, Clicker, Essence, VisStrategy, DataSource, Filter, SplitCombine, Dimension, DragPosition } from '../../../common/models/index';
-import { findParentWithClass, setDragGhost, transformStyle, getXFromEvent, classNames } from '../../utils/dom/dom';
+import { findParentWithClass, setDragGhost, transformStyle, getXFromEvent, isInside, uniqueId } from '../../utils/dom/dom';
 import { getMaxItems, SECTION_WIDTH } from '../../utils/pill-tile/pill-tile';
 
 import { DragManager } from '../../utils/drag-manager/drag-manager';
 import { FancyDragIndicator } from '../fancy-drag-indicator/fancy-drag-indicator';
 import { SplitMenu } from '../split-menu/split-menu';
-import { PillOverflow, PillOverflowProps } from '../pill-overflow/pill-overflow';
+import { BubbleMenu } from '../bubble-menu/bubble-menu';
 
 const SPLIT_CLASS_NAME = 'split';
 
@@ -30,18 +32,24 @@ export interface SplitTileState {
   dragPosition?: DragPosition;
   overflowMenuOpenOn?: Element;
   maxItems?: number;
+  menuInside?: Element;
+  overflowMenuId?: string;
 }
 
 export class SplitTile extends React.Component<SplitTileProps, SplitTileState> {
+  private overflowMenuId: string;
+  private overflowMenuDeferred: Q.Deferred<Element>;
 
   constructor() {
     super();
+    this.overflowMenuId = uniqueId('overflow-menu-');
     this.state = {
       SplitMenuAsync: null,
       menuOpenOn: null,
       menuDimension: null,
       dragPosition: null,
-      maxItems: null
+      maxItems: null,
+      overflowMenuId: null
     };
   }
 
@@ -64,11 +72,21 @@ export class SplitTile extends React.Component<SplitTileProps, SplitTileState> {
           menuOpenOn: null,
           menuDimension: null,
           overflowMenuOpenOn: null,
-          maxItems: newMaxItems
+          maxItems: newMaxItems,
+          overflowMenuId: null
         });
       }
     }
 
+  }
+
+  componentDidUpdate() {
+    var { overflowMenuOpenOn } = this.state;
+
+    if (overflowMenuOpenOn) {
+      var overflowMenu = this.getOverflowMenu();
+      if (overflowMenu) this.overflowMenuDeferred.resolve(overflowMenu);
+    }
   }
 
   selectDimensionSplit(dimension: Dimension, split: SplitCombine, e: MouseEvent) {
@@ -82,10 +100,18 @@ export class SplitTile extends React.Component<SplitTileProps, SplitTileState> {
       this.closeMenu();
       return;
     }
+
+    var overflowMenu = this.getOverflowMenu();
+    var menuInside: Element = null;
+    if (overflowMenu && isInside(target, overflowMenu)) {
+      menuInside = overflowMenu;
+    }
+
     this.setState({
       menuOpenOn: target,
       menuDimension: dimension,
-      menuSplit: split
+      menuSplit: split,
+      menuInside
     });
   }
 
@@ -95,7 +121,34 @@ export class SplitTile extends React.Component<SplitTileProps, SplitTileState> {
     this.setState({
       menuOpenOn: null,
       menuDimension: null,
+      menuInside: null,
       menuSplit: null
+    });
+  }
+
+  getOverflowMenu(): Element {
+    return document.getElementById(this.overflowMenuId);
+  }
+
+  openOverflowMenu(target: Element): Q.Promise<any> {
+    if (!target) return;
+    var { overflowMenuOpenOn } = this.state;
+
+    if (overflowMenuOpenOn === target) {
+      this.closeOverflowMenu();
+      return;
+    }
+
+    this.overflowMenuDeferred = Q.defer() as Q.Deferred<Element>;
+    this.setState({ overflowMenuOpenOn: target });
+    return this.overflowMenuDeferred.promise;
+  }
+
+  closeOverflowMenu() {
+    var { overflowMenuOpenOn } = this.state;
+    if (!overflowMenuOpenOn) return;
+    this.setState({
+      overflowMenuOpenOn: null
     });
   }
 
@@ -103,6 +156,7 @@ export class SplitTile extends React.Component<SplitTileProps, SplitTileState> {
     var { clicker } = this.props;
     clicker.removeSplit(split, VisStrategy.FairGame);
     this.closeMenu();
+    this.closeOverflowMenu();
     e.stopPropagation();
   }
 
@@ -123,6 +177,7 @@ export class SplitTile extends React.Component<SplitTileProps, SplitTileState> {
     setDragGhost(dataTransfer, dimension.title);
 
     this.closeMenu();
+    this.closeOverflowMenu();
   }
 
   calculateDragPosition(e: DragEvent): DragPosition {
@@ -200,30 +255,71 @@ export class SplitTile extends React.Component<SplitTileProps, SplitTileState> {
     this.openMenu(dimension, split, target);
   }
 
+  overflowButtonTarget(): Element {
+    return ReactDOM.findDOMNode(this.refs['overflow']);
+  }
+
+  overflowButtonClick() {
+    this.openOverflowMenu(this.overflowButtonTarget());
+  };
+
   renderMenu(): JSX.Element {
     var { essence, clicker, menuStage } = this.props;
-    var { SplitMenuAsync, menuOpenOn, menuDimension, menuSplit } = this.state;
+    var { SplitMenuAsync, menuOpenOn, menuDimension, menuSplit, menuInside, overflowMenuOpenOn } = this.state;
     if (!SplitMenuAsync || !menuDimension) return null;
     var onClose = this.closeMenu.bind(this);
 
     return <SplitMenuAsync
       clicker={clicker}
       essence={essence}
-      containerStage={menuStage}
+      containerStage={overflowMenuOpenOn ? null : menuStage}
       openOn={menuOpenOn}
       dimension={menuDimension}
       split={menuSplit}
       onClose={onClose}
+      inside={menuInside}
     />;
   }
 
-  renderOverflow(items: SplitCombine[], x: number): JSX.Element {
-    return React.createElement(PillOverflow, {
-      key: "pill-overflow",
-      items,
-      renderItemFn: this.renderSplit.bind(this),
-      x
-    } as PillOverflowProps<SplitCombine>);
+  renderOverflowMenu(items: SplitCombine[]): JSX.Element {
+    var { overflowMenuOpenOn } = this.state;
+    if (!overflowMenuOpenOn) return null;
+
+    var segmentHeight = 29 + CORE_ITEM_GAP;
+
+    var itemY = CORE_ITEM_GAP;
+    var filterItems = items.map((item, i) => {
+      var style = transformStyle(0, itemY);
+      itemY += segmentHeight;
+      return this.renderSplit(item, style, i);
+    });
+
+    return <BubbleMenu
+      className="overflow-menu"
+      id={this.overflowMenuId}
+      direction="down"
+      stage={Stage.fromSize(208, itemY)}
+      fixedSize={true}
+      openOn={overflowMenuOpenOn}
+      onClose={this.closeOverflowMenu.bind(this)}
+    >
+      {filterItems}
+    </BubbleMenu>;
+  }
+
+  renderOverflow(items: SplitCombine[], itemX: number): JSX.Element {
+    var style = transformStyle(itemX, 0);
+
+    return <div
+      className="overflow"
+      ref="overflow"
+      key="overflow"
+      style={style}
+      onClick={this.overflowButtonClick.bind(this)}
+    >
+      <div className="count">{'+' + items.length}</div>
+      {this.renderOverflowMenu(items)}
+    </div>;
   }
 
   renderSplit(split: SplitCombine, style: React.CSSProperties, i: number) {
