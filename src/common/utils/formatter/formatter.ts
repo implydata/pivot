@@ -82,8 +82,7 @@ export function formatValue(value: any): string {
 export interface LabelFormatOptions {
   dimension: Dimension;
   clause: FilterClause;
-  timeRange?: TimeRange;
-  timezone?: Timezone;
+  timezone: Timezone;
   verbose?: boolean;
 }
 
