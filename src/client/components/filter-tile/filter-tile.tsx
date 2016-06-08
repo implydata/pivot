@@ -463,22 +463,12 @@ export class FilterTile extends React.Component<FilterTileProps, FilterTileState
 
     var className = classNames.join(' ');
 
-    var formattingOptions: LabelFormatOptions = null;
-    if (dimension.kind === 'time') {
-      var timeSelection = clause.selection;
-      var timeRange = essence.evaluateSelection(timeSelection);
-      formattingOptions = {
-        dimension,
-        clause,
-        timeRange,
-        timezone: essence.timezone
-      };
-    } else {
-      formattingOptions = {
-        dimension,
-        clause
-      };
-    }
+    var evaluatedClause = dimension.kind === 'time' ? essence.evaluateClause(clause) : clause;
+    var formattingOptions = {
+      dimension,
+      clause: evaluatedClause,
+      timezone: essence.timezone
+    };
 
     if (source === 'from-highlight') {
       return <div

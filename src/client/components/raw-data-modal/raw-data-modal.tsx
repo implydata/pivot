@@ -131,23 +131,9 @@ export class RawDataModal extends React.Component<RawDataModalProps, RawDataModa
     return essence.getEffectiveFilter().clauses.map((clause, i) => {
       const dimension = dataSource.getDimensionByExpression(clause.expression);
       if (!dimension) return null;
-      var formattingOptions: LabelFormatOptions = null;
-      if (dimension.kind === 'time') {
-        var timeSelection = clause.selection;
-        var timeRange = essence.evaluateSelection(timeSelection);
-        formattingOptions = {
-          dimension,
-          clause,
-          timeRange,
-          timezone: essence.timezone
-        };
-      } else {
-        formattingOptions = {
-          dimension,
-          clause
-        };
-      }
-      return formatFilterClause(formattingOptions);
+      var evaluatedClause = dimension.kind === 'time' ? essence.evaluateClause(clause) : clause;
+
+      return formatFilterClause({ dimension, clause: evaluatedClause, timezone: essence.timezone });
     }).toList();
   }
 

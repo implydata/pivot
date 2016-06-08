@@ -1,5 +1,5 @@
 import * as numeral from 'numeral';
-import { NumberRange, TimeRange } from 'plywood';
+import { NumberRange, TimeRange, LiteralExpression } from 'plywood';
 import { Timezone } from 'chronoshift';
 
 import { Dimension, FilterClause } from '../../models/index';
@@ -105,7 +105,7 @@ export function formatFilterClause(options: LabelFormatOptions): string {
 
     case 'time':
       var timezone = options.timezone;
-      var timeRange = options.timeRange;
+      var timeRange = (clause.selection as LiteralExpression).value as TimeRange;
       if (verbose) {
         label += `: ${formatTimeRange(timeRange, timezone, DisplayYear.IF_DIFF)}`;
       } else {
