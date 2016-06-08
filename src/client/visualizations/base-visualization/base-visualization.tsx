@@ -151,7 +151,7 @@ export class BaseVisualization<S extends BaseVisualizationState>
           });
         },
         (error) => {
-          registerDownloadableDataset(null);
+          if (registerDownloadableDataset) registerDownloadableDataset(null);
           if (!this._isMounted) return;
           this.precalculate(this.props, {
             loading: false,

@@ -69,8 +69,8 @@ export class ChartLine extends React.Component<ChartLineProps, ChartLineState> {
       // Add potential post zero point
       var nextDatum = ds[i + 1];
       if (nextDatum) {
-        var nextTimeRange = getX(nextDatum) as TimeRange;
-        if (range.end.valueOf() !== nextTimeRange.start.valueOf()) {
+        var nextRange = getX(nextDatum) as PlywoodRange;
+        if (range.end.valueOf() !== nextRange.start.valueOf()) {
           dataPoints.push([
             scaleX(rangeMidpoint.valueOf() + (range.end.valueOf() - range.start.valueOf())),
             scaleY(0)

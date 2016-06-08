@@ -8,7 +8,7 @@ import * as d3 from 'd3';
 import { r, $, ply, Executor, Expression, Dataset, Datum, TimeRange, TimeRangeJS, TimeBucketAction, SortAction,
   PlywoodRange, NumberRangeJS, NumberRange, LiteralExpression, Set, Range } from 'plywood';
 import { Splits, Colors, FilterClause, Dimension, Stage, Filter, Measure, DataSource, VisualizationProps, DatasetLoad, Resolve } from '../../../common/models/index';
-import { formatTimeRange, DisplayYear } from '../../../common/utils/time/time';
+import { DisplayYear } from '../../../common/utils/time/time';
 import { rangeEquals, getRangeMidpoint } from '../../../common/utils/general/general';
 import { formatValue } from '../../../common/utils/formatter/formatter';
 
@@ -136,7 +136,7 @@ export class LineChart extends BaseVisualization<LineChartState> {
     }
   }
 
-  getDragTimeRange(e: MouseEvent): PlywoodRange {
+  getDragRange(e: MouseEvent): PlywoodRange {
     const { dragStartValue, axisTimeRange, scaleX } = this.state;
 
     var dragEndValue = scaleX.invert(this.getMyEventX(e));
@@ -182,7 +182,7 @@ export class LineChart extends BaseVisualization<LineChartState> {
     const { dragStartValue } = this.state;
     if (dragStartValue === null) return;
 
-    var dragRange = this.getDragTimeRange(e);
+    var dragRange = this.getDragRange(e);
     this.setState({
       dragRange,
       roundDragRange: this.roundRange(dragRange)
@@ -194,14 +194,14 @@ export class LineChart extends BaseVisualization<LineChartState> {
     const { dimension, dragStartValue, dragRange, dragOnMeasure } = this.state;
     if (dragStartValue === null) return;
 
-    var highlightTimeRange = this.roundRange(this.getDragTimeRange(e));
+    var highlightRange = this.roundRange(this.getDragRange(e));
 
     this.resetDrag();
 
     // If already highlighted and user clicks within it switches measure
     if (!dragRange && essence.highlightOn(LineChart.id)) {
       var existingHighlightTimeRange = essence.getSingleHighlightSet().elements[0];
-      if (existingHighlightTimeRange.contains(highlightTimeRange.start)) {
+      if (existingHighlightTimeRange.contains(highlightRange.start)) {
         var { highlight } = essence;
         if (highlight.measure === dragOnMeasure.name) {
           clicker.dropHighlight();
@@ -221,7 +221,7 @@ export class LineChart extends BaseVisualization<LineChartState> {
       dragOnMeasure.name,
       Filter.fromClause(new FilterClause({
         expression: dimension.expression,
-        selection: r(highlightTimeRange)
+        selection: r(highlightRange)
       }))
     );
   }
@@ -471,7 +471,7 @@ export class LineChart extends BaseVisualization<LineChartState> {
     }
 
     return <div
-      className="measure-time-chart"
+      className="measure-line-chart"
       key={measureName}
       onMouseDown={this.onMouseDown.bind(this, measure)}
       onMouseMove={this.onMouseMove.bind(this, mySplitDataset, measure, scaleX)}
@@ -533,26 +533,8 @@ export class LineChart extends BaseVisualization<LineChartState> {
         // Not filtered on time
         if (!axisRange && dataset) {
           var myDataset = dataset.data[0]['SPLIT'] as Dataset;
-          if (myDataset.data.length === 0) return;
 
-          axisRange = Range.fromJS({
-            start: (myDataset.data[0][dimension.name] as TimeRange | NumberRange).start,
-            end: (myDataset.data[myDataset.data.length - 1][dimension.name] as TimeRange).end
-          });
-          if (dimension.kind === 'time') {
-            axisRange = new TimeRange({
-              start: (myDataset.data[0][dimension.name] as TimeRange).start,
-              end: (myDataset.data[myDataset.data.length - 1][dimension.name] as TimeRange).end
-            });
-          } else {
-            var end = (myDataset.data[myDataset.data.length - 1][dimension.name] as NumberRange).end;
-            axisRange = new NumberRange({
-              start: (myDataset.data[0][dimension.name] as NumberRange).start,
-              end: end || 1000
-            });
-          }
         }
-
         if (axisRange) {
           newState.axisTimeRange = axisRange;
           let domain = [(axisRange).start, (axisRange).end];
@@ -618,7 +600,7 @@ export class LineChart extends BaseVisualization<LineChartState> {
     };
 
     return <div className="internals line-chart-inner">
-      <div className="measure-time-charts" style={measureChartsStyle} onScroll={this.onScroll.bind(this)}>
+      <div className="measure-line-charts" style={measureChartsStyle} onScroll={this.onScroll.bind(this)}>
         {measureCharts}
       </div>
       {bottomAxis}
