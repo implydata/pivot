@@ -115,7 +115,7 @@ describe('General', () => {
     });
 
     it('works in time case verbose', () => {
-      expect(formatFilterClause(DimensionMock.time(), timeFilter, Timezone.UTC, true)).to.equal('time: Nov 11 - Dec 11');
+      expect(formatFilterClause(DimensionMock.time(), timeFilterDifferentMonth, Timezone.UTC, true)).to.equal('time: Nov 11 - Dec 11');
     });
 
     it('works in number case', () => {
