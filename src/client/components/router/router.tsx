@@ -168,7 +168,7 @@ export class Router extends React.Component<RouterProps, RouterState> {
       let newProps: any = {};
       fragment.split('/').forEach((bit, i) => {
         if (bit.charAt(0) !== ':') return;
-        newProps[bit.slice(1)] = crumbs.shift();
+        newProps[bit.slice(1).replace(/=.*$/, '')] = crumbs.shift();
       });
 
       return React.cloneElement(child, newProps);

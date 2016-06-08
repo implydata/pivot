@@ -112,6 +112,7 @@ describe.only('Router', () => {
 
       var domNode: any = findDOMNode(component) as any;
       expect(domNode.className, 'should contain class').to.equal('fakey-fakey');
+      expect(domNode.innerHTML).to.equal('editmyItem');
       isActiveRoute('#root/qux/myItem/edit');
     });
   });

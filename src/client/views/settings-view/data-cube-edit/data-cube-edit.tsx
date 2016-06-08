@@ -46,7 +46,6 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
 
   selectTab(tab: string) {
     var hash = window.location.hash.split('/');
-    console.log(hash);
     hash.splice(-1);
     window.location.hash = hash.join('/') + '/' + tab;
   }
