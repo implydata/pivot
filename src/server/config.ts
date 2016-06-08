@@ -13,6 +13,7 @@ export interface ServerConfig {
 
 export interface PivotConfig {
   port?: number;
+  host?: string;
   verbose?: boolean;
   brokerHost?: string;
   druidHost?: string;
@@ -96,6 +97,7 @@ function parseArgs() {
       "version": Boolean,
       "verbose": Boolean,
       "port": Number,
+      "host": String,
       "example": String,
       "config": String,
 
@@ -195,6 +197,7 @@ export const START_SERVER = !PRINT_CONFIG;
 export const VERBOSE = Boolean(parsedArgs['verbose'] || config.verbose);
 
 export const PORT = parseInt(parsedArgs['port'] || config.port, 10) || 9090;
+export const HOST = parsedArgs['host'] || config.host;
 export const SERVER_ROOT: string = (config as any).serverRoot;
 export const DRUID_HOST = parsedArgs['druid'] || config.brokerHost || config.druidHost;
 export const TIMEOUT = parseInt(<any>config.timeout, 10) || 30000;
