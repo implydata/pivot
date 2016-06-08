@@ -66,6 +66,8 @@ export class Router extends React.Component<RouterProps, RouterState> {
   }
 
   onHashChange() {
+    const { rootFragment } = this.props;
+
     var crumbs = this.parseHash(window.location.hash);
 
     var children = this.props.children as JSX.Element[];
@@ -76,14 +78,37 @@ export class Router extends React.Component<RouterProps, RouterState> {
       return;
     }
 
-    // var child = this.getQualifiedChild(children, crumbs);
-    // console.log(child.props.fragment);
+    var route = this.getQualifiedRoute(children, crumbs);
+
+    if (this.canDefaultDeeper(route.fragment, route.crumbs)) {
+      crumbs = crumbs.concat(this.getDefaultDeeperCrumbs(route.fragment, route.crumbs));
+
+      window.location.hash = [rootFragment].concat(crumbs).join('/');
+    }
 
     if (this.props.onURLChange) {
       this.props.onURLChange(crumbs);
     }
 
     this.setState({hash: window.location.hash});
+  }
+
+  getDefaultDeeperCrumbs(fragment: string, crumbs: string[]): string[] {
+    var bits = fragment.split('/');
+
+    bits.splice(0, crumbs.length);
+
+    return bits.map((bit) => bit.match(/^:[^=]+=(\w+)$/)[1]);
+  }
+
+  canDefaultDeeper(fragment: string, crumbs: string[]): boolean {
+    var bits = fragment.split('/');
+
+    if (bits.length === crumbs.length) return false;
+
+    bits.splice(0, crumbs.length);
+
+    return bits.every((bit) => /^:[^=]+=\w+$/.test(bit));
   }
 
   getDefaultFragment(children: JSX.Element[]): string {
@@ -98,7 +123,7 @@ export class Router extends React.Component<RouterProps, RouterState> {
     return undefined;
   }
 
-  getQualifiedRoute(candidates: JSX.Element[], crumbs: string[]): {fragment?: string, route?: JSX.Element} {
+  getQualifiedRoute(candidates: JSX.Element[], crumbs: string[]): {fragment?: string, route?: JSX.Element, crumbs?: string[]} {
     var isRoute = (element: JSX.Element) => element.type === Route;
 
     for (let i = 0; i < candidates.length; i++) {
@@ -109,9 +134,9 @@ export class Router extends React.Component<RouterProps, RouterState> {
 
       if (crumbs[0] === fragment || fragment.charAt(0) === ':') {
         if (!(candidate.props.children instanceof Array)) {
-          return {fragment, route: candidate};
+          return {fragment, route: candidate, crumbs};
         } else if (crumbs.length === 1) {
-          return {fragment, route: candidate};
+          return {fragment, route: candidate, crumbs};
         } else {
           return this.getQualifiedRoute(candidate.props.children, crumbs.slice(1));
         }
@@ -132,18 +157,6 @@ export class Router extends React.Component<RouterProps, RouterState> {
     return !(route.props.children instanceof Array);
   }
 
-  // canDefaultToSubRoute(route: JSX.Element): boolean {
-  //   if (!route) return false;
-
-  //   if (this.isSimpleRoute(route)) return false;
-
-  //   var children = route.props.children;
-
-  //   return children.some((child) => {
-  //     if (this.isRoute(child) && child.props.fragment.charAt(0))
-  //   });
-  // }
-
   getDefaultRoute(route: JSX.Element): JSX.Element {
     if (!route) return null;
 
@@ -151,7 +164,6 @@ export class Router extends React.Component<RouterProps, RouterState> {
   }
 
   getQualifiedChild(candidates: JSX.Element[], crumbs: string[]): JSX.Element {
-
     var fillProps = (child: JSX.Element, crumbs: string[], fragment: string): JSX.Element => {
       let newProps: any = {};
       fragment.split('/').forEach((bit, i) => {
@@ -162,14 +174,14 @@ export class Router extends React.Component<RouterProps, RouterState> {
       return React.cloneElement(child, newProps);
     };
 
-    var {route, fragment}  = this.getQualifiedRoute(candidates, crumbs);
+    var result  = this.getQualifiedRoute(candidates, crumbs);
 
-    if (this.isSimpleRoute(route)) {
-      return fillProps(route.props.children, crumbs, fragment);
+    if (this.isSimpleRoute(result.route)) {
+      return fillProps(result.route.props.children, result.crumbs, result.fragment);
     }
 
-    if (this.getDefaultRoute(route)) {
-      return fillProps(this.getDefaultRoute(route), crumbs, fragment);
+    if (this.getDefaultRoute(result.route)) {
+      return fillProps(this.getDefaultRoute(result.route), result.crumbs, result.fragment);
     }
 
     return null;

@@ -111,9 +111,8 @@ describe.only('Router', () => {
       updateHash('#root/qux/myItem');
 
       var domNode: any = findDOMNode(component) as any;
-      // expect(domNode.className, 'should contain class').to.equal('fakey-fakey');
-      // expect(domNode.innerHTML).to.equal('myItemedit');
-      // isActiveRoute('#root/qux/myItem/edit');
+      expect(domNode.className, 'should contain class').to.equal('fakey-fakey');
+      isActiveRoute('#root/qux/myItem/edit');
     });
   });
 
