@@ -303,7 +303,8 @@ export function getLineChartTicks(range: PlywoodRange, timezone: Timezone): (Dat
     const { start, end } = range as NumberRange;
     var unit = getBestBucketUnitForRange(range as NumberRange, true) as number;
     var values: number[] = [];
-    var iter = Math.round(start / unit) * unit;
+    var iter = Math.round(start * unit) / unit;
+
     while (iter <= end) {
       values.push(iter);
       iter += unit;
