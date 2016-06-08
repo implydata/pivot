@@ -79,15 +79,7 @@ export function formatValue(value: any): string {
   }
 }
 
-export interface LabelFormatOptions {
-  dimension: Dimension;
-  clause: FilterClause;
-  timezone: Timezone;
-  verbose?: boolean;
-}
-
-export function formatFilterClause(options: LabelFormatOptions): string {
-  const { dimension, clause, verbose } = options;
+export function formatFilterClause(dimension: Dimension, clause: FilterClause, timezone: Timezone, verbose?: boolean): string {
   var label = dimension.title;
 
   switch (dimension.kind) {
@@ -103,7 +95,6 @@ export function formatFilterClause(options: LabelFormatOptions): string {
       break;
 
     case 'time':
-      var timezone = options.timezone;
       var timeRange = (clause.selection as LiteralExpression).value as TimeRange;
       if (verbose) {
         label += `: ${formatTimeRange(timeRange, timezone, DisplayYear.IF_DIFF)}`;

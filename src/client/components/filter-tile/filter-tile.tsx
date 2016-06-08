@@ -6,7 +6,7 @@ import * as Q from 'q';
 import { Timezone, Duration, hour, day, week } from 'chronoshift';
 import { STRINGS, BAR_TITLE_WIDTH, CORE_ITEM_WIDTH, CORE_ITEM_GAP } from '../../config/constants';
 import { Stage, Clicker, Essence, DataSource, Filter, FilterClause, Dimension, DragPosition } from '../../../common/models/index';
-import { formatFilterClause, LabelFormatOptions } from '../../../common/utils/formatter/formatter';
+import { formatFilterClause } from '../../../common/utils/formatter/formatter';
 import {
   findParentWithClass, setDragGhost, uniqueId, isInside, transformStyle, getXFromEvent, classNames
 } from '../../utils/dom/dom';
@@ -464,11 +464,7 @@ export class FilterTile extends React.Component<FilterTileProps, FilterTileState
     var className = classNames.join(' ');
 
     var evaluatedClause = dimension.kind === 'time' ? essence.evaluateClause(clause) : clause;
-    var formattingOptions = {
-      dimension,
-      clause: evaluatedClause,
-      timezone: essence.timezone
-    };
+    var timezone = essence.timezone;
 
     if (source === 'from-highlight') {
       return <div
@@ -478,7 +474,7 @@ export class FilterTile extends React.Component<FilterTileProps, FilterTileState
         onClick={clicker.acceptHighlight.bind(clicker)}
         style={style}
       >
-        <div className="reading">{formatFilterClause(formattingOptions)}</div>
+        <div className="reading">{formatFilterClause(dimension, evaluatedClause, timezone)}</div>
         {this.renderRemoveButton(itemBlank)}
       </div>;
     }
@@ -493,7 +489,7 @@ export class FilterTile extends React.Component<FilterTileProps, FilterTileState
         onDragStart={this.dragStart.bind(this, dimension, clause)}
         style={style}
       >
-        <div className="reading">{formatFilterClause(formattingOptions)}</div>
+        <div className="reading">{formatFilterClause(dimension, evaluatedClause, timezone)}</div>
         {this.renderRemoveButton(itemBlank)}
       </div>;
     } else {

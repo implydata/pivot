@@ -8,7 +8,7 @@ import { Essence, Stage, DataSource } from '../../../common/models/index';
 
 import { Fn, makeTitle, arraySum } from '../../../common/utils/general/general';
 import { download, makeFileName } from '../../utils/download/download';
-import { formatFilterClause, LabelFormatOptions } from '../../../common/utils/formatter/formatter';
+import { formatFilterClause } from '../../../common/utils/formatter/formatter';
 import { classNames } from '../../utils/dom/dom';
 import { getVisibleSegments } from '../../utils/sizing/sizing';
 import { STRINGS } from '../../config/constants';
@@ -132,8 +132,7 @@ export class RawDataModal extends React.Component<RawDataModalProps, RawDataModa
       const dimension = dataSource.getDimensionByExpression(clause.expression);
       if (!dimension) return null;
       var evaluatedClause = dimension.kind === 'time' ? essence.evaluateClause(clause) : clause;
-
-      return formatFilterClause({ dimension, clause: evaluatedClause, timezone: essence.timezone });
+      return formatFilterClause(dimension, evaluatedClause, essence.timezone);
     }).toList();
   }
 
