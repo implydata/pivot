@@ -72,24 +72,17 @@ export function formatterFromData(values: number[], format: string): Formatter {
 }
 
 
-export function formatValue(value: any): string {
+export function formatValue(value: any, timezone?: Timezone, displayYear?: DisplayYear): string {
   if (NumberRange.isNumberRange(value)) {
     return `${formatValue(value.start)}-${formatValue(value.end)}`;
+  } else if (TimeRange.isTimeRange(value)) {
+    return formatTimeRange(value, timezone, displayYear);
   } else {
     return '' + value;
   }
 }
 
-export interface LabelFormatOptions {
-  dimension: Dimension;
-  clause: FilterClause;
-  essence: Essence;
-  verbose?: boolean;
-}
-
-export function formatFilterClause(options: LabelFormatOptions): string {
-  const { dimension, clause, essence, verbose } = options;
-  // ToDo: get essence out of here
+export function formatFilterClause(dimension: Dimension, clause: FilterClause, timezone: Timezone, verbose?: boolean): string {
   var label = dimension.title;
 
   switch (dimension.kind) {
@@ -105,12 +98,11 @@ export function formatFilterClause(options: LabelFormatOptions): string {
       break;
 
     case 'time':
-      var timeSelection = clause.selection;
-      var timeRange = essence.evaluateSelection(timeSelection);
+      var timeRange = (clause.selection as LiteralExpression).value as TimeRange;
       if (verbose) {
-        label += `: ${formatTimeRange(timeRange, essence.timezone, DisplayYear.IF_DIFF)}`;
+        label += `: ${formatTimeRange(timeRange, timezone, DisplayYear.IF_DIFF)}`;
       } else {
-        label = formatTimeRange(timeRange, essence.timezone, DisplayYear.IF_DIFF);
+        label = formatTimeRange(timeRange, timezone, DisplayYear.IF_DIFF);
       }
       break;
 
