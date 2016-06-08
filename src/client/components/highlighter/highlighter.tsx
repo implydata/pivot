@@ -2,10 +2,10 @@ require('./highlighter.css');
 
 import * as React from 'react';
 import { Timezone, Duration } from 'chronoshift';
-import { TimeRange } from 'plywood';
+import { PlywoodRange } from 'plywood';
 
 export interface HighlighterProps extends React.Props<any> {
-  highlightTimeRange: TimeRange;
+  highlightTimeRange: PlywoodRange;
   scaleX: any;
 }
 

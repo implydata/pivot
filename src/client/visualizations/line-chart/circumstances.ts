@@ -5,13 +5,13 @@ import { CircumstancesHandler } from '../../../common/utils/circumstances-handle
 
 export default CircumstancesHandler.EMPTY()
 
-  .when((splits: Splits, dataSource: DataSource) => !dataSource.getDimensionByKind('time'))
+  .when((splits: Splits, dataSource: DataSource) => !(dataSource.getDimensionByKind('time') || dataSource.getDimensionByKind('number')))
   .then(() => Resolve.NEVER)
 
   .when(CircumstancesHandler.noSplits())
   .then((splits: Splits, dataSource: DataSource) => {
-    let timeDimensions = dataSource.getDimensionByKind('time');
-    return Resolve.manual(3, 'This visualization requires a time split',
+    let timeDimensions = dataSource.getDimensionByKind('time').concat(dataSource.getDimensionByKind('number'));
+    return Resolve.manual(3, 'This visualization requires a continuous dimension split',
       timeDimensions.toArray().map((timeDimension) => {
         return {
           description: `Add a split on ${timeDimension.title}`,
@@ -24,27 +24,29 @@ export default CircumstancesHandler.EMPTY()
   })
 
   .when(CircumstancesHandler.areExactSplitKinds('time'))
+  .or(CircumstancesHandler.areExactSplitKinds('number'))
   .then((splits: Splits, dataSource: DataSource, colors: Colors) => {
-    var timeSplit = splits.get(0);
-    var timeDimension = timeSplit.getDimension(dataSource.dimensions);
+    var firstSplit = splits.get(0);
+    var dimension = dataSource.getDimensionByExpression(firstSplit.expression);
 
     var sortAction: SortAction = new SortAction({
-      expression: $(timeDimension.name),
+      expression: $(dimension.name),
       direction: SortAction.ASCENDING
     });
 
     let autoChanged = false;
 
     // Fix time sort
-    if (!sortAction.equals(timeSplit.sortAction)) {
-      timeSplit = timeSplit.changeSortAction(sortAction);
+    if (!sortAction.equals(firstSplit.sortAction)) {
+      firstSplit = firstSplit.changeSortAction(sortAction);
       autoChanged = true;
     }
 
     // Fix time limit
-    if (timeSplit.limitAction) {
-      timeSplit = timeSplit.changeLimitAction(null);
-      autoChanged = true;
+    if (firstSplit.limitAction && dimension.kind === 'time') {
+      firstSplit = firstSplit.changeLimitAction(null);
+    } else {
+      firstSplit = firstSplit.changeLimit(100);
     }
 
     if (colors) {
@@ -52,7 +54,7 @@ export default CircumstancesHandler.EMPTY()
     }
 
     if (!autoChanged) return Resolve.ready(10);
-    return Resolve.automatic(8, {splits: new Splits(List([timeSplit]))});
+    return Resolve.automatic(8, {splits: new Splits(List([firstSplit]))});
   })
 
   .when(CircumstancesHandler.areExactSplitKinds('time', '*'))

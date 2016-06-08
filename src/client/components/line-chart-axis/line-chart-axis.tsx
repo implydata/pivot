@@ -1,4 +1,4 @@
-require('./time-axis.css');
+require('./line-chart-axis.css');
 
 import * as React from 'react';
 import { Timezone, WallTime } from 'chronoshift';
@@ -8,17 +8,17 @@ import { roundToHalfPx } from '../../utils/dom/dom';
 const TICK_HEIGHT = 5;
 const TEXT_OFFSET = 12;
 
-export interface TimeAxisProps extends React.Props<any> {
+export interface LineChartAxisProps extends React.Props<any> {
   stage: Stage;
-  ticks: Date[];
+  ticks: (Date | number)[];
   scale: any;
   timezone: Timezone;
 }
 
-export interface TimeAxisState {
+export interface LineChartAxisState {
 }
 
-export class TimeAxis extends React.Component<TimeAxisProps, TimeAxisState> {
+export class LineChartAxis extends React.Component<LineChartAxisProps, LineChartAxisState> {
   constructor() {
     super();
 
@@ -31,6 +31,12 @@ export class TimeAxis extends React.Component<TimeAxisProps, TimeAxisState> {
     var format = scale.tickFormat();
 
     var timezoneString = timezone.toString();
+
+    function formatLabel(v: Date | number) {
+      if (v instanceof Date) { return formatWithTimezone(v); }
+      return String(v);
+    }
+
     function formatWithTimezone(d: Date): string {
       return format(WallTime.UTCToWallTime(d, timezoneString));
     }
@@ -43,10 +49,10 @@ export class TimeAxis extends React.Component<TimeAxisProps, TimeAxisState> {
     var labelY = TICK_HEIGHT + TEXT_OFFSET;
     var labels = ticks.map((tick: any) => {
       var x = scale(tick);
-      return <text key={String(tick)} x={x} y={labelY}>{formatWithTimezone(tick)}</text>;
+      return <text key={String(tick)} x={x} y={labelY}>{formatLabel(tick)}</text>;
     });
 
-    return <g className="time-axis" transform={stage.getTransform()}>
+    return <g className="line-chart-axis" transform={stage.getTransform()}>
       {lines}
       {labels}
     </g>;
