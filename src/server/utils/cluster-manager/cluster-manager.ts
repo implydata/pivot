@@ -23,8 +23,8 @@ export interface ClusterManagerOptions {
 
 function noop() {}
 
-function sourceAsName(external: External) {
-  return (external as any).dataSource;
+function getSourceFromExternal(external: External): string {
+  return (external as any).dataSource || (external as any).table;
 }
 
 export class ClusterManager {
@@ -44,7 +44,7 @@ export class ClusterManager {
     this.cluster = cluster;
     this.managedExternals = options.initialExternals || [];
     this.onExternalChange = options.onExternalChange || noop;
-    this.generateExternalName = options.generateExternalName || sourceAsName;
+    this.generateExternalName = options.generateExternalName || getSourceFromExternal;
 
     var druidRequestDecorator: DruidRequestDecorator = null;
     // if (clusterType === 'druid' && serverSettings.druidRequestDecoratorModule) {
@@ -76,7 +76,7 @@ export class ClusterManager {
 
   // Do initialization
   public init(): Q.Promise<any> {
-    const { cluster, requester } = this;
+    const { cluster, requester, logger, verbose } = this;
 
     var progress: Q.Promise<any> = Q(null);
 
@@ -85,16 +85,16 @@ export class ClusterManager {
       progress = progress
         //.delay(30000)
         .then(() => {
-          if (cluster.type !== 'druid') return '1.2.3-lol';
+          if (cluster.type !== 'druid') return '1.2.3-' + cluster.type;
           return DruidExternal.getVersion(requester);
         })
         .then(
           (version) => {
             this.version = version;
-            this.logger.log(`Detected cluster ${cluster.name} running version ${version}`);
+            logger.log(`Detected cluster ${cluster.name} running version ${version}`);
           },
           (e) => {
-            this.logger.error(`Field to get version from cluster ${cluster.name} because ${e.message}`);
+            logger.error(`Field to get version from cluster ${cluster.name} because ${e.message}`);
           }
         );
     }
@@ -102,31 +102,28 @@ export class ClusterManager {
     // If desired scan for other sources
     if (cluster.sourceListScan) {
       progress = progress
-        .then(() => {
-          switch (cluster.type) {
-            case 'druid': return DruidExternal.getSourceList(requester);
-            case 'mysql': return MySQLExternal.getSourceList(requester);
-            case 'postgres': return PostgresExternal.getSourceList(requester);
-            default: throw new Error(`unknown requester type ${cluster.type}`);
-          }
-
-        })
+        .then(() => (External.classMap[cluster.type] as any).getSourceList(requester))
         .then(
           (sources) => {
-            this.logger.log(`For cluster '${cluster.name}' got sources: [${sources.join(', ')}]`);
+            logger.log(`For cluster '${cluster.name}' got sources: [${sources.join(', ')}]`);
             // For every un-accounted source: make an external and add it to the managed list.
             for (var source of sources) {
-              if (this.managedExternals.filter(managedExternal => (managedExternal.external as any).dataSource === source).length) continue;
-              var external = cluster.makeExternalFromSourceName(source, this.version).attachRequester(requester);
-              this.managedExternals.push({
-                name: this.generateExternalName(external),
-                external: external,
-                autoDiscovered: true
-              });
+              var existingExternalsForSource = this.managedExternals.filter(managedExternal => getSourceFromExternal(managedExternal.external) === source);
+              if (existingExternalsForSource.length) {
+                if (verbose) logger.log(`Cluster '${cluster.name}' already has an external for '${source}' ('${existingExternalsForSource[0].name}')`);
+              } else {
+                if (verbose) logger.log(`Cluster '${cluster.name}' making external for '${source}'`);
+                var external = cluster.makeExternalFromSourceName(source, this.version).attachRequester(requester);
+                this.managedExternals.push({
+                  name: this.generateExternalName(external),
+                  external: external,
+                  autoDiscovered: true
+                });
+              }
             }
           },
           (e) => {
-            this.logger.error(`Failed to get source list from cluster '${cluster.name}' because ${e.message}`);
+            logger.error(`Failed to get source list from cluster '${cluster.name}' because ${e.message}`);
           }
         );
     }
@@ -139,11 +136,16 @@ export class ClusterManager {
           if (managedExternal.suppressIntrospection) return;
           initialIntrospectionTasks.push(
             managedExternal.external.introspect()
-              .then(introspectedExternal => {
-                if (introspectedExternal.equals(managedExternal.external)) return;
-                managedExternal.external = introspectedExternal;
-                this.onExternalChange(managedExternal.name, introspectedExternal);
-              })
+              .then(
+                (introspectedExternal) => {
+                  // if (introspectedExternal.equals(managedExternal.external)) return; // ToDo: fix this!
+                  managedExternal.external = introspectedExternal;
+                  this.onExternalChange(managedExternal.name, introspectedExternal);
+                },
+                (e: Error) => {
+                  logger.error(`Cluster '${cluster.name}' could not introspect '${managedExternal.name}' because: ${e.message}`);
+                }
+              )
           );
         });
         return Q.all(initialIntrospectionTasks);
