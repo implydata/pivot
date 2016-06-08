@@ -118,8 +118,3 @@ export function rangeEquals(v1: PlywoodRange, v2: PlywoodRange) {
   if (v1 instanceof TimeRange) return (v1 as TimeRange).equals(v2 as TimeRange);
   return (v1 as NumberRange).equals(v2 as NumberRange);
 }
-
-export function getRangeMidpoint(value: PlywoodRange): Date | number {
-  if (value instanceof TimeRange) return (value as TimeRange).midpoint();
-  return (value as NumberRange).midpoint();
-}

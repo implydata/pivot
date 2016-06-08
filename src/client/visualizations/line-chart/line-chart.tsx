@@ -9,7 +9,7 @@ import { r, $, ply, Executor, Expression, Dataset, Datum, TimeRange, TimeRangeJS
   PlywoodRange, NumberRangeJS, NumberRange, LiteralExpression, Set, Range } from 'plywood';
 import { Splits, Colors, FilterClause, Dimension, Stage, Filter, Measure, DataSource, VisualizationProps, DatasetLoad, Resolve } from '../../../common/models/index';
 import { DisplayYear } from '../../../common/utils/time/time';
-import { rangeEquals, getRangeMidpoint } from '../../../common/utils/general/general';
+import { rangeEquals } from '../../../common/utils/general/general';
 import { formatValue } from '../../../common/utils/formatter/formatter';
 
 import { getLineChartTicks } from '../../../common/models/granularity/granularity';
@@ -42,7 +42,7 @@ function findClosest(data: Datum[], dragDate: Date, scaleX: (v: continuousValueT
   for (var datum of data) {
     var segmentValue = datum[dimension.name] as (TimeRange | NumberRange);
     if (!segmentValue) continue;
-    var mid = getRangeMidpoint(segmentValue);
+    var mid = segmentValue.midpoint();
     var dist = Math.abs(mid.valueOf() - dragDate.valueOf());
     var distPx = Math.abs(scaleX(mid) - scaleX(dragDate));
     if ((!closestDatum || dist < minDist) && distPx < MAX_HOVER_DIST) { // Make sure it is not too far way
@@ -311,7 +311,7 @@ export class LineChart extends BaseVisualization<LineChartState> {
           clicker={dragRange ? null : clicker}
         />;
       } else {
-        var leftOffset = containerStage.x + VIS_H_PADDING + scaleX(getRangeMidpoint(bubbleTimeRange));
+        var leftOffset = containerStage.x + VIS_H_PADDING + scaleX(bubbleTimeRange.midpoint());
         var highlightDatum = dataset.findDatumByAttribute(dimension.name, shownTimeRange);
         var segmentLabel = formatValue(shownTimeRange, timezone, DisplayYear.NEVER);
 
@@ -326,7 +326,7 @@ export class LineChart extends BaseVisualization<LineChartState> {
       }
 
     } else if (!dragRange && hoverRange && hoverMeasure === measure) {
-      var leftOffset = containerStage.x + VIS_H_PADDING + scaleX(getRangeMidpoint(hoverRange));
+      var leftOffset = containerStage.x + VIS_H_PADDING + scaleX((hoverRange as NumberRange | TimeRange).midpoint());
       var segmentLabel = formatValue(hoverRange, timezone, DisplayYear.NEVER);
 
       if (colors) {

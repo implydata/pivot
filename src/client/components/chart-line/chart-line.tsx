@@ -3,9 +3,9 @@ require('./chart-line.css');
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import * as d3 from 'd3';
-import { $, Expression, Executor, Dataset, Datum, TimeRange, PlywoodRange } from 'plywood';
+import { $, Expression, Executor, Dataset, Datum, TimeRange, PlywoodRange, NumberRange } from 'plywood';
 import { Stage, Filter, Dimension, Measure } from '../../../common/models/index';
-import { rangeEquals, getRangeMidpoint } from '../../../common/utils/general/general';
+import { rangeEquals } from '../../../common/utils/general/general';
 
 const lineFn = d3.svg.line();
 
@@ -43,7 +43,7 @@ export class ChartLine extends React.Component<ChartLineProps, ChartLineState> {
       var range = getX(datum) as PlywoodRange;
       if (!range) return null; // Incorrect data loaded
 
-      var rangeMidpoint = getRangeMidpoint(range);
+      var rangeMidpoint = (range as NumberRange | TimeRange).midpoint();
       var measureValue = getY(datum);
 
       // Add potential pre zero point
