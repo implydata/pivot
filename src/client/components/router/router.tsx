@@ -45,7 +45,7 @@ export class Router extends React.Component<RouterProps, RouterState> {
   }
 
   componentDidMount() {
-    this.setState({hash: window.location.hash});
+    this.onHashChange();
     window.addEventListener('hashchange', this.onHashChange);
   }
 
@@ -54,41 +54,105 @@ export class Router extends React.Component<RouterProps, RouterState> {
   }
 
   parseHash(hash: string): string[] {
-    const { rootFragment } = this.props;
+    if (!hash) return [];
 
     if (hash.charAt(0) === '#') hash = hash.substr(1);
 
-    var breadCrumbs = hash.split('/');
+    var fragments = hash.split('/');
 
-    if (breadCrumbs[0] === rootFragment) breadCrumbs.shift();
+    if (fragments[0] === this.props.rootFragment) fragments.shift();
 
-    return breadCrumbs;
+    return fragments;
   }
 
-  onHashChange(event: HashChangeEvent) {
+  onHashChange() {
+    var crumbs = this.parseHash(window.location.hash);
+
+    var children = this.props.children as JSX.Element[];
+
+    if (crumbs.length === 0) {
+      let defaultFragment = this.getDefaultFragment(children);
+      window.location.hash = window.location.hash + '/' + defaultFragment;
+      return;
+    }
+
+    // var child = this.getQualifiedChild(children, crumbs);
+    // console.log(child.props.fragment);
+
     if (this.props.onURLChange) {
-      this.props.onURLChange(this.parseHash(window.location.hash));
+      this.props.onURLChange(crumbs);
     }
 
     this.setState({hash: window.location.hash});
   }
 
-  getFragments(): string[] {
-    var children = this.props.children as JSX.Element[];
+  getDefaultFragment(children: JSX.Element[]): string {
+    for (let i = 0; i < children.length; i++) {
+      let child = children[i];
 
-    const isNotRoute = (c: JSX.Element) => c.type !== Route;
-    const hasNoFragment = (c: JSX.Element) => !c.props.fragment;
-
-    if (children.some(isNotRoute) || children.some(hasNoFragment)) {
-      throw new Error('Router only accepts Route elements with fragment as children');
+      if (child.type === Route) {
+        return child.props.fragment;
+      }
     }
 
-    return children.map((c) => c.props.fragment as string);
+    return undefined;
+  }
+
+  getQualifiedRoute(candidates: JSX.Element[], crumbs: string[]): {fragment?: string, route?: JSX.Element} {
+    var isRoute = (element: JSX.Element) => element.type === Route;
+
+    for (let i = 0; i < candidates.length; i++) {
+      let candidate = candidates[i];
+      let fragment = candidate.props.fragment;
+
+      if (!fragment) continue;
+
+      if (crumbs[0] === fragment || fragment.charAt(0) === ':') {
+        if (!(candidate.props.children instanceof Array)) {
+          return {fragment, route: candidate};
+        } else if (crumbs.length === 1) {
+          return {fragment, route: candidate};
+        } else {
+          return this.getQualifiedRoute(candidate.props.children, crumbs.slice(1));
+        }
+      }
+    }
+
+    return {};
+  }
+
+  isRoute(candidate: JSX.Element): boolean {
+    if (!candidate) return false;
+    return candidate.type === Route;
+  }
+
+  isSimpleRoute(route: JSX.Element): boolean {
+    if (!route) return false;
+
+    return !(route.props.children instanceof Array);
+  }
+
+  // canDefaultToSubRoute(route: JSX.Element): boolean {
+  //   if (!route) return false;
+
+  //   if (this.isSimpleRoute(route)) return false;
+
+  //   var children = route.props.children;
+
+  //   return children.some((child) => {
+  //     if (this.isRoute(child) && child.props.fragment.charAt(0))
+  //   });
+  // }
+
+  getDefaultRoute(route: JSX.Element): JSX.Element {
+    if (!route) return null;
+
+    return route.props.children.filter((child: JSX.Element) => !this.isRoute(child))[0];
   }
 
   getQualifiedChild(candidates: JSX.Element[], crumbs: string[]): JSX.Element {
-    var cloneChild = (child: JSX.Element, crumbs: string[], fragment: string): JSX.Element => {
 
+    var fillProps = (child: JSX.Element, crumbs: string[], fragment: string): JSX.Element => {
       let newProps: any = {};
       fragment.split('/').forEach((bit, i) => {
         if (bit.charAt(0) !== ':') return;
@@ -98,43 +162,29 @@ export class Router extends React.Component<RouterProps, RouterState> {
       return React.cloneElement(child, newProps);
     };
 
-    var isRoute = (element: JSX.Element) => element.type === Route;
+    var {route, fragment}  = this.getQualifiedRoute(candidates, crumbs);
 
-    for (let i = 0; i < candidates.length; i++) {
-      let candidate = candidates[i];
-      let fragment = candidate.props.fragment;
-      let child: JSX.Element;
-
-      if (!fragment) continue;
-
-      if (crumbs[0] === fragment || fragment.charAt(0) === ':') {
-        if (!(candidate.props.children instanceof Array)) {
-          child = isRoute(candidate) ? candidate.props.children : candidate;
-        } else if (crumbs.length === 1) {
-          child = candidate.props.children.filter((child: JSX.Element) => !isRoute(child))[0];
-        } else {
-          child = this.getQualifiedChild(candidate.props.children, crumbs.slice(1));
-        }
-
-        if (child) return cloneChild(child, crumbs, fragment);
-      }
+    if (this.isSimpleRoute(route)) {
+      return fillProps(route.props.children, crumbs, fragment);
     }
 
-    return candidates.length > 0 ? candidates[0] : null;
+    if (this.getDefaultRoute(route)) {
+      return fillProps(this.getDefaultRoute(route), crumbs, fragment);
+    }
+
+    return null;
   }
 
   render() {
     const { children } = this.props;
     const { hash } = this.state;
 
-    if (hash === undefined) return <div/>;
+    if (hash === undefined) return <div/>; // returning null causes the tests to fail...
 
-    const breadCrumbs = this.parseHash(hash);
+    const crumbs = this.parseHash(hash);
+    if (!crumbs || !crumbs.length) return null;
 
-    if (!breadCrumbs || !breadCrumbs.length) return null;
-
-    var qualifiedChild = this.getQualifiedChild(children as JSX.Element[], breadCrumbs);
-
+    var qualifiedChild = this.getQualifiedChild(children as JSX.Element[], crumbs);
     return qualifiedChild ? qualifiedChild : null;
   }
 }
