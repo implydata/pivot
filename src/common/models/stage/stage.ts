@@ -22,10 +22,6 @@ export interface StageJS {
   height: number;
 }
 
-function zeroOutNaN(value: number) {
-  return !isNaN(value) ? value : 0;
-}
-
 var check: Class<StageValue, StageJS>;
 export class Stage implements Instance<StageValue, StageJS> {
   static isStage(candidate: any): candidate is Stage {
@@ -67,10 +63,10 @@ export class Stage implements Instance<StageValue, StageJS> {
   public height: number;
 
   constructor(parameters: StageValue) {
-    this.x = zeroOutNaN(parameters.x);
-    this.y = zeroOutNaN(parameters.y);
-    this.width = zeroOutNaN(parameters.width);
-    this.height = zeroOutNaN(parameters.height);
+    this.x = parameters.x;
+    this.y = parameters.y;
+    this.width = parameters.width;
+    this.height = parameters.height;
   }
 
   public valueOf(): StageValue {
