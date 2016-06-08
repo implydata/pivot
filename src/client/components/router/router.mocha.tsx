@@ -1,6 +1,3 @@
-var ExecutionEnvironment = require('fbjs/lib/ExecutionEnvironment');
-ExecutionEnvironment.canUseDOM = true; // Geez, React.
-
 import { findDOMNode } from '../../utils/test-utils/index';
 
 import { expect } from 'chai';
@@ -36,7 +33,7 @@ class Fake extends React.Component<FakeProps, FakeState> {
 }
 // -- end of Fake class
 
-describe.only('Router', () => {
+describe('Router', () => {
   var component: React.Component<any, any>;
 
   var updateHash: (newHash: string) => void;

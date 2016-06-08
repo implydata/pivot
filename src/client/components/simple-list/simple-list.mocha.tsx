@@ -10,7 +10,7 @@ import { findDOMNode } from '../../utils/test-utils/index';
 
 import { SimpleList } from './simple-list';
 
-describe('SimpleList', () => {
+describe.skip('SimpleList', () => {
   it('adds the correct class', () => {
     var renderedComponent = TestUtils.renderIntoDocument(
       <SimpleList
