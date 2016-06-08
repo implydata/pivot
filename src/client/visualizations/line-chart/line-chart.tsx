@@ -534,7 +534,12 @@ export class LineChart extends BaseVisualization<LineChartState> {
         if (!axisRange && dataset) {
           var myDataset = dataset.data[0]['SPLIT'] as Dataset;
 
+          var start = (myDataset.data[0][dimension.name] as NumberRange | TimeRange).start;
+          // how to represent null end for numbers?
+          var end = (myDataset.data[myDataset.data.length - 1][dimension.name] as NumberRange | TimeRange).end;
+          axisRange = Range.fromJS({start, end});
         }
+
         if (axisRange) {
           newState.axisTimeRange = axisRange;
           let domain = [(axisRange).start, (axisRange).end];
