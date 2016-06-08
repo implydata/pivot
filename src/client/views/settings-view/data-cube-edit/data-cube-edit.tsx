@@ -16,12 +16,19 @@ import { SimpleList, SimpleListColumn, SimpleListAction } from '../../../compone
 export interface DataCubeEditProps extends React.Props<any> {
   settings?: AppSettings;
   cubeId?: string;
+  tab?: string;
 }
 
 export interface DataCubeEditState {
   newSettings?: AppSettings;
   hasChanged?: boolean;
 }
+
+const TABS = [
+  {label: 'General', value: 'general'},
+  {label: 'Dimensions', value: 'dimensions'},
+  {label: 'Measures', value: 'measures'}
+];
 
 export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEditState> {
   constructor() {
@@ -37,10 +44,34 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
     });
   }
 
+  selectTab(tab: string) {
+    var hash = window.location.hash.split('/');
+    hash.splice(-1);
+    window.location.hash = hash.join('/') + '/' + tab;
+  }
+
+  renderTabs(activeTab: string): JSX.Element[] {
+    return TABS.map(({label, value}) => {
+      return <Button
+        className={classNames({active: activeTab === value})}
+        title={label}
+        type="secondary"
+        key={value}
+        onClick={this.selectTab.bind(this, value)}
+      />;
+    });
+  }
 
   render() {
+    const { cubeId, tab } = this.props;
+
     return <div className="data-cube-edit">
-      {this.props.cubeId}
+      <div className="tabs">
+        {this.renderTabs(tab)}
+      </div>
+      <div className="content">
+
+      </div>
     </div>;
   }
 }

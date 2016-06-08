@@ -41,9 +41,9 @@ export interface SettingsViewState {
 }
 
 const VIEWS = [
-  {label: 'General', value: 'general'},
-  {label: 'Clusters', value: 'clusters'},
-  {label: 'Data Cubes', value: 'data_cubes'}
+  {label: 'General', value: 'general', svg: require('../../icons/gear-white.svg')},
+  {label: 'Clusters', value: 'clusters', svg: require('../../icons/cluster-white.svg')},
+  {label: 'Data Cubes', value: 'data_cubes', svg: require('../../icons/full-cube-white.svg')}
 ];
 
 export class SettingsView extends React.Component<SettingsViewProps, SettingsViewState> {
@@ -127,17 +127,18 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
   }
 
   selectTab(value: string) {
-    this.setState({breadCrumbs: [value]});
+    window.location.hash = `settings/${value}`;
   }
 
   renderLeftButtons(breadCrumbs: string[]): JSX.Element[] {
     if (!breadCrumbs || !breadCrumbs.length) return [];
 
-    return VIEWS.map(({label, value}) => {
+    return VIEWS.map(({label, value, svg}) => {
       return <Button
         className={classNames({active: breadCrumbs[0] === value})}
         title={label}
         type="primary"
+        svg={svg}
         key={value}
         onClick={this.selectTab.bind(this, value)}
       />;
@@ -167,7 +168,6 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
 
        <Router
          onURLChange={this.onURLChange.bind(this)}
-         breadCrumbs={breadCrumbs}
          rootFragment="settings"
        >
 
@@ -182,7 +182,7 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
          <Route fragment="data_cubes">
            <DataCubes settings={settings} onSave={this.onSave.bind(this)}/>
 
-           <Route fragment=":cubeId">
+           <Route fragment=":cubeId/:tab=general">
              <DataCubeEdit settings={settings}/>
            </Route>
 

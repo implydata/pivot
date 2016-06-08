@@ -3,7 +3,7 @@ import { testImmutableClass } from 'immutable-class/build/tester';
 
 import { Colors, ColorsJS } from './colors';
 
-describe('Colors', () => {
+describe.only('Colors', () => {
   it('is an immutable class', () => {
     testImmutableClass<ColorsJS>(Colors, [
       {

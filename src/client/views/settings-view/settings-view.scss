@@ -28,6 +28,16 @@
         background-color: $brand;
         color: $white;
       }
+
+      &.icon {
+        padding-left: 25px;
+
+        .svg-icon {
+          position: absolute;
+          top: 6px;
+          left: 3px;
+        }
+      }
     }
   }
 

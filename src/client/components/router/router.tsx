@@ -26,11 +26,11 @@ export class Route extends React.Component<RouteProps, RouteState> {
 
 export interface RouterProps extends React.Props<any> {
   onURLChange?: (breadCrumbs: string[]) => void;
-  breadCrumbs?: string[];
   rootFragment?: string;
 }
 
 export interface RouterState {
+  hash?: string;
 }
 
 export class Router extends React.Component<RouterProps, RouterState> {
@@ -39,12 +39,13 @@ export class Router extends React.Component<RouterProps, RouterState> {
   constructor() {
     super();
 
+    this.state = {};
+
     this.onHashChange = this.onHashChange.bind(this);
   }
 
   componentDidMount() {
-    this.updateBreadCrumbs(this.parseHash(window.location.hash));
-
+    this.setState({hash: window.location.hash});
     window.addEventListener('hashchange', this.onHashChange);
   }
 
@@ -64,29 +65,12 @@ export class Router extends React.Component<RouterProps, RouterState> {
     return breadCrumbs;
   }
 
-  updateBreadCrumbs(breadCrumbs: string[]) {
-    if (this.props.onURLChange) {
-      this.props.onURLChange(breadCrumbs);
-    }
-  }
-
   onHashChange(event: HashChangeEvent) {
-    this.updateBreadCrumbs(this.parseHash(event.newURL.split('#')[1]));
-  }
-
-  updateHash(defaultFragments: string[]) {
-    const { breadCrumbs, rootFragment } = this.props;
-
-    if (breadCrumbs) {
-      window.location.hash = `#${rootFragment || ''}/${breadCrumbs.join('/')}`;
-    } else {
-      window.location.hash = `#${rootFragment || ''}/${defaultFragments[0]}`;
-      this.updateBreadCrumbs([defaultFragments[0]]);
+    if (this.props.onURLChange) {
+      this.props.onURLChange(this.parseHash(window.location.hash));
     }
-  }
 
-  componentDidUpdate() {
-    this.updateHash(this.getFragments());
+    this.setState({hash: window.location.hash});
   }
 
   getFragments(): string[] {
@@ -103,11 +87,14 @@ export class Router extends React.Component<RouterProps, RouterState> {
   }
 
   getQualifiedChild(candidates: JSX.Element[], crumbs: string[]): JSX.Element {
-    var cloneChild = (child: JSX.Element, crumb: string, fragment: string): JSX.Element => {
-      if (fragment.charAt(0) !== ':') return child;
+    var cloneChild = (child: JSX.Element, crumbs: string[], fragment: string): JSX.Element => {
 
       let newProps: any = {};
-      newProps[fragment.slice(1)] = crumb;
+      fragment.split('/').forEach((bit, i) => {
+        if (bit.charAt(0) !== ':') return;
+        newProps[bit.slice(1)] = crumbs.shift();
+      });
+
       return React.cloneElement(child, newProps);
     };
 
@@ -129,15 +116,20 @@ export class Router extends React.Component<RouterProps, RouterState> {
           child = this.getQualifiedChild(candidate.props.children, crumbs.slice(1));
         }
 
-        if (child) return cloneChild(child, crumbs[0], fragment);
+        if (child) return cloneChild(child, crumbs, fragment);
       }
     }
 
-    return null;
+    return candidates.length > 0 ? candidates[0] : null;
   }
 
   render() {
-    const { children, breadCrumbs } = this.props;
+    const { children } = this.props;
+    const { hash } = this.state;
+
+    if (hash === undefined) return <div/>;
+
+    const breadCrumbs = this.parseHash(hash);
 
     if (!breadCrumbs || !breadCrumbs.length) return null;
 
