@@ -25,6 +25,7 @@ import { SvgIcon } from "../svg-icon/svg-icon";
 import { BubbleMenu } from "../bubble-menu/bubble-menu";
 import { Dropdown, DropdownProps } from "../dropdown/dropdown";
 import { ButtonGroup } from "../button-group/button-group";
+import { GROUP_BY_LIMIT } from "../../config/constants";
 
 function formatLimit(limit: number | string): string {
   if (limit === 'custom') return 'Custom';
@@ -207,7 +208,7 @@ export class SplitMenu extends React.Component<SplitMenuProps, SplitMenuState> {
     var { limitAction } = split;
 
     var items: Array<number | string> = [5, 10, 25, 50, 100];
-    var selectedItem: number | string = limitAction && limitAction.limit !== 5000 ? limitAction.limit : null;
+    var selectedItem: number | string = limitAction && limitAction.limit !== GROUP_BY_LIMIT ? limitAction.limit : null;
     if (colors) {
       items = [3, 5, 7, 9, 10];
       selectedItem = colors.values ? 'custom' : colors.limit;

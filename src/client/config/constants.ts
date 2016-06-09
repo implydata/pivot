@@ -23,6 +23,8 @@ export const SPLIT = 'SPLIT';
 export const MAX_SEARCH_LENGTH = 300;
 export const SEARCH_WAIT = 900;
 
+export const GROUP_BY_LIMIT = 5000;
+
 export const STRINGS = {
   dimensions: 'Dimensions',
   measures: 'Measures',
