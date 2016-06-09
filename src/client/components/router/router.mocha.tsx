@@ -96,6 +96,30 @@ describe('Router', () => {
     it('fixes multiple slashes', () => {
       updateHash('#root//foo/foo-1///');
       isActiveRoute('#root/foo/foo-1');
+
+      var domNode: any = findDOMNode(component) as any;
+      expect(domNode.className, 'should contain class').to.equal('foo-1-class');
+      expect(domNode.innerHTML).to.equal('foo-1');
+    });
+
+    it('fixes wrong fragment and defaults to first route', () => {
+      updateHash('#root/ABLAB');
+      isActiveRoute('#root/foo');
+
+      var domNode: any = findDOMNode(component) as any;
+      expect(domNode.className, 'should contain class').to.equal('foo-class');
+      expect(domNode.innerHTML).to.equal('foo');
+    });
+
+    it('strips extra fragments', () => {
+      updateHash('#root/bar/UNNECESSARY');
+      isActiveRoute('#root/bar');
+
+      updateHash('#root/baz/pouet/UNNECESSARY');
+      var domNode: any = findDOMNode(component) as any;
+      isActiveRoute('#root/baz/pouet');
+      expect(domNode.className, 'should contain class').to.equal('fakey-fakey');
+      expect(domNode.innerHTML).to.equal('pouet');
     });
 
     it('follows the window.location.hash\'s changes', () => {

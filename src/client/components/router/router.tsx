@@ -24,6 +24,13 @@ export class Route extends React.Component<RouteProps, RouteState> {
 }
 
 
+export interface QualifiedPath {
+  route: JSX.Element;
+  fragment: string;
+  crumbs: string[];
+  wasDefaultChoice?: boolean;
+}
+
 export interface RouterProps extends React.Props<any> {
   onURLChange?: (breadCrumbs: string[]) => void;
   rootFragment?: string;
@@ -77,9 +84,30 @@ export class Router extends React.Component<RouterProps, RouterState> {
   }
 
   replaceHash(newHash: string) {
-    // Acts like window.location.hash = 'something' but doesn't clutter the history
+    // Acts like window.location.hash = newHash but doesn't clutter the history
     // See http://stackoverflow.com/a/23924886/863119
     window.history.replaceState(undefined, undefined, newHash);
+    this.onHashChange();
+  }
+
+  hasExtraFragments(route: QualifiedPath): boolean {
+    return route.crumbs.length > route.fragment.split(HASH_SEPARATOR).length;
+  }
+
+  stripUnnecessaryFragments(route: QualifiedPath, crumbs: string[]) {
+    const { rootFragment } = this.props;
+    const fragments = route.fragment.split(HASH_SEPARATOR);
+
+    const parentFragment = crumbs.join('/').replace(route.crumbs.join('/'), '').replace(/\/$/, '');
+    const strippedRouteCrumbs = route.crumbs.slice(0, route.fragment.split(HASH_SEPARATOR).length);
+
+    const strippedCrumbs = [
+      rootFragment,
+      parentFragment,
+      strippedRouteCrumbs.join('/')
+    ].filter(Boolean);
+
+    this.replaceHash('#' + strippedCrumbs.join('/'));
   }
 
   onHashChange() {
@@ -104,6 +132,18 @@ export class Router extends React.Component<RouterProps, RouterState> {
     }
 
     var route = this.getQualifiedRoute(children, crumbs);
+    if (route.wasDefaultChoice) {
+      crumbs.pop();
+      crumbs.push(route.fragment);
+      this.replaceHash('#' + [rootFragment].concat(crumbs).join('/'));
+      return;
+    }
+
+    // Unnecessary fragments
+    if (this.hasExtraFragments(route)) {
+      this.stripUnnecessaryFragments(route, crumbs);
+      return;
+    }
 
     // Default child for this route
     if (this.canDefaultDeeper(route.fragment, route.crumbs)) {
@@ -148,7 +188,7 @@ export class Router extends React.Component<RouterProps, RouterState> {
     return undefined;
   }
 
-  getQualifiedRoute(candidates: JSX.Element[], crumbs: string[]): {fragment?: string, route?: JSX.Element, crumbs?: string[]} {
+  getQualifiedRoute(candidates: JSX.Element[], crumbs: string[]): QualifiedPath {
     var isRoute = (element: JSX.Element) => element.type === Route;
 
     for (let i = 0; i < candidates.length; i++) {
@@ -168,7 +208,11 @@ export class Router extends React.Component<RouterProps, RouterState> {
       }
     }
 
-    return {};
+    // If we are here, it means no route has been found and we should
+    // return a default one.
+    var route = candidates.filter(isRoute)[0];
+    var fragment = route.props.fragment;
+    return {fragment, route, crumbs, wasDefaultChoice: true};
   }
 
   isRoute(candidate: JSX.Element): boolean {
@@ -199,7 +243,7 @@ export class Router extends React.Component<RouterProps, RouterState> {
       return React.cloneElement(child, newProps);
     };
 
-    var result  = this.getQualifiedRoute(candidates, crumbs);
+    var result = this.getQualifiedRoute(candidates, crumbs);
 
     if (this.isSimpleRoute(result.route)) {
       return fillProps(result.route.props.children, result.crumbs, result.fragment);
