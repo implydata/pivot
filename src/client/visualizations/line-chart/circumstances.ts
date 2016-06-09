@@ -2,7 +2,6 @@ import { $, SortAction } from 'plywood';
 import { List } from 'immutable';
 import { Splits, DataSource, Resolve, SplitCombine, Colors } from '../../../common/models/index';
 import { CircumstancesHandler } from '../../../common/utils/circumstances-handler/circumstances-handler';
-import { GROUP_BY_LIMIT } from "../../config/constants";
 
 export default CircumstancesHandler.EMPTY()
 
@@ -46,10 +45,6 @@ export default CircumstancesHandler.EMPTY()
     // Fix time limit
     if (firstSplit.limitAction && dimension.kind === 'time') {
       firstSplit = firstSplit.changeLimitAction(null);
-    // essentially set limitAction to null but force plywood to do a topN query
-    } else if (!firstSplit.limitAction || firstSplit.limitAction.limit !== 5000) {
-      firstSplit = firstSplit.changeLimit(GROUP_BY_LIMIT);
-      autoChanged = true;
     }
 
     if (colors) {

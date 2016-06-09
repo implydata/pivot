@@ -5,7 +5,7 @@ import { Timezone, Duration } from 'chronoshift';
 import { PlywoodRange } from 'plywood';
 
 export interface HighlighterProps extends React.Props<any> {
-  highlightTimeRange: PlywoodRange;
+  highlightRange: PlywoodRange;
   scaleX: any;
 }
 
@@ -19,11 +19,11 @@ export class Highlighter extends React.Component<HighlighterProps, HighlighterSt
   }
 
   render() {
-    const { highlightTimeRange, scaleX } = this.props;
-    if (!highlightTimeRange) return null;
+    const { highlightRange, scaleX } = this.props;
+    if (!highlightRange) return null;
 
-    var startPos = scaleX(highlightTimeRange.start);
-    var endPos = scaleX(highlightTimeRange.end);
+    var startPos = scaleX(highlightRange.start);
+    var endPos = scaleX(highlightRange.end);
 
     var whiteoutLeftStyle = {
       width: Math.max(startPos, 0)

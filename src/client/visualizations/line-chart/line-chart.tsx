@@ -172,7 +172,7 @@ export class LineChart extends BaseVisualization<LineChartState> {
       var startFloored = Math.floor((dragRange as NumberRange).start);
       var endFloored = Math.floor((dragRange as NumberRange).end);
       var numberBucketAction = lastSplit.bucketAction as NumberBucketAction;
-      endFloored = endFloored +  numberBucketAction.size;
+      endFloored = endFloored + numberBucketAction.size;
 
       return NumberRange.fromJS({
         start: startFloored,
@@ -262,11 +262,11 @@ export class LineChart extends BaseVisualization<LineChartState> {
     const { dragRange, scaleX } = this.state;
 
     if (dragRange !== null) {
-      return <Highlighter highlightTimeRange={dragRange} scaleX={scaleX}/>;
+      return <Highlighter highlightRange={dragRange} scaleX={scaleX}/>;
     }
     if (essence.highlightOn(LineChart.id)) {
-      var highlightTimeRange = essence.getSingleHighlightSet().elements[0];
-      return <Highlighter highlightTimeRange={highlightTimeRange} scaleX={scaleX}/>;
+      var highlightRange = essence.getSingleHighlightSet().elements[0];
+      return <Highlighter highlightRange={highlightRange} scaleX={scaleX}/>;
     }
     return null;
   }

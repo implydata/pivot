@@ -7,6 +7,7 @@ import { roundToHalfPx } from '../../utils/dom/dom';
 
 const TICK_HEIGHT = 5;
 const TEXT_OFFSET = 12;
+const floatFormat =  d3.format(".1f");
 
 export interface LineChartAxisProps extends React.Props<any> {
   stage: Stage;
@@ -34,8 +35,7 @@ export class LineChartAxis extends React.Component<LineChartAxisProps, LineChart
 
     function formatLabel(v: Date | number) {
       if (v instanceof Date) { return formatWithTimezone(v); }
-      var f = d3.format(".1f");
-      return String(f(v as number));
+      return String(floatFormat(v as number));
     }
 
     function formatWithTimezone(d: Date): string {
