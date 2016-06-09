@@ -114,11 +114,13 @@ export class ClusterManager {
               } else {
                 if (verbose) logger.log(`Cluster '${cluster.name}' making external for '${source}'`);
                 var external = cluster.makeExternalFromSourceName(source, this.version).attachRequester(requester);
+                var newName = this.generateExternalName(external);
                 this.managedExternals.push({
-                  name: this.generateExternalName(external),
+                  name: newName,
                   external: external,
                   autoDiscovered: true
                 });
+                this.onExternalChange(newName, external);
               }
             }
           },

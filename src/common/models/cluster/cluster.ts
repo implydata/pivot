@@ -1,6 +1,5 @@
 import { Class, Instance, isInstanceOf } from 'immutable-class';
 import { External, ExternalValue, AttributeInfo } from 'plywood';
-import { DataSource } from '../data-source/data-source';
 import { RefreshRule } from '../refresh-rule/refresh-rule';
 
 export type SupportedTypes = 'druid' | 'mysql' | 'postgres';

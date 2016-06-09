@@ -135,9 +135,7 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
 
   changeCustomization(customization: Customization): AppSettings {
     var value = this.toJS();
-
     value.customization = customization;
-
     return AppSettings.fromJS(value);
   }
 
