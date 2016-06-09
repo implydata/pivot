@@ -45,8 +45,10 @@ export default CircumstancesHandler.EMPTY()
     // Fix time limit
     if (firstSplit.limitAction && dimension.kind === 'time') {
       firstSplit = firstSplit.changeLimitAction(null);
-    } else {
-      firstSplit = firstSplit.changeLimit(100);
+    // essentially set limitAction to null but force plywood to do a topN query
+    } else if (!firstSplit.limitAction || firstSplit.limitAction.limit !== 5000) {
+      firstSplit = firstSplit.changeLimit(5000);
+      autoChanged = true;
     }
 
     if (colors) {

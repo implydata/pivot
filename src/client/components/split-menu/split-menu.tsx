@@ -207,7 +207,7 @@ export class SplitMenu extends React.Component<SplitMenuProps, SplitMenuState> {
     var { limitAction } = split;
 
     var items: Array<number | string> = [5, 10, 25, 50, 100];
-    var selectedItem: number | string = limitAction ? limitAction.limit : null;
+    var selectedItem: number | string = limitAction && limitAction.limit !== 5000 ? limitAction.limit : null;
     if (colors) {
       items = [3, 5, 7, 9, 10];
       selectedItem = colors.values ? 'custom' : colors.limit;
