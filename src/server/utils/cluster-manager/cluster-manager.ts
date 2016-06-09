@@ -24,7 +24,7 @@ export interface ClusterManagerOptions {
 function noop() {}
 
 function getSourceFromExternal(external: External): string {
-  return (external as any).dataSource || (external as any).table;
+  return external.source as string;
 }
 
 export class ClusterManager {
@@ -102,7 +102,7 @@ export class ClusterManager {
     // If desired scan for other sources
     if (cluster.sourceListScan) {
       progress = progress
-        .then(() => (External.classMap[cluster.type] as any).getSourceList(requester))
+        .then(() => (External.getConstructorFor(cluster.type) as any).getSourceList(requester))
         .then(
           (sources) => {
             logger.log(`For cluster '${cluster.name}' got sources: [${sources.join(', ')}]`);

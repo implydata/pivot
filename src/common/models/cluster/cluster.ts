@@ -233,8 +233,7 @@ export class Cluster implements Instance<ClusterValue, ClusterJS> {
   public makeExternalFromSourceName(source: string, version?: string): External {
     return External.fromValue({
       engine: this.type,
-      dataSource: source,
-      table: source,
+      source,
       version: version,
 
       allowSelectQueries: true,
@@ -250,8 +249,7 @@ export class Cluster implements Instance<ClusterValue, ClusterJS> {
     var externalValue: ExternalValue = {
       engine: this.type,
       suppress: true,
-      dataSource: dataSource.source,
-      table: dataSource.source,
+      source: dataSource.source,
       version: version,
       rollup: dataSource.rollup,
       timeAttribute: dataSource.timeAttribute.name,
@@ -278,7 +276,7 @@ export class Cluster implements Instance<ClusterValue, ClusterJS> {
     var dataSource = DataSource.fromJS({
       name: dataSourceName,
       engine: this.name,
-      source: (external as any).dataSource || (external as any).table, // ToDo: !!!
+      source: external.source as string,
       refreshRule: RefreshRule.query().toJS()
     });
 
