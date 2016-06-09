@@ -34,7 +34,8 @@ export class LineChartAxis extends React.Component<LineChartAxisProps, LineChart
 
     function formatLabel(v: Date | number) {
       if (v instanceof Date) { return formatWithTimezone(v); }
-      return String(v);
+      var f = d3.format(".1f");
+      return String(f(v as number));
     }
 
     function formatWithTimezone(d: Date): string {

@@ -62,7 +62,7 @@ export interface LineChartState extends BaseVisualizationState {
 
   // Cached props
   dimension?: Dimension;
-  axisTimeRange?: PlywoodRange;
+  axisRange?: PlywoodRange;
   scaleX?: any;
   xTicks?: continuousValueType[];
 }
@@ -137,13 +137,13 @@ export class LineChart extends BaseVisualization<LineChartState> {
   }
 
   getDragRange(e: MouseEvent): PlywoodRange {
-    const { dragStartValue, axisTimeRange, scaleX } = this.state;
+    const { dragStartValue, axisRange, scaleX } = this.state;
 
     var dragEndValue = scaleX.invert(this.getMyEventX(e));
     var rangeJS: TimeRangeJS | NumberRangeJS = null;
 
     if (dragStartValue.valueOf() === dragEndValue.valueOf()) {
-      dragEndValue = TimeRange.isTimeRange(axisTimeRange) ? new Date(dragEndValue.valueOf() + 1) : dragEndValue + 1;
+      dragEndValue = TimeRange.isTimeRange(axisRange) ? new Date(dragEndValue.valueOf() + 1) : dragEndValue + 1;
     }
 
     if (dragStartValue < dragEndValue) {
@@ -152,11 +152,11 @@ export class LineChart extends BaseVisualization<LineChartState> {
       rangeJS = { start: dragEndValue, end: dragStartValue };
     }
 
-    return Range.fromJS(rangeJS).intersect(axisTimeRange);
+    return Range.fromJS(rangeJS).intersect(axisRange);
 
   }
 
-  roundRange(dragRange: PlywoodRange): PlywoodRange {
+  floorRange(dragRange: PlywoodRange): PlywoodRange {
     const { essence } = this.props;
     const { splits, timezone } = essence;
 
@@ -170,9 +170,14 @@ export class LineChart extends BaseVisualization<LineChartState> {
         end: duration.shift(duration.floor(dragRange.end, timezone), timezone, 1)
       });
     } else {
+      var startFloored = Math.floor((dragRange as NumberRange).start);
+      var endFloored = Math.floor((dragRange as NumberRange).end);
+      if (startFloored === endFloored) {
+        endFloored = startFloored + 1;
+      }
       return NumberRange.fromJS({
-        start: Math.round((dragRange as NumberRange).start),
-        end: Math.round((dragRange as NumberRange).end)
+        start: startFloored,
+        end: endFloored
       });
     }
 
@@ -185,7 +190,7 @@ export class LineChart extends BaseVisualization<LineChartState> {
     var dragRange = this.getDragRange(e);
     this.setState({
       dragRange,
-      roundDragRange: this.roundRange(dragRange)
+      roundDragRange: this.floorRange(dragRange)
     });
   }
 
@@ -194,8 +199,7 @@ export class LineChart extends BaseVisualization<LineChartState> {
     const { dimension, dragStartValue, dragRange, dragOnMeasure } = this.state;
     if (dragStartValue === null) return;
 
-    var highlightRange = this.roundRange(this.getDragRange(e));
-
+    var highlightRange = this.floorRange(this.getDragRange(e));
     this.resetDrag();
 
     // If already highlighted and user clicks within it switches measure
@@ -530,18 +534,17 @@ export class LineChart extends BaseVisualization<LineChartState> {
 
         var axisRange = essence.getEffectiveFilter(LineChart.id).getExtent(dimension.expression) as PlywoodRange;
 
-        // Not filtered on time
-        if (!axisRange && dataset) {
+        // Not filtered on time or has unbounded filter
+        if ((!axisRange && dataset) || (dataset && (!axisRange.start || !axisRange.end))) {
           var myDataset = dataset.data[0]['SPLIT'] as Dataset;
 
           var start = (myDataset.data[0][dimension.name] as NumberRange | TimeRange).start;
-          // how to represent null end for numbers?
           var end = (myDataset.data[myDataset.data.length - 1][dimension.name] as NumberRange | TimeRange).end;
           axisRange = Range.fromJS({start, end});
         }
 
         if (axisRange) {
-          newState.axisTimeRange = axisRange;
+          newState.axisRange = axisRange;
           let domain = [(axisRange).start, (axisRange).end];
           let range = [0, stage.width - VIS_H_PADDING * 2 - Y_AXIS_WIDTH];
           let scaleFn: any = null;
@@ -562,13 +565,13 @@ export class LineChart extends BaseVisualization<LineChartState> {
 
   renderInternals() {
     var { essence, stage } = this.props;
-    var { datasetLoad, axisTimeRange, scaleX, xTicks } = this.state;
+    var { datasetLoad, axisRange, scaleX, xTicks } = this.state;
     var { splits, timezone } = essence;
 
     var measureCharts: JSX.Element[];
     var bottomAxis: JSX.Element;
 
-    if (datasetLoad.dataset && splits.length() && axisTimeRange) {
+    if (datasetLoad.dataset && splits.length() && axisRange) {
       var measures = essence.getEffectiveMeasures().toArray();
 
       var chartWidth = stage.width - VIS_H_PADDING * 2;
