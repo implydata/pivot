@@ -116,10 +116,24 @@ export class NumberHelper {
   static minGranularity = granularityFromJS(1);
   static defaultGranularity = granularityFromJS(10);
 
-  static checkers = makeNumberBucketsSimple().map((v: NumberBucketAction) => makeCheckpoint(v.size, v.size));
+  static checkers = [
+    makeCheckpoint(5000, 1000),
+    makeCheckpoint(500, 100),
+    makeCheckpoint(100, 10),
+    makeCheckpoint(10, 1),
+    makeCheckpoint(0.1, 0.1)
+  ];
+
   static defaultGranularities = NumberHelper.checkers.map((c: any) => { return granularityFromJS(c.returnValue); }).reverse();
   static coarseGranularities: Granularity[] = null;
-  static coarseCheckers: Checker[] = makeNumberBucketsSimple().map((v: NumberBucketAction) => makeCheckpoint(v.size, v.size));
+  static coarseCheckers: Checker[] = [
+    makeCheckpoint(50000, 10000),
+    makeCheckpoint(5000, 1000),
+    makeCheckpoint(500, 100),
+    makeCheckpoint(100, 10),
+    makeCheckpoint(10, 1),
+    makeCheckpoint(0.1, 0.1)
+  ];
 
   static supportedGranularities = (bucketedBy: Granularity) => {
     return makeNumberBuckets(getBucketSize(bucketedBy), 10);
