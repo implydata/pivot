@@ -127,12 +127,12 @@ export class NumberHelper {
   static defaultGranularities = NumberHelper.checkers.map((c: any) => { return granularityFromJS(c.returnValue); }).reverse();
   static coarseGranularities: Granularity[] = null;
   static coarseCheckers: Checker[] = [
+    makeCheckpoint(500000, 50000),
     makeCheckpoint(50000, 10000),
     makeCheckpoint(5000, 5000),
     makeCheckpoint(1000, 1000),
     makeCheckpoint(100, 100),
     makeCheckpoint(10, 10),
-    makeCheckpoint(10, 1),
     makeCheckpoint(0.1, 0.1)
   ];
 

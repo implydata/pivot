@@ -541,7 +541,9 @@ export class LineChart extends BaseVisualization<LineChartState> {
 
           var start = (myDataset.data[0][dimension.name] as NumberRange | TimeRange).start;
           var end = (myDataset.data[myDataset.data.length - 1][dimension.name] as NumberRange | TimeRange).end;
-          axisRange = Range.fromJS({start, end});
+
+          // right now dataset might not be sorted properly
+          if (start < end ) axisRange = Range.fromJS({start, end});
         }
 
         if (axisRange) {
