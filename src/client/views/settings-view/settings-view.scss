@@ -61,10 +61,23 @@
           margin-top: 16px;
         }
 
-        .button {
+        .button.save {
           position: absolute;
           top: 12px;
           right: 10px;
+        }
+
+        .button.back {
+          width: 25px;
+          height: 25px;
+          background-color: transparent;
+          cursor: pointer;
+          margin-top: 16px;
+          margin-right: 15px;
+
+          &:hover {
+            background-color: $highlight;
+          }
         }
 
         > * {

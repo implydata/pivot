@@ -33,6 +33,8 @@ export interface RouterState {
   hash?: string;
 }
 
+const HASH_SEPARATOR = /\/+/;
+
 export class Router extends React.Component<RouterProps, RouterState> {
   public mounted: boolean;
 
@@ -58,35 +60,55 @@ export class Router extends React.Component<RouterProps, RouterState> {
 
     if (hash.charAt(0) === '#') hash = hash.substr(1);
 
-    var fragments = hash.split('/');
+    var fragments = hash.split(HASH_SEPARATOR);
 
     if (fragments[0] === this.props.rootFragment) fragments.shift();
 
-    return fragments;
+    return fragments.filter(Boolean);
+  }
+
+  sanitizeHash(hash: string): string {
+    const { rootFragment } = this.props;
+    const fragments = this.parseHash(hash);
+
+    if (fragments.length === 0) return '#' + rootFragment;
+
+    return `#${rootFragment}/${fragments.join('/')}`;
+  }
+
+  replaceHash(newHash: string) {
+    // Acts like window.location.hash = 'something' but doesn't clutter the history
+    // See http://stackoverflow.com/a/23924886/863119
+    window.history.replaceState(undefined, undefined, newHash);
   }
 
   onHashChange() {
     const { rootFragment } = this.props;
+    const hash = window.location.hash;
 
-    var crumbs = this.parseHash(window.location.hash);
+    var safeHash = this.sanitizeHash(hash);
+    if (hash !== safeHash) {
+      this.replaceHash(safeHash);
+      return;
+    }
+
+    var crumbs = this.parseHash(hash);
 
     var children = this.props.children as JSX.Element[];
 
+    // Default route
     if (crumbs.length === 0) {
       let defaultFragment = this.getDefaultFragment(children);
-      window.location.hash = window.location.hash + '/' + defaultFragment;
+      window.location.hash = hash + '/' + defaultFragment;
       return;
     }
 
     var route = this.getQualifiedRoute(children, crumbs);
 
+    // Default child for this route
     if (this.canDefaultDeeper(route.fragment, route.crumbs)) {
       crumbs = crumbs.concat(this.getDefaultDeeperCrumbs(route.fragment, route.crumbs));
-      let newHash = '#' + [rootFragment].concat(crumbs).join('/');
-
-      // Acts like window.location.hash = 'something' but doesn't clutter the history
-      // See http://stackoverflow.com/a/23924886/863119
-      window.history.replaceState(undefined, undefined, newHash);
+      this.replaceHash('#' + [rootFragment].concat(crumbs).join('/'));
     }
 
     if (this.props.onURLChange) {
@@ -97,7 +119,7 @@ export class Router extends React.Component<RouterProps, RouterState> {
   }
 
   getDefaultDeeperCrumbs(fragment: string, crumbs: string[]): string[] {
-    var bits = fragment.split('/');
+    var bits = fragment.split(HASH_SEPARATOR);
 
     bits.splice(0, crumbs.length);
 
@@ -105,7 +127,7 @@ export class Router extends React.Component<RouterProps, RouterState> {
   }
 
   canDefaultDeeper(fragment: string, crumbs: string[]): boolean {
-    var bits = fragment.split('/');
+    var bits = fragment.split(HASH_SEPARATOR);
 
     if (bits.length === crumbs.length) return false;
 
@@ -169,7 +191,7 @@ export class Router extends React.Component<RouterProps, RouterState> {
   getQualifiedChild(candidates: JSX.Element[], crumbs: string[]): JSX.Element {
     var fillProps = (child: JSX.Element, crumbs: string[], fragment: string): JSX.Element => {
       let newProps: any = {};
-      fragment.split('/').forEach((bit, i) => {
+      fragment.split(HASH_SEPARATOR).forEach((bit, i) => {
         if (bit.charAt(0) !== ':') return;
         newProps[bit.slice(1).replace(/=.*$/, '')] = crumbs.shift();
       });

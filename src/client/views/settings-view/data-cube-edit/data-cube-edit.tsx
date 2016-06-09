@@ -22,6 +22,7 @@ export interface DataCubeEditProps extends React.Props<any> {
 export interface DataCubeEditState {
   newSettings?: AppSettings;
   hasChanged?: boolean;
+  cube?: DataSource;
 }
 
 const TABS = [
@@ -40,7 +41,8 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
   componentWillReceiveProps(nextProps: DataCubeEditProps) {
     if (nextProps.settings) this.setState({
       newSettings: nextProps.settings,
-      hasChanged: false
+      hasChanged: false,
+      cube: nextProps.settings.dataSources.filter((d) => d.name === nextProps.cubeId)[0]
     });
   }
 
@@ -62,10 +64,30 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
     });
   }
 
+  save() {
+
+  }
+
+  goBack() {
+    const { cubeId, tab } = this.props;
+    var hash = window.location.hash;
+    window.location.hash = hash.replace(`/${cubeId}/${tab}`, '');
+  }
+
   render() {
     const { cubeId, tab } = this.props;
+    const { cube, hasChanged } = this.state;
+
+    if (!cube) return null;
 
     return <div className="data-cube-edit">
+      <div className="title-bar">
+        <button className="button back" onClick={this.goBack.bind(this)}>
+          <SvgIcon svg={require('../../../icons/full-back-brand.svg')}/>
+        </button>
+        <div className="title">{cube.title}</div>
+        {hasChanged ? <Button className="save" title="Save" type="primary" onClick={this.save.bind(this)}/> : null}
+      </div>
       <div className="tabs">
         {this.renderTabs(tab)}
       </div>

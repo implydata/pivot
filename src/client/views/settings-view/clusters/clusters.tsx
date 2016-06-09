@@ -65,7 +65,7 @@ export class Clusters extends React.Component<ClustersProps, ClustersState> {
     return <div className="clusters">
       <div className="title-bar">
         <div className="title">Clusters</div>
-        {hasChanged ? <Button title="Save" type="primary" onClick={this.save.bind(this)}/> : null}
+        {hasChanged ? <Button className="save" title="Save" type="primary" onClick={this.save.bind(this)}/> : null}
       </div>
       <div className="main">
       <SimpleList

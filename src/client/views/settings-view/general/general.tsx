@@ -92,7 +92,7 @@ export class General extends React.Component<GeneralProps, GeneralState> {
     return <div className="general">
       <div className="title-bar">
         <div className="title">General</div>
-        {hasChanged ? <Button title="Save" type="primary" onClick={this.save.bind(this)}/> : null}
+        {hasChanged ? <Button className="save" title="Save" type="primary" onClick={this.save.bind(this)}/> : null}
       </div>
       <div className="main">
         <form className="vertical">

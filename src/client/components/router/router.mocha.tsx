@@ -61,6 +61,12 @@ describe('Router', () => {
         <Router rootFragment="root">
           <Route fragment="foo">
             <div className="foo-class">foo</div>
+            <Route fragment="foo-0">
+              <div className="foo-0-class">foo-0</div>
+            </Route>
+            <Route fragment="foo-1">
+              <div className="foo-1-class">foo-1</div>
+            </Route>
           </Route>
 
           <Route fragment="bar">
@@ -87,6 +93,10 @@ describe('Router', () => {
       isActiveRoute('#root/bar');
     });
 
+    it('fixes multiple slashes', () => {
+      updateHash('#root//foo/foo-1///');
+      isActiveRoute('#root/foo/foo-1');
+    });
 
     it('follows the window.location.hash\'s changes', () => {
       updateHash('#root/baz');
