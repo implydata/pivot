@@ -52,6 +52,11 @@ function findClosest(data: Datum[], dragDate: Date, scaleX: (v: continuousValueT
   }
   return closestDatum;
 }
+
+function roundTo(v: number, roundTo: number) {
+  return Math.round(Math.floor(v / roundTo)) * roundTo;
+}
+
 export type continuousValueType = Date | number;
 
 export interface LineChartState extends BaseVisualizationState {
@@ -169,10 +174,14 @@ export class LineChart extends BaseVisualization<LineChartState> {
         end: duration.shift(duration.floor(dragRange.end, timezone), timezone, 1)
       });
     } else {
-      var startFloored = Math.floor((dragRange as NumberRange).start);
-      var endFloored = Math.floor((dragRange as NumberRange).end);
       var numberBucketAction = lastSplit.bucketAction as NumberBucketAction;
-      endFloored = endFloored + numberBucketAction.size;
+      var bucketSize = numberBucketAction.size;
+      var startFloored = roundTo((dragRange as NumberRange).start, bucketSize);
+      var endFloored = roundTo((dragRange as NumberRange).end, bucketSize);
+
+      if (endFloored - startFloored < bucketSize) {
+        endFloored += bucketSize;
+      }
 
       return NumberRange.fromJS({
         start: startFloored,
