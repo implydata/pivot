@@ -6,7 +6,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import * as d3 from 'd3';
 import { r, $, ply, Executor, Expression, Dataset, Datum, TimeRange, TimeRangeJS, TimeBucketAction, SortAction,
-  PlywoodRange, NumberRangeJS, NumberRange, LiteralExpression, Set, Range } from 'plywood';
+  PlywoodRange, NumberRangeJS, NumberRange, LiteralExpression, Set, Range, NumberBucketAction } from 'plywood';
 import { Splits, Colors, FilterClause, Dimension, Stage, Filter, Measure, DataSource, VisualizationProps, DatasetLoad, Resolve } from '../../../common/models/index';
 import { DisplayYear } from '../../../common/utils/time/time';
 import { rangeEquals } from '../../../common/utils/general/general';
@@ -159,12 +159,11 @@ export class LineChart extends BaseVisualization<LineChartState> {
   floorRange(dragRange: PlywoodRange): PlywoodRange {
     const { essence } = this.props;
     const { splits, timezone } = essence;
+    var lastSplit = splits.last();
 
     if (TimeRange.isTimeRange(dragRange)) {
-      var timeSplit = splits.last();
-      var timeBucketAction = timeSplit.bucketAction as TimeBucketAction;
+      var timeBucketAction = lastSplit.bucketAction as TimeBucketAction;
       var duration = timeBucketAction.duration;
-
       return TimeRange.fromJS({
         start: duration.floor(dragRange.start, timezone),
         end: duration.shift(duration.floor(dragRange.end, timezone), timezone, 1)
@@ -172,9 +171,11 @@ export class LineChart extends BaseVisualization<LineChartState> {
     } else {
       var startFloored = Math.floor((dragRange as NumberRange).start);
       var endFloored = Math.floor((dragRange as NumberRange).end);
-      if (startFloored === endFloored) {
-        endFloored = startFloored + 1;
-      }
+      var numberBucketAction = lastSplit.bucketAction as NumberBucketAction;
+      var size = numberBucketAction.size;
+      startFloored = startFloored - (size / 2);
+      endFloored = endFloored + (size / 2);
+
       return NumberRange.fromJS({
         start: startFloored,
         end: endFloored

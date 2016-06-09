@@ -128,9 +128,10 @@ export class NumberHelper {
   static coarseGranularities: Granularity[] = null;
   static coarseCheckers: Checker[] = [
     makeCheckpoint(50000, 10000),
-    makeCheckpoint(5000, 1000),
-    makeCheckpoint(500, 100),
-    makeCheckpoint(100, 10),
+    makeCheckpoint(5000, 5000),
+    makeCheckpoint(1000, 1000),
+    makeCheckpoint(100, 100),
+    makeCheckpoint(10, 10),
     makeCheckpoint(10, 1),
     makeCheckpoint(0.1, 0.1)
   ];
