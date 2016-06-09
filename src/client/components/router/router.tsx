@@ -82,8 +82,11 @@ export class Router extends React.Component<RouterProps, RouterState> {
 
     if (this.canDefaultDeeper(route.fragment, route.crumbs)) {
       crumbs = crumbs.concat(this.getDefaultDeeperCrumbs(route.fragment, route.crumbs));
+      let newHash = '#' + [rootFragment].concat(crumbs).join('/');
 
-      window.location.hash = [rootFragment].concat(crumbs).join('/');
+      // Acts like window.location.hash = 'something' but doesn't clutter the history
+      // See http://stackoverflow.com/a/23924886/863119
+      window.history.replaceState(undefined, undefined, newHash);
     }
 
     if (this.props.onURLChange) {
