@@ -1,19 +1,4 @@
 @import '../../../imports';
 
 .general {
-  .content {
-    form {
-      width: 300px;
-
-      &.vertical {
-        > * {
-          display: block;
-        }
-      }
-
-      input {
-        @extend %default-input;
-      }
-    }
-  }
 }

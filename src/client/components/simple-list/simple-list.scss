@@ -18,6 +18,7 @@
     .svg-icon {
       width: 20px;
       height: 20px;
+      margin-top: 6px;
     }
 
     .text {
@@ -27,10 +28,12 @@
       .title {
         font-size: 1.2em;
         color: $text-medium;
+        margin-bottom: 4px;
       }
 
       .description {
         color: $text-lighter;
+        font-size: 0.9em;
       }
     }
 

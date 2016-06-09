@@ -34,12 +34,51 @@
       bottom: 0;
       left: $tabs-column-width;
 
-      .simple-list {
+      .list {
+        width: 500px;
+        padding: 5px 30px;
         position: absolute;
         top: 0;
         bottom: 0;
-        width: 400px;
+
+        .list-title {
+          display: flex;
+          height: 40px;
+          padding: 15px 12px;
+
+          .label {
+            flex: 1 1;
+
+            color: $text-lighter;
+            text-transform: uppercase;
+          }
+
+          .actions {
+
+            button {
+              @extend %button-light;
+              text-transform: uppercase;
+              color: $brand;
+
+              &:not(:last-child) {
+                margin-right: 15px;
+              }
+            }
+          }
+        }
+
+        .simple-list {
+          height: 100%;
+          width: 100%;
+        }
       }
+
+      form {
+        width: 400px;
+        padding: 20px 30px 5px 30px;
+      }
+
+
     }
   }
 

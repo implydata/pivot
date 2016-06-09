@@ -23,15 +23,23 @@ export interface DataCubeEditState {
   newSettings?: AppSettings;
   hasChanged?: boolean;
   cube?: DataSource;
+  tab?: any;
 }
 
-const TABS = [
-  {label: 'General', value: 'general'},
-  {label: 'Dimensions', value: 'dimensions'},
-  {label: 'Measures', value: 'measures'}
-];
+export interface Tab {
+  label: string;
+  value: string;
+  render: () => JSX.Element;
+}
+
 
 export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEditState> {
+  private tabs: Tab[] = [
+    {label: 'General', value: 'general', render: this.renderGeneral},
+    {label: 'Dimensions', value: 'dimensions', render: this.renderDimensions},
+    {label: 'Measures', value: 'measures', render: this.renderMeasures}
+  ];
+
   constructor() {
     super();
 
@@ -42,7 +50,8 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
     if (nextProps.settings) this.setState({
       newSettings: nextProps.settings,
       hasChanged: false,
-      cube: nextProps.settings.dataSources.filter((d) => d.name === nextProps.cubeId)[0]
+      cube: nextProps.settings.dataSources.filter((d) => d.name === nextProps.cubeId)[0],
+      tab: this.tabs.filter((tab) => tab.value === nextProps.tab)[0]
     });
   }
 
@@ -52,10 +61,10 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
     window.location.hash = hash.join('/') + '/' + tab;
   }
 
-  renderTabs(activeTab: string): JSX.Element[] {
-    return TABS.map(({label, value}) => {
+  renderTabs(activeTab: Tab): JSX.Element[] {
+    return this.tabs.map(({label, value}) => {
       return <button
-        className={classNames({active: activeTab === value})}
+        className={classNames({active: activeTab.value === value})}
         key={value}
         onClick={this.selectTab.bind(this, value)}
       >{label}</button>;
@@ -72,6 +81,38 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
     window.location.hash = hash.replace(`/${cubeId}/${tab}`, '');
   }
 
+  onChange(propertyPath: string, e: KeyboardEvent) {
+
+  }
+
+  renderGeneral(): JSX.Element {
+    const helpTexts: any = {};
+    const { cube } = this.state;
+
+    return <form className="general vertical">
+      <FormLabel label="Title" helpText={helpTexts.title}></FormLabel>
+      <input
+        type="text"
+        value={cube.title}
+        onChange={this.onChange.bind(this, 'cube.title')}
+      />
+
+      <FormLabel label="Engine" helpText={helpTexts.title}></FormLabel>
+      <input
+        type="text"
+        value={cube.engine}
+        onChange={this.onChange.bind(this, 'cube.engine')}
+      />
+
+      <FormLabel label="Source" helpText={helpTexts.title}></FormLabel>
+      <input
+        type="text"
+        value={cube.source}
+        onChange={this.onChange.bind(this, 'cube.source')}
+      />
+    </form>;
+  }
+
   editDimension(index: number) {
 
   }
@@ -80,19 +121,68 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
 
   }
 
-  render() {
-    const { cubeId, tab } = this.props;
+  renderDimensions(): JSX.Element {
     const { cube, hasChanged } = this.state;
-
-    if (!cube) return null;
 
     const rows = cube.dimensions.toArray().map((dimension) => {
       return {
         title: dimension.title,
         description: dimension.expression.toString(),
-        icon: `dim-${dimension.kind}`
+        icon: `dim-${dimension.kind}-brand`
       };
     });
+
+    return <div className="list">
+      <div className="list-title">
+        <div className="label">Dimensions</div>
+        <div className="actions">
+          <button>Introspect</button>
+          <button>Add dimension</button>
+        </div>
+      </div>
+      <SimpleList
+        rows={rows}
+        onEdit={this.editDimension.bind(this)}
+        onRemove={this.deleteDimension.bind(this)}
+      />
+    </div>;
+  }
+
+  editMeasure(index: number) {
+
+  }
+
+  deleteMeasure(index: number) {
+
+  }
+
+  renderMeasures(): JSX.Element {
+    const { cube, hasChanged } = this.state;
+
+    const rows = cube.measures.toArray().map((measure) => {
+      return {
+        title: measure.title,
+        description: measure.expression.toString()
+      };
+    });
+
+    return <div className="list">
+      <div className="list-title">
+        <div className="label">Measures</div>
+        <div className="actions"></div>
+      </div>
+      <SimpleList
+        rows={rows}
+        onEdit={this.editMeasure.bind(this)}
+        onRemove={this.deleteMeasure.bind(this)}
+      />
+    </div>;
+  }
+
+  render() {
+    const { cube, tab, hasChanged } = this.state;
+
+    if (!cube || !tab) return null;
 
     return <div className="data-cube-edit">
       <div className="title-bar">
@@ -107,11 +197,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
           {this.renderTabs(tab)}
         </div>
         <div className="tab-content">
-          <SimpleList
-            rows={rows}
-            onEdit={this.editDimension.bind(this)}
-            onRemove={this.deleteDimension.bind(this)}
-          />
+          {tab.render.bind(this)()}
         </div>
       </div>
 

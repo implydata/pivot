@@ -1,0 +1,98 @@
+// __________________
+// |_________D______|
+// |   |_____B______|
+// | A |            |
+// |   |     C      |
+// |   |            |
+// |   |            |
+// ------------------
+//
+// A : left-panel
+// B : title-bar
+// B + C : main-panel
+// C : content (mostly up to the subviews)
+// D : home-header-bar
+
+.home-header-bar {
+  @include pin-top($header-height);
+}
+
+
+.left-panel {
+  @include unpin-top($header-height);
+
+  width: $left-panel-width;
+  padding: 10px 5px;
+
+  background-color: $background-brand-light;
+
+  button {
+    background-color: transparent;
+    display: block;
+    width: 100%;
+    margin-bottom: 10px;
+    text-align: left;
+
+    &.active {
+      background-color: $brand;
+      color: $white;
+    }
+
+    &.icon {
+      padding-left: 25px;
+
+      .svg-icon {
+        position: absolute;
+        top: 6px;
+        left: 3px;
+      }
+    }
+  }
+}
+
+.main-panel {
+  @include unpin-top($header-height);
+  left: $left-panel-width;
+  background-color: $white;
+}
+
+.title-bar {
+  height: $title-bar-height;
+  background-color: $white;
+  border-bottom: 1px solid $border-light;
+  padding-left: 20px;
+
+  .title {
+    font-size: 1.8em;
+    margin-top: 16px;
+  }
+
+  .button.save {
+    position: absolute;
+    top: 12px;
+    right: 10px;
+  }
+
+  .button.back {
+    width: 25px;
+    height: 25px;
+    background-color: transparent;
+    cursor: pointer;
+    margin-top: 16px;
+    margin-right: 15px;
+
+    &:hover {
+      background-color: $highlight;
+    }
+  }
+
+  > * {
+    display: inline-block;
+  }
+}
+
+.content {
+  @include unpin-top($title-bar-height);
+
+  padding: 20px 30px;
+}

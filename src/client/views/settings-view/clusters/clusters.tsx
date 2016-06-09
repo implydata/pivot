@@ -53,8 +53,8 @@ export class Clusters extends React.Component<ClustersProps, ClustersState> {
     if (!newSettings) return null;
 
     const columns: SimpleTableColumn[] = [
-      {label: 'Name', field: 'name', width: 400, cellIcon: 'cluster-grey'},
-      {label: 'Host', field: 'host', width: 400},
+      {label: 'Name', field: 'name', width: 200, cellIcon: 'cluster-grey'},
+      {label: 'Host', field: 'host', width: 200},
       {label: 'Strategy', field: 'introspectionStrategy', width: 300}
     ];
 

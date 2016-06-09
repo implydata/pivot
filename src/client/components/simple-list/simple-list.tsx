@@ -30,7 +30,7 @@ export class SimpleList extends React.Component<SimpleListProps, SimpleListState
     if (!rows || !rows.length) return [];
 
     const { onEdit, onRemove } = this.props;
-    const svgize = (iconName: string) => <SvgIcon svg={require(`../../icons/${iconName}.svg`)}/>;
+    const svgize = (iconName: string) => iconName ? <SvgIcon svg={require(`../../icons/${iconName}.svg`)}/> : null;
 
     return rows.map(({title, description, icon}, i) => {
       let svg = svgize(icon);
@@ -41,7 +41,7 @@ export class SimpleList extends React.Component<SimpleListProps, SimpleListState
 
       let actions = <div className="actions">
         <button onClick={onEdit.bind(this, i)}>{svgize('full-edit-brand')}</button>
-        <button onClick={onRemove.bind(this, i)}>{svgize('full-delete')}</button>
+        <button onClick={onRemove.bind(this, i)}>{svgize('cross-brand')}</button>
       </div>;
 
       return <div className="row" key={`row-${i}`}>

@@ -12,9 +12,11 @@ import { SimpleList } from './simple-list';
 
 describe.skip('SimpleList', () => {
   it('adds the correct class', () => {
+    var myRows: any[] = [];
+
     var renderedComponent = TestUtils.renderIntoDocument(
       <SimpleList
-
+        rows={myRows}
       />
     );
 
