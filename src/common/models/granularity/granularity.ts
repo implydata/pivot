@@ -120,7 +120,7 @@ export class NumberHelper {
     makeCheckpoint(5000, 1000),
     makeCheckpoint(500, 100),
     makeCheckpoint(100, 10),
-    makeCheckpoint(10, 1),
+    makeCheckpoint(1, 1),
     makeCheckpoint(0.1, 0.1)
   ];
 
@@ -133,6 +133,7 @@ export class NumberHelper {
     makeCheckpoint(1000, 1000),
     makeCheckpoint(100, 100),
     makeCheckpoint(10, 10),
+    makeCheckpoint(1, 1),
     makeCheckpoint(0.1, 0.1)
   ];
 
