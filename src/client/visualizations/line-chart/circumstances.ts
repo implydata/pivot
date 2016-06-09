@@ -45,6 +45,7 @@ export default CircumstancesHandler.EMPTY()
     // Fix time limit
     if (firstSplit.limitAction && dimension.kind === 'time') {
       firstSplit = firstSplit.changeLimitAction(null);
+      autoChanged = true;
     }
 
     if (colors) {
