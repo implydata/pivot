@@ -1,7 +1,9 @@
 const { expect } = require('chai');
 const { exec } = require('child_process');
 
-describe('basics', () => {
+describe('basics', function () {
+  this.timeout(5000);
+
   it('shows help', (testComplete) => {
     exec('bin/pivot', (error: Error, stdout: Buffer, stderr: Buffer) => {
       expect(error).to.equal(null);
