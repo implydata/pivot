@@ -67,3 +67,17 @@
     background: rgba($brand, 0.38);
   }
 }
+
+%button-light {
+  color: $text-standard;
+  background-color: transparent;
+  cursor: pointer;
+
+  &:hover {
+    background-color: $hover;
+  }
+
+  &.active, &:active {
+    background-color: $highlight;
+  }
+}

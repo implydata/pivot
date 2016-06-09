@@ -11,7 +11,7 @@ import { Button } from '../../../components/button/button';
 
 import { AppSettings, Cluster } from '../../../../common/models/index';
 
-import { SimpleList, SimpleListColumn, SimpleListAction } from '../../../components/simple-list/simple-list';
+import { SimpleTable, SimpleTableColumn, SimpleTableAction } from '../../../components/simple-table/simple-table';
 
 export interface ClustersProps extends React.Props<any> {
   settings?: AppSettings;
@@ -52,13 +52,13 @@ export class Clusters extends React.Component<ClustersProps, ClustersState> {
 
     if (!newSettings) return null;
 
-    const columns: SimpleListColumn[] = [
+    const columns: SimpleTableColumn[] = [
       {label: 'Name', field: 'name', width: 400, cellIcon: 'cluster-grey'},
       {label: 'Host', field: 'host', width: 400},
       {label: 'Strategy', field: 'introspectionStrategy', width: 300}
     ];
 
-    const actions: SimpleListAction[] = [
+    const actions: SimpleTableAction[] = [
       {icon: 'full-edit-brand', callback: this.edit.bind(this)}
     ];
 
@@ -68,11 +68,11 @@ export class Clusters extends React.Component<ClustersProps, ClustersState> {
         {hasChanged ? <Button className="save" title="Save" type="primary" onClick={this.save.bind(this)}/> : null}
       </div>
       <div className="content">
-      <SimpleList
+      <SimpleTable
         columns={columns}
         rows={newSettings.clusters}
         actions={actions}
-      ></SimpleList>
+      ></SimpleTable>
       </div>
     </div>;
   }

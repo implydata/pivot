@@ -8,18 +8,19 @@ import { DataSourceMock, EssenceMock } from '../../../common/models/mocks';
 
 import { findDOMNode } from '../../utils/test-utils/index';
 
-import { SimpleList } from './simple-list';
+import { SimpleTable } from './simple-table';
 
-describe.skip('SimpleList', () => {
+describe.skip('SimpleTable', () => {
   it('adds the correct class', () => {
     var renderedComponent = TestUtils.renderIntoDocument(
-      <SimpleList
-
+      <SimpleTable
+        columns={[]}
+        rows={[]}
       />
     );
 
     expect(TestUtils.isCompositeComponent(renderedComponent), 'should be composite').to.equal(true);
-    expect((findDOMNode(renderedComponent) as any).className, 'should contain class').to.contain('simple-list');
+    expect((findDOMNode(renderedComponent) as any).className, 'should contain class').to.contain('simple-table');
   });
 
 });

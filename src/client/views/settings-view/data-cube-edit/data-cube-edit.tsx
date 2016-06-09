@@ -11,7 +11,7 @@ import { Button } from '../../../components/button/button';
 
 import { AppSettings, Cluster, DataSource} from '../../../../common/models/index';
 
-import { SimpleList, SimpleListColumn, SimpleListAction } from '../../../components/simple-list/simple-list';
+import { SimpleList } from '../../../components/simple-list/simple-list';
 
 export interface DataCubeEditProps extends React.Props<any> {
   settings?: AppSettings;
@@ -72,11 +72,27 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
     window.location.hash = hash.replace(`/${cubeId}/${tab}`, '');
   }
 
+  editDimension(index: number) {
+
+  }
+
+  deleteDimension(index: number) {
+
+  }
+
   render() {
     const { cubeId, tab } = this.props;
     const { cube, hasChanged } = this.state;
 
     if (!cube) return null;
+
+    const rows = cube.dimensions.toArray().map((dimension) => {
+      return {
+        title: dimension.title,
+        description: dimension.expression.toString(),
+        icon: `dim-${dimension.kind}`
+      };
+    });
 
     return <div className="data-cube-edit">
       <div className="title-bar">
@@ -91,7 +107,11 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
           {this.renderTabs(tab)}
         </div>
         <div className="tab-content">
-          {cubeId}
+          <SimpleList
+            rows={rows}
+            onEdit={this.editDimension.bind(this)}
+            onRemove={this.deleteDimension.bind(this)}
+          />
         </div>
       </div>
 

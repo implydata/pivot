@@ -19,28 +19,27 @@
 
       button,
       .button {
+        @extend %button-light;
+
         display: block;
         width: 100%;
         padding: 10px 15px;
-        color: $text-standard;
         text-align: left;
-        background-color: transparent;
-        cursor: pointer;
-
-        &:hover {
-          background-color: $hover;
-        }
-
-        &.active {
-          background-color: $highlight;
-        }
       }
     }
 
     .tab-content {
       position: absolute;
       top: 0;
+      bottom: 0;
       left: $tabs-column-width;
+
+      .simple-list {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 400px;
+      }
     }
   }
 

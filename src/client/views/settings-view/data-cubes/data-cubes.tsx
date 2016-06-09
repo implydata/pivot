@@ -11,7 +11,7 @@ import { Button } from '../../../components/button/button';
 
 import { AppSettings, Cluster, DataSource} from '../../../../common/models/index';
 
-import { SimpleList, SimpleListColumn, SimpleListAction } from '../../../components/simple-list/simple-list';
+import { SimpleTable, SimpleTableColumn, SimpleTableAction } from '../../../components/simple-table/simple-table';
 
 export interface DataCubesProps extends React.Props<any> {
   settings?: AppSettings;
@@ -90,14 +90,14 @@ export class DataCubes extends React.Component<DataCubesProps, DataCubesState> {
 
     if (!newSettings) return null;
 
-    const columns: SimpleListColumn[] = [
+    const columns: SimpleTableColumn[] = [
       {label: 'Name', field: 'title', width: 170, cellIcon: 'full-cube-grey'},
       {label: 'Source', field: 'source', width: 400},
       {label: 'Dimensions', field: (cube: DataSource) => cube.dimensions.size, width: 120},
       {label: 'Measures', field: (cube: DataSource) => cube.measures.size, width: 80}
     ];
 
-    const actions: SimpleListAction[] = [
+    const actions: SimpleTableAction[] = [
       {icon: 'full-edit-brand', callback: this.edit.bind(this)}
     ];
 
@@ -107,11 +107,11 @@ export class DataCubes extends React.Component<DataCubesProps, DataCubesState> {
         {hasChanged ? <Button className="save" title="Save" type="primary" onClick={this.save.bind(this)}/> : null}
       </div>
       <div className="content">
-      <SimpleList
+      <SimpleTable
         columns={columns}
         rows={newSettings.dataSources}
         actions={actions}
-      ></SimpleList>
+      ></SimpleTable>
       </div>
     </div>;
   }
