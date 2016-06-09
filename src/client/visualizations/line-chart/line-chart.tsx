@@ -172,9 +172,7 @@ export class LineChart extends BaseVisualization<LineChartState> {
       var startFloored = Math.floor((dragRange as NumberRange).start);
       var endFloored = Math.floor((dragRange as NumberRange).end);
       var numberBucketAction = lastSplit.bucketAction as NumberBucketAction;
-      var size = numberBucketAction.size;
-      startFloored = startFloored - (size / 2);
-      endFloored = endFloored + (size / 2);
+      endFloored = endFloored +  numberBucketAction.size;
 
       return NumberRange.fromJS({
         start: startFloored,
