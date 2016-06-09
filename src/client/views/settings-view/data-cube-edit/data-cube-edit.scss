@@ -35,15 +35,17 @@
       left: $tabs-column-width;
 
       .list {
-        width: 500px;
-        padding: 5px 30px;
+        $list-title-height: 50px;
+
         position: absolute;
-        top: 0;
-        bottom: 0;
+        top: 5px;
+        bottom: 5px;
+        left: 30px;
+        width: 440px;
 
         .list-title {
           display: flex;
-          height: 40px;
+          height: $list-title-height;
           padding: 15px 12px;
 
           .label {
@@ -68,8 +70,11 @@
         }
 
         .simple-list {
-          height: 100%;
-          width: 100%;
+          position: absolute;
+          top: 50px;
+          bottom: 0;
+          left: 0;
+          right: 0;
         }
       }
 
