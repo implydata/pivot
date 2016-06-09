@@ -1,4 +1,47 @@
 @import '../../../imports';
 
 .data-cube-edit {
+  $tabs-column-width: 200px;
+  height: 100%;
+
+  .content {
+    padding: 0;
+
+    .tabs {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: $tabs-column-width;
+
+      border-right: 1px solid $border-light;
+
+      padding: 10px 5px;
+
+      button,
+      .button {
+        display: block;
+        width: 100%;
+        padding: 10px 15px;
+        color: $text-standard;
+        text-align: left;
+        background-color: transparent;
+        cursor: pointer;
+
+        &:hover {
+          background-color: $hover;
+        }
+
+        &.active {
+          background-color: $highlight;
+        }
+      }
+    }
+
+    .tab-content {
+      position: absolute;
+      top: 0;
+      left: $tabs-column-width;
+    }
+  }
+
 }

@@ -94,7 +94,7 @@ export class General extends React.Component<GeneralProps, GeneralState> {
         <div className="title">General</div>
         {hasChanged ? <Button className="save" title="Save" type="primary" onClick={this.save.bind(this)}/> : null}
       </div>
-      <div className="main">
+      <div className="content">
         <form className="vertical">
           <FormLabel label="Title" helpText={helpTexts.title}></FormLabel>
           <input

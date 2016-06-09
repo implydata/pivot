@@ -67,7 +67,7 @@ export class Clusters extends React.Component<ClustersProps, ClustersState> {
         <div className="title">Clusters</div>
         {hasChanged ? <Button className="save" title="Save" type="primary" onClick={this.save.bind(this)}/> : null}
       </div>
-      <div className="main">
+      <div className="content">
       <SimpleList
         columns={columns}
         rows={newSettings.clusters}

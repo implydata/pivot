@@ -106,7 +106,7 @@ export class DataCubes extends React.Component<DataCubesProps, DataCubesState> {
         <div className="title">Data Cubes</div>
         {hasChanged ? <Button className="save" title="Save" type="primary" onClick={this.save.bind(this)}/> : null}
       </div>
-      <div className="main">
+      <div className="content">
       <SimpleList
         columns={columns}
         rows={newSettings.dataSources}

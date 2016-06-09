@@ -54,13 +54,11 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
 
   renderTabs(activeTab: string): JSX.Element[] {
     return TABS.map(({label, value}) => {
-      return <Button
+      return <button
         className={classNames({active: activeTab === value})}
-        title={label}
-        type="secondary"
         key={value}
         onClick={this.selectTab.bind(this, value)}
-      />;
+      >{label}</button>;
     });
   }
 
@@ -88,12 +86,15 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
         <div className="title">{cube.title}</div>
         {hasChanged ? <Button className="save" title="Save" type="primary" onClick={this.save.bind(this)}/> : null}
       </div>
-      <div className="tabs">
-        {this.renderTabs(tab)}
-      </div>
       <div className="content">
-        {cubeId}
+        <div className="tabs">
+          {this.renderTabs(tab)}
+        </div>
+        <div className="tab-content">
+          {cubeId}
+        </div>
       </div>
+
     </div>;
   }
 }
