@@ -3,11 +3,11 @@ require('./general.css');
 import * as React from 'react';
 import { Fn } from '../../../../common/utils/general/general';
 import { classNames } from '../../../utils/dom/dom';
-import { firstUp } from '../../../utils/string/string';
 
 import { SvgIcon } from '../../../components/svg-icon/svg-icon';
 import { FormLabel } from '../../../components/form-label/form-label';
 import { Button } from '../../../components/button/button';
+import { ImmutableInput } from '../../../components/immutable-input/immutable-input';
 
 import { AppSettings, AppSettingsJS } from '../../../../common/models/index';
 
@@ -35,37 +35,8 @@ export class General extends React.Component<GeneralProps, GeneralState> {
     });
   }
 
-  changeOnPath(path: string, instance: any, newValue: any): any {
-    var bits = path.split('.');
-    var lastObject = newValue;
-    var currentObject: any;
-
-    var getLastObject = () => {
-      let o: any = instance;
-
-      for (let i = 0; i < bits.length; i++) {
-        o = o[bits[i]];
-      }
-
-      return o;
-    };
-
-    while (bits.length) {
-      let bit = bits.pop();
-
-      currentObject = getLastObject();
-
-      lastObject = currentObject[`change${firstUp(bit)}`](lastObject);
-    }
-
-    return lastObject;
-  }
-
-  onChange(propertyPath: string, e: KeyboardEvent) {
+  onChange(newSettings: AppSettings) {
     const settings: AppSettings = this.props.settings;
-
-    var newValue: any = (e.target as HTMLInputElement).value;
-    var newSettings = this.changeOnPath(propertyPath, settings, newValue);
 
     this.setState({
       newSettings,
@@ -97,11 +68,7 @@ export class General extends React.Component<GeneralProps, GeneralState> {
       <div className="content">
         <form className="vertical">
           <FormLabel label="Title" helpText={helpTexts.title}></FormLabel>
-          <input
-            type="text"
-            value={newSettings.customization.title}
-            onChange={this.onChange.bind(this, 'customization.title')}
-          />
+          <ImmutableInput instance={newSettings} path={'customization.title'} onChange={this.onChange.bind(this)}/>
         </form>
       </div>
     </div>;

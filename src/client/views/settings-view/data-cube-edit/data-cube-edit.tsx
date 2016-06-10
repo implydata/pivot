@@ -3,15 +3,15 @@ require('./data-cube-edit.css');
 import * as React from 'react';
 import { Fn } from '../../../../common/utils/general/general';
 import { classNames } from '../../../utils/dom/dom';
-import { firstUp } from '../../../utils/string/string';
 
 import { SvgIcon } from '../../../components/svg-icon/svg-icon';
 import { FormLabel } from '../../../components/form-label/form-label';
 import { Button } from '../../../components/button/button';
+import { SimpleList } from '../../../components/simple-list/simple-list';
+import { ImmutableInput } from '../../../components/immutable-input/immutable-input';
 
 import { AppSettings, Cluster, DataSource} from '../../../../common/models/index';
 
-import { SimpleList } from '../../../components/simple-list/simple-list';
 
 export interface DataCubeEditProps extends React.Props<any> {
   settings?: AppSettings;
@@ -20,7 +20,7 @@ export interface DataCubeEditProps extends React.Props<any> {
 }
 
 export interface DataCubeEditState {
-  newSettings?: AppSettings;
+  newCube?: DataSource;
   hasChanged?: boolean;
   cube?: DataSource;
   tab?: any;
@@ -47,12 +47,16 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
   }
 
   componentWillReceiveProps(nextProps: DataCubeEditProps) {
-    if (nextProps.settings) this.setState({
-      newSettings: nextProps.settings,
-      hasChanged: false,
-      cube: nextProps.settings.dataSources.filter((d) => d.name === nextProps.cubeId)[0],
-      tab: this.tabs.filter((tab) => tab.value === nextProps.tab)[0]
-    });
+    if (nextProps.settings && !this.state.hasChanged) {
+      let cube = nextProps.settings.dataSources.filter((d) => d.name === nextProps.cubeId)[0];
+
+      this.setState({
+        newCube: cube,
+        hasChanged: false,
+        cube,
+        tab: this.tabs.filter((tab) => tab.value === nextProps.tab)[0]
+      });
+    }
   }
 
   selectTab(tab: string) {
@@ -81,35 +85,28 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
     window.location.hash = hash.replace(`/${cubeId}/${tab}`, '');
   }
 
-  onChange(propertyPath: string, e: KeyboardEvent) {
+  onSimpleChange(newCube: DataSource) {
+    const { cube } = this.state;
 
+    this.setState({
+      newCube,
+      hasChanged: !cube.equals(newCube)
+    });
   }
 
   renderGeneral(): JSX.Element {
     const helpTexts: any = {};
-    const { cube } = this.state;
+    const { newCube } = this.state;
 
     return <form className="general vertical">
       <FormLabel label="Title" helpText={helpTexts.title}></FormLabel>
-      <input
-        type="text"
-        value={cube.title}
-        onChange={this.onChange.bind(this, 'cube.title')}
-      />
+      <ImmutableInput instance={newCube} path={'title'} onChange={this.onSimpleChange.bind(this)}/>
 
-      <FormLabel label="Engine" helpText={helpTexts.title}></FormLabel>
-      <input
-        type="text"
-        value={cube.engine}
-        onChange={this.onChange.bind(this, 'cube.engine')}
-      />
+      <FormLabel label="Engine" helpText={helpTexts.engine}></FormLabel>
+      <ImmutableInput instance={newCube} path={'engine'} onChange={this.onSimpleChange.bind(this)}/>
 
-      <FormLabel label="Source" helpText={helpTexts.title}></FormLabel>
-      <input
-        type="text"
-        value={cube.source}
-        onChange={this.onChange.bind(this, 'cube.source')}
-      />
+      <FormLabel label="Source" helpText={helpTexts.source}></FormLabel>
+      <ImmutableInput instance={newCube} path={'source'} onChange={this.onSimpleChange.bind(this)}/>
     </form>;
   }
 

@@ -874,6 +874,12 @@ export class DataSource implements Instance<DataSourceValue, DataSourceJS> {
     return new DataSource(value);
   }
 
+  public changeTitle(title: string) {
+    var value = this.valueOf();
+    value.title = title;
+    return new DataSource(value);
+  }
+
   public getDefaultSortAction(): SortAction {
     return new SortAction({
       expression: $(this.defaultSortMeasure),

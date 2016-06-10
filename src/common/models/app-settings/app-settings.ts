@@ -144,9 +144,21 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
   }
 
   changeCustomization(customization: Customization): AppSettings {
-    var value = this.toJS();
+    var value = this.valueOf();
     value.customization = customization;
-    return AppSettings.fromJS(value);
+    return new AppSettings(value);
+  }
+
+  changeClusters(clusters: Cluster[]): AppSettings {
+    var value = this.valueOf();
+    value.clusters = clusters;
+    return new AppSettings(value);
+  }
+
+  changeDataSources(dataSources: DataSource[]): AppSettings {
+    var value = this.valueOf();
+    value.dataSources = dataSources;
+    return new AppSettings(value);
   }
 
 }
