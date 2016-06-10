@@ -3,14 +3,13 @@ import { $, Expression, RefExpression, External, Datum, Dataset, TimeRange, basi
 import { Timezone, WallTime, Duration } from 'chronoshift';
 
 import { PivotRequest } from '../../utils/index';
-import { VERSION, SETTINGS_MANAGER } from '../../config';
 
 var router = Router();
 
 router.post('/', (req: PivotRequest, res: Response) => {
   var { version, dataSource, expression, timezone } = req.body;
 
-  if (version && version !== VERSION) {
+  if (version && version !== req.version) {
     res.status(412).send({
       error: 'incorrect version',
       action: 'reload'
@@ -49,8 +48,9 @@ router.post('/', (req: PivotRequest, res: Response) => {
     return;
   }
 
-  SETTINGS_MANAGER.getDataSource(dataSource)
-    .then((myDataSource) => {
+  req.getSettings(dataSource)
+    .then((appSettings) => {
+      var myDataSource = appSettings.getDataSource(dataSource);
       if (!myDataSource) {
         res.status(400).send({ error: 'unknown data source' });
         return;

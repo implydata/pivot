@@ -26,18 +26,28 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
   }
 
   static fromJS(parameters: AppSettingsJS): AppSettings {
-    var value: AppSettingsValue = {
-      customization: Customization.fromJS(parameters.customization || {}),
-      dataSources: (parameters.dataSources || []).map(dataSource => DataSource.fromJS(dataSource)),
-      linkViewConfig: parameters.linkViewConfig ? LinkViewConfig.fromJS(parameters.linkViewConfig) : null
-    };
-
+    var clusters: Cluster[];
     if (parameters.clusters) {
-      value.clusters = parameters.clusters.map(cluster => Cluster.fromJS(cluster));
+      clusters = parameters.clusters.map(cluster => Cluster.fromJS(cluster));
     } else {
       (parameters as any).clusterName = 'druid';
-      value.clusters = [Cluster.fromJS(parameters as any)];
+      clusters = [Cluster.fromJS(parameters as any)];
     }
+
+    var dataSources = (parameters.dataSources || []).map(dataSource => {
+      if (dataSource.engine !== 'native') {
+        var cluster = helper.findByName(clusters, dataSource.engine);
+        if (!cluster) throw new Error(`Can not find cluster '${dataSource.engine}' for data source '${dataSource.name}'`);
+      }
+      return DataSource.fromJS(dataSource, { cluster });
+    });
+
+    var value: AppSettingsValue = {
+      clusters,
+      customization: Customization.fromJS(parameters.customization || {}),
+      dataSources,
+      linkViewConfig: parameters.linkViewConfig ? LinkViewConfig.fromJS(parameters.linkViewConfig) : null
+    };
 
     return new AppSettings(value);
   }

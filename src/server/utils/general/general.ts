@@ -1,6 +1,8 @@
 import { Request } from 'express';
-import { User } from '../../../common/models/index';
+import { User, AppSettings } from '../../../common/models/index';
 
 export interface PivotRequest extends Request {
+  version: string;
   user: User;
+  getSettings(dataSourceOfInterest?: string): Q.Promise<AppSettings>;
 }

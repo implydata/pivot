@@ -53,12 +53,14 @@ export class SettingsManager {
       // Collect all declared datasources
       progress = progress.then(() => {
         const { clusters } = this.appSettings;
+        const generateExternalName = this.generateDataSourceName.bind(this);
+
         clusters.forEach(cluster => {
           // Get each of their externals
           var initialExternals = this.appSettings.getDataSourcesForCluster(cluster.name).map(dataSource => {
             return {
               name: dataSource.name,
-              external: cluster.makeExternalFromDataSource(dataSource), // ToDo: figure out version story
+              external: dataSource.toExternal(),
               suppressIntrospection: dataSource.introspection === 'none'
             };
           });
@@ -68,7 +70,8 @@ export class SettingsManager {
             logger,
             verbose,
             initialExternals,
-            onExternalChange: this.onExternalChange.bind(this, cluster)
+            onExternalChange: this.onExternalChange.bind(this, cluster),
+            generateExternalName
           }));
         });
 
@@ -113,17 +116,14 @@ export class SettingsManager {
     this.makeMaxTimeCheckTimer();
   }
 
-  getDataSource(dataSourceName: string): Q.Promise<DataSource> {
-    return this.getSettings().then(appSettings => appSettings.getDataSource(dataSourceName));
-  }
-
-  getSettings(): Q.Promise<AppSettings> {
+  getSettings(dataSourceOfInterest?: string): Q.Promise<AppSettings> {
     return this.initialLoad
       .timeout(this.initialLoadTimeout)
       .catch(e => {
         this.logger.error(`Initial load timeout hit, continuing`);
       })
       .then(() => {
+        // ToDo: utilize dataSourceOfInterest
         return Q.all(this.clusterManagers.map(clusterManager => clusterManager.refresh()));
       })
       .then(() => this.appSettings);
@@ -153,6 +153,19 @@ export class SettingsManager {
     return Q(null); // ToDo: actual work
   }
 
+  generateDataSourceName(external: External): string {
+    const { appSettings } = this;
+    var source = String(external.source);
+
+    var candidateName = source;
+    var i = 0;
+    while (appSettings.getDataSource(candidateName)) {
+      i++;
+      candidateName = source + i;
+    }
+    return candidateName;
+  }
+
   onDatasetChange(dataSourceName: string, changedDataset: Dataset): void {
     if (this.verbose) this.logger.log(`Got native dataset update for ${dataSourceName}`);
 
@@ -162,11 +175,12 @@ export class SettingsManager {
   }
 
   onExternalChange(cluster: Cluster, dataSourceName: string, changedExternal: External): void {
+    if (!changedExternal.attributes) return;
     if (this.verbose) this.logger.log(`Got external dataset update for ${dataSourceName} in cluster ${cluster.name}`);
 
     var dataSource = this.appSettings.getDataSource(dataSourceName);
     if (!dataSource) {
-       dataSource = cluster.makeDataSourceFromExternal(dataSourceName, changedExternal);
+       dataSource = DataSource.fromClusterAndExternal(dataSourceName, cluster, changedExternal);
     }
     this.appSettings = this.appSettings.addOrUpdateDataSource(dataSource.updateWithExternal(changedExternal));
   }

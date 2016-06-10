@@ -4,7 +4,7 @@ import { Class, Instance, isInstanceOf, immutableEqual, immutableArraysEqual, im
 import { Duration, Timezone, minute, second } from 'chronoshift';
 import { $, ply, r, Expression, ExpressionJS, Executor, External, RefExpression, basicExecutorFactory, Dataset,
   Attributes, AttributeInfo, AttributeJSs, SortAction, SimpleFullType, DatasetFullType, PlyTypeSimple,
-  CustomDruidAggregations, helper } from 'plywood';
+  CustomDruidAggregations, ExternalValue, helper } from 'plywood';
 import { hasOwnProperty, verifyUrlSafeName, makeUrlSafeName, makeTitle, immutableListsEqual } from '../../utils/general/general';
 import { getWallTimeString } from '../../utils/time/time';
 import { Dimension, DimensionJS } from '../dimension/dimension';
@@ -13,6 +13,7 @@ import { Filter, FilterJS } from '../filter/filter';
 import { SplitsJS } from '../splits/splits';
 import { MaxTime, MaxTimeJS } from '../max-time/max-time';
 import { RefreshRule, RefreshRuleJS } from '../refresh-rule/refresh-rule';
+import { Cluster } from '../cluster/cluster';
 
 function formatTimeDiff(diff: number): string {
   diff = Math.round(Math.abs(diff) / 1000); // turn to seconds
@@ -76,6 +77,7 @@ export interface DataSourceValue {
   refreshRule: RefreshRule;
   maxTime?: MaxTime;
 
+  cluster?: Cluster;
   executor?: Executor;
 }
 
@@ -118,6 +120,7 @@ export interface DataSourceOptions {
 }
 
 export interface DataSourceContext {
+  cluster?: Cluster;
   executor?: Executor;
 }
 
@@ -202,8 +205,19 @@ export class DataSource implements Instance<DataSourceValue, DataSourceJS> {
     });
   }
 
+  static fromClusterAndExternal(name: string, cluster: Cluster, external: External): DataSource {
+    var dataSource = DataSource.fromJS({
+      name,
+      engine: cluster.name,
+      source: String(external.source),
+      refreshRule: RefreshRule.query().toJS()
+    });
+
+    return dataSource.updateCluster(cluster).updateWithExternal(external);
+  }
+
   static fromJS(parameters: DataSourceJS, context: DataSourceContext = {}): DataSource {
-    const { executor } = context;
+    const { cluster, executor } = context;
     var engine = parameters.engine;
     var introspection = parameters.introspection;
     var attributeOverrideJSs = parameters.attributeOverrides;
@@ -241,7 +255,7 @@ export class DataSource implements Instance<DataSourceValue, DataSourceJS> {
     }
 
     var timeAttributeName = parameters.timeAttribute;
-    if (engine === 'druid' && !timeAttributeName) {
+    if (cluster && cluster.type === 'druid' && !timeAttributeName) {
       timeAttributeName = '__time';
     }
     var timeAttribute = timeAttributeName ? $(timeAttributeName) : null;
@@ -301,6 +315,10 @@ export class DataSource implements Instance<DataSourceValue, DataSourceJS> {
       refreshRule,
       maxTime
     };
+    if (cluster) {
+      if (engine !== cluster.name) throw new Error(`Engine '${engine}' was given but '${cluster.name}' cluster was supplied (must match)`);
+      value.cluster = cluster;
+    }
     if (executor) value.executor = executor;
     return new DataSource(value);
   }
@@ -329,6 +347,7 @@ export class DataSource implements Instance<DataSourceValue, DataSourceJS> {
   public refreshRule: RefreshRule;
   public maxTime: MaxTime;
 
+  public cluster: Cluster;
   public executor: Executor;
 
   constructor(parameters: DataSourceValue) {
@@ -359,6 +378,7 @@ export class DataSource implements Instance<DataSourceValue, DataSourceJS> {
     this.refreshRule = parameters.refreshRule;
     this.maxTime = parameters.maxTime;
 
+    this.cluster = parameters.cluster;
     this.executor = parameters.executor;
 
     this._validateDefaults();
@@ -389,6 +409,7 @@ export class DataSource implements Instance<DataSourceValue, DataSourceJS> {
       refreshRule: this.refreshRule,
       maxTime: this.maxTime
     };
+    if (this.cluster) value.cluster = this.cluster;
     if (this.executor) value.executor = this.executor;
     return value;
   }
@@ -472,6 +493,44 @@ export class DataSource implements Instance<DataSourceValue, DataSourceJS> {
     }
   }
 
+  public toExternal(): External {
+    if (this.engine === 'native') throw new Error(`there is no external on a native data source`);
+    const { cluster } = this;
+    if (!cluster) throw new Error('must have a cluster');
+
+
+
+    var externalValue: ExternalValue = {
+      engine: cluster.type,
+      suppress: true,
+      source: this.source,
+      version: cluster.version,
+      derivedAttributes: this.derivedAttributes,
+      customAggregations: this.options.customAggregations,
+      filter: this.subsetFilter
+    };
+
+    if (cluster.type === 'druid') {
+      externalValue.rollup = this.rollup;
+      externalValue.timeAttribute = this.timeAttribute.name;
+      externalValue.introspectionStrategy = cluster.introspectionStrategy;
+      externalValue.allowSelectQueries = true;
+      externalValue.context = {
+        timeout: cluster.timeout
+      };
+    }
+
+    if (this.introspection === 'none') {
+      externalValue.attributes = AttributeInfo.override(this.deduceAttributes(), this.attributeOverrides);
+      externalValue.derivedAttributes = this.derivedAttributes;
+    } else {
+      // ToDo: else if (we know that it will GET introspect) and there are no overrides apply special attributes as overrides
+      externalValue.attributeOverrides = this.attributeOverrides;
+    }
+
+    return External.fromValue(externalValue);
+  }
+
   public getMainTypeContext(): DatasetFullType {
     var { attributes, derivedAttributes } = this;
     if (!attributes) return null;
@@ -529,6 +588,12 @@ export class DataSource implements Instance<DataSourceValue, DataSourceJS> {
     });
 
     return issues;
+  }
+
+  public updateCluster(cluster: Cluster): DataSource {
+    var value = this.valueOf();
+    value.cluster = cluster;
+    return new DataSource(value);
   }
 
   public updateWithDataset(dataset: Dataset): DataSource {

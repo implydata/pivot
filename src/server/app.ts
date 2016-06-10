@@ -1,5 +1,5 @@
 import * as express from 'express';
-import { Request, Response } from 'express';
+import { Request, Response, Router, Handler } from 'express';
 
 import * as path from 'path';
 import * as logger from 'morgan';
@@ -14,7 +14,7 @@ if (!WallTime.rules) {
 }
 
 import { PivotRequest } from './utils/index';
-import { VERSION, AUTH, SERVER_SETTINGS } from './config';
+import { VERSION, AUTH, SERVER_SETTINGS, SETTINGS_MANAGER } from './config';
 import * as plywoodRoutes from './routes/plywood/plywood';
 import * as plyqlRoutes from './routes/plyql/plyql';
 import * as pivotRoutes from './routes/pivot/pivot';
@@ -25,38 +25,41 @@ import { errorLayout } from './views';
 var app = express();
 app.disable('x-powered-by');
 
+function addRoutes(attach: string, router: Router | Handler): void {
+  app.use(attach, router);
+  app.use(SERVER_SETTINGS.serverRoot + attach, router);
+}
+
 app.use(compress());
 app.use(logger('dev'));
 
-app.use('/', express.static(path.join(__dirname, '../../build/public')));
-app.use(SERVER_SETTINGS.serverRoot, express.static(path.join(__dirname, '../../build/public')));
+addRoutes('/', express.static(path.join(__dirname, '../../build/public')));
+addRoutes('/', express.static(path.join(__dirname, '../../assets')));
 
-app.use('/', express.static(path.join(__dirname, '../../assets')));
-app.use(SERVER_SETTINGS.serverRoot, express.static(path.join(__dirname, '../../assets')));
+app.use((req: PivotRequest, res: Response, next: Function) => {
+  req.user = null;
+  req.version = VERSION;
+  req.getSettings = (dataSourceOfInterest?: string) => {
+    return SETTINGS_MANAGER.getSettings(dataSourceOfInterest);
+  };
+  next();
+});
 
 if (AUTH) {
   app.use(AUTH.auth({
     version: VERSION
   }));
 
-} else {
-  app.use((req: PivotRequest, res: Response, next: Function) => {
-    req.user = null;
-    next();
-  });
 }
 
 app.use(bodyParser.json());
 
+addRoutes('/health', healthRoutes);
+
 // Data routes
-app.use('/plywood', plywoodRoutes);
-app.use(SERVER_SETTINGS.serverRoot + '/plywood', plywoodRoutes);
-
-app.use('/plyql', plyqlRoutes);
-app.use(SERVER_SETTINGS.serverRoot + '/plyql', plyqlRoutes);
-
-app.use('/settings', settingsRoutes);
-app.use(SERVER_SETTINGS.serverRoot + '/settings', settingsRoutes);
+addRoutes('/plywood', plywoodRoutes);
+addRoutes('/plyql', plyqlRoutes);
+addRoutes('/settings', settingsRoutes);
 
 // View routes
 if (SERVER_SETTINGS.iframe === 'deny') {
@@ -67,11 +70,7 @@ if (SERVER_SETTINGS.iframe === 'deny') {
   });
 }
 
-app.use('/', pivotRoutes);
-app.use(SERVER_SETTINGS.serverRoot, pivotRoutes);
-
-app.use('/health', healthRoutes);
-app.use(SERVER_SETTINGS.serverRoot + '/health', healthRoutes);
+addRoutes('/', pivotRoutes);
 
 // Catch 404 and redirect to /
 app.use((req: Request, res: Response, next: Function) => {

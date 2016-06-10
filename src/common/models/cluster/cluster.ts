@@ -240,47 +240,5 @@ export class Cluster implements Instance<ClusterValue, ClusterJS> {
     });
   }
 
-  public makeExternalFromDataSource(dataSource: DataSource, version?: string): External {
-    var context = {
-      timeout: this.timeout
-    };
-
-    var externalValue: ExternalValue = {
-      engine: this.type,
-      suppress: true,
-      source: dataSource.source,
-      version: version,
-      rollup: dataSource.rollup,
-      timeAttribute: dataSource.timeAttribute.name,
-      derivedAttributes: dataSource.derivedAttributes,
-      customAggregations: dataSource.options.customAggregations,
-      introspectionStrategy: this.introspectionStrategy,
-      filter: dataSource.subsetFilter,
-      allowSelectQueries: true,
-      context
-    };
-
-    if (dataSource.introspection === 'none') {
-      externalValue.attributes = AttributeInfo.override(dataSource.deduceAttributes(), dataSource.attributeOverrides);
-      externalValue.derivedAttributes = dataSource.derivedAttributes;
-    } else {
-      // ToDo: else if (we know that it will GET introspect) and there are no overrides apply special attributes as overrides
-      externalValue.attributeOverrides = dataSource.attributeOverrides;
-    }
-
-    return External.fromValue(externalValue);
-  }
-
-  public makeDataSourceFromExternal(dataSourceName: string, external: External): DataSource {
-    var dataSource = DataSource.fromJS({
-      name: dataSourceName,
-      engine: this.name,
-      source: external.source as string,
-      refreshRule: RefreshRule.query().toJS()
-    });
-
-    return dataSource.updateWithExternal(external);
-  }
-
 }
 check = Cluster;

@@ -5,6 +5,14 @@ import { properRequesterFactory } from '../requester/requester';
 import { Cluster, SupportedTypes } from '../../../common/models/index';
 import { Logger } from '../logger/logger';
 
+// Hack: (this should really be part of Plywood)
+function externalChangeVersion(external: External, version: string): External {
+  if (external.version === version) return external;
+  var value = this.valueOf();
+  value.version = version;
+  return new External(value);
+}
+
 // For each external we want to maintain its source and weather it should introspect at all
 export interface ManagedExternal {
   name: string;
@@ -24,7 +32,7 @@ export interface ClusterManagerOptions {
 function noop() {}
 
 function getSourceFromExternal(external: External): string {
-  return external.source as string;
+  return String(external.source);
 }
 
 export class ClusterManager {
