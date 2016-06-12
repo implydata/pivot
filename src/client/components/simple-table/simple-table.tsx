@@ -27,6 +27,7 @@ export interface SimpleTableProps extends React.Props<any> {
   columns: SimpleTableColumn[];
   rows: any[];
   actions?: SimpleTableAction[];
+  onRowClick?: (row: any) => void;
 }
 
 export interface SimpleTableState {
@@ -236,7 +237,9 @@ export class SimpleTable extends React.Component<SimpleTableProps, SimpleTableSt
   }
 
   onCellClick(row: any, column: SimpleTableColumn) {
-
+    if (this.props.onRowClick) {
+      this.props.onRowClick(row);
+    }
   }
 
   onHeaderClick(column: SimpleTableColumn) {

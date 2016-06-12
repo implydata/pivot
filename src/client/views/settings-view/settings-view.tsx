@@ -183,7 +183,7 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
            <DataCubes settings={settings} onSave={this.onSave.bind(this)}/>
 
            <Route fragment=":cubeId/:tab=general">
-             <DataCubeEdit settings={settings}/>
+             <DataCubeEdit settings={settings} onSave={this.onSave.bind(this)}/>
            </Route>
 
          </Route>

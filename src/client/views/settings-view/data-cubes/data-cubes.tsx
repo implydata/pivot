@@ -111,6 +111,7 @@ export class DataCubes extends React.Component<DataCubesProps, DataCubesState> {
         columns={columns}
         rows={newSettings.dataSources}
         actions={actions}
+        onRowClick={this.edit.bind(this)}
       ></SimpleTable>
       </div>
     </div>;

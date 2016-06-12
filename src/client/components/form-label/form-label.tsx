@@ -28,6 +28,8 @@ export class FormLabel extends React.Component<FormLabelProps, FormLabelState> {
   }
 
   getIcon(): JSX.Element {
+    if (!this.props.helpText) return null;
+
     const { helpVisible } = this.state;
 
     var icons: string[] = ['help-brand-light', 'help-brand'];

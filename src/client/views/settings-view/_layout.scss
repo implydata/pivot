@@ -67,11 +67,19 @@
     margin-top: 16px;
   }
 
-  .button.save {
+  // Allows placement of one single button or of a group
+  > .button-group,
+  > .button.save,
+  > .button.cancel {
     position: absolute;
     top: 12px;
     right: 10px;
   }
+
+  .button-group .button:not(:last-child) {
+    margin-right: 10px;
+  }
+
 
   .button.back {
     width: 25px;
