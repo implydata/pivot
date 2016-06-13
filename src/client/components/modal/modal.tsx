@@ -83,7 +83,7 @@ export class Modal extends React.Component<ModalProps, ModalState> {
       </div>;
     }
 
-    return <BodyPortal>
+    return <BodyPortal fullSize={true}>
       <div className={classNames('modal', className)}>
         <div className="backdrop"></div>
         <GoldenCenter>
