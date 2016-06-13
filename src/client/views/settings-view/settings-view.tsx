@@ -10,6 +10,7 @@ import { Fn } from '../../../common/utils/general/general';
 import { queryUrlExecutorFactory } from '../../utils/ajax/ajax';
 
 import { classNames } from '../../utils/dom/dom';
+import { Notifier } from '../../components/notifications/notifications';
 
 import { HomeHeaderBar } from '../../components/home-header-bar/home-header-bar';
 import { Button } from '../../components/button/button';
@@ -103,11 +104,8 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
       .then(
         (status) => {
           if (!this.mounted) return;
-          this.setState({
-            errorText: '',
-            messageText: 'Saved.',
-            settings
-          });
+          this.setState({settings});
+          Notifier.success('Settings saved');
 
           if (onSettingsChange) {
             onSettingsChange(settings.toClientSettings().attachExecutors((dataSource: DataSource) => {
@@ -117,11 +115,7 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
         },
         (xhr: XMLHttpRequest) => {
           if (!this.mounted) return;
-          var jsonError = JSON.parse(xhr.responseText);
-          this.setState({
-            errorText: `Server error: ${jsonError}`,
-            messageText: ''
-          });
+          Notifier.failure('Woops', 'Something bad happened');
         }
       ).done();
   }

@@ -38,12 +38,12 @@ if (config.appSettings.dataSources.length) {
     'chronoshift/lib/walltime/walltime-data.js',
     './utils/ajax/ajax',
     '../common/models/index',
-    './components/pivot-application/pivot-application'
+    './views/pivot-application/pivot-application'
   ], (require) => {
     var WallTime = require('chronoshift').WallTime;
     var queryUrlExecutorFactory = require('./utils/ajax/ajax').queryUrlExecutorFactory;
     var AppSettings = require('../common/models/index').AppSettings;
-    var PivotApplication = require('./components/pivot-application/pivot-application').PivotApplication;
+    var PivotApplication = require('./views/pivot-application/pivot-application').PivotApplication;
 
     var appSettings = AppSettings.fromJS(config.appSettings).attachExecutors((dataSource: DataSource) => {
       return queryUrlExecutorFactory(dataSource.name, 'plywood', version);

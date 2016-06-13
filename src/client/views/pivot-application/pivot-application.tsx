@@ -6,13 +6,14 @@ import { helper } from 'plywood';
 
 import { DataSource, LinkViewConfig, AppSettings, User } from '../../../common/models/index';
 
-import { AboutModal } from '../about-modal/about-modal';
-import { SideDrawer } from '../side-drawer/side-drawer';
+import { AboutModal } from '../../components/about-modal/about-modal';
+import { SideDrawer } from '../../components/side-drawer/side-drawer';
+import { Notifications, Notifier } from '../../components/notifications/notifications';
 
-import { HomeView } from '../../views/home-view/home-view';
-import { LinkView } from '../../views/link-view/link-view';
-import { CubeView } from '../../views/cube-view/cube-view';
-import { SettingsView } from '../../views/settings-view/settings-view';
+import { HomeView } from '../home-view/home-view';
+import { LinkView } from '../link-view/link-view';
+import { CubeView } from '../cube-view/cube-view';
+import { SettingsView } from '../settings-view/settings-view';
 
 import { visualizations } from '../../visualizations/index';
 
@@ -27,6 +28,7 @@ export interface PivotApplicationProps extends React.Props<any> {
 
 export interface PivotApplicationState {
   AboutModalAsync?: typeof AboutModal;
+  NotificationsAsync?: typeof Notifications;
   ReactCSSTransitionGroupAsync?: typeof ReactCSSTransitionGroup;
   SideDrawerAsync?: typeof SideDrawer;
 
@@ -105,18 +107,24 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
       });
     }, 'clipboard');
 
-    require.ensure(['react-addons-css-transition-group', '../side-drawer/side-drawer'], (require) => {
+    require.ensure(['react-addons-css-transition-group', '../../components/side-drawer/side-drawer'], (require) => {
       this.setState({
         ReactCSSTransitionGroupAsync: require('react-addons-css-transition-group'),
-        SideDrawerAsync: require('../side-drawer/side-drawer').SideDrawer
+        SideDrawerAsync: require('../../components/side-drawer/side-drawer').SideDrawer
       });
     }, 'side-drawer');
 
-    require.ensure(['../about-modal/about-modal'], (require) => {
+    require.ensure(['../../components/about-modal/about-modal'], (require) => {
       this.setState({
-        AboutModalAsync: require('../about-modal/about-modal').AboutModal
+        AboutModalAsync: require('../../components/about-modal/about-modal').AboutModal
       });
     }, 'about-modal');
+
+    require.ensure(['../../components/notifications/notifications'], (require) => {
+      this.setState({
+        NotificationsAsync: require('../../components/notifications/notifications').Notifications
+      });
+    }, 'notifications');
   }
 
   componentWillUnmount() {
@@ -250,6 +258,13 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
     />;
   }
 
+  renderNotifications() {
+    const { version } = this.props;
+    const { NotificationsAsync } = this.state;
+    if (!NotificationsAsync) return null;
+    return <NotificationsAsync/>;
+  }
+
   render() {
     var { maxFilters, maxSplits, user, version } = this.props;
     var { viewType, viewHash, selectedDataSource, ReactCSSTransitionGroupAsync, drawerOpen, SideDrawerAsync, appSettings, linkViewConfig } = this.state;
@@ -338,6 +353,7 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
       {view}
       {sideDrawerTransition}
       {this.renderAboutModal()}
+      {this.renderNotifications()}
     </main>;
   }
 }
