@@ -14,7 +14,6 @@
       height: 100%;
 
       .header {
-        margin-top: 6px;
       }
 
       background-color: $white;
@@ -48,27 +47,27 @@
 
       .cell {
         @include ellipsis;
-        padding: 12px 5px 5px 0;
+        padding: 14px 10px 5px 0;
 
         &.has-icon {
-          padding-left: 25px;
+          padding-left: 34px;
         }
 
         .icon {
           position: absolute;
-          top: 8px;
-          left: 0;
+          top: 10px;
+          left: 6px;
           width: 19px;
           height: 19px;
 
           path {
-            fill: #ccc;
+            fill: $brand;
           }
         }
       }
 
       &.action {
-        padding: 8px;
+        padding: 10px;
 
         .svg-icon {
           width: 19px;

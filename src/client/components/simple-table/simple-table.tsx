@@ -35,9 +35,9 @@ export interface SimpleTableState {
   sortAscending?: boolean;
 }
 
-const ROW_HEIGHT = 38;
-const HEADER_HEIGHT = 34;
-const ACTION_WIDTH = 30;
+const ROW_HEIGHT = 42;
+const HEADER_HEIGHT = 26;
+const ACTION_WIDTH = 38;
 
 export class SimpleTable extends React.Component<SimpleTableProps, SimpleTableState> {
   constructor() {

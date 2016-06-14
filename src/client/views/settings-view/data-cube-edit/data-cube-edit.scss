@@ -48,6 +48,8 @@
           display: flex;
           height: $list-title-height;
           padding-top: 12px;
+          width: 400px;
+          border-bottom: 1px solid $border-super-light;
 
           .label {
             flex: 1 1;
@@ -59,8 +61,6 @@
           }
 
           .actions {
-            margin-right: 24px;
-
             button {
               @extend %button-light;
               font-size: 12px;
@@ -84,13 +84,13 @@
           right: 0;
 
           .row {
-            margin-right: 24px;
+            width: 400px;
           }
         }
       }
 
       form {
-        width: 400px;
+        width: 448px;
         padding: 24px 24px;
       }
 
