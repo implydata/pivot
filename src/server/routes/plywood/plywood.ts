@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { $, Expression, RefExpression, External, Datum, Dataset, TimeRange, basicExecutorFactory, Executor, AttributeJSs, helper } from 'plywood';
+import { $, Expression, RefExpression, External, Datum, Dataset, PlywoodValue, TimeRange, basicExecutorFactory, Executor, AttributeJSs, helper } from 'plywood';
 import { Timezone, WallTime, Duration } from 'chronoshift';
 
 import { PivotRequest } from '../../utils/index';
@@ -62,8 +62,10 @@ router.post('/', (req: PivotRequest, res: Response) => {
       }
 
       return myDataSource.executor(ex, { timezone: queryTimezone }).then(
-        (data: Dataset) => {
-          res.send(data.toJS());
+        (data: PlywoodValue) => {
+          res.json({
+            result: Dataset.isDataset(data) ? data.toJS() : data
+          });
         },
         (e: Error) => {
           console.log('error:', e.message);

@@ -30,8 +30,10 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
     if (parameters.clusters) {
       clusters = parameters.clusters.map(cluster => Cluster.fromJS(cluster));
     } else {
-      (parameters as any).clusterName = 'druid';
-      clusters = [Cluster.fromJS(parameters as any)];
+      var clusterJS: any = JSON.parse(JSON.stringify(parameters));
+      clusterJS.name = 'druid';
+      clusterJS.host = clusterJS.host || clusterJS.druidHost || clusterJS.brokerHost;
+      clusters = [Cluster.fromJS(clusterJS)];
     }
 
     var dataSources = (parameters.dataSources || []).map(dataSource => {

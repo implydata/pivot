@@ -71,11 +71,6 @@ export class Cluster implements Instance<ClusterValue, ClusterJS> {
       password
     } = parameters;
 
-    name = name || (parameters as any).clusterName || 'druid';
-
-    // host might be written as druidHost or brokerHost
-    host = host || (parameters as any).druidHost || (parameters as any).brokerHost;
-
     var value: ClusterValue = {
       name,
       type,

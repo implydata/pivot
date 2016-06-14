@@ -99,8 +99,6 @@ export class SettingsManager {
           initPromises.push(this.fileManager.init());
         }
 
-        // this.appSettings.getDataSourcesForCluster('native')
-
         return Q.all(initPromises);
       });
 
