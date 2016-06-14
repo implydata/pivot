@@ -868,16 +868,27 @@ export class DataSource implements Instance<DataSourceValue, DataSourceJS> {
     return new DataSource(value);
   }
 
+  change(propertyName: string, newValue: any): DataSource {
+    var v = this.valueOf();
+
+    if (!v.hasOwnProperty(propertyName)) {
+      throw new Error(`Unknown property : ${propertyName}`);
+    }
+
+    (v as any)[propertyName] = newValue;
+    return new DataSource(v);
+  }
+
   public changeMaxTime(maxTime: MaxTime) {
-    var value = this.valueOf();
-    value.maxTime = maxTime;
-    return new DataSource(value);
+    return this.change('maxTime', maxTime);
   }
 
   public changeTitle(title: string) {
-    var value = this.valueOf();
-    value.title = title;
-    return new DataSource(value);
+    return this.change('title', title);
+  }
+
+  public changeMeasures(measures: List<Measure>) {
+    return this.change('measures', measures);
   }
 
   public getDefaultSortAction(): SortAction {

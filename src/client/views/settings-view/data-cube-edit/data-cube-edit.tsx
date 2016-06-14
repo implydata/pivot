@@ -12,8 +12,9 @@ import { ImmutableInput } from '../../../components/immutable-input/immutable-in
 import { Dropdown, DropdownProps } from '../../../components/dropdown/dropdown';
 
 import { DimensionModal } from '../dimension-modal/dimension-modal';
+import { MeasureModal } from '../measure-modal/measure-modal';
 
-import { AppSettings, Cluster, DataSource, Dimension, DimensionJS } from '../../../../common/models/index';
+import { AppSettings, Cluster, DataSource, Dimension, DimensionJS, Measure, MeasureJS } from '../../../../common/models/index';
 
 
 export interface DataCubeEditProps extends React.Props<any> {
@@ -30,6 +31,7 @@ export interface DataCubeEditState {
   tab?: any;
   editedDimensionIndex?: number;
   pendingAddDimension?: DimensionJS;
+  editedMeasureIndex?: number;
 }
 
 export interface Tab {
@@ -177,7 +179,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
 
     this.setState({
       tempCube: newCube,
-      hasChanged: !tempCube.equals(newCube)
+      hasChanged: true
     });
   }
 
@@ -190,7 +192,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       const newDimensions = cube.dimensions.update(dimensionIndex, () => Dimension.fromJS(newDimension));
       const newCube = cube.changeDimensions(newDimensions);
 
-      this.setState({tempCube: newCube, editedDimensionIndex: undefined}, this.save);
+      this.setState({tempCube: newCube, editedDimensionIndex: undefined, hasChanged: true});
     };
 
     var onClose = () => this.setState({editedDimensionIndex: undefined});
@@ -204,7 +206,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       const newDimensions = cube.dimensions.push(Dimension.fromJS(newDimension));
       const newCube = cube.changeDimensions(newDimensions);
 
-      this.setState({tempCube: newCube, pendingAddDimension: null}, this.save);
+      this.setState({tempCube: newCube, pendingAddDimension: null, hasChanged: true});
     };
 
     var onClose = () => this.setState({pendingAddDimension: null});
@@ -213,7 +215,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
   }
 
   renderMeasures(): JSX.Element {
-    const { tempCube } = this.state;
+    const { tempCube, editedMeasureIndex } = this.state;
 
     const rows = tempCube.measures.toArray().map((measure) => {
       return {
@@ -232,15 +234,40 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
         onEdit={this.editMeasure.bind(this)}
         onRemove={this.deleteMeasure.bind(this)}
       />
+      {editedMeasureIndex !== undefined ? this.renderEditMeasureModal(editedMeasureIndex) : null}
     </div>;
   }
 
-  editMeasure(index: number) {
+  renderEditMeasureModal(measureIndex: number): JSX.Element {
+    const { tempCube } = this.state;
+    var measure = tempCube.measures.get(measureIndex);
 
+    var onSave = (newMeasure: MeasureJS) => {
+      const { cube } = this.state;
+      const newMeasures = cube.measures.update(measureIndex, () => Measure.fromJS(newMeasure));
+      const newCube = cube.changeMeasures(newMeasures);
+
+      this.setState({tempCube: newCube, editedMeasureIndex: undefined, hasChanged: true});
+    };
+
+    var onClose = () => this.setState({editedMeasureIndex: undefined});
+
+    return <MeasureModal measure={measure.toJS()} onSave={onSave.bind(this)} onClose={onClose.bind(this)}/>;
+  }
+
+  editMeasure(index: number) {
+    this.setState({editedMeasureIndex: index});
   }
 
   deleteMeasure(index: number) {
+    const { tempCube } = this.state;
+    const newMeasures = tempCube.measures.delete(index);
+    const newCube = tempCube.changeMeasures(newMeasures);
 
+    this.setState({
+      tempCube: newCube,
+      hasChanged: true
+    });
   }
 
   render() {
