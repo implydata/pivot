@@ -53,13 +53,13 @@ export class Clusters extends React.Component<ClustersProps, ClustersState> {
     if (!newSettings) return null;
 
     const columns: SimpleTableColumn[] = [
-      {label: 'Name', field: 'name', width: 200, cellIcon: 'cluster-grey'},
+      {label: 'Name', field: 'name', width: 200, cellIcon: 'full-cluster'},
       {label: 'Host', field: 'host', width: 200},
       {label: 'Strategy', field: 'introspectionStrategy', width: 300}
     ];
 
     const actions: SimpleTableAction[] = [
-      {icon: 'full-edit-brand', callback: this.edit.bind(this)}
+      {icon: 'full-edit', callback: this.edit.bind(this)}
     ];
 
     return <div className="clusters">

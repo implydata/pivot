@@ -140,7 +140,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       return {
         title: dimension.title,
         description: dimension.expression.toString(),
-        icon: `dim-${dimension.kind}-brand`
+        icon: `dim-${dimension.kind}`
       };
     });
 
@@ -250,9 +250,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
 
     return <div className="data-cube-edit">
       <div className="title-bar">
-        <button className="button back" onClick={this.goBack.bind(this)}>
-          <SvgIcon svg={require('../../../icons/full-back-brand.svg')}/>
-        </button>
+        <Button className="button back" type="secondary" svg={require('../../../icons/full-back.svg')} onClick={this.goBack.bind(this)}/>
         <div className="title">{tempCube.title}</div>
         {hasChanged ? <div className="button-group">
           <Button className="cancel" title="Cancel" type="secondary" onClick={this.cancel.bind(this)}/>

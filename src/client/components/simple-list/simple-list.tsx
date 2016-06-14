@@ -40,8 +40,8 @@ export class SimpleList extends React.Component<SimpleListProps, SimpleListState
       </div>;
 
       let actions = <div className="actions">
-        <button onClick={onEdit.bind(this, i)}>{svgize('full-edit-brand')}</button>
-        <button onClick={onRemove.bind(this, i)}>{svgize('cross-brand')}</button>
+        <button onClick={onEdit.bind(this, i)}>{svgize('full-edit')}</button>
+        <button onClick={onRemove.bind(this, i)}>{svgize('full-remove')}</button>
       </div>;
 
       return <div className="row" key={`row-${i}`}>

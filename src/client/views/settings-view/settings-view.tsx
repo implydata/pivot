@@ -42,9 +42,9 @@ export interface SettingsViewState {
 }
 
 const VIEWS = [
-  {label: 'General', value: 'general', svg: require('../../icons/gear-white.svg')},
-  {label: 'Clusters', value: 'clusters', svg: require('../../icons/cluster-white.svg')},
-  {label: 'Data Cubes', value: 'data_cubes', svg: require('../../icons/full-cube-white.svg')}
+  {label: 'General', value: 'general', svg: require('../../icons/full-settings.svg')},
+  {label: 'Clusters', value: 'clusters', svg: require('../../icons/full-cluster.svg')},
+  {label: 'Data Cubes', value: 'data_cubes', svg: require('../../icons/full-cube.svg')}
 ];
 
 export class SettingsView extends React.Component<SettingsViewProps, SettingsViewState> {

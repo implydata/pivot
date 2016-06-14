@@ -3,6 +3,10 @@
 .dimension-modal {
   @import '../form';
 
+  form {
+    width: 100%;
+  }
+
   .button-group {
     margin-top: 30px;
 

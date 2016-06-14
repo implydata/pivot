@@ -91,14 +91,14 @@ export class DataCubes extends React.Component<DataCubesProps, DataCubesState> {
     if (!newSettings) return null;
 
     const columns: SimpleTableColumn[] = [
-      {label: 'Name', field: 'title', width: 170, cellIcon: 'full-cube-grey'},
+      {label: 'Name', field: 'title', width: 170, cellIcon: 'full-cube'},
       {label: 'Source', field: 'source', width: 400},
       {label: 'Dimensions', field: (cube: DataSource) => cube.dimensions.size, width: 120},
       {label: 'Measures', field: (cube: DataSource) => cube.measures.size, width: 80}
     ];
 
     const actions: SimpleTableAction[] = [
-      {icon: 'full-edit-brand', callback: this.edit.bind(this)}
+      {icon: 'full-edit', callback: this.edit.bind(this)}
     ];
 
     return <div className="data-cubes">

@@ -1,7 +1,7 @@
 @import '../../../imports';
 
 .data-cube-edit {
-  $tabs-column-width: 200px;
+  $tabs-column-width: 190px;
   height: 100%;
 
   .content {
@@ -13,7 +13,7 @@
       bottom: 0;
       width: $tabs-column-width;
 
-      border-right: 1px solid $border-light;
+      border-right: 1px solid $border-super-light;
 
       padding: 10px 5px;
 
@@ -33,34 +33,41 @@
       top: 0;
       bottom: 0;
       left: $tabs-column-width;
+      right: 0;
 
       .list {
-        $list-title-height: 50px;
+        $list-title-height: 44px;
 
         position: absolute;
         top: 5px;
         bottom: 5px;
-        left: 30px;
-        width: 440px;
+        left: 24px;
+        right: 0;
 
         .list-title {
           display: flex;
           height: $list-title-height;
-          padding: 15px 12px;
+          padding-top: 12px;
 
           .label {
             flex: 1 1;
+            padding: 6px 0;
 
             color: $text-lighter;
+            font-size: 12px;
             text-transform: uppercase;
           }
 
           .actions {
+            margin-right: 24px;
 
             button {
               @extend %button-light;
+              font-size: 12px;
               text-transform: uppercase;
               color: $brand;
+              padding: 6px;
+              border-radius: 2px;
 
               &:not(:last-child) {
                 margin-right: 15px;
@@ -71,16 +78,20 @@
 
         .simple-list {
           position: absolute;
-          top: 50px;
+          top: $list-title-height;
           bottom: 0;
           left: 0;
           right: 0;
+
+          .row {
+            margin-right: 24px;
+          }
         }
       }
 
       form {
         width: 400px;
-        padding: 20px 30px 5px 30px;
+        padding: 24px 24px;
       }
 
 

@@ -8,9 +8,14 @@
     height: 100%;
 
     .column-headers {
-      font-size: 1.2em;
-      border-bottom: 1px solid $border-light;
+      font-size: 12px;
+      text-transform: uppercase;
+      border-bottom: 1px solid $border-super-light;
       height: 100%;
+
+      .header {
+        margin-top: 6px;
+      }
 
       background-color: $white;
 
@@ -19,7 +24,7 @@
       }
 
       .sort-arrow {
-        width: 10px;
+        width: 8px;
         margin-left: 10px;
 
         &.ascending {
@@ -29,13 +34,12 @@
     }
 
     .top-right-corner {
-      border-bottom: 1px solid $border-light;
+      border-bottom: 1px solid $border-super-light;
       background-color: $white;
     }
 
     .row {
-      padding: 12px 0 5px 0;
-      border-bottom: 1px solid $border-light;
+      border-bottom: 1px solid $border-super-light;
       white-space: nowrap;
 
       > * {
@@ -43,24 +47,36 @@
       }
 
       .cell {
+        @include ellipsis;
+        padding: 12px 5px 5px 0;
+
         &.has-icon {
           padding-left: 25px;
         }
 
         .icon {
           position: absolute;
-          top: -3px;
+          top: 8px;
           left: 0;
-          width: 20px;
+          width: 19px;
+          height: 19px;
+
+          path {
+            fill: #ccc;
+          }
         }
       }
 
       &.action {
-        cursor: pointer;
+        padding: 8px;
 
-        .icon {
-          width: 20px;
-          height: 20px;
+        .svg-icon {
+          width: 19px;
+          height: 19px;
+
+          path {
+            fill: $brand;
+          }
         }
       }
     }
