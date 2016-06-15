@@ -12,11 +12,11 @@ export default CircumstancesHandler.EMPTY()
   .then((splits: Splits, dataSource: DataSource) => {
     let continuousDimensions = dataSource.getDimensionByKind('time').concat(dataSource.getDimensionByKind('number'));
     return Resolve.manual(3, 'This visualization requires a continuous dimension split',
-      continuousDimensions.toArray().map((timeDimension) => {
+      continuousDimensions.toArray().map((continuousDimension) => {
         return {
-          description: `Add a split on ${timeDimension.title}`,
+          description: `Add a split on ${continuousDimension.title}`,
           adjustment: {
-            splits: Splits.fromSplitCombine(SplitCombine.fromExpression(timeDimension.expression))
+            splits: Splits.fromSplitCombine(SplitCombine.fromExpression(continuousDimension.expression))
           }
         };
       })
@@ -152,13 +152,13 @@ export default CircumstancesHandler.EMPTY()
 
   .otherwise(
     (splits: Splits, dataSource: DataSource) => {
-      let timeDimensions = dataSource.getDimensionByKind('time');
-      return Resolve.manual(3, 'The Time Series needs one time split',
-        timeDimensions.toArray().map((timeDimension) => {
+      let continuousDimensions = dataSource.getDimensionByKind('time').concat(dataSource.getDimensionByKind('number'));
+      return Resolve.manual(3, 'The Line Chart needs one continuous dimension split',
+        continuousDimensions.toArray().map((continuousDimension) => {
           return {
-            description: `Split on ${timeDimension.title} instead`,
+            description: `Split on ${continuousDimension.title} instead`,
             adjustment: {
-              splits: Splits.fromSplitCombine(SplitCombine.fromExpression(timeDimension.expression))
+              splits: Splits.fromSplitCombine(SplitCombine.fromExpression(continuousDimension.expression))
             }
           };
         })
