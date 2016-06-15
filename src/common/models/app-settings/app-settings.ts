@@ -1,5 +1,6 @@
 import { Class, Instance, isInstanceOf, immutableArraysEqual, immutableEqual } from 'immutable-class';
 import { Executor, helper } from 'plywood';
+import { hasOwnProperty } from '../../utils/general/general';
 import { Cluster, ClusterJS } from '../cluster/cluster';
 import { Customization, CustomizationJS } from '../customization/customization';
 import { DataSource, DataSourceJS } from  '../data-source/data-source';
@@ -29,11 +30,15 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
     var clusters: Cluster[];
     if (parameters.clusters) {
       clusters = parameters.clusters.map(cluster => Cluster.fromJS(cluster));
-    } else {
+
+    } else if (hasOwnProperty(parameters, 'druidHost') || hasOwnProperty(parameters, 'brokerHost')) {
       var clusterJS: any = JSON.parse(JSON.stringify(parameters));
       clusterJS.name = 'druid';
-      clusterJS.host = clusterJS.host || clusterJS.druidHost || clusterJS.brokerHost;
+      clusterJS.host = clusterJS.druidHost || clusterJS.brokerHost;
       clusters = [Cluster.fromJS(clusterJS)];
+
+    } else {
+      clusters = [];
     }
 
     var dataSources = (parameters.dataSources || []).map(dataSource => {

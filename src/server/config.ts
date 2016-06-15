@@ -2,9 +2,10 @@ import * as path from 'path';
 import * as nopt from 'nopt';
 import { Cluster } from '../common/models/index';
 import { dataSourceToYAML } from '../common/utils/yaml-helper/yaml-helper';
-import { ServerSettings } from './models/server-settings/server-settings';
+import { ServerSettings, ServerSettingsJS } from './models/server-settings/server-settings';
 import { loadFileSync, SettingsManager, CONSOLE_LOGGER } from './utils/index';
 
+const AUTH_MODULE_VERSION = 0;
 
 function errorExit(message: string): void {
   console.error(message);
@@ -94,68 +95,38 @@ if (!parsedArgs['example'] && !parsedArgs['config'] && !parsedArgs['druid'] && !
   process.exit();
 }
 
-const DEFAULT_SETTINGS: any = {
-  port: 9090,
-  sourceListScan: 'auto',
-  sourceListRefreshInterval: 10000,
-  dataSources: []
-};
+var configFilePath = parsedArgs['config'];
 
-var exampleConfig: any = null;
 if (parsedArgs['example']) {
   delete parsedArgs['druid'];
   var example = parsedArgs['example'];
   if (example === 'wiki') {
-    try {
-      exampleConfig = loadFileSync(path.join(__dirname, `../../config-example-${example}.yaml`), 'yaml');
-    } catch (e) {
-      errorExit(`Could not load example config for '${example}': ${e.message}`);
-    }
+    configFilePath = path.join(__dirname, `../../config-example-${example}.yaml`);
   } else {
     console.log(`Unknown example '${example}'. Possible examples are: wiki`);
     process.exit();
   }
 }
 
-var configFilePath = parsedArgs['config'];
 var configFileDir: string = null;
-var config: any;
+var serverSettingsJS: any;
 if (configFilePath) {
   configFileDir = path.dirname(configFilePath);
   try {
-    config = loadFileSync(configFilePath, 'yaml');
+    serverSettingsJS = loadFileSync(configFilePath, 'yaml');
     console.log(`Using config ${configFilePath}`);
   } catch (e) {
     errorExit(`Could not load config from '${configFilePath}': ${e.message}`);
   }
 } else {
-  config = DEFAULT_SETTINGS;
+  serverSettingsJS = {};
 }
 
-// If there is an example config take its dataSources
-if (exampleConfig && Array.isArray(exampleConfig.dataSources)) {
-  config.dataSources = exampleConfig.dataSources;
-}
-
-// If a file is specified add it as a dataSource
-var file = parsedArgs['file'];
-if (file) {
-  config.dataSources.push({
-    name: path.basename(file, path.extname(file)),
-    engine: 'native',
-    source: file
-  });
-}
-
-if (parsedArgs['druid']) {
-  config.druidHost = parsedArgs['druid'];
-}
-
-var serverSettings = ServerSettings.fromJS(config, configFileDir);
+var serverSettings = ServerSettings.fromJS(serverSettingsJS, configFileDir);
 
 export const PRINT_CONFIG = Boolean(parsedArgs['print-config']);
 export const START_SERVER = !PRINT_CONFIG;
-export const VERBOSE = Boolean(parsedArgs['verbose'] || config.verbose);
+export const VERBOSE = Boolean(parsedArgs['verbose'] || serverSettingsJS.verbose);
 
 export const SERVER_SETTINGS = serverSettings;
 export const SETTINGS_MANAGER = new SettingsManager({
@@ -168,7 +139,25 @@ export const SETTINGS_MANAGER = new SettingsManager({
   initialLoadTimeout: SERVER_SETTINGS.pageMustLoadTimeout
 });
 
-var auth = config.auth;
+// If a file is specified add it as a dataSource
+var file = parsedArgs['file'];
+if (file) {
+  serverSettingsJS.dataSources.push({
+    name: path.basename(file, path.extname(file)),
+    engine: 'native',
+    source: file
+  });
+}
+
+if (parsedArgs['druid']) {
+  serverSettingsJS.druidHost = parsedArgs['druid'];
+  // sourceListScan: 'auto',
+  // sourceListRefreshInterval: 10000
+}
+
+// --- Auth -------------------------------
+
+var auth = serverSettingsJS.auth;
 var authModule: any = null;
 if (auth) {
   auth = path.resolve(configFileDir, auth);
@@ -178,18 +167,19 @@ if (auth) {
   } catch (e) {
     errorExit(`error loading auth module: ${e.message}`);
   }
+
+  if (authModule.version !== AUTH_MODULE_VERSION) {
+    errorExit(`unsupported auth module version ${authModule.version} needed ${AUTH_MODULE_VERSION}`);
+  }
   if (typeof authModule.auth !== 'function') errorExit('Invalid auth module');
 }
 export const AUTH = authModule;
 
-
-//var configDirectory = configFileDir || path.join(__dirname, '../..');
+// --- Printing -------------------------------
 
 if (!PRINT_CONFIG) {
   console.log(`Starting Pivot v${VERSION}`);
-}
-
-if (PRINT_CONFIG) {
+} else {
   var withComments = Boolean(parsedArgs['with-comments']);
   var dataSourcesOnly = Boolean(parsedArgs['data-sources-only']);
 

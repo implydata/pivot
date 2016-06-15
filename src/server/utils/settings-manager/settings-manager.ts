@@ -9,7 +9,7 @@ import { AppSettings, Cluster, DataSource } from '../../../common/models/index';
 
 
 export interface SettingsLocation {
-  location: 'local';
+  location: 'local' | 'transient';
   readOnly: boolean;
   uri: string;
 }
@@ -47,7 +47,18 @@ export class SettingsManager {
 
       // Load the settings
       progress = progress.then(() => {
-        this.appSettings = AppSettings.fromJS(loadFileSync(settingsLocation.uri, 'yaml'));
+        switch (settingsLocation.location) {
+          case 'transient':
+            this.appSettings = AppSettings.fromJS({});
+            break;
+
+          case 'local':
+            this.appSettings = AppSettings.fromJS(loadFileSync(settingsLocation.uri, 'yaml'));
+            break;
+
+          default:
+            throw new Error(`unknown location ${settingsLocation.location}`);
+        }
       });
 
       // Collect all declared datasources

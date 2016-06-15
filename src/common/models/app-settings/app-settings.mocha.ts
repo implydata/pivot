@@ -22,4 +22,15 @@ describe('AppSettings', () => {
 
   });
 
+  describe("general", () => {
+    it("from {}", () => {
+      expect(AppSettings.fromJS({}).toJS()).to.deep.equal({
+        "clusters": [],
+        "customization": {},
+        "dataSources": []
+      });
+    });
+
+  });
+
 });
