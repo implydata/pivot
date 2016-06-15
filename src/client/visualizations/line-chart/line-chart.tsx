@@ -212,8 +212,8 @@ export class LineChart extends BaseVisualization<LineChartState> {
 
     // If already highlighted and user clicks within it switches measure
     if (!dragRange && essence.highlightOn(LineChart.id)) {
-      var existingHighlightTimeRange = essence.getSingleHighlightSet().elements[0];
-      if (existingHighlightTimeRange.contains(highlightRange.start)) {
+      var existingHighlightRange = essence.getSingleHighlightSet().elements[0];
+      if (existingHighlightRange.contains(highlightRange.start)) {
         var { highlight } = essence;
         if (highlight.measure === dragOnMeasure.name) {
           clicker.dropHighlight();
