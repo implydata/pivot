@@ -27,10 +27,10 @@ export default CircumstancesHandler.EMPTY()
   .or(CircumstancesHandler.areExactSplitKinds('number'))
   .then((splits: Splits, dataSource: DataSource, colors: Colors) => {
     var continuousSplit = splits.get(0);
-    var dimension = dataSource.getDimensionByExpression(continuousSplit.expression);
+    var continuousDimension = dataSource.getDimensionByExpression(continuousSplit.expression);
 
     var sortAction: SortAction = new SortAction({
-      expression: $(dimension.name),
+      expression: $(continuousDimension.name),
       direction: SortAction.ASCENDING
     });
 
@@ -43,7 +43,7 @@ export default CircumstancesHandler.EMPTY()
     }
 
     // Fix time limit
-    if (continuousSplit.limitAction && dimension.kind === 'time') {
+    if (continuousSplit.limitAction && continuousDimension.kind === 'time') {
       continuousSplit = continuousSplit.changeLimitAction(null);
       autoChanged = true;
     }

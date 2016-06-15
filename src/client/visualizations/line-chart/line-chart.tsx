@@ -164,17 +164,17 @@ export class LineChart extends BaseVisualization<LineChartState> {
   floorRange(dragRange: PlywoodRange): PlywoodRange {
     const { essence } = this.props;
     const { splits, timezone } = essence;
-    var lastSplit = splits.last();
+    var continuousSplit = splits.last();
 
     if (TimeRange.isTimeRange(dragRange)) {
-      var timeBucketAction = lastSplit.bucketAction as TimeBucketAction;
+      var timeBucketAction = continuousSplit.bucketAction as TimeBucketAction;
       var duration = timeBucketAction.duration;
       return TimeRange.fromJS({
         start: duration.floor(dragRange.start, timezone),
         end: duration.shift(duration.floor(dragRange.end, timezone), timezone, 1)
       });
     } else {
-      var numberBucketAction = lastSplit.bucketAction as NumberBucketAction;
+      var numberBucketAction = continuousSplit.bucketAction as NumberBucketAction;
       var bucketSize = numberBucketAction.size;
       var startFloored = roundTo((dragRange as NumberRange).start, bucketSize);
       var endFloored = roundTo((dragRange as NumberRange).end, bucketSize);
@@ -535,8 +535,8 @@ export class LineChart extends BaseVisualization<LineChartState> {
         if (registerDownloadableDataset) registerDownloadableDataset(dataset);
       }
 
-      var chartSplit = splits.length() === 1 ? splits.get(0) : splits.get(1);
-      var continuousDimension = chartSplit.getDimension(essence.dataSource.dimensions);
+      var continuousSplit = splits.length() === 1 ? splits.get(0) : splits.get(1);
+      var continuousDimension = continuousSplit.getDimension(essence.dataSource.dimensions);
       if (continuousDimension) {
         newState.continuousDimension = continuousDimension;
 
