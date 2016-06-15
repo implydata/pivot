@@ -10,9 +10,9 @@ export default CircumstancesHandler.EMPTY()
 
   .when(CircumstancesHandler.noSplits())
   .then((splits: Splits, dataSource: DataSource) => {
-    let timeDimensions = dataSource.getDimensionByKind('time').concat(dataSource.getDimensionByKind('number'));
+    let continuousDimensions = dataSource.getDimensionByKind('time').concat(dataSource.getDimensionByKind('number'));
     return Resolve.manual(3, 'This visualization requires a continuous dimension split',
-      timeDimensions.toArray().map((timeDimension) => {
+      continuousDimensions.toArray().map((timeDimension) => {
         return {
           description: `Add a split on ${timeDimension.title}`,
           adjustment: {
@@ -26,8 +26,8 @@ export default CircumstancesHandler.EMPTY()
   .when(CircumstancesHandler.areExactSplitKinds('time'))
   .or(CircumstancesHandler.areExactSplitKinds('number'))
   .then((splits: Splits, dataSource: DataSource, colors: Colors) => {
-    var firstSplit = splits.get(0);
-    var dimension = dataSource.getDimensionByExpression(firstSplit.expression);
+    var continuousSplit = splits.get(0);
+    var dimension = dataSource.getDimensionByExpression(continuousSplit.expression);
 
     var sortAction: SortAction = new SortAction({
       expression: $(dimension.name),
@@ -37,14 +37,14 @@ export default CircumstancesHandler.EMPTY()
     let autoChanged = false;
 
     // Fix time sort
-    if (!sortAction.equals(firstSplit.sortAction)) {
-      firstSplit = firstSplit.changeSortAction(sortAction);
+    if (!sortAction.equals(continuousSplit.sortAction)) {
+      continuousSplit = continuousSplit.changeSortAction(sortAction);
       autoChanged = true;
     }
 
     // Fix time limit
-    if (firstSplit.limitAction && dimension.kind === 'time') {
-      firstSplit = firstSplit.changeLimitAction(null);
+    if (continuousSplit.limitAction && dimension.kind === 'time') {
+      continuousSplit = continuousSplit.changeLimitAction(null);
       autoChanged = true;
     }
 
@@ -53,7 +53,7 @@ export default CircumstancesHandler.EMPTY()
     }
 
     if (!autoChanged) return Resolve.ready(10);
-    return Resolve.automatic(8, {splits: new Splits(List([firstSplit]))});
+    return Resolve.automatic(8, {splits: new Splits(List([continuousSplit]))});
   })
 
   .when(CircumstancesHandler.areExactSplitKinds('time', '*'))

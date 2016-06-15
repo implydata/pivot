@@ -36,13 +36,13 @@ const HOVER_MULTI_BUBBLE_V_OFFSET = -8;
 const MAX_HOVER_DIST = 50;
 const MAX_ASPECT_RATIO = 1; // width / height
 
-function findClosest(data: Datum[], dragDate: Date, scaleX: (v: continuousValueType) => number, dimension: Dimension) {
+function findClosest(data: Datum[], dragDate: Date, scaleX: (v: continuousValueType) => number, continuousDimension: Dimension) {
   var closestDatum: Datum = null;
   var minDist = Infinity;
   for (var datum of data) {
-    var segmentValue = datum[dimension.name] as (TimeRange | NumberRange);
-    if (!segmentValue) continue;
-    var mid = segmentValue.midpoint();
+    var continuousSegmentValue = datum[continuousDimension.name] as (TimeRange | NumberRange);
+    if (!continuousSegmentValue) continue;
+    var mid = continuousSegmentValue.midpoint();
     var dist = Math.abs(mid.valueOf() - dragDate.valueOf());
     var distPx = Math.abs(scaleX(mid) - scaleX(dragDate));
     if ((!closestDatum || dist < minDist) && distPx < MAX_HOVER_DIST) { // Make sure it is not too far way
@@ -66,7 +66,7 @@ export interface LineChartState extends BaseVisualizationState {
   hoverRange?: PlywoodRange;
 
   // Cached props
-  dimension?: Dimension;
+  continuousDimension?: Dimension;
   axisRange?: PlywoodRange;
   scaleX?: any;
   xTicks?: continuousValueType[];
@@ -114,7 +114,7 @@ export class LineChart extends BaseVisualization<LineChartState> {
 
   onMouseMove(dataset: Dataset, measure: Measure, scaleX: any, e: MouseEvent) {
     var { essence } = this.props;
-    var { dimension, hoverRange, hoverMeasure } = this.state;
+    var { continuousDimension, hoverRange, hoverMeasure } = this.state;
     if (!dataset) return;
 
     var splitLength = essence.splits.length();
@@ -126,12 +126,12 @@ export class LineChart extends BaseVisualization<LineChartState> {
     var closestDatum: Datum;
     if (splitLength > 1) {
       var flatData = dataset.flatten();
-      closestDatum = findClosest(flatData, dragDate, scaleX, dimension);
+      closestDatum = findClosest(flatData, dragDate, scaleX, continuousDimension);
     } else {
-      closestDatum = findClosest(dataset.data, dragDate, scaleX, dimension);
+      closestDatum = findClosest(dataset.data, dragDate, scaleX, continuousDimension);
     }
 
-    var currentHoverRange: any = closestDatum ? (closestDatum[dimension.name]) : null;
+    var currentHoverRange: any = closestDatum ? (closestDatum[continuousDimension.name]) : null;
 
     if (!hoverRange || !rangeEquals(hoverRange, currentHoverRange) || measure !== hoverMeasure) {
       this.setState({
@@ -204,7 +204,7 @@ export class LineChart extends BaseVisualization<LineChartState> {
 
   globalMouseUpListener(e: MouseEvent) {
     const { clicker, essence } = this.props;
-    const { dimension, dragStartValue, dragRange, dragOnMeasure } = this.state;
+    const { continuousDimension, dragStartValue, dragRange, dragOnMeasure } = this.state;
     if (dragStartValue === null) return;
 
     var highlightRange = this.floorRange(this.getDragRange(e));
@@ -232,7 +232,7 @@ export class LineChart extends BaseVisualization<LineChartState> {
       LineChart.id,
       dragOnMeasure.name,
       Filter.fromClause(new FilterClause({
-        expression: dimension.expression,
+        expression: continuousDimension.expression,
         selection: r(highlightRange)
       }))
     );
@@ -282,7 +282,7 @@ export class LineChart extends BaseVisualization<LineChartState> {
 
   renderChartBubble(dataset: Dataset, measure: Measure, chartIndex: number, containerStage: Stage, chartStage: Stage, extentY: number[], scaleY: any): JSX.Element {
     const { clicker, essence, openRawDataModal } = this.props;
-    const { scrollTop, dragRange, roundDragRange, dragOnMeasure, hoverRange, hoverMeasure, scaleX, dimension } = this.state;
+    const { scrollTop, dragRange, roundDragRange, dragOnMeasure, hoverRange, hoverMeasure, scaleX, continuousDimension } = this.state;
     const { colors, timezone } = essence;
 
     if (essence.highlightOnDifferentMeasure(LineChart.id, measure.name)) return null;
@@ -301,7 +301,7 @@ export class LineChart extends BaseVisualization<LineChartState> {
         var categoryDimension = essence.splits.get(0).getDimension(essence.dataSource.dimensions);
         var leftOffset = containerStage.x + VIS_H_PADDING + scaleX(bubbleTimeRange.end);
 
-        var hoverDatums = dataset.data.map(d => (d[SPLIT] as Dataset).findDatumByAttribute(dimension.name, bubbleTimeRange));
+        var hoverDatums = dataset.data.map(d => (d[SPLIT] as Dataset).findDatumByAttribute(continuousDimension.name, bubbleTimeRange));
         var colorValues = colors.getColors(dataset.data.map(d => d[categoryDimension.name]));
         var colorEntries: ColorEntry[] = dataset.data.map((d, i) => {
           var segment = d[categoryDimension.name];
@@ -324,7 +324,7 @@ export class LineChart extends BaseVisualization<LineChartState> {
         />;
       } else {
         var leftOffset = containerStage.x + VIS_H_PADDING + scaleX(bubbleTimeRange.midpoint());
-        var highlightDatum = dataset.findDatumByAttribute(dimension.name, shownTimeRange);
+        var highlightDatum = dataset.findDatumByAttribute(continuousDimension.name, shownTimeRange);
         var segmentLabel = formatValue(shownTimeRange, timezone, DisplayYear.NEVER);
 
         return <SegmentBubble
@@ -343,7 +343,7 @@ export class LineChart extends BaseVisualization<LineChartState> {
 
       if (colors) {
         var categoryDimension = essence.splits.get(0).getDimension(essence.dataSource.dimensions);
-        var hoverDatums = dataset.data.map(d => (d[SPLIT] as Dataset).findDatumByAttribute(dimension.name, hoverRange));
+        var hoverDatums = dataset.data.map(d => (d[SPLIT] as Dataset).findDatumByAttribute(continuousDimension.name, hoverRange));
         var colorValues = colors.getColors(dataset.data.map(d => d[categoryDimension.name]));
         var colorEntries: ColorEntry[] = dataset.data.map((d, i) => {
           var segment = d[categoryDimension.name];
@@ -364,7 +364,7 @@ export class LineChart extends BaseVisualization<LineChartState> {
         />;
 
       } else {
-        var hoverDatum = dataset.findDatumByAttribute(dimension.name, hoverRange);
+        var hoverDatum = dataset.findDatumByAttribute(continuousDimension.name, hoverRange);
         if (!hoverDatum) return null;
         var segmentLabel = formatValue(hoverRange, timezone, DisplayYear.NEVER);
 
@@ -384,7 +384,7 @@ export class LineChart extends BaseVisualization<LineChartState> {
 
   renderChart(dataset: Dataset, measure: Measure, chartIndex: number, containerStage: Stage, chartStage: Stage): JSX.Element {
     const { essence } = this.props;
-    const { hoverRange, hoverMeasure, dragRange, scaleX, xTicks, dimension } = this.state;
+    const { hoverRange, hoverMeasure, dragRange, scaleX, xTicks, continuousDimension } = this.state;
     const { splits, colors } = essence;
     var splitLength = splits.length();
 
@@ -392,7 +392,7 @@ export class LineChart extends BaseVisualization<LineChartState> {
     var yAxisStage = chartStage.within({ top: TEXT_SPACER, left: lineStage.width, bottom: 1 });
 
     var measureName = measure.name;
-    var getX = (d: Datum) => d[dimension.name] as (TimeRange | NumberRange);
+    var getX = (d: Datum) => d[continuousDimension.name] as (TimeRange | NumberRange);
     var getY = (d: Datum) => d[measureName] as number;
 
     var myDatum: Datum = dataset.data[0];
@@ -536,18 +536,18 @@ export class LineChart extends BaseVisualization<LineChartState> {
       }
 
       var chartSplit = splits.length() === 1 ? splits.get(0) : splits.get(1);
-      var dimension = chartSplit.getDimension(essence.dataSource.dimensions);
-      if (dimension) {
-        newState.dimension = dimension;
+      var continuousDimension = chartSplit.getDimension(essence.dataSource.dimensions);
+      if (continuousDimension) {
+        newState.continuousDimension = continuousDimension;
 
-        var axisRange = essence.getEffectiveFilter(LineChart.id).getExtent(dimension.expression) as PlywoodRange;
+        var axisRange = essence.getEffectiveFilter(LineChart.id).getExtent(continuousDimension.expression) as PlywoodRange;
 
         // Not filtered on time or has unbounded filter
         if ((!axisRange && dataset) || (dataset && (!axisRange.start || !axisRange.end))) {
           var myDataset = dataset.data[0]['SPLIT'] as Dataset;
 
-          var start = (myDataset.data[0][dimension.name] as NumberRange | TimeRange).start;
-          var end = (myDataset.data[myDataset.data.length - 1][dimension.name] as NumberRange | TimeRange).end;
+          var start = (myDataset.data[0][continuousDimension.name] as NumberRange | TimeRange).start;
+          var end = (myDataset.data[myDataset.data.length - 1][continuousDimension.name] as NumberRange | TimeRange).end;
 
           // right now dataset might not be sorted properly
           if (start < end ) axisRange = Range.fromJS({start, end});
@@ -558,7 +558,7 @@ export class LineChart extends BaseVisualization<LineChartState> {
           let domain = [(axisRange).start, (axisRange).end];
           let range = [0, stage.width - VIS_H_PADDING * 2 - Y_AXIS_WIDTH];
           let scaleFn: any = null;
-          if (dimension.kind === 'time') {
+          if (continuousDimension.kind === 'time') {
             scaleFn = d3.time.scale();
           } else {
             scaleFn = d3.scale.linear();
