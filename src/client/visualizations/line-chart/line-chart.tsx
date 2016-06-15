@@ -292,16 +292,16 @@ export class LineChart extends BaseVisualization<LineChartState> {
     topOffset += containerStage.y;
 
     if ((dragRange && dragOnMeasure === measure) || (!dragRange && essence.highlightOn(LineChart.id, measure.name))) {
-      var bubbleTimeRange = dragRange || essence.getSingleHighlightSet().elements[0];
+      var bubbleRange = dragRange || essence.getSingleHighlightSet().elements[0];
 
-      var shownTimeRange = roundDragRange || bubbleTimeRange;
-      var segmentLabel = formatValue(bubbleTimeRange, timezone, DisplayYear.NEVER);
+      var shownRange = roundDragRange || bubbleRange;
+      var segmentLabel = formatValue(bubbleRange, timezone, DisplayYear.NEVER);
 
       if (colors) {
         var categoryDimension = essence.splits.get(0).getDimension(essence.dataSource.dimensions);
-        var leftOffset = containerStage.x + VIS_H_PADDING + scaleX(bubbleTimeRange.end);
+        var leftOffset = containerStage.x + VIS_H_PADDING + scaleX(bubbleRange.end);
 
-        var hoverDatums = dataset.data.map(d => (d[SPLIT] as Dataset).findDatumByAttribute(continuousDimension.name, bubbleTimeRange));
+        var hoverDatums = dataset.data.map(d => (d[SPLIT] as Dataset).findDatumByAttribute(continuousDimension.name, bubbleRange));
         var colorValues = colors.getColors(dataset.data.map(d => d[categoryDimension.name]));
         var colorEntries: ColorEntry[] = dataset.data.map((d, i) => {
           var segment = d[categoryDimension.name];
@@ -323,9 +323,9 @@ export class LineChart extends BaseVisualization<LineChartState> {
           clicker={dragRange ? null : clicker}
         />;
       } else {
-        var leftOffset = containerStage.x + VIS_H_PADDING + scaleX(bubbleTimeRange.midpoint());
-        var highlightDatum = dataset.findDatumByAttribute(continuousDimension.name, shownTimeRange);
-        var segmentLabel = formatValue(shownTimeRange, timezone, DisplayYear.NEVER);
+        var leftOffset = containerStage.x + VIS_H_PADDING + scaleX(bubbleRange.midpoint());
+        var highlightDatum = dataset.findDatumByAttribute(continuousDimension.name, shownRange);
+        var segmentLabel = formatValue(shownRange, timezone, DisplayYear.NEVER);
 
         return <SegmentBubble
           left={leftOffset}
