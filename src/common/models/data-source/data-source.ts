@@ -60,21 +60,21 @@ export interface DataSourceValue {
   subsetFilter?: Expression;
   rollup?: boolean;
   options?: DataSourceOptions;
-  introspection: string;
-  attributeOverrides: Attributes;
-  attributes: Attributes;
+  introspection?: string;
+  attributeOverrides?: Attributes;
+  attributes?: Attributes;
   derivedAttributes?: Lookup<Expression>;
 
-  dimensions: List<Dimension>;
-  measures: List<Measure>;
-  timeAttribute: RefExpression;
-  defaultTimezone: Timezone;
-  defaultFilter: Filter;
-  defaultDuration: Duration;
-  defaultSortMeasure: string;
+  dimensions?: List<Dimension>;
+  measures?: List<Measure>;
+  timeAttribute?: RefExpression;
+  defaultTimezone?: Timezone;
+  defaultFilter?: Filter;
+  defaultDuration?: Duration;
+  defaultSortMeasure?: string;
   defaultSelectedMeasures?: OrderedSet<string>;
   defaultPinnedDimensions?: OrderedSet<string>;
-  refreshRule: RefreshRule;
+  refreshRule?: RefreshRule;
   maxTime?: MaxTime;
 
   cluster?: Cluster;
@@ -247,7 +247,7 @@ export class DataSource implements Instance<DataSourceValue, DataSourceJS> {
       throw new Error(`invalid introspection value ${introspection}, must be one of ${DataSource.INTROSPECTION_VALUES.join(', ')}`);
     }
 
-    var refreshRule = parameters.refreshRule ? RefreshRule.fromJS(parameters.refreshRule) : RefreshRule.query();
+    var refreshRule = parameters.refreshRule ? RefreshRule.fromJS(parameters.refreshRule) : null;
 
     var maxTime = parameters.maxTime ? MaxTime.fromJS(parameters.maxTime) : null;
     if (!maxTime && refreshRule.isRealtime()) {
@@ -306,9 +306,9 @@ export class DataSource implements Instance<DataSourceValue, DataSourceJS> {
       dimensions,
       measures,
       timeAttribute,
-      defaultTimezone: parameters.defaultTimezone ? Timezone.fromJS(parameters.defaultTimezone) : DataSource.DEFAULT_TIMEZONE,
-      defaultFilter: parameters.defaultFilter ? Filter.fromJS(parameters.defaultFilter) : Filter.EMPTY,
-      defaultDuration: parameters.defaultDuration ? Duration.fromJS(parameters.defaultDuration) : DataSource.DEFAULT_DURATION,
+      defaultTimezone: parameters.defaultTimezone ? Timezone.fromJS(parameters.defaultTimezone) : null,
+      defaultFilter: parameters.defaultFilter ? Filter.fromJS(parameters.defaultFilter) : null,
+      defaultDuration: parameters.defaultDuration ? Duration.fromJS(parameters.defaultDuration) : null,
       defaultSortMeasure: parameters.defaultSortMeasure || (measures.size ? measures.first().name : null),
       defaultSelectedMeasures: parameters.defaultSelectedMeasures ? OrderedSet(parameters.defaultSelectedMeasures) : null,
       defaultPinnedDimensions: parameters.defaultPinnedDimensions ? OrderedSet(parameters.defaultPinnedDimensions) : null,
@@ -369,13 +369,13 @@ export class DataSource implements Instance<DataSourceValue, DataSourceJS> {
     this.dimensions = parameters.dimensions || List([]);
     this.measures = parameters.measures || List([]);
     this.timeAttribute = parameters.timeAttribute;
-    this.defaultTimezone = parameters.defaultTimezone;
-    this.defaultFilter = parameters.defaultFilter;
-    this.defaultDuration = parameters.defaultDuration;
+    this.defaultTimezone = parameters.defaultTimezone || DataSource.DEFAULT_TIMEZONE;
+    this.defaultFilter = parameters.defaultFilter || Filter.EMPTY;
+    this.defaultDuration = parameters.defaultDuration || DataSource.DEFAULT_DURATION;
     this.defaultSortMeasure = parameters.defaultSortMeasure;
     this.defaultSelectedMeasures = parameters.defaultSelectedMeasures;
     this.defaultPinnedDimensions = parameters.defaultPinnedDimensions;
-    this.refreshRule = parameters.refreshRule;
+    this.refreshRule = parameters.refreshRule || RefreshRule.query();
     this.maxTime = parameters.maxTime;
 
     this.cluster = parameters.cluster;

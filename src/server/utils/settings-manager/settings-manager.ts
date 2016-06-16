@@ -5,13 +5,13 @@ import { Logger } from '../logger/logger';
 import { loadFileSync } from '../file/file';
 import { FileManager } from '../file-manager/file-manager';
 import { ClusterManager } from '../cluster-manager/cluster-manager';
+import { updater } from '../updater/updater';
 import { AppSettings, Cluster, DataSource } from '../../../common/models/index';
-
 
 export interface SettingsLocation {
   location: 'local' | 'transient';
   readOnly: boolean;
-  uri: string;
+  uri?: string;
 }
 
 export interface SettingsManagerOptions {
@@ -25,9 +25,9 @@ export class SettingsManager {
   public verbose: boolean;
   public settingsLocation: SettingsLocation;
   public appSettings: AppSettings;
-  public fileManager: FileManager;
+  public fileManagers: FileManager[];
   public clusterManagers: ClusterManager[];
-  public initialLoad: Q.Promise<any>;
+  public currentWork: Q.Promise<any>;
   public initialLoadTimeout: number;
 
   constructor(settingsLocation: SettingsLocation, options: SettingsManagerOptions) {
@@ -37,96 +37,98 @@ export class SettingsManager {
     this.verbose = verbose;
 
     this.settingsLocation = settingsLocation;
-    this.fileManager = null;
+    this.fileManagers = [];
     this.clusterManagers = [];
 
     this.initialLoadTimeout = options.initialLoadTimeout || 30000;
+    this.appSettings = AppSettings.BLANK;
 
-    this.initialLoad = Q.fcall(() => {
-      var progress: Q.Promise<any> = Q(null);
+    switch (settingsLocation.location) {
+      case 'transient':
+        this.currentWork = Q(null);
+        break;
 
-      // Load the settings
-      progress = progress.then(() => {
-        switch (settingsLocation.location) {
-          case 'transient':
-            this.appSettings = AppSettings.fromJS({});
-            break;
+      case 'local':
+        Q.fcall(() => AppSettings.fromJS(loadFileSync(settingsLocation.uri, 'yaml')))
+          .then(
+            (appSettings) => {
+              this.changeSettings(appSettings);
+            },
+            e => {
+              logger.error(`Fatal settings load error: ${e.message}`);
+              throw e;
+            }
+          );
 
-          case 'local':
-            this.appSettings = AppSettings.fromJS(loadFileSync(settingsLocation.uri, 'yaml'));
-            break;
+        break;
 
-          default:
-            throw new Error(`unknown location ${settingsLocation.location}`);
-        }
-      });
-
-      // Collect all declared datasources
-      progress = progress.then(() => {
-        const { clusters } = this.appSettings;
-        const generateExternalName = this.generateDataSourceName.bind(this);
-
-        clusters.forEach(cluster => {
-          // Get each of their externals
-          var initialExternals = this.appSettings.getDataSourcesForCluster(cluster.name).map(dataSource => {
-            return {
-              name: dataSource.name,
-              external: dataSource.toExternal(),
-              suppressIntrospection: dataSource.introspection === 'none'
-            };
-          });
-
-          // Make a cluster manager for each cluster and assign the correct initial externals to it.
-          this.clusterManagers.push(new ClusterManager(cluster, {
-            logger,
-            verbose,
-            initialExternals,
-            onExternalChange: this.onExternalChange.bind(this, cluster),
-            generateExternalName
-          }));
-        });
-
-        var initPromises = this.clusterManagers.map(clusterManager => clusterManager.init());
-
-        // Also make a FileManager for the local files
-        var initialDatasets = this.appSettings.getDataSourcesForCluster('native').map(dataSource => {
-          var uri = dataSource.source;
-          if (settingsLocation.location === 'local') uri = path.resolve(path.dirname(settingsLocation.uri), uri);
-          return {
-            name: dataSource.name,
-            uri,
-            subsetFilter: dataSource.subsetFilter
-          };
-        });
-
-        if (initialDatasets.length) {
-          this.fileManager = new FileManager({
-            logger,
-            verbose,
-            initialDatasets,
-            onDatasetChange: this.onDatasetChange.bind(this)
-          });
-
-          initPromises.push(this.fileManager.init());
-        }
-
-        return Q.all(initPromises);
-      });
-
-      return progress;
-    })
-      .then(() => {
-        logger.log(`Initial load and introspection complete.`);
-      })
-      .catch(e => {
-        logger.error(`Fatal initialization error: ${e.message}`);
-      });
+      default:
+        throw new Error(`unknown location ${settingsLocation.location}`);
+    }
 
     this.makeMaxTimeCheckTimer();
   }
 
+  private addClusterManager(cluster: Cluster): Q.Promise<any> {
+    const { verbose, logger } = this;
+
+    var initialExternals = this.appSettings.getDataSourcesForCluster(cluster.name).map(dataSource => {
+      return {
+        name: dataSource.name,
+        external: dataSource.toExternal(),
+        suppressIntrospection: dataSource.introspection === 'none'
+      };
+    });
+
+    // Make a cluster manager for each cluster and assign the correct initial externals to it.
+    var clusterManager = new ClusterManager(cluster, {
+      logger,
+      verbose,
+      initialExternals,
+      onExternalChange: this.onExternalChange.bind(this, cluster),
+      generateExternalName: this.generateDataSourceName.bind(this)
+    });
+
+    logger.log(`Adding cluster manager for '${cluster.name}'`);
+    this.clusterManagers.push(clusterManager);
+    return clusterManager.init();
+  }
+
+  private removeClusterManager(cluster: Cluster): void {
+    this.clusterManagers = this.clusterManagers.filter((clusterManager) => {
+      if (clusterManager.cluster.name !== cluster.name) return true;
+      clusterManager.destroy();
+      return false;
+    });
+  }
+
+  private addFileManager(dataSource: DataSource): Q.Promise<any> {
+    if (dataSource.engine !== 'native') throw new Error(`data source '${dataSource.name}' must be native to have a file manager`);
+    const { verbose, logger } = this;
+
+    var fileManager = new FileManager({
+      logger,
+      verbose,
+      uri: dataSource.source,
+      onDatasetChange: this.onDatasetChange.bind(this, dataSource.name)
+    });
+
+    this.fileManagers.push(fileManager);
+    return fileManager.init();
+  }
+
+  private removeFileManager(dataSource: DataSource): void {
+    if (dataSource.engine !== 'native') throw new Error(`data source '${dataSource.name}' must be native to have a file manager`);
+
+    this.fileManagers = this.fileManagers.filter((fileManager) => {
+      if (fileManager.uri !== dataSource.source) return true;
+      fileManager.destroy();
+      return false;
+    });
+  }
+
   getSettings(dataSourceOfInterest?: string): Q.Promise<AppSettings> {
-    return this.initialLoad
+    return this.currentWork
       .timeout(this.initialLoadTimeout)
       .catch(e => {
         this.logger.error(`Initial load timeout hit, continuing`);
@@ -136,6 +138,37 @@ export class SettingsManager {
         return Q.all(this.clusterManagers.map(clusterManager => clusterManager.refresh()));
       })
       .then(() => this.appSettings);
+  }
+
+  changeSettings(newSettings: AppSettings): void {
+    var oldSettings = this.appSettings;
+    this.appSettings = newSettings;
+
+    updater(oldSettings.clusters, newSettings.clusters, {
+      onExit: (oldCluster) => {
+        this.removeClusterManager(oldCluster);
+      },
+      onUpdate: (newCluster) => {
+        console.log(`${newCluster.name} UPDATED cluster`);
+      },
+      onEnter: (newCluster) => {
+        this.addClusterManager(newCluster);
+      }
+    });
+
+    var oldNativeDataSources = oldSettings.getDataSourcesForCluster('native');
+    var newNativeDataSources = newSettings.getDataSourcesForCluster('native');
+    updater(oldNativeDataSources, newNativeDataSources, {
+      onExit: (oldDataSource) => {
+        this.removeFileManager(oldDataSource);
+      },
+      onUpdate: (newDataSource) => {
+        console.log(`${newDataSource.name} UPDATED datasource`);
+      },
+      onEnter: (newDataSource) => {
+        this.addFileManager(newDataSource);
+      }
+    });
   }
 
   updateSettings(newSettings: AppSettings): Q.Promise<any> {
@@ -175,6 +208,14 @@ export class SettingsManager {
     return candidateName;
   }
 
+  getFreshDataSourceName(suggestion: string): string {
+    return suggestion;
+  }
+
+  getFreshClusterName(suggestion: string): string {
+    return suggestion;
+  }
+
   onDatasetChange(dataSourceName: string, changedDataset: Dataset): void {
     if (this.verbose) this.logger.log(`Got native dataset update for ${dataSourceName}`);
 
@@ -197,8 +238,7 @@ export class SettingsManager {
   makeMaxTimeCheckTimer() {
     // Periodically check if max time needs to be updated
     setInterval(() => {
-      var appSettings = this.appSettings;
-      appSettings.dataSources.forEach((dataSource) => {
+      this.appSettings.dataSources.forEach((dataSource) => {
         if (dataSource.refreshRule.isQuery() && dataSource.shouldUpdateMaxTime()) {
           DataSource.updateMaxTime(dataSource)
             .then(
@@ -213,6 +253,16 @@ export class SettingsManager {
         }
       });
     }, 1000).unref();
+  }
+
+  addCluster(cluster: Cluster): void {
+    this.currentWork = this.currentWork
+      .then(() => this.changeSettings(this.appSettings.addCluster(cluster)));
+  }
+
+  addDataSource(dataSource: DataSource): void {
+    this.currentWork = this.currentWork
+      .then(() => this.changeSettings(this.appSettings.addDataSource(dataSource)));
   }
 
 }

@@ -1,13 +1,18 @@
 import * as path from 'path';
 import * as nopt from 'nopt';
-import { Cluster } from '../common/models/index';
+import { Cluster, DataSource, SupportedTypes } from '../common/models/index';
 import { dataSourceToYAML } from '../common/utils/yaml-helper/yaml-helper';
 import { ServerSettings, ServerSettingsJS } from './models/server-settings/server-settings';
-import { loadFileSync, SettingsManager, CONSOLE_LOGGER } from './utils/index';
+import { loadFileSync, SettingsManager, SettingsLocation, CONSOLE_LOGGER } from './utils/index';
 
 const AUTH_MODULE_VERSION = 0;
 
-function errorExit(message: string): void {
+function exitWithMessage(message: string): void {
+  console.log(message);
+  process.exit();
+}
+
+function exitWithError(message: string): void {
   console.error(message);
   process.exit(1);
 }
@@ -17,12 +22,11 @@ var packageObj: any = null;
 try {
   packageObj = loadFileSync(path.join(__dirname, '../../package.json'), 'json');
 } catch (e) {
-  errorExit(`Could not read package.json: ${e.message}`);
+  exitWithError(`Could not read package.json: ${e.message}`);
 }
 export const VERSION = packageObj.version;
 
-function printUsage() {
-  console.log(`
+const USAGE = `
 Usage: pivot [options]
 
 Possible usage:
@@ -42,11 +46,14 @@ Possible usage:
       --data-sources-only      Only print the data sources in the auto generated config
 
   -f, --file                   Start pivot on top of this file based data source (must be JSON, CSV, or TSV)
-
   -d, --druid                  The Druid broker node to connect to
-`
-  );
-}
+      --postgres               The Postgres cluster to connect to
+      --mysql                  The MySQL cluster to connect to
+      
+      --user                   The cluster 'user' (if needed)
+      --password               The cluster 'password' (if needed)
+      --database               The cluster 'database' (if needed)
+`;
 
 function parseArgs() {
   return nopt(
@@ -63,8 +70,13 @@ function parseArgs() {
       "data-sources-only": Boolean,
 
       "file": String,
+      "druid": String,
+      "postgres": String,
+      "mysql": String,
 
-      "druid": String
+      "user": String,
+      "password": String,
+      "database": String
     },
     {
       "v": ["--verbose"],
@@ -81,78 +93,98 @@ var parsedArgs = parseArgs();
 //console.log(parsedArgs);
 
 if (parsedArgs['help']) {
-  printUsage();
-  process.exit();
+  exitWithMessage(USAGE);
 }
 
 if (parsedArgs['version']) {
-  console.log(VERSION);
-  process.exit();
+  exitWithMessage(VERSION);
 }
 
-if (!parsedArgs['example'] && !parsedArgs['config'] && !parsedArgs['druid'] && !parsedArgs['file']) {
-  printUsage();
-  process.exit();
+var hasCLIData = Boolean(parsedArgs['file'] || parsedArgs['druid'] || parsedArgs['postgres'] || parsedArgs['mysql']);
+if (!parsedArgs['example'] && !parsedArgs['config'] && !hasCLIData) {
+  exitWithMessage(USAGE);
 }
 
-var configFilePath = parsedArgs['config'];
+var serverSettingsFilePath = parsedArgs['config'];
 
 if (parsedArgs['example']) {
   delete parsedArgs['druid'];
   var example = parsedArgs['example'];
   if (example === 'wiki') {
-    configFilePath = path.join(__dirname, `../../config-example-${example}.yaml`);
+    serverSettingsFilePath = path.join(__dirname, `../../config-example-${example}.yaml`);
   } else {
-    console.log(`Unknown example '${example}'. Possible examples are: wiki`);
-    process.exit();
+    exitWithMessage(`Unknown example '${example}'. Possible examples are: wiki`);
   }
 }
 
-var configFileDir: string = null;
+var serverSettingsFileDir: string = null;
 var serverSettingsJS: any;
-if (configFilePath) {
-  configFileDir = path.dirname(configFilePath);
+if (serverSettingsFilePath) {
+  serverSettingsFileDir = path.dirname(serverSettingsFilePath);
   try {
-    serverSettingsJS = loadFileSync(configFilePath, 'yaml');
-    console.log(`Using config ${configFilePath}`);
+    serverSettingsJS = loadFileSync(serverSettingsFilePath, 'yaml');
+    console.log(`Using config ${serverSettingsFilePath}`);
   } catch (e) {
-    errorExit(`Could not load config from '${configFilePath}': ${e.message}`);
+    exitWithError(`Could not load config from '${serverSettingsFilePath}': ${e.message}`);
   }
 } else {
   serverSettingsJS = {};
 }
 
-var serverSettings = ServerSettings.fromJS(serverSettingsJS, configFileDir);
+var serverSettings = ServerSettings.fromJS(serverSettingsJS, serverSettingsFileDir);
 
 export const PRINT_CONFIG = Boolean(parsedArgs['print-config']);
 export const START_SERVER = !PRINT_CONFIG;
 export const VERBOSE = Boolean(parsedArgs['verbose'] || serverSettingsJS.verbose);
 
+var settingsLocation: SettingsLocation = null;
+if (serverSettingsFilePath) {
+  settingsLocation = {
+    location: 'local',
+    readOnly: false, // ToDo: this should be true
+    uri: serverSettingsFilePath
+  };
+} else {
+  settingsLocation = {
+    location: 'transient',
+    readOnly: false
+  };
+}
+
 export const SERVER_SETTINGS = serverSettings;
-export const SETTINGS_MANAGER = new SettingsManager({
-  location: 'local',
-  readOnly: false, // ToDo: this should be true
-  uri: configFilePath
-}, {
+export const SETTINGS_MANAGER = new SettingsManager(settingsLocation, {
   logger: CONSOLE_LOGGER,
   verbose: VERBOSE,
   initialLoadTimeout: SERVER_SETTINGS.pageMustLoadTimeout
 });
 
 // If a file is specified add it as a dataSource
-var file = parsedArgs['file'];
-if (file) {
-  serverSettingsJS.dataSources.push({
-    name: path.basename(file, path.extname(file)),
+var filesToLoad = parsedArgs['file'] || [];
+for (var fileToLoad of filesToLoad) {
+  SETTINGS_MANAGER.addDataSource(new DataSource({
+    name: SETTINGS_MANAGER.getFreshDataSourceName(path.basename(fileToLoad, path.extname(fileToLoad))),
     engine: 'native',
-    source: file
-  });
+    source: fileToLoad
+  }));
 }
 
-if (parsedArgs['druid']) {
-  serverSettingsJS.druidHost = parsedArgs['druid'];
-  // sourceListScan: 'auto',
-  // sourceListRefreshInterval: 10000
+const CLUSTER_TYPES: SupportedTypes[] = ['druid', 'postgres', 'mysql'];
+
+for (var clusterType of CLUSTER_TYPES) {
+  var host = parsedArgs[clusterType];
+  if (host) {
+    SETTINGS_MANAGER.addCluster(new Cluster({
+      name: SETTINGS_MANAGER.getFreshClusterName(clusterType),
+      type: clusterType,
+      host: host,
+      sourceListScan: 'auto',
+      sourceListRefreshInterval: 15000,
+
+      user: parsedArgs['user'],
+      password: parsedArgs['password'],
+      database: parsedArgs['database']
+    }));
+  }
 }
 
 // --- Auth -------------------------------
@@ -160,18 +192,18 @@ if (parsedArgs['druid']) {
 var auth = serverSettingsJS.auth;
 var authModule: any = null;
 if (auth) {
-  auth = path.resolve(configFileDir, auth);
+  auth = path.resolve(serverSettingsFileDir, auth);
   console.log(`Using auth ${auth}`);
   try {
     authModule = require(auth);
   } catch (e) {
-    errorExit(`error loading auth module: ${e.message}`);
+    exitWithError(`error loading auth module: ${e.message}`);
   }
 
   if (authModule.version !== AUTH_MODULE_VERSION) {
-    errorExit(`unsupported auth module version ${authModule.version} needed ${AUTH_MODULE_VERSION}`);
+    exitWithError(`unsupported auth module version ${authModule.version} needed ${AUTH_MODULE_VERSION}`);
   }
-  if (typeof authModule.auth !== 'function') errorExit('Invalid auth module');
+  if (typeof authModule.auth !== 'function') exitWithError('Invalid auth module');
 }
 export const AUTH = authModule;
 

@@ -23,67 +23,55 @@ export function getFileData(filePath: string): Q.Promise<any[]> {
     });
 }
 
-export interface ManagedDataset {
-  name: string;
-  uri: string;
-  dataset?: Dataset;
-  subsetFilter?: Expression;
-}
-
 export interface FileManagerOptions {
+  uri: string;
   logger: Logger;
   verbose?: boolean;
-  initialDatasets?: ManagedDataset[];
-  onDatasetChange?: (name: string, dataset: Dataset) => void;
+  subsetFilter?: Expression;
+  onDatasetChange?: (dataset: Dataset) => void;
 }
 
 function noop() {}
 
 export class FileManager {
   public logger: Logger;
-  public managedDatasets: ManagedDataset[] = [];
   public verbose: boolean;
-  public onDatasetChange: (name: string, dataset: Dataset) => void;
+  public uri: string;
+  public dataset: Dataset;
+  public subsetFilter: Expression;
+  public onDatasetChange: (dataset: Dataset) => void;
 
   constructor(options: FileManagerOptions) {
+    this.uri = options.uri;
     this.logger = options.logger;
+    this.subsetFilter = options.subsetFilter;
     this.verbose = Boolean(options.verbose);
-    this.managedDatasets = options.initialDatasets || [];
     this.onDatasetChange = options.onDatasetChange || noop;
   }
 
   // Do initialization
   public init(): Q.Promise<any> {
-    var progress: Q.Promise<any> = Q(null);
+    this.logger.log(`Loading file ${this.uri}`);
+    return getFileData(this.uri)
+      .then(
+        (rawData) => {
+          this.logger.log(`Loaded file ${this.uri} (rows = ${rawData.length})`);
+          var dataset = Dataset.fromJS(rawData).hide();
 
-    progress = progress
-      .then(() => {
-        var initialIntrospectionTasks: Q.Promise<any>[] = [];
-        this.managedDatasets.forEach((managedDataset) => {
-          this.logger.log(`Loading file ${managedDataset.uri}`);
-          getFileData(managedDataset.uri)
-            .then(
-              (rawData) => {
-                this.logger.log(`Loaded file ${managedDataset.uri} (rows = ${rawData.length})`);
-                var dataset = Dataset.fromJS(rawData).hide();
+          if (this.subsetFilter) {
+            dataset = dataset.filter(this.subsetFilter.getFn(), {});
+          }
 
-                if (managedDataset.subsetFilter) {
-                  dataset = dataset.filter(managedDataset.subsetFilter.getFn(), {});
-                }
+          this.dataset = dataset;
+          this.onDatasetChange(dataset);
+        },
+        (e) => {
+          this.logger.error(`Field to load file ${this.uri} because ${e.message}`);
+        }
+      );
+  }
 
-                managedDataset.dataset = dataset;
-                this.onDatasetChange(managedDataset.name, dataset);
-              },
-              (e) => {
-                this.logger.error(`Field to load file ${managedDataset.name} because ${e.message}`);
-              }
-            );
-        });
-        return Q.all(initialIntrospectionTasks);
-      });
-
-    // Set up timers to reintrospect the sources and reintrospect the
-
-    return progress;
+  public destroy(): void {
+    // Nothing here for now
   }
 }

@@ -45,6 +45,13 @@ export class ClusterManager {
   public onExternalChange: (name: string, external: External) => void;
   public generateExternalName: (external: External) => string;
 
+  private host: string = null;
+
+  private sourceListRefreshInterval: number = 0;
+  private sourceListRefreshTimer: NodeJS.Timer = null;
+  private sourceReintrospectInterval: number = 0;
+  private sourceReintrospectTimer: NodeJS.Timer = null;
+
   constructor(cluster: Cluster, options: ClusterManagerOptions) {
     if (!cluster) throw new Error('must have cluster');
     this.logger = options.logger;
@@ -55,6 +62,37 @@ export class ClusterManager {
     this.onExternalChange = options.onExternalChange || noop;
     this.generateExternalName = options.generateExternalName || getSourceFromExternal;
 
+    this.updateRequester();
+    this.updateSourceListRefreshTimer();
+    this.updateSourceReintrospectTimer();
+
+    for (var managedExternal of this.managedExternals) {
+      managedExternal.external = managedExternal.external.attachRequester(this.requester);
+    }
+  }
+
+  // Do initialization
+  public init(): Q.Promise<any> {
+    return Q(null)
+      .then(() => this.introspectVersion())
+      .then(() => this.reintrospectSources())
+      .then(() => this.scanSourceList());
+  }
+
+  public destroy() {
+    if (this.sourceListRefreshTimer) {
+      clearInterval(this.sourceListRefreshTimer);
+      this.sourceListRefreshTimer = null;
+    }
+    if (this.sourceReintrospectTimer) {
+      clearInterval(this.sourceReintrospectTimer);
+      this.sourceReintrospectTimer = null;
+    }
+  }
+
+  private updateRequester() {
+    const { cluster } = this;
+
     var druidRequestDecorator: DruidRequestDecorator = null;
     // if (clusterType === 'druid' && serverSettings.druidRequestDecoratorModule) {
     //   var logger = (str: string) => console.log(str);
@@ -63,48 +101,66 @@ export class ClusterManager {
     //   });
     // }
 
-    var requester = properRequesterFactory({
-      type: cluster.type,
-      host: cluster.host,
-      timeout: cluster.timeout,
-      verbose: this.verbose,
-      concurrentLimit: 5,
+    if (this.host !== cluster.host) {
+      this.host = cluster.host;
+      this.requester = properRequesterFactory({
+        type: cluster.type,
+        host: cluster.host,
+        timeout: cluster.timeout,
+        verbose: this.verbose,
+        concurrentLimit: 5,
 
-      druidRequestDecorator,
+        druidRequestDecorator,
 
-      database: cluster.database,
-      user: cluster.user,
-      password: cluster.password
-    });
-    this.requester = requester;
-
-    for (var managedExternal of this.managedExternals) {
-      managedExternal.external = managedExternal.external.attachRequester(requester);
+        database: cluster.database,
+        user: cluster.user,
+        password: cluster.password
+      });
     }
   }
 
-  // Do initialization
-  public init(): Q.Promise<any> {
+  private updateSourceListRefreshTimer() {
     const { logger, cluster } = this;
 
-    if (cluster.sourceListRefreshInterval) {
-      logger.log(`Setting up timer to scan for new sources in cluster '${cluster.name}' every ${cluster.sourceListRefreshInterval}ms`);
-      setInterval(() => {
-        this.scanSourceList();
-      }, cluster.sourceListRefreshInterval);
-    }
+    if (this.sourceListRefreshInterval !== cluster.sourceListRefreshInterval) {
+      this.sourceListRefreshInterval = cluster.sourceListRefreshInterval;
 
-    if (cluster.sourceReintrospectInterval) {
-      logger.log(`Setting up timer to reintrospect sources in cluster '${cluster.name}' every ${cluster.sourceReintrospectInterval}ms`);
-      setInterval(() => {
-        this.reintrospectSources();
-      }, cluster.sourceReintrospectInterval);
-    }
+      if (this.sourceListRefreshTimer) {
+        logger.log(`Clearing sourceListRefresh timer in cluster '${cluster.name}'`);
+        clearTimeout(this.sourceListRefreshTimer);
+        this.sourceListRefreshTimer = null;
+      }
 
-    return Q(null)
-      .then(() => this.introspectVersion())
-      .then(() => this.reintrospectSources())
-      .then(() => this.scanSourceList());
+      if (this.sourceListRefreshInterval) {
+        logger.log(`Setting up sourceListRefresh timer in cluster '${cluster.name}' (every ${this.sourceListRefreshInterval}ms)`);
+        this.sourceListRefreshTimer = setInterval(() => {
+          this.scanSourceList();
+        }, this.sourceListRefreshInterval);
+        this.sourceListRefreshTimer.unref();
+      }
+    }
+  }
+
+  private updateSourceReintrospectTimer() {
+    const { logger, cluster } = this;
+
+    if (this.sourceReintrospectInterval !== cluster.sourceReintrospectInterval) {
+      this.sourceReintrospectInterval = cluster.sourceReintrospectInterval;
+
+      if (this.sourceReintrospectTimer) {
+        logger.log(`Clearing sourceReintrospect timer in cluster '${cluster.name}'`);
+        clearTimeout(this.sourceReintrospectTimer);
+        this.sourceReintrospectTimer = null;
+      }
+
+      if (this.sourceReintrospectInterval) {
+        logger.log(`Setting up sourceReintrospect timer in cluster '${cluster.name}' (every ${this.sourceReintrospectInterval}ms)`);
+        this.sourceReintrospectTimer = setInterval(() => {
+          this.scanSourceList();
+        }, this.sourceReintrospectInterval);
+        this.sourceReintrospectTimer.unref();
+      }
+    }
   }
 
   public introspectVersion(): Q.Promise<any> {
@@ -161,7 +217,7 @@ export class ClusterManager {
     return (External.getConstructorFor(cluster.type) as any).getSourceList(this.requester)
       .then(
         (sources: string[]) => {
-          logger.log(`For cluster '${cluster.name}' got sources: [${sources.join(', ')}]`);
+          if (verbose) logger.log(`For cluster '${cluster.name}' got sources: [${sources.join(', ')}]`);
           // For every un-accounted source: make an external and add it to the managed list.
           var introspectionTasks: Q.Promise<any>[] = [];
           for (var source of sources) {

@@ -22,6 +22,8 @@ export interface AppSettingsJS {
 
 var check: Class<AppSettingsValue, AppSettingsJS>;
 export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
+  static BLANK = AppSettings.fromJS({});
+
   static isAppSettings(candidate: any): candidate is AppSettings {
     return isInstanceOf(candidate, AppSettings);
   }
@@ -162,10 +164,18 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
     return new AppSettings(value);
   }
 
+  addCluster(cluster: Cluster): AppSettings {
+    return this.changeClusters(helper.overrideByName(this.clusters, cluster));
+  }
+
   changeDataSources(dataSources: DataSource[]): AppSettings {
     var value = this.valueOf();
     value.dataSources = dataSources;
     return new AppSettings(value);
+  }
+
+  addDataSource(dataSource: DataSource): AppSettings {
+    return this.changeDataSources(helper.overrideByName(this.dataSources, dataSource));
   }
 
 }
