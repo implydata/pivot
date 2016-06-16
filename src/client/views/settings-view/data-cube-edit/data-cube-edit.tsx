@@ -1,6 +1,7 @@
 require('./data-cube-edit.css');
 
 import * as React from 'react';
+import { List } from 'immutable';
 import { Fn } from '../../../../common/utils/general/general';
 import { classNames } from '../../../utils/dom/dom';
 
@@ -11,7 +12,7 @@ import { SimpleList } from '../../../components/simple-list/simple-list';
 import { ImmutableInput } from '../../../components/immutable-input/immutable-input';
 import { Dropdown, DropdownProps } from '../../../components/dropdown/dropdown';
 
-import { DimensionModal } from '../dimension-modal/dimension-modal';
+import { DimensionsList } from '../dimensions-list/dimensions-list';
 import { MeasureModal } from '../measure-modal/measure-modal';
 
 import { AppSettings, Cluster, DataSource, Dimension, DimensionJS, Measure, MeasureJS } from '../../../../common/models/index';
@@ -29,8 +30,6 @@ export interface DataCubeEditState {
   hasChanged?: boolean;
   cube?: DataSource;
   tab?: any;
-  editedDimensionIndex?: number;
-  pendingAddDimension?: DimensionJS;
   editedMeasureIndex?: number;
 }
 
@@ -136,82 +135,17 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
   }
 
   renderDimensions(): JSX.Element {
-    const { tempCube, hasChanged, editedDimensionIndex, pendingAddDimension } = this.state;
-
-    const rows = tempCube.dimensions.toArray().map((dimension) => {
-      return {
-        title: dimension.title,
-        description: dimension.expression.toString(),
-        icon: `dim-${dimension.kind}`
-      };
-    });
-
-    return <div className="list">
-      <div className="list-title">
-        <div className="label">Dimensions</div>
-        <div className="actions">
-          <button>Introspect</button>
-          <button onClick={this.addDimension.bind(this)}>Add dimension</button>
-        </div>
-      </div>
-      <SimpleList
-        rows={rows}
-        onEdit={this.editDimension.bind(this)}
-        onRemove={this.deleteDimension.bind(this)}
-      />
-      {editedDimensionIndex !== undefined ? this.renderEditDimensionModal(editedDimensionIndex) : null}
-      {pendingAddDimension ? this.renderAddDimensionModal(pendingAddDimension) : null}
-    </div>;
-  }
-
-  editDimension(index: number) {
-    this.setState({editedDimensionIndex: index});
-  }
-
-  addDimension() {
-    this.setState({pendingAddDimension: {name: '', title: ''}});
-  }
-
-  deleteDimension(index: number) {
     const { tempCube } = this.state;
-    const newDimensions = tempCube.dimensions.delete(index);
-    const newCube = tempCube.changeDimensions(newDimensions);
 
-    this.setState({
-      tempCube: newCube,
-      hasChanged: true
-    });
-  }
-
-  renderEditDimensionModal(dimensionIndex: number): JSX.Element {
-    const { tempCube } = this.state;
-    var dimension = tempCube.dimensions.get(dimensionIndex);
-
-    var onSave = (newDimension: DimensionJS) => {
-      const { cube } = this.state;
-      const newDimensions = cube.dimensions.update(dimensionIndex, () => Dimension.fromJS(newDimension));
-      const newCube = cube.changeDimensions(newDimensions);
-
-      this.setState({tempCube: newCube, editedDimensionIndex: undefined, hasChanged: true});
+    const onChange = (newDimensions: List<Dimension>) => {
+      const newCube = tempCube.changeDimensions(newDimensions);
+      this.setState({
+        tempCube: newCube,
+        hasChanged: !this.state.cube.equals(newCube)
+      });
     };
 
-    var onClose = () => this.setState({editedDimensionIndex: undefined});
-
-    return <DimensionModal dimension={dimension.toJS()} onSave={onSave.bind(this)} onClose={onClose.bind(this)}/>;
-  }
-
-  renderAddDimensionModal(dimension: DimensionJS): JSX.Element {
-    var onSave = (newDimension: DimensionJS) => {
-      const { cube } = this.state;
-      const newDimensions = cube.dimensions.push(Dimension.fromJS(newDimension));
-      const newCube = cube.changeDimensions(newDimensions);
-
-      this.setState({tempCube: newCube, pendingAddDimension: null, hasChanged: true});
-    };
-
-    var onClose = () => this.setState({pendingAddDimension: null});
-
-    return <DimensionModal dimension={dimension} onSave={onSave.bind(this)} onClose={onClose.bind(this)}/>;
+    return <DimensionsList dimensions={tempCube.dimensions} onChange={onChange.bind(this)}/>;
   }
 
   renderMeasures(): JSX.Element {

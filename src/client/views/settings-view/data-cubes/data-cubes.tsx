@@ -15,78 +15,46 @@ import { SimpleTable, SimpleTableColumn, SimpleTableAction } from '../../../comp
 
 export interface DataCubesProps extends React.Props<any> {
   settings?: AppSettings;
-  onSave?: (settings: AppSettings) => void;
+  onSave?: (settings: AppSettings, message?: string) => void;
 }
 
 export interface DataCubesState {
   newSettings?: AppSettings;
-  hasChanged?: boolean;
 }
 
 export class DataCubes extends React.Component<DataCubesProps, DataCubesState> {
   constructor() {
     super();
 
-    this.state = {hasChanged: false};
+    this.state = {};
   }
 
   componentWillReceiveProps(nextProps: DataCubesProps) {
     if (nextProps.settings) this.setState({
-      newSettings: nextProps.settings,
-      hasChanged: false
+      newSettings: nextProps.settings
     });
-  }
-
-  changeOnPath(path: string, instance: any, newValue: any): any {
-    var bits = path.split('.');
-    var lastObject = newValue;
-    var currentObject: any;
-
-    var getLastObject = () => {
-      let o: any = instance;
-
-      for (let i = 0; i < bits.length; i++) {
-        o = o[bits[i]];
-      }
-
-      return o;
-    };
-
-    while (bits.length) {
-      let bit = bits.pop();
-
-      currentObject = getLastObject();
-
-      lastObject = currentObject[`change${firstUp(bit)}`](lastObject);
-    }
-
-    return lastObject;
-  }
-
-  onChange(propertyPath: string, e: KeyboardEvent) {
-    const settings: AppSettings = this.props.settings;
-
-    var newValue: any = (e.target as HTMLInputElement).value;
-    var newSettings = this.changeOnPath(propertyPath, settings, newValue);
-
-    this.setState({
-      newSettings,
-      hasChanged: !settings.equals(newSettings)
-    });
-  }
-
-  save() {
-    if (this.props.onSave) {
-      this.props.onSave(this.state.newSettings);
-    }
   }
 
   edit(cube: DataSource) {
     window.location.hash += `/${cube.name}`;
   }
 
+  createCube() {
+    var dataSources = this.state.newSettings.dataSources;
+    dataSources.push(DataSource.fromJS({
+      name: 'new-datacube',
+      engine: 'druid',
+      source: 'new-source'
+    }));
+
+    this.props.onSave(
+      this.state.newSettings.changeDataSources(dataSources),
+      'Cube added'
+    );
+  }
+
   render() {
-    const { hasChanged, newSettings } = this.state;
+    const { newSettings } = this.state;
 
     if (!newSettings) return null;
 
@@ -104,7 +72,7 @@ export class DataCubes extends React.Component<DataCubesProps, DataCubesState> {
     return <div className="data-cubes">
       <div className="title-bar">
         <div className="title">Data Cubes</div>
-        {hasChanged ? <Button className="save" title="Save" type="primary" onClick={this.save.bind(this)}/> : null}
+        <Button className="save" title="Add a cube" type="primary" onClick={this.createCube.bind(this)}/>
       </div>
       <div className="content">
       <SimpleTable

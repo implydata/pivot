@@ -35,7 +35,8 @@
       left: $tabs-column-width;
       right: 0;
 
-      .list {
+      .dimensions-list,
+      .measures-list {
         $list-title-height: 44px;
 
         position: absolute;

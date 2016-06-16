@@ -88,7 +88,7 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
     this.mounted = false;
   }
 
-  onSave(settings: AppSettings) {
+  onSave(settings: AppSettings, okMessage?: string) {
     const { version, onSettingsChange } = this.props;
 
     Qajax({
@@ -105,7 +105,7 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
         (status) => {
           if (!this.mounted) return;
           this.setState({settings});
-          Notifier.success('Settings saved');
+          Notifier.success(okMessage ? okMessage : 'Settings saved');
 
           if (onSettingsChange) {
             onSettingsChange(settings.toClientSettings().attachExecutors((dataSource: DataSource) => {

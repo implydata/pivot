@@ -12,17 +12,17 @@ import { ImmutableInput } from '../../../components/immutable-input/immutable-in
 import { Modal } from '../../../components/modal/modal';
 import { Dropdown, DropdownProps } from '../../../components/dropdown/dropdown';
 
-import { Dimension, DimensionJS } from '../../../../common/models/index';
+import { Dimension } from '../../../../common/models/index';
 
 
 export interface DimensionModalProps extends React.Props<any> {
-  dimension?: DimensionJS;
-  onSave?: (dimension: DimensionJS) => void;
+  dimension?: Dimension;
+  onSave?: (dimension: Dimension) => void;
   onClose?: () => void;
 }
 
 export interface DimensionModalState {
-  newDimension?: DimensionJS;
+  newDimension?: Dimension;
   canSave?: boolean;
 }
 
@@ -33,8 +33,6 @@ export interface DimensionKind {
 
 
 export class DimensionModal extends React.Component<DimensionModalProps, DimensionModalState> {
-  private hasInitialized = false;
-
   private kinds: DimensionKind[] = [
     {label: 'Time', value: 'time'},
     {label: 'String', value: 'string'},
@@ -45,14 +43,13 @@ export class DimensionModal extends React.Component<DimensionModalProps, Dimensi
   constructor() {
     super();
     this.state = {canSave: false};
-    this.globalKeyDownListener = this.globalKeyDownListener.bind(this);
   }
 
   initStateFromProps(props: DimensionModalProps) {
     if (props.dimension) {
       this.setState({
-        newDimension: (Object as any).assign({}, props.dimension),
-        canSave: false
+        newDimension: new Dimension(props.dimension.valueOf()),
+        canSave: true
       });
     }
   }
@@ -63,55 +60,27 @@ export class DimensionModal extends React.Component<DimensionModalProps, Dimensi
 
   componentDidMount() {
     this.initStateFromProps(this.props);
-    window.addEventListener('keydown', this.globalKeyDownListener);
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener('keydown', this.globalKeyDownListener);
-  }
-
-  componentDidUpdate() {
-    if (!this.hasInitialized && !!this.refs['name-input']) {
-      (this.refs['name-input'] as any).focus();
-      this.hasInitialized = true;
-    }
-  }
-
-  globalKeyDownListener(e: KeyboardEvent) {
-    if (enterKey(e) && this.state.canSave) {
-      this.save();
-    }
-  }
-
-  areEqual(a: DimensionJS, b: DimensionJS): boolean {
-    // Fails when name is empty, hence the try-catch
-    try {
-      return Dimension.fromJS(a).equals(Dimension.fromJS(b));
-    } catch (e) {
-      return false;
-    }
   }
 
   onKindChange(newKind: DimensionKind) {
     var dimension = this.state.newDimension;
-    dimension.kind = newKind.value;
+    dimension = dimension.changeKind(newKind.value);
 
     this.setState({
       newDimension: dimension,
-      canSave: !this.areEqual(this.props.dimension, dimension)
+      canSave: !this.props.dimension.equals(dimension)
     });
   }
 
-  onChange(property: string, validator: RegExp, event: KeyboardEvent) {
-    var dimension = this.state.newDimension;
-
-    const newValue = (event.target as HTMLInputElement).value;
-    (dimension as any)[property] = newValue;
-
-    this.setState({
-      newDimension: dimension,
-      canSave: validator.test(newValue) && !this.areEqual(this.props.dimension, dimension)
-    });
+  onChange(newDimension: Dimension, isValid: boolean) {
+    if (isValid) {
+      this.setState({
+        newDimension,
+        canSave: !this.props.dimension.equals(newDimension)
+      });
+    } else {
+      this.setState({canSave: false});
+    }
   }
 
   save() {
@@ -119,33 +88,28 @@ export class DimensionModal extends React.Component<DimensionModalProps, Dimensi
   }
 
   render(): JSX.Element {
+    const { dimension } = this.props;
     const { newDimension, canSave } = this.state;
 
     if (!newDimension) return null;
 
     var selectedKind: DimensionKind = this.kinds.filter((d) => d.value === newDimension.kind)[0] || this.kinds[0];
 
+
     return <Modal
       className="dimension-modal"
-      title={newDimension.title}
+      title={dimension.title}
       onClose={this.props.onClose}
+      onEnter={this.save.bind(this)}
     >
       <form className="general vertical">
-        <FormLabel label="Name"></FormLabel>
-        <input
-          type="text"
-          className={/^.+$/.test(newDimension.name) ? '' : 'invalid'}
-          value={newDimension.name}
-          onChange={this.onChange.bind(this, 'name', /^.+$/)}
-          ref='name-input'
-        />
-
         <FormLabel label="Title"></FormLabel>
-        <input
-          type="text"
-          className={/^.+$/.test(newDimension.title) ? '' : 'invalid'}
-          value={newDimension.title}
-          onChange={this.onChange.bind(this, 'title', /^.+$/)}
+        <ImmutableInput
+          focusOnStartUp={true}
+          instance={newDimension}
+          path={'title'}
+          onChange={this.onChange.bind(this)}
+          validator={/^.+$/}
         />
 
         {React.createElement(Dropdown, {

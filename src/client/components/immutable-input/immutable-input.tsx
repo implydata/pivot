@@ -3,11 +3,14 @@ require('./immutable-input.css');
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
+import { classNames } from '../../utils/dom/dom';
+
 import { firstUp } from '../../utils/string/string';
 
 export interface ImmutableInputProps extends React.Props<any> {
   instance: any;
   path: string;
+  focusOnStartUp?: boolean;
   onChange?: (newInstance: any, valid: boolean) => void;
   validator?: RegExp;
 }
@@ -18,6 +21,8 @@ export interface ImmutableInputState {
 }
 
 export class ImmutableInput extends React.Component<ImmutableInputProps, ImmutableInputState> {
+  private focusAlreadyGiven =  false;
+
   constructor() {
     super();
     this.state = {};
@@ -35,8 +40,21 @@ export class ImmutableInput extends React.Component<ImmutableInputProps, Immutab
     this.initFromProps(nextProps);
   }
 
+  componentDidUpdate() {
+    this.maybeFocus();
+  }
+
   componentDidMount() {
     this.initFromProps(this.props);
+
+    this.maybeFocus();
+  }
+
+  maybeFocus() {
+    if (!this.focusAlreadyGiven && this.props.focusOnStartUp && this.refs['me']) {
+      (ReactDOM.findDOMNode(this.refs['me']) as any).focus();
+      this.focusAlreadyGiven = true;
+    }
   }
 
   changeImmutable(instance: any, path: string, newValue: any): any {
@@ -98,9 +116,12 @@ export class ImmutableInput extends React.Component<ImmutableInputProps, Immutab
     var bit: string;
     while (bit = bits.shift()) value = value[bit];
 
+
     return <input
+      className={classNames('immutable-input', {invalid: invalidValue !== undefined})}
+      ref='me'
       type="text"
-      value={invalidValue ? invalidValue : value}
+      value={invalidValue !== undefined ? invalidValue : value}
       onChange={this.onChange.bind(this)}
     />;
   }
