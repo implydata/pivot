@@ -215,7 +215,8 @@ export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
   }
 
   getEssenceFromDataSource(dataSource: DataSource): Essence {
-    return Essence.fromDataSource(dataSource, { dataSource: dataSource, visualizations });
+    const essence = Essence.fromDataSource(dataSource, { dataSource: dataSource, visualizations });
+    return essence.multiMeasureMode !== this.isMultiMeasure() ? essence.toggleMultiMeasureMode() : essence;
   }
 
   getEssenceFromHash(hash: string): Essence {
@@ -303,6 +304,10 @@ export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
     const { essence } = this.state;
     const newEsssence = essence.changeTimezone(newTimezone);
     this.setState({ essence: newEsssence });
+  }
+
+  isMultiMeasure(): boolean {
+    return localStorage.get('is-multi-measure');
   }
 
   getStoredLayout(): CubeViewLayout {
