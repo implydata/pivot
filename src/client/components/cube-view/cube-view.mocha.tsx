@@ -42,6 +42,7 @@ describe('CubeView', () => {
         hash={null}
         dataSource={DataSourceMock.wiki()}
         updateViewHash={updateViewHash}
+        dataSources={null}
       />
     );
 
