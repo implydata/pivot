@@ -216,7 +216,7 @@ export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
 
   getEssenceFromDataSource(dataSource: DataSource): Essence {
     const essence = Essence.fromDataSource(dataSource, { dataSource: dataSource, visualizations });
-    return essence.multiMeasureMode !== this.isMultiMeasure() ? essence.toggleMultiMeasureMode() : essence;
+    return essence.multiMeasureMode !== Boolean(this.isMultiMeasure()) ? essence.toggleMultiMeasureMode() : essence;
   }
 
   getEssenceFromHash(hash: string): Essence {
