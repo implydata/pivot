@@ -53,17 +53,20 @@ describe('CubeView', () => {
 
   it('remembers measure mode toggle click', () => {
     var updateViewHash = sinon.stub();
+    var stub = sinon.stub(localStorage, "get");
+    stub.withArgs('is-multi-measure').returns(undefined);
 
-    var twitterCubeView = TestUtils.renderIntoDocument(
+    var initialCubeView = TestUtils.renderIntoDocument(
       <CubeView
         hash={null}
-        dataSource={DataSourceMock.twitter()}
+        dataSource={DataSourceMock.wiki()}
         updateViewHash={updateViewHash}
       />
     );
-    expect(twitterCubeView.state.essence.multiMeasureMode, 'default is single measure').to.equal(false);
+    expect(initialCubeView.state.essence.multiMeasureMode, 'default is single measure').to.equal(false);
 
-    var stub = sinon.stub(localStorage, "get");
+    stub.restore();
+    stub = sinon.stub(localStorage, "get");
     stub.withArgs('is-multi-measure').returns(true);
 
     var wikiCubeView = TestUtils.renderIntoDocument(
