@@ -10,7 +10,7 @@ import { EssenceMock, StageMock } from '../../../common/models/mocks';
 import { $, Expression } from 'plywood';
 import { BarChart } from './bar-chart';
 
-describe.skip('BarChart', () => {
+describe('BarChart', () => {
   it('adds the correct class', () => {
     var renderedComponent = TestUtils.renderIntoDocument(
       <BarChart

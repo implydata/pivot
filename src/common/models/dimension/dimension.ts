@@ -1,9 +1,9 @@
 import { List } from 'immutable';
-import { Class, Instance, isInstanceOf } from 'immutable-class';
+import { Class, Instance, isInstanceOf, immutableArraysEqual } from 'immutable-class';
+
 import { $, Expression, ExpressionJS, Action, NumberRangeJS, ApplyAction, AttributeInfo } from 'plywood';
-import { verifyUrlSafeName, makeTitle } from '../../utils/general/general';
+import { verifyUrlSafeName, makeTitle, hasOwnProperty } from '../../utils/general/general';
 import { Granularity, GranularityJS, granularityFromJS, granularityToJS, granularityEquals } from "../granularity/granularity";
-import { immutableArraysEqual } from "immutable-class";
 
 var geoName = /continent|country|city|region/i;
 function isGeo(name: string): boolean {
@@ -15,6 +15,10 @@ function typeToKind(type: string): string {
   return type.toLowerCase().replace(/_/g, '-').replace(/-range$/, '');
 }
 
+export const NEVER_BUCKET = "never_bucket";
+
+export type BucketingStrategy = "always_bucket" | "never_bucket";
+
 export interface DimensionValue {
   name: string;
   title?: string;
@@ -23,6 +27,7 @@ export interface DimensionValue {
   url?: string;
   granularities?: Granularity[];
   bucketedBy?: Granularity;
+  bucketingStrategy?: BucketingStrategy;
 }
 
 export interface DimensionJS {
@@ -33,6 +38,7 @@ export interface DimensionJS {
   url?: string;
   granularities?: GranularityJS[];
   bucketedBy?: GranularityJS;
+  bucketingStrategy?: string;
 }
 
 var check: Class<DimensionValue, DimensionJS>;
@@ -79,6 +85,10 @@ export class Dimension implements Instance<DimensionValue, DimensionJS> {
       value.bucketedBy = granularityFromJS(bucketedBy);
     }
 
+    if (parameters.bucketingStrategy) {
+      value.bucketingStrategy = parameters.bucketingStrategy as BucketingStrategy;
+    }
+
     return new Dimension(value);
   }
 
@@ -90,6 +100,7 @@ export class Dimension implements Instance<DimensionValue, DimensionJS> {
   public url: string;
   public granularities: Granularity[];
   public bucketedBy: Granularity;
+  public bucketingStrategy: BucketingStrategy;
 
   constructor(parameters: DimensionValue) {
     var name = parameters.name;
@@ -114,6 +125,8 @@ export class Dimension implements Instance<DimensionValue, DimensionJS> {
 
     if (parameters.granularities) this.granularities = parameters.granularities;
     if (parameters.bucketedBy) this.bucketedBy = parameters.bucketedBy;
+    if (parameters.bucketingStrategy) this.bucketingStrategy = parameters.bucketingStrategy;
+
   }
 
   public valueOf(): DimensionValue {
@@ -124,7 +137,8 @@ export class Dimension implements Instance<DimensionValue, DimensionJS> {
       kind: this.kind,
       url: this.url,
       granularities: this.granularities,
-      bucketedBy: this.bucketedBy
+      bucketedBy: this.bucketedBy,
+      bucketingStrategy: this.bucketingStrategy
     };
   }
 
@@ -138,6 +152,8 @@ export class Dimension implements Instance<DimensionValue, DimensionJS> {
     if (this.url) js.url = this.url;
     if (this.granularities) js.granularities = this.granularities.map((g) => { return granularityToJS(g); });
     if (this.bucketedBy) js.bucketedBy = granularityToJS(this.bucketedBy);
+    if (this.bucketingStrategy !== null && this.bucketingStrategy !== undefined) js.bucketingStrategy = this.bucketingStrategy;
+
     return js;
   }
 
@@ -157,7 +173,8 @@ export class Dimension implements Instance<DimensionValue, DimensionJS> {
       this.kind === other.kind &&
       this.url === other.url &&
       immutableArraysEqual(this.granularities, other.granularities) &&
-      granularityEquals(this.bucketedBy, other.bucketedBy);
+      granularityEquals(this.bucketedBy, other.bucketedBy) &&
+      this.bucketingStrategy === other.bucketingStrategy;
   }
 
   public isContinuous() {
