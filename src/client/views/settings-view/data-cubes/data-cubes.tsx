@@ -20,6 +20,7 @@ export interface DataCubesProps extends React.Props<any> {
 
 export interface DataCubesState {
   newSettings?: AppSettings;
+  hasChanged?: boolean;
 }
 
 export class DataCubes extends React.Component<DataCubesProps, DataCubesState> {
@@ -35,8 +36,20 @@ export class DataCubes extends React.Component<DataCubesProps, DataCubesState> {
     });
   }
 
-  edit(cube: DataSource) {
+  editCube(cube: DataSource) {
     window.location.hash += `/${cube.name}`;
+  }
+
+  removeCube(cube: DataSource) {
+    // var index = this.state.newSettings.dataSources.indexOf(cube);
+
+    // if (index < 0) return;
+
+    // var newCubes = this.state.newSettings.dataSources.splice(index, 1);
+
+    // this.setState({
+    //   newSettings: this.state.newSettings.changedDataSources(newCubes)
+    // })
   }
 
   createCube() {
@@ -66,7 +79,8 @@ export class DataCubes extends React.Component<DataCubesProps, DataCubesState> {
     ];
 
     const actions: SimpleTableAction[] = [
-      {icon: 'full-edit', callback: this.edit.bind(this)}
+      {icon: 'full-edit', callback: this.editCube.bind(this)},
+      {icon: 'full-remove', callback: this.removeCube.bind(this)}
     ];
 
     return <div className="data-cubes">
@@ -79,7 +93,7 @@ export class DataCubes extends React.Component<DataCubesProps, DataCubesState> {
         columns={columns}
         rows={newSettings.dataSources}
         actions={actions}
-        onRowClick={this.edit.bind(this)}
+        onRowClick={this.editCube.bind(this)}
       ></SimpleTable>
       </div>
     </div>;

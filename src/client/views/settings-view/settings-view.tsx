@@ -22,6 +22,7 @@ import { AppSettings, AppSettingsJS } from '../../../common/models/index';
 
 import { General } from './general/general';
 import { Clusters } from './clusters/clusters';
+import { ClusterEdit } from './cluster-edit/cluster-edit';
 import { DataCubes } from './data-cubes/data-cubes';
 import { DataCubeEdit } from './data-cube-edit/data-cube-edit';
 
@@ -171,6 +172,10 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
 
          <Route fragment="clusters">
            <Clusters settings={settings} onSave={this.onSave.bind(this)}/>
+
+           <Route fragment=":clusterId">
+             <ClusterEdit settings={settings} onSave={this.onSave.bind(this)}/>
+           </Route>
          </Route>
 
          <Route fragment="data_cubes">

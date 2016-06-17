@@ -12,6 +12,7 @@ export interface ImmutableInputProps extends React.Props<any> {
   path: string;
   focusOnStartUp?: boolean;
   onChange?: (newInstance: any, valid: boolean) => void;
+  onInvalid?: (invalidValue: string) => void;
   validator?: RegExp;
 }
 
@@ -29,15 +30,18 @@ export class ImmutableInput extends React.Component<ImmutableInputProps, Immutab
   }
 
   initFromProps(props: ImmutableInputProps) {
-    if (props.instance && this.state.invalidValue === undefined) {
-      this.setState({
-        newInstance: props.instance
-      });
-    }
+    if (!props.instance || !props.path) return;
+
+    this.setState({
+      newInstance: props.instance,
+      invalidValue: undefined
+    });
   }
 
   componentWillReceiveProps(nextProps: ImmutableInputProps) {
-    this.initFromProps(nextProps);
+    if (nextProps.instance !== this.state.newInstance) {
+      this.initFromProps(nextProps);
+    }
   }
 
   componentDidUpdate() {
@@ -77,14 +81,20 @@ export class ImmutableInput extends React.Component<ImmutableInputProps, Immutab
 
       currentObject = getLastObject();
 
-      lastObject = currentObject[`change${firstUp(bit)}`](lastObject);
+      let fnName = `change${firstUp(bit)}`;
+
+      if (currentObject[fnName]) {
+        lastObject = currentObject[fnName](lastObject);
+      } else {
+        throw new Error('Unknow function : ' + fnName);
+      }
     }
 
     return lastObject;
   }
 
   onChange(event: KeyboardEvent) {
-    const { path, onChange, instance, validator } = this.props;
+    const { path, onChange, instance, validator, onInvalid } = this.props;
 
     var newValue: any = (event.target as HTMLInputElement).value;
 
@@ -94,15 +104,25 @@ export class ImmutableInput extends React.Component<ImmutableInputProps, Immutab
     if (validator && !validator.test(newValue)) {
       newInstance = this.props.instance;
       invalidValue = newValue;
+
+      if (onInvalid) onInvalid(newValue);
+
     } else {
       newInstance = this.changeImmutable(instance, path, newValue);
     }
 
     this.setState({newInstance, invalidValue});
 
-    if (onChange) {
-      onChange(newInstance, invalidValue === undefined);
-    }
+    if (onChange) onChange(newInstance, invalidValue === undefined);
+  }
+
+  getValue(instance: any, path: string): string {
+    var value = instance;
+    var bits = path.split('.');
+    var bit: string;
+    while (bit = bits.shift()) value = value[bit];
+
+    return value as string;
   }
 
   render() {
@@ -111,14 +131,10 @@ export class ImmutableInput extends React.Component<ImmutableInputProps, Immutab
 
     if (!path || !newInstance) return null;
 
-    var value = newInstance;
-    var bits = path.split('.');
-    var bit: string;
-    while (bit = bits.shift()) value = value[bit];
-
+    const value = this.getValue(newInstance, path);
 
     return <input
-      className={classNames('immutable-input', {invalid: invalidValue !== undefined})}
+      className={classNames('immutable-input', {error: invalidValue !== undefined})}
       ref='me'
       type="text"
       value={invalidValue !== undefined ? invalidValue : value}

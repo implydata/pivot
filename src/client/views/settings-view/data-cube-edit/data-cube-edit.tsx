@@ -10,9 +10,8 @@ import { FormLabel } from '../../../components/form-label/form-label';
 import { Button } from '../../../components/button/button';
 import { SimpleList } from '../../../components/simple-list/simple-list';
 import { ImmutableInput } from '../../../components/immutable-input/immutable-input';
+import { ImmutableList } from '../../../components/immutable-list/immutable-list';
 import { Dropdown, DropdownProps } from '../../../components/dropdown/dropdown';
-
-import { ImmutableList } from '../immutable-list/immutable-list';
 
 import { DimensionModal } from '../dimension-modal/dimension-modal';
 import { MeasureModal } from '../measure-modal/measure-modal';
@@ -32,6 +31,7 @@ export interface DataCubeEditState {
   hasChanged?: boolean;
   cube?: DataSource;
   tab?: any;
+  canSave?: boolean;
 }
 
 export interface Tab {
@@ -66,6 +66,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
     this.setState({
       tempCube: cube,
       hasChanged: false,
+      canSave: true,
       cube,
       tab: this.tabs.filter((tab) => tab.value === props.tab)[0]
     });
@@ -110,13 +111,23 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
     window.location.hash = hash.replace(`/${cubeId}/${tab}`, '');
   }
 
-  onSimpleChange(newCube: DataSource) {
+  onSimpleChange(newCube: DataSource, isValid: boolean) {
     const { cube } = this.state;
 
-    this.setState({
-      tempCube: newCube,
-      hasChanged: !cube.equals(newCube)
-    });
+    const hasChanged = !isValid || !cube.equals(newCube);
+
+    if (isValid) {
+      this.setState({
+        tempCube: newCube,
+        canSave: true,
+        hasChanged
+      });
+    } else {
+      this.setState({
+        canSave: false,
+        hasChanged
+      });
+    }
   }
 
   renderGeneral(): JSX.Element {
@@ -125,13 +136,28 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
 
     return <form className="general vertical">
       <FormLabel label="Title" helpText={helpTexts.title}></FormLabel>
-      <ImmutableInput instance={tempCube} path={'title'} onChange={this.onSimpleChange.bind(this)}/>
+      <ImmutableInput
+        instance={tempCube}
+        path={'title'}
+        onChange={this.onSimpleChange.bind(this)}
+        validator={/^.+$/}
+      />
 
       <FormLabel label="Engine" helpText={helpTexts.engine}></FormLabel>
-      <ImmutableInput instance={tempCube} path={'engine'} onChange={this.onSimpleChange.bind(this)}/>
+      <ImmutableInput
+        instance={tempCube}
+        path={'engine'}
+        onChange={this.onSimpleChange.bind(this)}
+        validator={/^.+$/}
+      />
 
       <FormLabel label="Source" helpText={helpTexts.source}></FormLabel>
-      <ImmutableInput instance={tempCube} path={'source'} onChange={this.onSimpleChange.bind(this)}/>
+      <ImmutableInput
+        instance={tempCube}
+        path={'source'}
+        onChange={this.onSimpleChange.bind(this)}
+        validator={/^.+$/}
+      />
     </form>;
   }
 
@@ -203,17 +229,17 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
   }
 
   render() {
-    const { tempCube, tab, hasChanged } = this.state;
+    const { tempCube, tab, hasChanged, cube, canSave } = this.state;
 
-    if (!tempCube || !tab) return null;
+    if (!tempCube || !tab || !cube) return null;
 
     return <div className="data-cube-edit">
       <div className="title-bar">
         <Button className="button back" type="secondary" svg={require('../../../icons/full-back.svg')} onClick={this.goBack.bind(this)}/>
-        <div className="title">{tempCube.title}</div>
+        <div className="title">{cube.title}</div>
         {hasChanged ? <div className="button-group">
           <Button className="cancel" title="Cancel" type="secondary" onClick={this.cancel.bind(this)}/>
-          <Button className="save" title="Save" type="primary" onClick={this.save.bind(this)}/>
+          <Button className={classNames("save", {disabled: !canSave})} title="Save" type="primary" onClick={this.save.bind(this)}/>
         </div> : null}
       </div>
       <div className="content">

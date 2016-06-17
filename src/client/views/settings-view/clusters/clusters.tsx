@@ -43,8 +43,8 @@ export class Clusters extends React.Component<ClustersProps, ClustersState> {
     }
   }
 
-  edit(cluster: Cluster) {
-
+  editCluster(cluster: Cluster) {
+    window.location.hash += `/${cluster.name}`;
   }
 
   render() {
@@ -59,7 +59,7 @@ export class Clusters extends React.Component<ClustersProps, ClustersState> {
     ];
 
     const actions: SimpleTableAction[] = [
-      {icon: 'full-edit', callback: this.edit.bind(this)}
+      {icon: 'full-edit', callback: this.editCluster.bind(this)}
     ];
 
     return <div className="clusters">
@@ -72,6 +72,7 @@ export class Clusters extends React.Component<ClustersProps, ClustersState> {
         columns={columns}
         rows={newSettings.clusters}
         actions={actions}
+        onRowClick={this.editCluster.bind(this)}
       ></SimpleTable>
       </div>
     </div>;

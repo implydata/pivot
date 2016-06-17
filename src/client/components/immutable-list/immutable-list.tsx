@@ -4,11 +4,11 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { List } from 'immutable';
 
-import { Button } from '../../../components/button/button';
-import { Modal } from '../../../components/modal/modal';
-import { SvgIcon } from '../../../components/svg-icon/svg-icon';
-import { FormLabel } from '../../../components/form-label/form-label';
-import { SimpleList, SimpleRow } from '../../../components/simple-list/simple-list';
+import { Button } from '../button/button';
+import { Modal } from '../modal/modal';
+import { SvgIcon } from '../svg-icon/svg-icon';
+import { FormLabel } from '../form-label/form-label';
+import { SimpleList, SimpleRow } from '../simple-list/simple-list';
 
 export interface ImmutableListProps<T> extends React.Props<any> {
   items: List<T>;

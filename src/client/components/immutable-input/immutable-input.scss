@@ -2,8 +2,4 @@
 
 .immutable-input {
   @extend %default-input;
-
-  &.invalid {
-    border-color: $red;
-  }
 }

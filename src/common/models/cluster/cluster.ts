@@ -234,5 +234,27 @@ export class Cluster implements Instance<ClusterValue, ClusterJS> {
     });
   }
 
+  change(propertyName: string, newValue: any): Cluster {
+    var v = this.valueOf();
+
+    if (!v.hasOwnProperty(propertyName)) {
+      throw new Error(`Unknown property : ${propertyName}`);
+    }
+
+    (v as any)[propertyName] = newValue;
+    return new Cluster(v);
+  }
+
+  changeHost(newHost: string): Cluster {
+    return this.change('host', newHost);
+  }
+
+  changeTimeout(newTimeout: string): Cluster {
+    return this.change('timeout', newTimeout);
+  }
+
+  changeSourceListRefreshInterval(newSourceListRefreshInterval: string): Cluster {
+    return this.change('sourceListRefreshInterval', newSourceListRefreshInterval);
+  }
 }
 check = Cluster;

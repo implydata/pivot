@@ -37,7 +37,7 @@ export interface SimpleTableState {
 
 const ROW_HEIGHT = 42;
 const HEADER_HEIGHT = 26;
-const ACTION_WIDTH = 38;
+const ACTION_WIDTH = 30;
 
 export class SimpleTable extends React.Component<SimpleTableProps, SimpleTableState> {
   constructor() {
@@ -237,7 +237,7 @@ export class SimpleTable extends React.Component<SimpleTableProps, SimpleTableSt
   }
 
   onCellClick(row: any, column: SimpleTableColumn) {
-    if (this.props.onRowClick) {
+    if (this.props.onRowClick && row) {
       this.props.onRowClick(row);
     }
   }
