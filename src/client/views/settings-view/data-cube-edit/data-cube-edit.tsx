@@ -12,7 +12,9 @@ import { SimpleList } from '../../../components/simple-list/simple-list';
 import { ImmutableInput } from '../../../components/immutable-input/immutable-input';
 import { Dropdown, DropdownProps } from '../../../components/dropdown/dropdown';
 
-import { DimensionsList } from '../dimensions-list/dimensions-list';
+import { ImmutableList } from '../immutable-list/immutable-list';
+
+import { DimensionModal } from '../dimension-modal/dimension-modal';
 import { MeasureModal } from '../measure-modal/measure-modal';
 
 import { AppSettings, Cluster, DataSource, Dimension, DimensionJS, Measure, MeasureJS } from '../../../../common/models/index';
@@ -30,7 +32,6 @@ export interface DataCubeEditState {
   hasChanged?: boolean;
   cube?: DataSource;
   tab?: any;
-  editedMeasureIndex?: number;
 }
 
 export interface Tab {
@@ -145,63 +146,60 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       });
     };
 
-    return <DimensionsList dimensions={tempCube.dimensions} onChange={onChange.bind(this)}/>;
+    const getModal = (item: Dimension) => <DimensionModal dimension={item}/>;
+
+    const getNewItem = (name: string) => Dimension.fromJS({name});
+
+    const getRows = (items: List<Dimension>) => items.toArray().map((dimension) => {
+      return {
+        title: dimension.title,
+        description: dimension.expression.toString(),
+        icon: `dim-${dimension.kind}`
+      };
+    });
+
+    const DimensionsList = ImmutableList.specialize<Dimension>();
+
+    return <DimensionsList
+      items={tempCube.dimensions}
+      onChange={onChange.bind(this)}
+      getModal={getModal}
+      getNewItem={getNewItem}
+      getRows={getRows}
+    />;
   }
 
   renderMeasures(): JSX.Element {
-    const { tempCube, editedMeasureIndex } = this.state;
+    const { tempCube } = this.state;
 
-    const rows = tempCube.measures.toArray().map((measure) => {
+    const onChange = (newMeasures: List<Measure>) => {
+      const newCube = tempCube.changeMeasures(newMeasures);
+      this.setState({
+        tempCube: newCube,
+        hasChanged: !this.state.cube.equals(newCube)
+      });
+    };
+
+    const getModal = (item: Measure) => <MeasureModal measure={item}/>;
+
+    const getNewItem = (name: string) => Measure.fromJS({name});
+
+    const getRows = (items: List<Measure>) => items.toArray().map((measure) => {
       return {
         title: measure.title,
         description: measure.expression.toString()
       };
     });
 
-    return <div className="list">
-      <div className="list-title">
-        <div className="label">Measures</div>
-        <div className="actions"></div>
-      </div>
-      <SimpleList
-        rows={rows}
-        onEdit={this.editMeasure.bind(this)}
-        onRemove={this.deleteMeasure.bind(this)}
-      />
-      {editedMeasureIndex !== undefined ? this.renderEditMeasureModal(editedMeasureIndex) : null}
-    </div>;
-  }
+    const MeasuresList = ImmutableList.specialize<Measure>();
 
-  renderEditMeasureModal(measureIndex: number): JSX.Element {
-    const { tempCube } = this.state;
-    var measure = tempCube.measures.get(measureIndex);
-
-    var onSave = (newMeasure: MeasureJS) => {
-      const { cube } = this.state;
-      const newMeasures = cube.measures.update(measureIndex, () => Measure.fromJS(newMeasure));
-      const newCube = cube.changeMeasures(newMeasures);
-
-      this.setState({tempCube: newCube, editedMeasureIndex: undefined, hasChanged: true});
-    };
-
-    var onClose = () => this.setState({editedMeasureIndex: undefined});
-
-    return <MeasureModal measure={measure.toJS()} onSave={onSave.bind(this)} onClose={onClose.bind(this)}/>;
-  }
-
-  editMeasure(index: number) {
-    this.setState({editedMeasureIndex: index});
-  }
-
-  deleteMeasure(index: number) {
-    const { tempCube } = this.state;
-    const newMeasures = tempCube.measures.delete(index);
-    const newCube = tempCube.changeMeasures(newMeasures);
-
-    this.setState({
-      tempCube: newCube,
-      hasChanged: true
-    });
+    return <MeasuresList
+      items={tempCube.measures}
+      onChange={onChange.bind(this)}
+      getModal={getModal}
+      getNewItem={getNewItem}
+      getRows={getRows}
+    />;
   }
 
   render() {

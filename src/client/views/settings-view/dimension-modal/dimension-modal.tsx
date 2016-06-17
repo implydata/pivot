@@ -10,7 +10,7 @@ import { FormLabel } from '../../../components/form-label/form-label';
 import { Button } from '../../../components/button/button';
 import { ImmutableInput } from '../../../components/immutable-input/immutable-input';
 import { Modal } from '../../../components/modal/modal';
-import { Dropdown, DropdownProps } from '../../../components/dropdown/dropdown';
+import { Dropdown } from '../../../components/dropdown/dropdown';
 
 import { Dimension } from '../../../../common/models/index';
 
@@ -95,6 +95,8 @@ export class DimensionModal extends React.Component<DimensionModalProps, Dimensi
 
     var selectedKind: DimensionKind = this.kinds.filter((d) => d.value === newDimension.kind)[0] || this.kinds[0];
 
+    // Specializing the Dropdown FTW
+    const KindDropDown = Dropdown as { new (): Dropdown<DimensionKind>; };
 
     return <Modal
       className="dimension-modal"
@@ -112,15 +114,16 @@ export class DimensionModal extends React.Component<DimensionModalProps, Dimensi
           validator={/^.+$/}
         />
 
-        {React.createElement(Dropdown, {
-          label: "Kind",
-          items: this.kinds,
-          selectedItem: selectedKind,
-          equal: (a: DimensionKind, b: DimensionKind) => a.value === b.value,
-          renderItem: (a: DimensionKind) => a.label,
-          keyItem: (a: DimensionKind) => a.value,
-          onSelect: this.onKindChange.bind(this)
-        } as DropdownProps<DimensionKind>)}
+        <KindDropDown
+          label={'Kind'}
+          items={this.kinds}
+          selectedItem={selectedKind}
+          equal={(a: DimensionKind, b: DimensionKind) => a.value === b.value}
+          renderItem={(a: DimensionKind) => a.label}
+          keyItem={(a: DimensionKind) => a.value}
+          onSelect={this.onKindChange.bind(this)}
+        />
+
       </form>
 
       <div className="button-group">

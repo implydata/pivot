@@ -12,17 +12,17 @@ import { ImmutableInput } from '../../../components/immutable-input/immutable-in
 import { Modal } from '../../../components/modal/modal';
 import { Dropdown, DropdownProps } from '../../../components/dropdown/dropdown';
 
-import { Measure, MeasureJS } from '../../../../common/models/index';
+import { Measure } from '../../../../common/models/index';
 
 
 export interface MeasureModalProps extends React.Props<any> {
-  measure?: MeasureJS;
-  onSave?: (measure: MeasureJS) => void;
+  measure?: Measure;
+  onSave?: (measure: Measure) => void;
   onClose?: () => void;
 }
 
 export interface MeasureModalState {
-  newMeasure?: MeasureJS;
+  newMeasure?: Measure;
   canSave?: boolean;
 }
 
@@ -38,8 +38,8 @@ export class MeasureModal extends React.Component<MeasureModalProps, MeasureModa
   initStateFromProps(props: MeasureModalProps) {
     if (props.measure) {
       this.setState({
-        newMeasure: (Object as any).assign({}, props.measure),
-        canSave: false
+        newMeasure: new Measure(props.measure.valueOf()),
+        canSave: true
       });
     }
   }
@@ -70,25 +70,15 @@ export class MeasureModal extends React.Component<MeasureModalProps, MeasureModa
     }
   }
 
-  areEqual(a: MeasureJS, b: MeasureJS): boolean {
-    // Fails when name is empty, hence the try-catch
-    try {
-      return Measure.fromJS(a).equals(Measure.fromJS(b));
-    } catch (e) {
-      return false;
+  onChange(newMeasure: Measure, isValid: boolean) {
+    if (isValid) {
+      this.setState({
+        newMeasure,
+        canSave: !this.props.measure.equals(newMeasure)
+      });
+    } else {
+      this.setState({canSave: false});
     }
-  }
-
-  onChange(property: string, validator: RegExp, event: KeyboardEvent) {
-    var measure = this.state.newMeasure;
-
-    const newValue = (event.target as HTMLInputElement).value;
-    (measure as any)[property] = newValue;
-
-    this.setState({
-      newMeasure: measure,
-      canSave: validator.test(newValue) && !this.areEqual(this.props.measure, measure)
-    });
   }
 
   save() {
@@ -106,23 +96,14 @@ export class MeasureModal extends React.Component<MeasureModalProps, MeasureModa
       onClose={this.props.onClose}
     >
       <form className="general vertical">
-        <FormLabel label="Name"></FormLabel>
-        <input
-          type="text"
-          className={/^.+$/.test(newMeasure.name) ? '' : 'invalid'}
-          value={newMeasure.name}
-          onChange={this.onChange.bind(this, 'name', /^.+$/)}
-          ref='name-input'
-        />
-
         <FormLabel label="Title"></FormLabel>
-        <input
-          type="text"
-          className={/^.+$/.test(newMeasure.title) ? '' : 'invalid'}
-          value={newMeasure.title}
-          onChange={this.onChange.bind(this, 'title', /^.+$/)}
+        <ImmutableInput
+          focusOnStartUp={true}
+          instance={newMeasure}
+          path={'title'}
+          onChange={this.onChange.bind(this)}
+          validator={/^.+$/}
         />
-
       </form>
 
       <div className="button-group">
