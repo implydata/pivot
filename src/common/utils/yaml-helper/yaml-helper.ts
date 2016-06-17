@@ -1,5 +1,64 @@
 import { $, AttributeInfo, RefExpression } from 'plywood';
-import { DataSource, DataSourceJS, RefreshRule, Dimension, Measure } from '../../../common/models/index';
+import { DataSource, Dimension, Measure, Cluster } from '../../../common/models/index';
+
+function spaces(n: number) {
+  return (new Array(n + 1)).join(' ');
+}
+
+function yamlObject(lines: string[], indent: number): string[] {
+  var pad = spaces(indent);
+  return lines.map((line, i) => {
+    if (line === null) return '';
+    return pad + (i ? '  ' : '- ') + line;
+  });
+}
+
+export function clusterToYAML(cluster: Cluster, withComments: boolean): string[] {
+  var lines: string[] = [
+    `name: ${cluster.name}`,
+    `type: ${cluster.type}`
+  ];
+
+  if (withComments) {
+    lines.push("# The host to which to connect");
+  }
+  lines.push(`host: ${cluster.host}`, null);
+
+  if (withComments) {
+    lines.push("# A timeout for the Druid queries in ms (default: 30000 = 30 seconds)");
+    lines.push("#timeout: 30000", '');
+  }
+
+  if (withComments) {
+    lines.push("# Should new datasources automatically be added?");
+  }
+  lines.push(`sourceListScan: disable`, null);
+
+  if (withComments) {
+    lines.push("# Database specific");
+  }
+  switch (cluster.type) {
+    case 'druid':
+      if (cluster.introspectionStrategy !== Cluster.DEFAULT_INTROSPECTION_STRATEGY) {
+        if (withComments) {
+          lines.push("# The introspection strategy for the Druid external");
+        }
+        lines.push(`introspectionStrategy: ${cluster.introspectionStrategy}`, null);
+      }
+      break;
+
+    case 'postgres':
+    case 'mysql':
+      if (cluster.database) lines.push(`database: ${cluster.database}`);
+      if (cluster.user) lines.push(`user: ${cluster.user}`);
+      if (cluster.password) lines.push(`password: ${cluster.password}`);
+      break;
+  }
+
+  lines.push(null);
+  return yamlObject(lines, 2);
+}
+
 
 export function attributeToYAML(attribute: AttributeInfo): string[] {
   var lines: string[] = [

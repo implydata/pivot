@@ -49,7 +49,7 @@ export class SettingsManager {
         break;
 
       case 'local':
-        Q.fcall(() => AppSettings.fromJS(loadFileSync(settingsLocation.uri, 'yaml')))
+        this.currentWork = Q.fcall(() => AppSettings.fromJS(loadFileSync(settingsLocation.uri, 'yaml')))
           .then(
             (appSettings) => {
               this.changeSettings(appSettings);
@@ -140,9 +140,11 @@ export class SettingsManager {
       .then(() => this.appSettings);
   }
 
-  changeSettings(newSettings: AppSettings): void {
+  changeSettings(newSettings: AppSettings): Q.Promise<any> {
     var oldSettings = this.appSettings;
     this.appSettings = newSettings;
+
+    var tasks: Q.Promise<any>[] = [];
 
     updater(oldSettings.clusters, newSettings.clusters, {
       onExit: (oldCluster) => {
@@ -152,7 +154,7 @@ export class SettingsManager {
         console.log(`${newCluster.name} UPDATED cluster`);
       },
       onEnter: (newCluster) => {
-        this.addClusterManager(newCluster);
+        tasks.push(this.addClusterManager(newCluster));
       }
     });
 
@@ -166,9 +168,11 @@ export class SettingsManager {
         console.log(`${newDataSource.name} UPDATED datasource`);
       },
       onEnter: (newDataSource) => {
-        this.addFileManager(newDataSource);
+        tasks.push(this.addFileManager(newDataSource));
       }
     });
+
+    return Q.all(tasks);
   }
 
   updateSettings(newSettings: AppSettings): Q.Promise<any> {

@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as nopt from 'nopt';
 import { Cluster, DataSource, SupportedTypes } from '../common/models/index';
-import { dataSourceToYAML } from '../common/utils/yaml-helper/yaml-helper';
+import { clusterToYAML, dataSourceToYAML } from '../common/utils/yaml-helper/yaml-helper';
 import { ServerSettings, ServerSettingsJS } from './models/server-settings/server-settings';
 import { loadFileSync, SettingsManager, SettingsLocation, CONSOLE_LOGGER } from './utils/index';
 
@@ -15,6 +15,10 @@ function exitWithMessage(message: string): void {
 function exitWithError(message: string): void {
   console.error(message);
   process.exit(1);
+}
+
+function zeroOne(thing: any): number {
+  return Number(Boolean(thing));
 }
 
 
@@ -42,8 +46,7 @@ Possible usage:
   -c, --config                 The configuration YAML files to use
 
       --print-config           Prints out the auto generated config
-      --with-comments          Adds comments when printing the auto generated config
-      --data-sources-only      Only print the data sources in the auto generated config
+      --with-comments          Adds comments when printing the auto generated config      
 
   -f, --file                   Start pivot on top of this file based data source (must be JSON, CSV, or TSV)
   -d, --druid                  The Druid broker node to connect to
@@ -67,7 +70,6 @@ function parseArgs() {
 
       "print-config": Boolean,
       "with-comments": Boolean,
-      "data-sources-only": Boolean,
 
       "file": String,
       "druid": String,
@@ -100,9 +102,13 @@ if (parsedArgs['version']) {
   exitWithMessage(VERSION);
 }
 
-var hasCLIData = Boolean(parsedArgs['file'] || parsedArgs['druid'] || parsedArgs['postgres'] || parsedArgs['mysql']);
-if (!parsedArgs['example'] && !parsedArgs['config'] && !hasCLIData) {
+var numDataInputs = zeroOne(parsedArgs['file']) + zeroOne(parsedArgs['druid']) + zeroOne(parsedArgs['postgres']) + zeroOne(parsedArgs['mysql']);
+if (!parsedArgs['example'] && !parsedArgs['config'] && numDataInputs === 0) {
   exitWithMessage(USAGE);
+}
+
+if (numDataInputs > 1) {
+  exitWithError('only one of --file, --druid, --postgres, --mysql can be given on the command line, to connect to several clusters create a config');
 }
 
 var serverSettingsFilePath = parsedArgs['config'];
@@ -131,7 +137,29 @@ if (serverSettingsFilePath) {
   serverSettingsJS = {};
 }
 
-var serverSettings = ServerSettings.fromJS(serverSettingsJS, serverSettingsFileDir);
+export const SERVER_SETTINGS = ServerSettings.fromJS(serverSettingsJS, serverSettingsFileDir);
+
+// --- Auth -------------------------------
+
+var auth = serverSettingsJS.auth;
+var authModule: any = null;
+if (auth) {
+  auth = path.resolve(serverSettingsFileDir, auth);
+  console.log(`Using auth ${auth}`);
+  try {
+    authModule = require(auth);
+  } catch (e) {
+    exitWithError(`error loading auth module: ${e.message}`);
+  }
+
+  if (authModule.version !== AUTH_MODULE_VERSION) {
+    exitWithError(`unsupported auth module version ${authModule.version} needed ${AUTH_MODULE_VERSION}`);
+  }
+  if (typeof authModule.auth !== 'function') exitWithError('Invalid auth module');
+}
+export const AUTH = authModule;
+
+// --- Printing -------------------------------
 
 export const PRINT_CONFIG = Boolean(parsedArgs['print-config']);
 export const START_SERVER = !PRINT_CONFIG;
@@ -151,7 +179,6 @@ if (serverSettingsFilePath) {
   };
 }
 
-export const SERVER_SETTINGS = serverSettings;
 export const SETTINGS_MANAGER = new SettingsManager(settingsLocation, {
   logger: CONSOLE_LOGGER,
   verbose: VERBOSE,
@@ -187,37 +214,13 @@ for (var clusterType of CLUSTER_TYPES) {
   }
 }
 
-// --- Auth -------------------------------
-
-var auth = serverSettingsJS.auth;
-var authModule: any = null;
-if (auth) {
-  auth = path.resolve(serverSettingsFileDir, auth);
-  console.log(`Using auth ${auth}`);
-  try {
-    authModule = require(auth);
-  } catch (e) {
-    exitWithError(`error loading auth module: ${e.message}`);
-  }
-
-  if (authModule.version !== AUTH_MODULE_VERSION) {
-    exitWithError(`unsupported auth module version ${authModule.version} needed ${AUTH_MODULE_VERSION}`);
-  }
-  if (typeof authModule.auth !== 'function') exitWithError('Invalid auth module');
-}
-export const AUTH = authModule;
-
-// --- Printing -------------------------------
-
 if (!PRINT_CONFIG) {
   console.log(`Starting Pivot v${VERSION}`);
 } else {
   var withComments = Boolean(parsedArgs['with-comments']);
-  var dataSourcesOnly = Boolean(parsedArgs['data-sources-only']);
 
   SETTINGS_MANAGER.getSettings().then(appSettings => {
     var { dataSources, clusters } = appSettings;
-    var cluster = clusters[0];
 
     if (!dataSources.length) throw new Error('Could not find any data sources please verify network connectivity');
 
@@ -227,43 +230,20 @@ if (!PRINT_CONFIG) {
       ''
     ];
 
-    if (!dataSourcesOnly) {
-      if (VERBOSE) {
-        if (withComments) {
-          lines.push("# Run Pivot in verbose mode so it prints out the queries that it issues");
-        }
-        lines.push(`verbose: true`, '');
-      }
-
+    if (VERBOSE) {
       if (withComments) {
-        lines.push("# The port on which the Pivot server will listen on");
+        lines.push("# Run Pivot in verbose mode so it prints out the queries that it issues");
       }
-      lines.push(`port: ${serverSettings.port}`, '');
-
-      if (cluster.host) {
-        if (withComments) {
-          lines.push("# A Druid broker node that can serve data (only used if you have Druid based data source)");
-        }
-        lines.push(`druidHost: ${cluster.host}`, '');
-
-        if (withComments) {
-          lines.push("# A timeout for the Druid queries in ms (default: 30000 = 30 seconds)");
-          lines.push("#timeout: 30000", '');
-        }
-      }
-
-      if (cluster.introspectionStrategy !== Cluster.DEFAULT_INTROSPECTION_STRATEGY) {
-        if (withComments) {
-          lines.push("# The introspection strategy for the Druid external");
-        }
-        lines.push(`introspectionStrategy: ${cluster.introspectionStrategy}`, '');
-      }
-
-      if (withComments) {
-        lines.push("# Should new datasources automatically be added?");
-      }
-      lines.push(`sourceListScan: disable`, '');
+      lines.push(`verbose: true`, '');
     }
+
+    if (withComments) {
+      lines.push("# The port on which the Pivot server will listen on");
+    }
+    lines.push(`port: ${SERVER_SETTINGS.port}`, '');
+
+    lines.push('clusters:');
+    lines = lines.concat.apply(lines, clusters.map(c => clusterToYAML(c, withComments)));
 
     lines.push('dataSources:');
     lines = lines.concat.apply(lines, dataSources.map(d => dataSourceToYAML(d, withComments)));
