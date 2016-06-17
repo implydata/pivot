@@ -9,7 +9,7 @@ import { formatterFromData, collect, formatGranularity, formatTimeBasedOnGranula
 import { Fn } from '../../../common/utils/general/general';
 import { Clicker, Essence, VisStrategy, Dimension, SortOn, SplitCombine,
   Colors, Granularity, ContinuousDimensionKind, getBestGranularityForRange, granularityEquals,
-  granularityToString, getDefaultGranularityForKind, getGranularities } from '../../../common/models/index';
+  granularityToString, getDefaultGranularityForKind, getGranularities, NEVER_BUCKET } from '../../../common/models/index';
 
 import { setDragGhost, classNames } from '../../utils/dom/dom';
 import { DragManager } from '../../utils/drag-manager/drag-manager';
@@ -100,7 +100,7 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
 
     var sortExpression: Expression = null;
 
-    if (dimension.isContinuous()) {
+    if (dimension.isContinuous() && dimension.bucketingStrategy !== NEVER_BUCKET) {
       const dimensionExpression = dimension.expression as RefExpression;
       const attributeName = dimensionExpression.name;
 
@@ -491,7 +491,7 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
       showSearch={showSearch}
       icons={icons}
       className={className}
-      actions={continuous ? this.getGranularityActions() : null}
+      actions={(continuous && dimension.bucketingStrategy !== NEVER_BUCKET) ? this.getGranularityActions() : null}
       >
       <div className="rows">
         {rows}
