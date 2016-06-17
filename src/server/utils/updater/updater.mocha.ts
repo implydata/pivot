@@ -1,8 +1,8 @@
 const { expect } = require('chai');
 import { updater } from './updater';
 
-function stdEquals(a: any, b: any) {
-  return a === b;
+function valueEqual(a: any, b: any) {
+  return a.value === b.value;
 }
 
 describe('updater', function () {
@@ -13,12 +13,12 @@ describe('updater', function () {
       [],
       [{ name: 'A' }],
       {
-        equals: stdEquals,
+        equals: valueEqual,
         onEnter: (newThing) => {
           ops.push(`Enter ${newThing.name}`);
         },
         onUpdate: (newThing, oldThing) => {
-          ops.push(`Update ${oldThing.name} => ${newThing.name}`);
+          ops.push(`Update ${oldThing.name} ${oldThing.value} => ${newThing.value}`);
         },
         onExit: (oldThing) => {
           ops.push(`Exit ${oldThing.name}`);
@@ -36,12 +36,12 @@ describe('updater', function () {
       [{ name: 'A' }],
       [],
       {
-        equals: stdEquals,
+        equals: valueEqual,
         onEnter: (newThing) => {
           ops.push(`Enter ${newThing.name}`);
         },
         onUpdate: (newThing, oldThing) => {
-          ops.push(`Update ${oldThing.name} => ${newThing.name}`);
+          ops.push(`Update ${oldThing.name} ${oldThing.value} => ${newThing.value}`);
         },
         onExit: (oldThing) => {
           ops.push(`Exit ${oldThing.name}`);
@@ -59,12 +59,12 @@ describe('updater', function () {
       [{ name: 'A' }],
       [{ name: 'B' }],
       {
-        equals: stdEquals,
+        equals: valueEqual,
         onEnter: (newThing) => {
           ops.push(`Enter ${newThing.name}`);
         },
         onUpdate: (newThing, oldThing) => {
-          ops.push(`Update ${oldThing.name} => ${newThing.name}`);
+          ops.push(`Update ${oldThing.name} ${oldThing.value} => ${newThing.value}`);
         },
         onExit: (oldThing) => {
           ops.push(`Exit ${oldThing.name}`);
@@ -73,6 +73,29 @@ describe('updater', function () {
     );
 
     expect(ops.join('; ')).to.equal('Enter B; Exit A');
+  });
+
+  it('enter / update / exit', () => {
+    var ops: string[] = [];
+
+    updater(
+      [{ name: 'A', value: 1 }, { name: 'B', value: 2 }],
+      [{ name: 'B', value: 3 }, { name: 'C', value: 4 }],
+      {
+        equals: valueEqual,
+        onEnter: (newThing) => {
+          ops.push(`Enter ${newThing.name}`);
+        },
+        onUpdate: (newThing, oldThing) => {
+          ops.push(`Update ${oldThing.name} ${oldThing.value} => ${newThing.value}`);
+        },
+        onExit: (oldThing) => {
+          ops.push(`Exit ${oldThing.name}`);
+        }
+      }
+    );
+
+    expect(ops.join('; ')).to.equal('Update B 2 => 3; Enter C; Exit A');
   });
 
 });

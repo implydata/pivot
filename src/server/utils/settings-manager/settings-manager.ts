@@ -12,6 +12,7 @@ export interface SettingsLocation {
   location: 'local' | 'transient';
   readOnly: boolean;
   uri?: string;
+  loadHook?: (appSettings: AppSettings) => AppSettings;
 }
 
 export interface SettingsManagerOptions {
@@ -49,7 +50,13 @@ export class SettingsManager {
         break;
 
       case 'local':
-        this.currentWork = Q.fcall(() => AppSettings.fromJS(loadFileSync(settingsLocation.uri, 'yaml')))
+        this.currentWork = Q.fcall(() => {
+          var appSettings = AppSettings.fromJS(loadFileSync(settingsLocation.uri, 'yaml'));
+          if (settingsLocation.loadHook) {
+            appSettings = settingsLocation.loadHook(appSettings);
+          }
+          return appSettings;
+        })
           .then(
             (appSettings) => {
               this.changeSettings(appSettings);

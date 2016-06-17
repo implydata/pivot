@@ -15,7 +15,7 @@ export interface UpdatedOptions<T> {
   onExit?: (oldThing: T) => void;
 }
 
-export function updater<T>(initialList: T[], updatedList: T[], updatedOptions: UpdatedOptions<T>): void {
+export function updater<T>(oldThings: T[], newThings: T[], updatedOptions: UpdatedOptions<T>): void {
   const key = updatedOptions.key || getName;
   const equals = updatedOptions.equals || immutableEqual;
   const onEnter = updatedOptions.onEnter || noop;
@@ -23,24 +23,24 @@ export function updater<T>(initialList: T[], updatedList: T[], updatedOptions: U
   const onExit = updatedOptions.onExit || noop;
 
   var initialByKey: Lookup<T> = {};
-  for (var i = 0; i < initialList.length; i++) {
-    var initialThing = initialList[i];
+  for (var i = 0; i < oldThings.length; i++) {
+    var initialThing = oldThings[i];
     var initialThingKey = key(initialThing);
     if (initialByKey[initialThingKey]) throw new Error(`duplicate key '${initialThingKey}'`);
     initialByKey[initialThingKey] = initialThing;
   }
 
-  for (var j = 0; j < updatedList.length; j++) {
-    var updatedThing = updatedList[j];
-    var updatedThingKey = key(updatedThing);
-    var oldThing = initialByKey[updatedThingKey];
+  for (var j = 0; j < newThings.length; j++) {
+    var newThing = newThings[j];
+    var newThingKey = key(newThing);
+    var oldThing = initialByKey[newThingKey];
     if (oldThing) {
-      if (!equals(updatedThing, oldThing)) {
-        onUpdate(updatedThing, oldThing);
+      if (!equals(newThing, oldThing)) {
+        onUpdate(newThing, oldThing);
       }
-      delete initialByKey[updatedThingKey];
+      delete initialByKey[newThingKey];
     } else {
-      onEnter(updatedThing);
+      onEnter(newThing);
     }
   }
 

@@ -1,6 +1,5 @@
 import { Class, Instance, isInstanceOf } from 'immutable-class';
-import { External, ExternalValue, AttributeInfo } from 'plywood';
-import { RefreshRule } from '../refresh-rule/refresh-rule';
+import { External } from 'plywood';
 
 export type SupportedTypes = 'druid' | 'mysql' | 'postgres';
 export type SourceListScan = 'disable' | 'auto';
