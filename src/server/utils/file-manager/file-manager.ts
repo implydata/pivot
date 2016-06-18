@@ -24,9 +24,10 @@ export function getFileData(filePath: string): Q.Promise<any[]> {
 }
 
 export interface FileManagerOptions {
-  uri: string;
   logger: Logger;
   verbose?: boolean;
+  anchorPath: string;
+  uri: string;
   subsetFilter?: Expression;
   onDatasetChange?: (dataset: Dataset) => void;
 }
@@ -36,14 +37,17 @@ function noop() {}
 export class FileManager {
   public logger: Logger;
   public verbose: boolean;
+  public anchorPath: string;
   public uri: string;
   public dataset: Dataset;
   public subsetFilter: Expression;
   public onDatasetChange: (dataset: Dataset) => void;
 
   constructor(options: FileManagerOptions) {
-    this.uri = options.uri;
     this.logger = options.logger;
+    this.verbose = Boolean(options.verbose);
+    this.anchorPath = options.anchorPath;
+    this.uri = options.uri;
     this.subsetFilter = options.subsetFilter;
     this.verbose = Boolean(options.verbose);
     this.onDatasetChange = options.onDatasetChange || noop;
@@ -51,11 +55,15 @@ export class FileManager {
 
   // Do initialization
   public init(): Q.Promise<any> {
-    this.logger.log(`Loading file ${this.uri}`);
-    return getFileData(this.uri)
+    const { logger, anchorPath, uri } = this;
+
+    var filePath = path.resolve(anchorPath, uri);
+
+    logger.log(`Loading file ${filePath}`);
+    return getFileData(filePath)
       .then(
         (rawData) => {
-          this.logger.log(`Loaded file ${this.uri} (rows = ${rawData.length})`);
+          logger.log(`Loaded file ${filePath} (rows = ${rawData.length})`);
           var dataset = Dataset.fromJS(rawData).hide();
 
           if (this.subsetFilter) {
@@ -66,7 +74,7 @@ export class FileManager {
           this.onDatasetChange(dataset);
         },
         (e) => {
-          this.logger.error(`Field to load file ${this.uri} because ${e.message}`);
+          logger.error(`Field to load file ${filePath} because ${e.message}`);
         }
       );
   }

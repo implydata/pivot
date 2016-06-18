@@ -1,14 +1,5 @@
 import * as path from 'path';
 import { Class, Instance, isInstanceOf } from 'immutable-class';
-import { DruidRequestDecorator } from 'plywood-druid-requester';
-
-export interface RequestDecoratorFactoryOptions {
-  config: any;
-}
-
-export interface DruidRequestDecoratorModule {
-  druidRequestDecorator: (log: (line: string) => void, options: RequestDecoratorFactoryOptions) => DruidRequestDecorator;
-}
 
 export type Iframe = "allow" | "deny";
 
@@ -18,9 +9,6 @@ export interface ServerSettingsValue {
   serverRoot?: string;
   pageMustLoadTimeout?: number;
   iframe?: Iframe;
-  druidRequestDecorator?: string;
-
-  druidRequestDecoratorModule?: DruidRequestDecoratorModule;
 }
 
 export interface ServerSettingsJS {
@@ -29,7 +17,6 @@ export interface ServerSettingsJS {
   serverRoot?: string;
   pageMustLoadTimeout?: number;
   iframe?: Iframe;
-  druidRequestDecorator?: string;
 }
 
 function parseIntFromPossibleString(x: any) {
@@ -53,31 +40,18 @@ export class ServerSettings implements Instance<ServerSettingsValue, ServerSetti
       serverHost,
       serverRoot,
       pageMustLoadTimeout,
-      iframe,
-      druidRequestDecorator
+      iframe
     } = parameters;
 
     if (serverRoot && serverRoot[0] !== '/') serverRoot = '/' + serverRoot;
     if (serverRoot === '/') serverRoot = null;
-
-    var druidRequestDecoratorModule: DruidRequestDecoratorModule = null;
-    if (configFileDir && druidRequestDecorator) {
-      druidRequestDecorator = path.resolve(configFileDir, druidRequestDecorator);
-      try {
-        druidRequestDecoratorModule = require(druidRequestDecorator);
-      } catch (e) {
-        throw new Error(`error loading druidRequestDecorator module: ${e.message}`);
-      }
-    }
 
     return new ServerSettings({
       port: parseIntFromPossibleString(port),
       serverHost,
       serverRoot,
       pageMustLoadTimeout,
-      iframe,
-      druidRequestDecorator,
-      druidRequestDecoratorModule
+      iframe
     });
   }
 
@@ -88,8 +62,6 @@ export class ServerSettings implements Instance<ServerSettingsValue, ServerSetti
   public iframe: Iframe;
   public druidRequestDecorator: string;
 
-  public druidRequestDecoratorModule: DruidRequestDecoratorModule;
-
   constructor(parameters: ServerSettingsValue) {
     var port = parameters.port || ServerSettings.DEFAULT_PORT;
     if (typeof port !== 'number') throw new Error(`port must be a number`);
@@ -99,9 +71,6 @@ export class ServerSettings implements Instance<ServerSettingsValue, ServerSetti
     this.serverRoot = parameters.serverRoot || ServerSettings.DEFAULT_SERVER_ROOT;
     this.pageMustLoadTimeout = parameters.pageMustLoadTimeout || ServerSettings.DEFAULT_PAGE_MUST_LOAD_TIMEOUT;
     this.iframe = parameters.iframe || ServerSettings.DEFAULT_IFRAME;
-    this.druidRequestDecorator = parameters.druidRequestDecorator;
-
-    this.druidRequestDecoratorModule = parameters.druidRequestDecoratorModule;
   }
 
   public valueOf(): ServerSettingsValue {
@@ -110,9 +79,7 @@ export class ServerSettings implements Instance<ServerSettingsValue, ServerSetti
       serverHost: this.serverHost,
       serverRoot: this.serverRoot,
       pageMustLoadTimeout: this.pageMustLoadTimeout,
-      iframe: this.iframe,
-      druidRequestDecorator: this.druidRequestDecorator,
-      druidRequestDecoratorModule: this.druidRequestDecoratorModule
+      iframe: this.iframe
     };
   }
 
@@ -124,7 +91,6 @@ export class ServerSettings implements Instance<ServerSettingsValue, ServerSetti
     if (this.serverRoot !== ServerSettings.DEFAULT_SERVER_ROOT) js.serverRoot = this.serverRoot;
     if (this.pageMustLoadTimeout !== ServerSettings.DEFAULT_PAGE_MUST_LOAD_TIMEOUT) js.pageMustLoadTimeout = this.pageMustLoadTimeout;
     if (this.iframe !== ServerSettings.DEFAULT_IFRAME) js.iframe = this.iframe;
-    if (this.druidRequestDecorator) js.druidRequestDecorator = this.druidRequestDecorator;
     return js;
   }
 
@@ -142,8 +108,7 @@ export class ServerSettings implements Instance<ServerSettingsValue, ServerSetti
       this.serverHost === other.serverHost &&
       this.serverRoot === other.serverRoot &&
       this.pageMustLoadTimeout === other.pageMustLoadTimeout &&
-      this.iframe === other.iframe &&
-      this.druidRequestDecorator === other.druidRequestDecorator;
+      this.iframe === other.iframe;
   }
 
 }

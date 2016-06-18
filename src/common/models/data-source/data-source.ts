@@ -250,9 +250,6 @@ export class DataSource implements Instance<DataSourceValue, DataSourceJS> {
     var refreshRule = parameters.refreshRule ? RefreshRule.fromJS(parameters.refreshRule) : null;
 
     var maxTime = parameters.maxTime ? MaxTime.fromJS(parameters.maxTime) : null;
-    if (!maxTime && refreshRule.isRealtime()) {
-      maxTime = MaxTime.fromNow();
-    }
 
     var timeAttributeName = parameters.timeAttribute;
     if (cluster && cluster.type === 'druid' && !timeAttributeName) {
@@ -375,8 +372,10 @@ export class DataSource implements Instance<DataSourceValue, DataSourceJS> {
     this.defaultSortMeasure = parameters.defaultSortMeasure;
     this.defaultSelectedMeasures = parameters.defaultSelectedMeasures;
     this.defaultPinnedDimensions = parameters.defaultPinnedDimensions;
-    this.refreshRule = parameters.refreshRule || RefreshRule.query();
-    this.maxTime = parameters.maxTime;
+
+    var refreshRule = parameters.refreshRule || RefreshRule.query();
+    this.refreshRule = refreshRule;
+    this.maxTime = parameters.maxTime || (refreshRule.isRealtime() ? MaxTime.fromNow() : null);
 
     this.cluster = parameters.cluster;
     this.executor = parameters.executor;

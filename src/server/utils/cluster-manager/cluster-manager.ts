@@ -1,11 +1,20 @@
+import * as path from 'path';
 import * as Q from 'q';
-import { External, DruidExternal, MySQLExternal, PostgresExternal, helper } from 'plywood';
+import { External, helper } from 'plywood';
 import { DruidRequestDecorator } from 'plywood-druid-requester';
 import { properRequesterFactory } from '../requester/requester';
-import { Cluster, SupportedTypes } from '../../../common/models/index';
+import { Cluster, SupportedType } from '../../../common/models/index';
 import { Logger } from '../logger/logger';
 
-// Hack: (this should really be part of Plywood)
+export interface RequestDecoratorFactoryOptions {
+  // ToDo: expand
+}
+
+export interface DruidRequestDecoratorModule {
+  druidRequestDecorator: (logger: Logger, options: RequestDecoratorFactoryOptions) => DruidRequestDecorator;
+}
+
+// ToDo: Hack: (this should really be part of Plywood)
 function externalChangeVersion(external: External, version: string): External {
   if (external.version === version) return external;
   var value = external.valueOf();
@@ -24,6 +33,7 @@ export interface ManagedExternal {
 export interface ClusterManagerOptions {
   logger: Logger;
   verbose?: boolean;
+  anchorPath: string;
   initialExternals?: ManagedExternal[];
   onExternalChange?: (name: string, external: External) => void;
   generateExternalName?: (external: External) => string;
@@ -38,12 +48,14 @@ function getSourceFromExternal(external: External): string {
 export class ClusterManager {
   public logger: Logger;
   public verbose: boolean;
+  public anchorPath: string;
   public cluster: Cluster;
   public version: string;
   public requester: Requester.PlywoodRequester<any>;
   public managedExternals: ManagedExternal[] = [];
   public onExternalChange: (name: string, external: External) => void;
   public generateExternalName: (external: External) => string;
+  public requestDecoratorModule: DruidRequestDecoratorModule;
 
   private host: string = null;
 
@@ -56,12 +68,14 @@ export class ClusterManager {
     if (!cluster) throw new Error('must have cluster');
     this.logger = options.logger;
     this.verbose = Boolean(options.verbose);
+    this.anchorPath = options.anchorPath;
     this.cluster = cluster;
     this.version = cluster.version;
     this.managedExternals = options.initialExternals || [];
     this.onExternalChange = options.onExternalChange || noop;
     this.generateExternalName = options.generateExternalName || getSourceFromExternal;
 
+    this.loadRequestDecorator();
     this.updateRequester();
     this.updateSourceListRefreshTimer();
     this.updateSourceReintrospectTimer();
@@ -90,16 +104,27 @@ export class ClusterManager {
     }
   }
 
+  private loadRequestDecorator(): void {
+    const { cluster, logger, anchorPath } = this;
+    if (!cluster.requestDecorator) return;
+
+    var requestDecoratorPath = path.resolve(anchorPath, cluster.requestDecorator);
+    try {
+      this.requestDecoratorModule = require(requestDecoratorPath);
+    } catch (e) {
+      throw new Error(`error loading druidRequestDecorator module: ${e.message}`);
+    }
+  }
+
   private updateRequester() {
-    const { cluster } = this;
+    const { cluster, logger, requestDecoratorModule } = this;
 
     var druidRequestDecorator: DruidRequestDecorator = null;
-    // if (clusterType === 'druid' && serverSettings.druidRequestDecoratorModule) {
-    //   var logger = (str: string) => console.log(str);
-    //   druidRequestDecorator = serverSettings.druidRequestDecoratorModule.druidRequestDecorator(logger, {
-    //     config
-    //   });
-    // }
+    if (cluster.type === 'druid' && requestDecoratorModule) {
+      druidRequestDecorator = requestDecoratorModule.druidRequestDecorator(logger, {
+        // ToDo: pass in options
+      });
+    }
 
     if (this.host !== cluster.host) {
       this.host = cluster.host;

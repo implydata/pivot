@@ -2,10 +2,10 @@ import { $, helper } from 'plywood';
 import { druidRequesterFactory, DruidRequestDecorator } from 'plywood-druid-requester';
 import { mySqlRequesterFactory } from 'plywood-mysql-requester';
 import { postgresRequesterFactory } from 'plywood-postgres-requester';
-import { SupportedTypes } from '../../../common/models/index';
+import { SupportedType } from '../../../common/models/index';
 
 export interface ProperRequesterOptions {
-  type: SupportedTypes;
+  type: SupportedType;
   host: string;
   retry?: number;
   timeout?: number;

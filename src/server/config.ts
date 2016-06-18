@@ -1,6 +1,7 @@
 import * as path from 'path';
 import * as nopt from 'nopt';
-import { Cluster, DataSource, SupportedTypes } from '../common/models/index';
+import { arraySum } from '../common/utils/general/general';
+import { Cluster, DataSource, SupportedType, AppSettings } from '../common/models/index';
 import { clusterToYAML, dataSourceToYAML } from '../common/utils/yaml-helper/yaml-helper';
 import { ServerSettings, ServerSettingsJS } from './models/server-settings/server-settings';
 import { loadFileSync, SettingsManager, SettingsLocation, CONSOLE_LOGGER } from './utils/index';
@@ -35,27 +36,38 @@ Usage: pivot [options]
 
 Possible usage:
 
-  pivot --example wiki
+  pivot --example
   pivot --druid your.broker.host:8082
+
+General arguments:
 
       --help                   Print this help message
       --version                Display the version number
   -v, --verbose                Display the DB queries that are being made
-  -p, --port                   The port pivot will run on
-      --example                Start pivot with some example data (overrides all other options)
-  -c, --config                 The configuration YAML files to use
 
-      --print-config           Prints out the auto generated config
-      --with-comments          Adds comments when printing the auto generated config      
+Server arguments:
 
-  -f, --file                   Start pivot on top of this file based data source (must be JSON, CSV, or TSV)
-  -d, --druid                  The Druid broker node to connect to
-      --postgres               The Postgres cluster to connect to
-      --mysql                  The MySQL cluster to connect to
+  -p, --port <port-number>     The port pivot will run on (default: ${ServerSettings.DEFAULT_PORT})
       
-      --user                   The cluster 'user' (if needed)
-      --password               The cluster 'password' (if needed)
-      --database               The cluster 'database' (if needed)
+Data connection options:      
+  
+  Exactly one data connection option must be provided. 
+  
+  -c, --config <path>          Use this local configuration (YAML) file
+      --example                Start Pivot with some example data for testing / demo  
+  -f, --file <path>            Start Pivot on top of this file based data source (must be JSON, CSV, or TSV)
+  -d, --druid <host>           The Druid broker node to connect to
+      --postgres <host>        The Postgres cluster to connect to
+      --mysql <host>           The MySQL cluster to connect to
+      
+      --user <string>          The cluster 'user' (if needed)
+      --password <string>      The cluster 'password' (if needed)
+      --database <string>      The cluster 'database' (if needed)
+
+Configuration printing utilities:      
+      
+      --print-config           Prints out the auto generated config
+      --with-comments          Adds comments when printing the auto generated config
 `;
 
 function parseArgs() {
@@ -102,13 +114,16 @@ if (parsedArgs['version']) {
   exitWithMessage(VERSION);
 }
 
-var numDataInputs = zeroOne(parsedArgs['file']) + zeroOne(parsedArgs['druid']) + zeroOne(parsedArgs['postgres']) + zeroOne(parsedArgs['mysql']);
-if (!parsedArgs['example'] && !parsedArgs['config'] && numDataInputs === 0) {
+const SETTINGS_INPUTS = ['config', 'example', 'file', 'druid', 'postgres', 'mysql'];
+
+var numSettingsInputs = arraySum(SETTINGS_INPUTS.map((input) => zeroOne(parsedArgs[input])));
+
+if (numSettingsInputs === 0) {
   exitWithMessage(USAGE);
 }
 
-if (numDataInputs > 1) {
-  exitWithError('only one of --file, --druid, --postgres, --mysql can be given on the command line, to connect to several clusters create a config');
+if (numSettingsInputs > 1) {
+  exitWithError(`only one of --${SETTINGS_INPUTS.join(', --')} can be given on the command line`);
 }
 
 var serverSettingsFilePath = parsedArgs['config'];
@@ -123,10 +138,10 @@ if (parsedArgs['example']) {
   }
 }
 
-var serverSettingsFileDir: string = null;
+var anchorPath: string;
 var serverSettingsJS: any;
 if (serverSettingsFilePath) {
-  serverSettingsFileDir = path.dirname(serverSettingsFilePath);
+  anchorPath = path.dirname(serverSettingsFilePath);
   try {
     serverSettingsJS = loadFileSync(serverSettingsFilePath, 'yaml');
     console.log(`Using config ${serverSettingsFilePath}`);
@@ -134,17 +149,18 @@ if (serverSettingsFilePath) {
     exitWithError(`Could not load config from '${serverSettingsFilePath}': ${e.message}`);
   }
 } else {
+  anchorPath = process.cwd();
   serverSettingsJS = {};
 }
 
-export const SERVER_SETTINGS = ServerSettings.fromJS(serverSettingsJS, serverSettingsFileDir);
+export const SERVER_SETTINGS = ServerSettings.fromJS(serverSettingsJS, anchorPath);
 
 // --- Auth -------------------------------
 
 var auth = serverSettingsJS.auth;
 var authModule: any = null;
 if (auth) {
-  auth = path.resolve(serverSettingsFileDir, auth);
+  auth = path.resolve(anchorPath, auth);
   console.log(`Using auth ${auth}`);
   try {
     authModule = require(auth);
@@ -159,11 +175,9 @@ if (auth) {
 }
 export const AUTH = authModule;
 
-// --- Printing -------------------------------
+// --- Location -------------------------------
 
-export const PRINT_CONFIG = Boolean(parsedArgs['print-config']);
-export const START_SERVER = !PRINT_CONFIG;
-export const VERBOSE = Boolean(parsedArgs['verbose'] || serverSettingsJS.verbose);
+const CLUSTER_TYPES: SupportedType[] = ['druid', 'postgres', 'mysql'];
 
 var settingsLocation: SettingsLocation = null;
 if (serverSettingsFilePath) {
@@ -173,46 +187,54 @@ if (serverSettingsFilePath) {
     uri: serverSettingsFilePath
   };
 } else {
+  var initAppSettings = AppSettings.BLANK;
+
+  // If a file is specified add it as a dataSource
+  var filesToLoad = parsedArgs['file'] || [];
+  for (var fileToLoad of filesToLoad) {
+    initAppSettings = initAppSettings.addDataSource(new DataSource({
+      name: path.basename(fileToLoad, path.extname(fileToLoad)),
+      engine: 'native',
+      source: fileToLoad
+    }));
+  }
+
+  for (var clusterType of CLUSTER_TYPES) {
+    var host = parsedArgs[clusterType];
+    if (host) {
+      initAppSettings = initAppSettings.addCluster(new Cluster({
+        name: clusterType,
+        type: clusterType,
+        host: host,
+        sourceListScan: 'auto',
+        sourceListRefreshInterval: 15000,
+
+        user: parsedArgs['user'],
+        password: parsedArgs['password'],
+        database: parsedArgs['database']
+      }));
+    }
+  }
+
   settingsLocation = {
     location: 'transient',
-    readOnly: false
+    readOnly: false,
+    initAppSettings
   };
 }
+
+export const PRINT_CONFIG = Boolean(parsedArgs['print-config']);
+export const START_SERVER = !PRINT_CONFIG;
+export const VERBOSE = Boolean(parsedArgs['verbose'] || serverSettingsJS.verbose);
 
 export const SETTINGS_MANAGER = new SettingsManager(settingsLocation, {
   logger: CONSOLE_LOGGER,
   verbose: VERBOSE,
+  anchorPath,
   initialLoadTimeout: SERVER_SETTINGS.pageMustLoadTimeout
 });
 
-// If a file is specified add it as a dataSource
-var filesToLoad = parsedArgs['file'] || [];
-for (var fileToLoad of filesToLoad) {
-  SETTINGS_MANAGER.addDataSource(new DataSource({
-    name: SETTINGS_MANAGER.getFreshDataSourceName(path.basename(fileToLoad, path.extname(fileToLoad))),
-    engine: 'native',
-    source: fileToLoad
-  }));
-}
-
-const CLUSTER_TYPES: SupportedTypes[] = ['druid', 'postgres', 'mysql'];
-
-for (var clusterType of CLUSTER_TYPES) {
-  var host = parsedArgs[clusterType];
-  if (host) {
-    SETTINGS_MANAGER.addCluster(new Cluster({
-      name: SETTINGS_MANAGER.getFreshClusterName(clusterType),
-      type: clusterType,
-      host: host,
-      sourceListScan: 'auto',
-      sourceListRefreshInterval: 15000,
-
-      user: parsedArgs['user'],
-      password: parsedArgs['password'],
-      database: parsedArgs['database']
-    }));
-  }
-}
+// --- Printing -------------------------------
 
 if (!PRINT_CONFIG) {
   console.log(`Starting Pivot v${VERSION}`);

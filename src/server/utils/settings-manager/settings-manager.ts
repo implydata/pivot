@@ -1,29 +1,31 @@
-import * as path from 'path';
 import * as Q from 'q';
 import { External, Dataset, basicExecutorFactory } from 'plywood';
+import { inlineVars } from '../../../common/utils/general/general';
+import { AppSettings, Cluster, DataSource } from '../../../common/models/index';
 import { Logger } from '../logger/logger';
 import { loadFileSync } from '../file/file';
 import { FileManager } from '../file-manager/file-manager';
 import { ClusterManager } from '../cluster-manager/cluster-manager';
 import { updater } from '../updater/updater';
-import { AppSettings, Cluster, DataSource } from '../../../common/models/index';
 
 export interface SettingsLocation {
   location: 'local' | 'transient';
   readOnly: boolean;
   uri?: string;
-  loadHook?: (appSettings: AppSettings) => AppSettings;
+  initAppSettings?: AppSettings;
 }
 
 export interface SettingsManagerOptions {
   logger: Logger;
   verbose?: boolean;
   initialLoadTimeout?: number;
+  anchorPath: string;
 }
 
 export class SettingsManager {
   public logger: Logger;
   public verbose: boolean;
+  public anchorPath: string;
   public settingsLocation: SettingsLocation;
   public appSettings: AppSettings;
   public fileManagers: FileManager[];
@@ -34,8 +36,8 @@ export class SettingsManager {
   constructor(settingsLocation: SettingsLocation, options: SettingsManagerOptions) {
     var logger = options.logger;
     this.logger = logger;
-    var verbose = Boolean(options.verbose);
-    this.verbose = verbose;
+    this.verbose = Boolean(options.verbose);
+    this.anchorPath = options.anchorPath;
 
     this.settingsLocation = settingsLocation;
     this.fileManagers = [];
@@ -46,16 +48,14 @@ export class SettingsManager {
 
     switch (settingsLocation.location) {
       case 'transient':
-        this.currentWork = Q(null);
+        this.currentWork = settingsLocation.initAppSettings ? this.changeSettings(settingsLocation.initAppSettings) : Q(null);
         break;
 
       case 'local':
         this.currentWork = Q.fcall(() => {
-          var appSettings = AppSettings.fromJS(loadFileSync(settingsLocation.uri, 'yaml'));
-          if (settingsLocation.loadHook) {
-            appSettings = settingsLocation.loadHook(appSettings);
-          }
-          return appSettings;
+          var appSettingsJS = loadFileSync(settingsLocation.uri, 'yaml');
+          appSettingsJS = inlineVars(appSettingsJS, process.env);
+          return AppSettings.fromJS(appSettingsJS);
         })
           .then(
             (appSettings) => {
@@ -77,7 +77,7 @@ export class SettingsManager {
   }
 
   private addClusterManager(cluster: Cluster): Q.Promise<any> {
-    const { verbose, logger } = this;
+    const { verbose, logger, anchorPath } = this;
 
     var initialExternals = this.appSettings.getDataSourcesForCluster(cluster.name).map(dataSource => {
       return {
@@ -91,6 +91,7 @@ export class SettingsManager {
     var clusterManager = new ClusterManager(cluster, {
       logger,
       verbose,
+      anchorPath,
       initialExternals,
       onExternalChange: this.onExternalChange.bind(this, cluster),
       generateExternalName: this.generateDataSourceName.bind(this)
@@ -111,11 +112,12 @@ export class SettingsManager {
 
   private addFileManager(dataSource: DataSource): Q.Promise<any> {
     if (dataSource.engine !== 'native') throw new Error(`data source '${dataSource.name}' must be native to have a file manager`);
-    const { verbose, logger } = this;
+    const { verbose, logger, anchorPath } = this;
 
     var fileManager = new FileManager({
       logger,
       verbose,
+      anchorPath,
       uri: dataSource.source,
       onDatasetChange: this.onDatasetChange.bind(this, dataSource.name)
     });
@@ -219,16 +221,10 @@ export class SettingsManager {
     return candidateName;
   }
 
-  getFreshDataSourceName(suggestion: string): string {
-    return suggestion;
-  }
-
-  getFreshClusterName(suggestion: string): string {
-    return suggestion;
-  }
-
   onDatasetChange(dataSourceName: string, changedDataset: Dataset): void {
-    if (this.verbose) this.logger.log(`Got native dataset update for ${dataSourceName}`);
+    const { logger, verbose } = this;
+
+    if (verbose) logger.log(`Got native dataset update for ${dataSourceName}`);
 
     var dataSource = this.appSettings.getDataSource(dataSourceName);
     if (!dataSource) throw new Error(`Unknown dataset ${dataSourceName}`);
@@ -237,7 +233,9 @@ export class SettingsManager {
 
   onExternalChange(cluster: Cluster, dataSourceName: string, changedExternal: External): void {
     if (!changedExternal.attributes) return;
-    if (this.verbose) this.logger.log(`Got external dataset update for ${dataSourceName} in cluster ${cluster.name}`);
+    const { logger, verbose } = this;
+
+    if (verbose) logger.log(`Got external dataset update for ${dataSourceName} in cluster ${cluster.name}`);
 
     var dataSource = this.appSettings.getDataSource(dataSourceName);
     if (!dataSource) {
@@ -264,16 +262,6 @@ export class SettingsManager {
         }
       });
     }, 1000).unref();
-  }
-
-  addCluster(cluster: Cluster): void {
-    this.currentWork = this.currentWork
-      .then(() => this.changeSettings(this.appSettings.addCluster(cluster)));
-  }
-
-  addDataSource(dataSource: DataSource): void {
-    this.currentWork = this.currentWork
-      .then(() => this.changeSettings(this.appSettings.addDataSource(dataSource)));
   }
 
 }

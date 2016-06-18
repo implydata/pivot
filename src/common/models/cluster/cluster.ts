@@ -1,12 +1,12 @@
 import { Class, Instance, isInstanceOf } from 'immutable-class';
 import { External } from 'plywood';
 
-export type SupportedTypes = 'druid' | 'mysql' | 'postgres';
+export type SupportedType = 'druid' | 'mysql' | 'postgres';
 export type SourceListScan = 'disable' | 'auto';
 
 export interface ClusterValue {
   name: string;
-  type?: SupportedTypes;
+  type?: SupportedType;
   host?: string;
   version?: string;
   timeout?: number;
@@ -15,7 +15,10 @@ export interface ClusterValue {
   sourceListRefreshInterval?: number;
   sourceReintrospectOnLoad?: boolean;
   sourceReintrospectInterval?: number;
+
   introspectionStrategy?: string;
+  requestDecorator?: string;
+
   database?: string;
   user?: string;
   password?: string;
@@ -23,7 +26,7 @@ export interface ClusterValue {
 
 export interface ClusterJS {
   name: string;
-  type?: SupportedTypes;
+  type?: SupportedType;
   host?: string;
   version?: string;
   timeout?: number;
@@ -32,7 +35,10 @@ export interface ClusterJS {
   sourceListRefreshInterval?: number;
   sourceReintrospectOnLoad?: boolean;
   sourceReintrospectInterval?: number;
+
   introspectionStrategy?: string;
+  requestDecorator?: string;
+
   database?: string;
   user?: string;
   password?: string;
@@ -65,6 +71,7 @@ export class Cluster implements Instance<ClusterValue, ClusterJS> {
       sourceReintrospectOnLoad,
       sourceReintrospectInterval,
       introspectionStrategy,
+      requestDecorator,
       database,
       user,
       password
@@ -81,7 +88,8 @@ export class Cluster implements Instance<ClusterValue, ClusterJS> {
       sourceListRefreshInterval: parseIntFromPossibleString(sourceListRefreshInterval),
       sourceReintrospectOnLoad: sourceReintrospectOnLoad,
       sourceReintrospectInterval: parseIntFromPossibleString(sourceReintrospectInterval),
-      introspectionStrategy: introspectionStrategy,
+      introspectionStrategy,
+      requestDecorator,
       database,
       user,
       password
@@ -91,7 +99,7 @@ export class Cluster implements Instance<ClusterValue, ClusterJS> {
 
 
   public name: string;
-  public type: SupportedTypes;
+  public type: SupportedType;
   public host: string;
   public version: string;
   public timeout: number;
@@ -103,6 +111,7 @@ export class Cluster implements Instance<ClusterValue, ClusterJS> {
 
   // Druid
   public introspectionStrategy: string;
+  public requestDecorator: string;
 
   // SQLs
   public database: string;
@@ -138,6 +147,7 @@ export class Cluster implements Instance<ClusterValue, ClusterJS> {
     switch (this.type) {
       case 'druid':
         this.introspectionStrategy = parameters.introspectionStrategy || Cluster.DEFAULT_INTROSPECTION_STRATEGY;
+        this.requestDecorator = parameters.requestDecorator;
         break;
 
       case 'mysql':
@@ -164,6 +174,7 @@ export class Cluster implements Instance<ClusterValue, ClusterJS> {
       sourceReintrospectOnLoad: this.sourceReintrospectOnLoad,
       sourceReintrospectInterval: this.sourceReintrospectInterval,
       introspectionStrategy: this.introspectionStrategy,
+      requestDecorator: this.requestDecorator,
       database: this.database,
       user: this.user,
       password: this.password
@@ -185,6 +196,7 @@ export class Cluster implements Instance<ClusterValue, ClusterJS> {
     js.sourceReintrospectInterval = this.sourceReintrospectInterval;
 
     if (this.introspectionStrategy) js.introspectionStrategy = this.introspectionStrategy;
+    if (this.requestDecorator) js.requestDecorator = this.requestDecorator;
 
     if (this.database) js.database = this.database;
     if (this.user) js.user = this.user;
@@ -212,6 +224,7 @@ export class Cluster implements Instance<ClusterValue, ClusterJS> {
       this.sourceReintrospectOnLoad === other.sourceReintrospectOnLoad &&
       this.sourceReintrospectInterval === other.sourceReintrospectInterval &&
       this.introspectionStrategy === other.introspectionStrategy &&
+      this.requestDecorator === other.requestDecorator &&
       this.database === other.database &&
       this.user === other.user &&
       this.password === other.password;
