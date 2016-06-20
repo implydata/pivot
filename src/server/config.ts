@@ -6,7 +6,7 @@ import { clusterToYAML, dataSourceToYAML } from '../common/utils/yaml-helper/yam
 import { ServerSettings, ServerSettingsJS } from './models/server-settings/server-settings';
 import { loadFileSync, SettingsManager, SettingsLocation, CONSOLE_LOGGER } from './utils/index';
 
-const AUTH_MODULE_VERSION = 0;
+const AUTH_MODULE_VERSION = 1;
 
 function exitWithMessage(message: string): void {
   console.log(message);
@@ -169,7 +169,7 @@ if (auth) {
   }
 
   if (authModule.version !== AUTH_MODULE_VERSION) {
-    exitWithError(`unsupported auth module version ${authModule.version} needed ${AUTH_MODULE_VERSION}`);
+    exitWithError(`incorrect auth module version ${authModule.version} needed ${AUTH_MODULE_VERSION}`);
   }
   if (typeof authModule.auth !== 'function') exitWithError('Invalid auth module');
 }

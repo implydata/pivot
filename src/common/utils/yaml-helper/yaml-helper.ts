@@ -25,7 +25,7 @@ export function clusterToYAML(cluster: Cluster, withComments: boolean): string[]
   lines.push(`host: ${cluster.host}`, null);
 
   if (withComments) {
-    lines.push("# A timeout for the Druid queries in ms (default: 30000 = 30 seconds)");
+    lines.push("# A timeout for queries in ms (default: 30000 = 30 seconds)");
     lines.push("#timeout: 30000", '');
   }
 
@@ -62,58 +62,50 @@ export function clusterToYAML(cluster: Cluster, withComments: boolean): string[]
 
 export function attributeToYAML(attribute: AttributeInfo): string[] {
   var lines: string[] = [
-    `      - name: ${attribute.name}`,
-    `        type: ${attribute.type}`
+    `name: ${attribute.name}`,
+    `type: ${attribute.type}`
   ];
 
   if (attribute.special) {
-    lines.push(`        special: ${attribute.special}`);
+    lines.push(`special: ${attribute.special}`);
   }
 
-  lines.push('');
-  return lines;
+  lines.push(null);
+  return yamlObject(lines, 6);
 }
 
 export function dimensionToYAML(dimension: Dimension): string[] {
   var lines: string[] = [
-    `      - name: ${dimension.name}`,
-    `        title: ${dimension.title}`
+    `name: ${dimension.name}`,
+    `title: ${dimension.title}`
   ];
 
   if (dimension.kind !== 'string') {
-    lines.push(`        kind: ${dimension.kind}`);
+    lines.push(`kind: ${dimension.kind}`);
   }
 
-  lines.push(`        expression: ${dimension.expression.toString()}`);
+  lines.push(`expression: ${dimension.expression.toString()}`);
 
-  lines.push('');
-  return lines;
+  lines.push(null);
+  return yamlObject(lines, 6);
 }
 
 export function measureToYAML(measure: Measure): string[] {
   var lines: string[] = [
-    `      - name: ${measure.name}`,
-    `        title: ${measure.title}`
+    `name: ${measure.name}`,
+    `title: ${measure.title}`
   ];
 
   var ex = measure.expression;
-  var lastAction = ex.lastAction();
-  var comment = ''; // Make a comment if this is a .sum(min_blah) or similar
-  if (
-    lastAction.action === 'sum' &&
-    /\bmin\b|\bmax\b|\bunique\b|\buniques\b/i.test(((lastAction.expression as RefExpression).name || '').replace(/_/g, ' ')) // \b matches "_"   :-(
-  ) {
-    comment = ' # double check please';
-  }
-  lines.push(`        expression: ${ex.toString()}${comment}`);
+  lines.push(`expression: ${ex.toString()}`);
 
   var format = measure.format;
   if (format !== Measure.DEFAULT_FORMAT) {
-    lines.push(`        format: ${format}`);
+    lines.push(`format: ${format}`);
   }
 
-  lines.push('');
-  return lines;
+  lines.push(null);
+  return yamlObject(lines, 6);
 }
 
 export function dataSourceToYAML(dataSource: DataSource, withComments: boolean): string[] {

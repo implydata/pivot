@@ -3,23 +3,18 @@ import * as Q from 'q';
 import { External, helper } from 'plywood';
 import { DruidRequestDecorator } from 'plywood-druid-requester';
 import { properRequesterFactory } from '../requester/requester';
-import { Cluster, SupportedType } from '../../../common/models/index';
+import { Cluster } from '../../../common/models/index';
 import { Logger } from '../logger/logger';
 
+const DRUID_REQUEST_DECORATOR_MODULE_VERSION = 1;
+
 export interface RequestDecoratorFactoryOptions {
-  // ToDo: expand
+  cluster: Cluster;
 }
 
 export interface DruidRequestDecoratorModule {
-  druidRequestDecorator: (logger: Logger, options: RequestDecoratorFactoryOptions) => DruidRequestDecorator;
-}
-
-// ToDo: Hack: (this should really be part of Plywood)
-function externalChangeVersion(external: External, version: string): External {
-  if (external.version === version) return external;
-  var value = external.valueOf();
-  value.version = version;
-  return External.fromValue(value);
+  version: number;
+  druidRequestDecoratorFactory: (logger: Logger, options: RequestDecoratorFactoryOptions) => DruidRequestDecorator;
 }
 
 // For each external we want to maintain its source and weather it should introspect at all
@@ -57,8 +52,6 @@ export class ClusterManager {
   public generateExternalName: (external: External) => string;
   public requestDecoratorModule: DruidRequestDecoratorModule;
 
-  private host: string = null;
-
   private sourceListRefreshInterval: number = 0;
   private sourceListRefreshTimer: NodeJS.Timer = null;
   private sourceReintrospectInterval: number = 0;
@@ -75,7 +68,7 @@ export class ClusterManager {
     this.onExternalChange = options.onExternalChange || noop;
     this.generateExternalName = options.generateExternalName || getSourceFromExternal;
 
-    this.loadRequestDecorator();
+    this.updateRequestDecorator();
     this.updateRequester();
     this.updateSourceListRefreshTimer();
     this.updateSourceReintrospectTimer();
@@ -104,15 +97,20 @@ export class ClusterManager {
     }
   }
 
-  private loadRequestDecorator(): void {
+  private updateRequestDecorator(): void {
     const { cluster, logger, anchorPath } = this;
     if (!cluster.requestDecorator) return;
 
     var requestDecoratorPath = path.resolve(anchorPath, cluster.requestDecorator);
+    logger.log(`Loading requestDecorator from '${requestDecoratorPath}'`);
     try {
       this.requestDecoratorModule = require(requestDecoratorPath);
     } catch (e) {
-      throw new Error(`error loading druidRequestDecorator module: ${e.message}`);
+      throw new Error(`error loading druidRequestDecorator module from '${requestDecoratorPath}': ${e.message}`);
+    }
+
+    if (this.requestDecoratorModule.version !== DRUID_REQUEST_DECORATOR_MODULE_VERSION) {
+      throw new Error(`druidRequestDecorator module '${requestDecoratorPath}' has incorrect version`);
     }
   }
 
@@ -121,27 +119,25 @@ export class ClusterManager {
 
     var druidRequestDecorator: DruidRequestDecorator = null;
     if (cluster.type === 'druid' && requestDecoratorModule) {
-      druidRequestDecorator = requestDecoratorModule.druidRequestDecorator(logger, {
-        // ToDo: pass in options
+      logger.log(`Cluster '${cluster.name}' creating requestDecorator`);
+      druidRequestDecorator = requestDecoratorModule.druidRequestDecoratorFactory(logger, {
+        cluster
       });
     }
 
-    if (this.host !== cluster.host) {
-      this.host = cluster.host;
-      this.requester = properRequesterFactory({
-        type: cluster.type,
-        host: cluster.host,
-        timeout: cluster.timeout,
-        verbose: this.verbose,
-        concurrentLimit: 5,
+    this.requester = properRequesterFactory({
+      type: cluster.type,
+      host: cluster.host,
+      timeout: cluster.timeout,
+      verbose: this.verbose,
+      concurrentLimit: 5,
 
-        druidRequestDecorator,
+      druidRequestDecorator,
 
-        database: cluster.database,
-        user: cluster.user,
-        password: cluster.password
-      });
-    }
+      database: cluster.database,
+      user: cluster.user,
+      password: cluster.password
+    });
   }
 
   private updateSourceListRefreshTimer() {
@@ -212,7 +208,7 @@ export class ClusterManager {
         // Add versions to all existing externals
         this.managedExternals.forEach(managedExternal => {
           if (managedExternal.external.version) return;
-          managedExternal.external = externalChangeVersion(managedExternal.external, version);
+          managedExternal.external = managedExternal.external.changeVersion(version);
         });
       });
   }

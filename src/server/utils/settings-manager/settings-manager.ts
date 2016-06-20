@@ -48,7 +48,7 @@ export class SettingsManager {
 
     switch (settingsLocation.location) {
       case 'transient':
-        this.currentWork = settingsLocation.initAppSettings ? this.changeSettings(settingsLocation.initAppSettings) : Q(null);
+        this.currentWork = settingsLocation.initAppSettings ? this.reviseSettings(settingsLocation.initAppSettings) : Q(null);
         break;
 
       case 'local':
@@ -57,15 +57,13 @@ export class SettingsManager {
           appSettingsJS = inlineVars(appSettingsJS, process.env);
           return AppSettings.fromJS(appSettingsJS);
         })
-          .then(
-            (appSettings) => {
-              this.changeSettings(appSettings);
-            },
-            e => {
-              logger.error(`Fatal settings load error: ${e.message}`);
-              throw e;
-            }
-          );
+          .then((appSettings) => {
+            this.reviseSettings(appSettings);
+          })
+          .catch(e => {
+            logger.error(`Fatal settings load error: ${e.message}`);
+            throw e;
+          });
 
         break;
 
@@ -149,10 +147,19 @@ export class SettingsManager {
       .then(() => this.appSettings);
   }
 
-  changeSettings(newSettings: AppSettings): Q.Promise<any> {
-    var oldSettings = this.appSettings;
+  reviseSettings(newSettings: AppSettings): Q.Promise<any> {
+    var tasks = [
+      this.reviseClusters(newSettings),
+      this.reviseDataSources(newSettings)
+    ];
     this.appSettings = newSettings;
 
+    return Q.all(tasks);
+  }
+
+  reviseClusters(newSettings: AppSettings): Q.Promise<any> {
+    const { verbose, logger } = this;
+    var oldSettings = this.appSettings;
     var tasks: Q.Promise<any>[] = [];
 
     updater(oldSettings.clusters, newSettings.clusters, {
@@ -160,24 +167,40 @@ export class SettingsManager {
         this.removeClusterManager(oldCluster);
       },
       onUpdate: (newCluster) => {
-        console.log(`${newCluster.name} UPDATED cluster`);
+        logger.log(`${newCluster.name} UPDATED cluster`);
       },
       onEnter: (newCluster) => {
         tasks.push(this.addClusterManager(newCluster));
       }
     });
 
+    return Q.all(tasks);
+  }
+
+  reviseDataSources(newSettings: AppSettings): Q.Promise<any> {
+    const { verbose, logger } = this;
+    var oldSettings = this.appSettings;
+    var tasks: Q.Promise<any>[] = [];
+
     var oldNativeDataSources = oldSettings.getDataSourcesForCluster('native');
     var newNativeDataSources = newSettings.getDataSourcesForCluster('native');
     updater(oldNativeDataSources, newNativeDataSources, {
       onExit: (oldDataSource) => {
-        this.removeFileManager(oldDataSource);
+        if (oldDataSource.engine === 'native') {
+          this.removeFileManager(oldDataSource);
+        } else {
+          throw new Error(`only native datasources work for now`); // ToDo: fix
+        }
       },
       onUpdate: (newDataSource) => {
-        console.log(`${newDataSource.name} UPDATED datasource`);
+        logger.log(`${newDataSource.name} UPDATED datasource`);
       },
       onEnter: (newDataSource) => {
-        tasks.push(this.addFileManager(newDataSource));
+        if (newDataSource.engine === 'native') {
+          tasks.push(this.addFileManager(newDataSource));
+        } else {
+          throw new Error(`only native datasources work for now`); // ToDo: fix
+        }
       }
     });
 
@@ -205,7 +228,7 @@ export class SettingsManager {
       return null;
     });
 
-    return Q(null); // ToDo: actual work
+    return Q(null); // ToDo: actually save settings
   }
 
   generateDataSourceName(external: External): string {

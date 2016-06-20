@@ -44,9 +44,10 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
     }
 
     var dataSources = (parameters.dataSources || []).map(dataSource => {
-      if (dataSource.engine !== 'native') {
-        var cluster = helper.findByName(clusters, dataSource.engine);
-        if (!cluster) throw new Error(`Can not find cluster '${dataSource.engine}' for data source '${dataSource.name}'`);
+      var dataSourceEngine = dataSource.engine;
+      if (dataSourceEngine !== 'native') {
+        var cluster = helper.findByName(clusters, dataSourceEngine);
+        if (!cluster) throw new Error(`Can not find cluster '${dataSourceEngine}' for data source '${dataSource.name}'`);
       }
       return DataSource.fromJS(dataSource, { cluster });
     });
