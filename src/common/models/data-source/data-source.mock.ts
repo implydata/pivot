@@ -104,6 +104,15 @@ export class DataSourceMock {
           name: 'userId',
           title: 'User Id',
           bucketingStrategy: 'never_bucket'
+        },
+        {
+          expression: {
+            name: 'orderSize',
+            op: 'ref'
+          },
+          kind: 'number',
+          name: 'orderSize',
+          title: 'Order Size'
         }
       ],
       measures: [
