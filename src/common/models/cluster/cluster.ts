@@ -227,6 +227,7 @@ export class Cluster implements Instance<ClusterValue, ClusterJS> {
       this.requestDecorator === other.requestDecorator &&
       this.database === other.database &&
       this.user === other.user &&
+      this.timeout === other.timeout &&
       this.password === other.password;
   }
 

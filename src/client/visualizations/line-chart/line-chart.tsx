@@ -2,7 +2,7 @@ require('./line-chart.css');
 
 import { BaseVisualization, BaseVisualizationState } from '../base-visualization/base-visualization';
 
-import { immutableEqual } from 'immutable-class'
+import { immutableEqual } from 'immutable-class';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import * as d3 from 'd3';

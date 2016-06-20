@@ -5,18 +5,13 @@ import { List } from 'immutable';
 import { Fn } from '../../../../common/utils/general/general';
 import { classNames } from '../../../utils/dom/dom';
 
-// import { SvgIcon } from '../../../components/svg-icon/svg-icon';
 import { FormLabel } from '../../../components/form-label/form-label';
 import { Button } from '../../../components/button/button';
-// import { SimpleList } from '../../../components/simple-list/simple-list';
 import { ImmutableInput } from '../../../components/immutable-input/immutable-input';
-// import { ImmutableList } from '../../../components/immutable-list/immutable-list';
-// import { Dropdown, DropdownProps } from '../../../components/dropdown/dropdown';
-
-// import { DimensionModal } from '../dimension-modal/dimension-modal';
-// import { MeasureModal } from '../measure-modal/measure-modal';
 
 import { AppSettings, Cluster } from '../../../../common/models/index';
+
+import { CLUSTER_EDIT as LABELS } from '../utils/labels';
 
 // Shamelessly stolen from http://stackoverflow.com/a/10006499
 // (well, traded for an upvote)
@@ -53,10 +48,11 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
     let cluster = props.settings.clusters.filter((d) => d.name === props.clusterId)[0];
 
     this.setState({
-      tempCluster: cluster,
+      tempCluster: new Cluster(cluster.valueOf()),
       hasChanged: false,
       canSave: true,
-      cluster
+      cluster,
+      errors: {}
     });
   }
 
@@ -83,8 +79,10 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
     window.location.hash = hash.replace(`/${clusterId}`, '');
   }
 
-  onSimpleChange(newCluster: Cluster, isValid: boolean) {
-    const { cluster } = this.state;
+  onSimpleChange(newCluster: Cluster, isValid: boolean, path: string) {
+    const { cluster, errors } = this.state;
+
+    errors[path] = !isValid;
 
     const hasChanged = !isValid || !cluster.equals(newCluster);
 
@@ -92,22 +90,27 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
       this.setState({
         tempCluster: newCluster,
         canSave: true,
+        errors,
         hasChanged
       });
     } else {
       this.setState({
         canSave: false,
+        errors,
         hasChanged
       });
     }
   }
 
   renderGeneral(): JSX.Element {
-    const helpTexts: any = {};
     const { tempCluster, errors } = this.state;
 
     return <form className="general vertical">
-      <FormLabel label="Host" helpText={helpTexts.host}></FormLabel>
+      <FormLabel
+        label="Host"
+        helpText={LABELS.host.help}
+        errorText={errors.host ? LABELS.host.error : undefined}
+      />
       <ImmutableInput
         instance={tempCluster}
         path={'host'}
@@ -115,12 +118,29 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
         focusOnStartUp={true}
         validator={IP_REGEX}
       />
+      <FormLabel
+        label="Timeout"
+        helpText={LABELS.timeout.help}
+        errorText={errors.timeout ? LABELS.timeout.error : undefined}
+      />
+      <ImmutableInput
+        instance={tempCluster}
+        path={'timeout'}
+        onChange={this.onSimpleChange.bind(this)}
+        validator={/^\d+$/}
+      />
 
-      <FormLabel label="Timeout" helpText={helpTexts.timeout}></FormLabel>
-      <ImmutableInput instance={tempCluster} path={'timeout'} onChange={this.onSimpleChange.bind(this)}/>
-
-      <FormLabel label="Refresh interval" helpText={helpTexts.sourceListRefreshInterval}></FormLabel>
-      <ImmutableInput instance={tempCluster} path={'sourceListRefreshInterval'} onChange={this.onSimpleChange.bind(this)}/>
+      <FormLabel
+        label="Refresh interval"
+        helpText={LABELS.sourceListRefreshInterval.help}
+        errorText={errors.sourceListRefreshInterval ? LABELS.sourceListRefreshInterval.error : undefined}
+      />
+      <ImmutableInput
+        instance={tempCluster}
+        path={'sourceListRefreshInterval'}
+        onChange={this.onSimpleChange.bind(this)}
+        validator={/^\d+$/}
+      />
     </form>;
   }
 

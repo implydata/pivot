@@ -9,6 +9,8 @@ import { FormLabel } from '../../../components/form-label/form-label';
 import { Button } from '../../../components/button/button';
 import { ImmutableInput } from '../../../components/immutable-input/immutable-input';
 
+import { GENERAL as LABELS } from '../utils/labels';
+
 import { AppSettings, AppSettingsJS } from '../../../../common/models/index';
 
 export interface GeneralProps extends React.Props<any> {
@@ -19,27 +21,33 @@ export interface GeneralProps extends React.Props<any> {
 export interface GeneralState {
   newSettings?: AppSettings;
   hasChanged?: boolean;
+  errors?: any;
 }
 
 export class General extends React.Component<GeneralProps, GeneralState> {
   constructor() {
     super();
 
-    this.state = {hasChanged: false};
+    this.state = {hasChanged: false, errors: {}};
   }
 
   componentWillReceiveProps(nextProps: GeneralProps) {
     if (nextProps.settings) this.setState({
       newSettings: nextProps.settings,
-      hasChanged: false
+      hasChanged: false,
+      errors: {}
     });
   }
 
-  onChange(newSettings: AppSettings) {
+  onChange(newSettings: AppSettings, isValid: boolean, path: string) {
+    const { errors } = this.state;
     const settings: AppSettings = this.props.settings;
+
+    errors[path] = !isValid;
 
     this.setState({
       newSettings,
+      errors,
       hasChanged: !settings.equals(newSettings)
     });
   }
@@ -51,12 +59,7 @@ export class General extends React.Component<GeneralProps, GeneralState> {
   }
 
   render() {
-    // Put this in i18n, probably
-    const helpTexts: any = {
-      title: 'The title as it will appear in your browser\'s title bar. Use %v to show the version.'
-    };
-
-    const { hasChanged, newSettings } = this.state;
+    const { hasChanged, newSettings, errors } = this.state;
 
     if (!newSettings) return null;
 
@@ -67,8 +70,17 @@ export class General extends React.Component<GeneralProps, GeneralState> {
       </div>
       <div className="content">
         <form className="vertical">
-          <FormLabel label="Title" helpText={helpTexts.title}></FormLabel>
-          <ImmutableInput instance={newSettings} path={'customization.title'} onChange={this.onChange.bind(this)}/>
+          <FormLabel
+            helpText={LABELS.title.help}
+            errorText={errors['customization.title'] ? LABELS.title.error : undefined}
+          />
+          <ImmutableInput
+            instance={newSettings}
+            path={'customization.title'}
+            onChange={this.onChange.bind(this)}
+            focusOnStartUp={true}
+            validator={/^.+$/}
+          />
         </form>
       </div>
     </div>;

@@ -5,6 +5,7 @@ import * as ReactDOM from 'react-dom';
 import { $, Expression, Executor, Dataset } from 'plywood';
 import { Stage, Clicker, Essence, DataSource, Filter, Dimension, Measure } from '../../../common/models/index';
 import { SvgIcon } from '../svg-icon/svg-icon';
+import { classNames } from '../../utils/dom/dom';
 
 export interface FormLabelProps extends React.Props<any> {
   label?: string;
@@ -27,31 +28,52 @@ export class FormLabel extends React.Component<FormLabelProps, FormLabelState> {
     this.setState({helpVisible: !this.state.helpVisible});
   }
 
-  getIcon(): JSX.Element {
-    if (!this.props.helpText) return null;
+  renderIcon(): JSX.Element {
+    const { helpText, errorText } = this.props;
+
+    if (!helpText && !errorText) return null;
 
     const { helpVisible } = this.state;
 
-    var icons: string[] = ['help-brand-light', 'help-brand'];
+    if (errorText) {
+      return <div className="icon-container" onClick={this.onHelpClick.bind(this)}>
+        <SvgIcon className="icon" svg={require(`../../icons/help-brand.svg`)}/>
+        <SvgIcon className="icon hover" svg={require(`../../icons/help-brand.svg`)}/>
+      </div>;
+    }
 
-    if (helpVisible) icons[0] = 'help-brand';
+    if (helpVisible) {
+      return <div className="icon-container" onClick={this.onHelpClick.bind(this)}>
+        <SvgIcon className="icon" svg={require(`../../icons/help-brand.svg`)}/>
+        <SvgIcon className="icon hover" svg={require(`../../icons/help-brand.svg`)}/>
+      </div>;
+    }
 
     return <div className="icon-container" onClick={this.onHelpClick.bind(this)}>
-      <SvgIcon className="icon" svg={require(`../../icons/${icons[0]}.svg`)}/>
-      <SvgIcon className="icon hover" svg={require(`../../icons/${icons[1]}.svg`)}/>
+      <SvgIcon className="icon" svg={require(`../../icons/help-brand-light.svg`)}/>
+      <SvgIcon className="icon hover" svg={require(`../../icons/help-brand.svg`)}/>
+    </div>;
+  }
+
+  renderAdditionalText(): JSX.Element {
+    const { helpText, errorText } = this.props;
+    const { helpVisible } = this.state;
+
+    if (!helpVisible && !errorText) return null;
+
+    return <div className="additional-text">
+      {errorText ? <div className="error-text">{errorText}</div> : null}
+      {helpVisible ? <div className="help-text">{helpText}</div> : null}
     </div>;
   }
 
   render() {
-    const { label, helpText } = this.props;
-    const { helpVisible } = this.state;
+    const { label, errorText } = this.props;
 
-    var help = helpVisible ? <div className="help-text">{helpText}</div> : null;
-
-    return <div className="form-label">
+    return <div className={classNames('form-label', {error: !!errorText})}>
       <div className="label">{label}</div>
-      {this.getIcon()}
-      {help}
+      {this.renderIcon()}
+      {this.renderAdditionalText()}
     </div>;
   }
 }

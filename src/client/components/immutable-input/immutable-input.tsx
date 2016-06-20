@@ -11,7 +11,7 @@ export interface ImmutableInputProps extends React.Props<any> {
   instance: any;
   path: string;
   focusOnStartUp?: boolean;
-  onChange?: (newInstance: any, valid: boolean) => void;
+  onChange?: (newInstance: any, valid: boolean, path?: string) => void;
   onInvalid?: (invalidValue: string) => void;
   validator?: RegExp;
 }
@@ -113,7 +113,7 @@ export class ImmutableInput extends React.Component<ImmutableInputProps, Immutab
 
     this.setState({newInstance, invalidValue});
 
-    if (onChange) onChange(newInstance, invalidValue === undefined);
+    if (onChange) onChange(newInstance, invalidValue === undefined, path);
   }
 
   getValue(instance: any, path: string): string {

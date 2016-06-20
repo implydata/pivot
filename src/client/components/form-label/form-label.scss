@@ -37,7 +37,7 @@
     }
   }
 
-  .help-text {
+  .additional-text {
     position: absolute;
     left: calc(100% + 20px);
     top: -2px;
@@ -45,5 +45,16 @@
 
     font-size: 13px;
     color: $text-lighterish;
+
+    .error-text {
+      color: $error;
+      margin-bottom: 10px;
+    }
+  }
+
+  &.error {
+    .icon path {
+      fill: $error;
+    }
   }
 }
