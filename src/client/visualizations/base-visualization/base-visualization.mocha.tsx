@@ -29,6 +29,7 @@ describe('BaseVisualization', () => {
     expect(numericBarChartScore, 'bucketable numeric defaults to bar chart').to.greaterThan(numericTableScore);
     expect(numericLineChart.score, 'bucketable numeric split allows line chart but does not default').to.be.lessThan(numericBarChartScore);
     expect(numericLineChart.state, 'bucketable numeric split allows line chart but does not default').to.equal('ready');
+
   });
 
   it('handles never-bucket numeric split properly', () => {
