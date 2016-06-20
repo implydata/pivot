@@ -11,7 +11,7 @@ import { $, Expression } from 'plywood';
 import { BarChart } from './bar-chart';
 
 describe('BarChart', () => {
-  it('adds the correct class', () => {
+  it.skip('adds the correct class', () => {
     var renderedComponent = TestUtils.renderIntoDocument(
       <BarChart
         clicker={null}
