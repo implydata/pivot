@@ -38,7 +38,7 @@ describe('BaseVisualization', () => {
     expect(neverBucketTableScore, 'unbucketable numeric dim should default to table').to.be.greaterThan(neverBucketBarChartScore);
 
     var neverBucketLineChart = LineChart.handleCircumstance(DataSourceMock.twitter(), SplitCombineMock.userId(), null, false);
-    expect(neverBucketLineChart.score, 'line chart is not allowed with unbucketable').to.equal(3);
+    expect(neverBucketLineChart.state, 'line chart is not allowed with unbucketable').to.equal('manual');
     expect(neverBucketLineChart.message, 'line chart is not allowed with unbucketable').to.equal('The Line Chart needs one bucketed continuous dimension split');
 
   });

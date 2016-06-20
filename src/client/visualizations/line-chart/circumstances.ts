@@ -56,7 +56,7 @@ export default CircumstancesHandler.EMPTY()
 
     if (continuousDimension.kind === 'time') timeBoost = 7;
 
-    if (!autoChanged) return Resolve.ready(timeBoost + 2);
+    if (!autoChanged) return Resolve.ready(timeBoost + 3);
     return Resolve.automatic(timeBoost, {splits: new Splits(List([continuousSplit]))});
   })
 

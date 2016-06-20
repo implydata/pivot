@@ -36,16 +36,15 @@ export class CircumstancesHandler {
     return CircumstancesHandler.haveExactProperties({'kind': kindSelectors});
   }
 
-  public static haveExactProperties = (desiredProps: Lookup<string | string[]>) => {
+  public static haveExactProperties = (desiredProperties: Lookup<string | string[]>) => {
     return (splits: Splits, dataSource: DataSource): boolean => {
-    for (var prop in desiredProps) {
-      var properties: string[] = splits.toArray().map((split: SplitCombine) => (split.getDimension(dataSource.dimensions) as any)[prop]);
-      var desiredProp = desiredProps[prop];
+    for (var property in desiredProperties) {
+      var properties: string[] = splits.toArray().map((split: SplitCombine) => (split.getDimension(dataSource.dimensions) as any)[property]);
+      var desiredProp = desiredProperties[property];
       var selectors: string[] = typeof desiredProp === 'string' ? [desiredProp] : desiredProp;
-      if (!CircumstancesHandler.strictCompare(selectors, properties)) {
-        return false;
-      }
+      if (!CircumstancesHandler.strictCompare(selectors, properties)) return false;
     }
+
     return true;
     };
   }
