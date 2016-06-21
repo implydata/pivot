@@ -2,6 +2,7 @@ require('./line-chart.css');
 
 import { BaseVisualization, BaseVisualizationState } from '../base-visualization/base-visualization';
 
+import { immutableEqual } from 'immutable-class';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import * as d3 from 'd3';
@@ -9,7 +10,6 @@ import { r, $, ply, Executor, Expression, Dataset, Datum, TimeRange, TimeRangeJS
   PlywoodRange, NumberRangeJS, NumberRange, LiteralExpression, Set, Range, NumberBucketAction } from 'plywood';
 import { Splits, Colors, FilterClause, Dimension, Stage, Filter, Measure, DataSource, VisualizationProps, DatasetLoad, Resolve } from '../../../common/models/index';
 import { DisplayYear } from '../../../common/utils/time/time';
-import { rangeEquals } from '../../../common/utils/general/general';
 import { formatValue } from '../../../common/utils/formatter/formatter';
 
 import { getLineChartTicks } from '../../../common/models/granularity/granularity';
@@ -51,6 +51,29 @@ function findClosest(data: Datum[], dragDate: Date, scaleX: (v: continuousValueT
     }
   }
   return closestDatum;
+}
+
+function getDatumValue(dataset: Dataset, dimensionName: string, last: boolean): NumberRange | TimeRange {
+  var data = dataset.data;
+  var index = last ? data.length - 1 : 0;
+  var datum = data[index];
+  var value = datum[dimensionName];
+  if (value) return value as NumberRange | TimeRange;
+  if (datum[SPLIT]) return getDatumValue(datum[SPLIT] as Dataset, dimensionName, last);
+  return null;
+}
+
+function getAxisRangeFromDataset(dataset: Dataset, dimensionName: string) {
+  var start = getDatumValue(dataset, dimensionName, false).start;
+  var end = getDatumValue(dataset, dimensionName, true).end;
+
+  // right now dataset might not be sorted properly
+  if (start < end ) {
+    return Range.fromJS({start, end});
+  } else {
+    return Range.fromJS({ start: end, end: start });
+  }
+
 }
 
 function roundTo(v: number, roundTo: number) {
@@ -133,7 +156,7 @@ export class LineChart extends BaseVisualization<LineChartState> {
 
     var currentHoverRange: any = closestDatum ? (closestDatum[continuousDimension.name]) : null;
 
-    if (!hoverRange || !rangeEquals(hoverRange, currentHoverRange) || measure !== hoverMeasure) {
+    if (!hoverRange || !immutableEqual(hoverRange, currentHoverRange) || measure !== hoverMeasure) {
       this.setState({
         hoverRange: currentHoverRange,
         hoverMeasure: measure
@@ -545,12 +568,7 @@ export class LineChart extends BaseVisualization<LineChartState> {
         // Not filtered on time or has unbounded filter
         if ((!axisRange && dataset) || (dataset && (!axisRange.start || !axisRange.end))) {
           var myDataset = dataset.data[0]['SPLIT'] as Dataset;
-
-          var start = (myDataset.data[0][continuousDimension.name] as NumberRange | TimeRange).start;
-          var end = (myDataset.data[myDataset.data.length - 1][continuousDimension.name] as NumberRange | TimeRange).end;
-
-          // right now dataset might not be sorted properly
-          if (start < end ) axisRange = Range.fromJS({start, end});
+          axisRange = getAxisRangeFromDataset(myDataset, continuousDimension.name);
         }
 
         if (axisRange) {

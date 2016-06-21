@@ -41,7 +41,7 @@ export class DimensionMock {
     };
   }
 
-  public static get NUMBER_JS(): DimensionJS {
+  public static get ORDER_SIZE_JS(): DimensionJS {
     return {
       name: 'numeric',
       title: 'Numeric',
@@ -51,6 +51,20 @@ export class DimensionMock {
         'type': 'SET'
       },
       kind: 'number'
+    };
+  }
+
+  public static get USER_ID_JS(): DimensionJS {
+    return {
+      name: 'userId',
+      title: 'User ID',
+      'expression': {
+        'op': 'literal',
+        'value': { 'setType': 'NUMBER', 'elements': [175, 883, 237] },
+        'type': 'SET'
+      },
+      kind: 'number',
+      bucketingStrategy: 'never_bucket'
     };
   }
 
@@ -66,7 +80,11 @@ export class DimensionMock {
     return Dimension.fromJS(DimensionMock.TIME_JS);
   }
 
-  static number() {
-    return Dimension.fromJS(DimensionMock.NUMBER_JS);
+  static orderSize() {
+    return Dimension.fromJS(DimensionMock.ORDER_SIZE_JS);
+  }
+
+  static userId() {
+    return Dimension.fromJS(DimensionMock.USER_ID_JS);
   }
 }

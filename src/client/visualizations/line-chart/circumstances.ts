@@ -1,6 +1,6 @@
 import { $, SortAction } from 'plywood';
 import { List } from 'immutable';
-import { Splits, DataSource, Resolve, SplitCombine, Colors } from '../../../common/models/index';
+import { Splits, DataSource, Resolve, SplitCombine, Colors, NEVER_BUCKET } from '../../../common/models/index';
 import { CircumstancesHandler } from '../../../common/utils/circumstances-handler/circumstances-handler';
 
 export default CircumstancesHandler.EMPTY()
@@ -10,8 +10,8 @@ export default CircumstancesHandler.EMPTY()
 
   .when(CircumstancesHandler.noSplits())
   .then((splits: Splits, dataSource: DataSource) => {
-    let continuousDimensions = dataSource.getDimensionByKind('time').concat(dataSource.getDimensionByKind('number'));
-    return Resolve.manual(3, 'This visualization requires a continuous dimension split',
+    let continuousDimensions = dataSource.getDimensionByKind('time').concat(dataSource.getDimensionByKind('number').filter((d) => d.bucketingStrategy !== NEVER_BUCKET));
+    return Resolve.manual(3, 'This visualization requires a bucketed continuous dimension split',
       continuousDimensions.toArray().map((continuousDimension) => {
         return {
           description: `Add a split on ${continuousDimension.title}`,
@@ -24,8 +24,10 @@ export default CircumstancesHandler.EMPTY()
   })
 
   .when(CircumstancesHandler.areExactSplitKinds('time'))
-  .or(CircumstancesHandler.areExactSplitKinds('number'))
+  .or(CircumstancesHandler.haveExactProperties({bucketingStrategy : '!never_bucket', kind: 'number'}))
   .then((splits: Splits, dataSource: DataSource, colors: Colors) => {
+    var timeBoost = 0;
+
     var continuousSplit = splits.get(0);
     var continuousDimension = dataSource.getDimensionByExpression(continuousSplit.expression);
 
@@ -52,8 +54,10 @@ export default CircumstancesHandler.EMPTY()
       autoChanged = true;
     }
 
-    if (!autoChanged) return Resolve.ready(10);
-    return Resolve.automatic(8, {splits: new Splits(List([continuousSplit]))});
+    if (continuousDimension.kind === 'time') timeBoost = 7;
+
+    if (!autoChanged) return Resolve.ready(timeBoost + 3);
+    return Resolve.automatic(timeBoost, {splits: new Splits(List([continuousSplit]))});
   })
 
   .when(CircumstancesHandler.areExactSplitKinds('time', '*'))
@@ -94,6 +98,7 @@ export default CircumstancesHandler.EMPTY()
   })
 
   .when(CircumstancesHandler.areExactSplitKinds('*', 'time'))
+  .or(CircumstancesHandler.haveExactProperties({bucketingStrategy: ['*', '!never_bucket'], kind: ['*', 'number']}))
   .then((splits: Splits, dataSource: DataSource, colors: Colors) => {
     var timeSplit = splits.get(1);
     var timeDimension = timeSplit.getDimension(dataSource.dimensions);
@@ -152,8 +157,8 @@ export default CircumstancesHandler.EMPTY()
 
   .otherwise(
     (splits: Splits, dataSource: DataSource) => {
-      let continuousDimensions = dataSource.getDimensionByKind('time').concat(dataSource.getDimensionByKind('number'));
-      return Resolve.manual(3, 'The Line Chart needs one continuous dimension split',
+      let continuousDimensions = dataSource.getDimensionByKind('time').concat(dataSource.getDimensionByKind('number').filter((d) => d.bucketingStrategy !== NEVER_BUCKET));
+      return Resolve.manual(3, 'The Line Chart needs one bucketed continuous dimension split',
         continuousDimensions.toArray().map((continuousDimension) => {
           return {
             description: `Split on ${continuousDimension.title} instead`,
