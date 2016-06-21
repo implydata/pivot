@@ -1,5 +1,5 @@
 %white-shadow {
-  &:after {
+  &::after {
     @include pin-full;
     content: '';
     pointer-events: none;
