@@ -20,3 +20,18 @@ export const GENERAL = {
     help: 'What will appear as the tab\'s title in your browser. Use \'%v\' as a placeholder for Pivot\'s version.'
   }
 };
+
+export const CUBE_EDIT = {
+  title: {
+    error: 'The title should not be empty',
+    help: 'What will appear as the tab\'s title in your browser. Use \'%v\' as a placeholder for Pivot\'s version.'
+  },
+  engine: {
+    error: 'The engine should not be empty',
+    help: 'The cube\'s cluster, really.'
+  },
+  source: {
+    error: 'The source should not be empty',
+    help: 'The cube\'s source ?'
+  }
+};

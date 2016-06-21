@@ -71,6 +71,7 @@ export class General extends React.Component<GeneralProps, GeneralState> {
       <div className="content">
         <form className="vertical">
           <FormLabel
+            label="Browser title"
             helpText={LABELS.title.help}
             errorText={errors['customization.title'] ? LABELS.title.error : undefined}
           />

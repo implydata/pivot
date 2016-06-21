@@ -18,6 +18,8 @@ import { MeasureModal } from '../measure-modal/measure-modal';
 
 import { AppSettings, Cluster, DataSource, Dimension, DimensionJS, Measure, MeasureJS } from '../../../../common/models/index';
 
+import { CUBE_EDIT as LABELS } from '../utils/labels';
+
 
 export interface DataCubeEditProps extends React.Props<any> {
   settings: AppSettings;
@@ -32,6 +34,7 @@ export interface DataCubeEditState {
   cube?: DataSource;
   tab?: any;
   canSave?: boolean;
+  errors?: any;
 }
 
 export interface Tab {
@@ -51,7 +54,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
   constructor() {
     super();
 
-    this.state = {hasChanged: false};
+    this.state = {hasChanged: false, errors: {}};
   }
 
   componentWillReceiveProps(nextProps: DataCubeEditProps) {
@@ -111,8 +114,10 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
     window.location.hash = hash.replace(`/${cubeId}/${tab}`, '');
   }
 
-  onSimpleChange(newCube: DataSource, isValid: boolean) {
-    const { cube } = this.state;
+  onSimpleChange(newCube: DataSource, isValid: boolean, path: string) {
+    const { cube, errors } = this.state;
+
+    errors[path] = !isValid;
 
     const hasChanged = !isValid || !cube.equals(newCube);
 
@@ -120,11 +125,13 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       this.setState({
         tempCube: newCube,
         canSave: true,
+        errors,
         hasChanged
       });
     } else {
       this.setState({
         canSave: false,
+        errors,
         hasChanged
       });
     }
@@ -132,10 +139,14 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
 
   renderGeneral(): JSX.Element {
     const helpTexts: any = {};
-    const { tempCube } = this.state;
+    const { tempCube, errors } = this.state;
 
     return <form className="general vertical">
-      <FormLabel label="Title" helpText={helpTexts.title}></FormLabel>
+      <FormLabel
+        label="Title"
+        helpText={LABELS.title.help}
+        errorText={errors.title ? LABELS.title.error : undefined}
+      />
       <ImmutableInput
         instance={tempCube}
         path={'title'}
@@ -143,7 +154,11 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
         validator={/^.+$/}
       />
 
-      <FormLabel label="Engine" helpText={helpTexts.engine}></FormLabel>
+      <FormLabel
+        label="Engine"
+        helpText={LABELS.engine.help}
+        errorText={errors.engine ? LABELS.engine.error : undefined}
+      />
       <ImmutableInput
         instance={tempCube}
         path={'engine'}
@@ -151,7 +166,11 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
         validator={/^.+$/}
       />
 
-      <FormLabel label="Source" helpText={helpTexts.source}></FormLabel>
+      <FormLabel
+        label="Source"
+        helpText={LABELS.source.help}
+        errorText={errors.source ? LABELS.source.error : undefined}
+      />
       <ImmutableInput
         instance={tempCube}
         path={'source'}
