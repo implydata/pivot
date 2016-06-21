@@ -9,3 +9,11 @@ export const CONSOLE_LOGGER: Logger = {
   warn: console.warn.bind(console),
   error: console.error.bind(console)
 };
+
+function noop() {}
+
+export const NULL_LOGGER: Logger = {
+  log: noop,
+  warn: noop,
+  error: noop
+};

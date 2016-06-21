@@ -7,7 +7,7 @@ export type SourceListScan = 'disable' | 'auto';
 
 export interface ClusterValue {
   name: string;
-  type?: SupportedType;
+  type: SupportedType;
   host?: string;
   version?: string;
   timeout?: number;
@@ -27,7 +27,7 @@ export interface ClusterValue {
 
 export interface ClusterJS {
   name: string;
-  type?: SupportedType;
+  type: SupportedType;
   host?: string;
   version?: string;
   timeout?: number;
@@ -129,7 +129,7 @@ export class Cluster implements Instance<ClusterValue, ClusterJS> {
     this.name = name;
 
     this.type = parameters.type;
-    if (this.type) ensureOneOf(this.type, Cluster.TYPE_VALUES, `In cluster '${this.name}' type`);
+    ensureOneOf(this.type, Cluster.TYPE_VALUES, `In cluster '${this.name}' type`);
 
     this.host = parameters.host;
 
@@ -190,9 +190,9 @@ export class Cluster implements Instance<ClusterValue, ClusterJS> {
 
   public toJS(): ClusterJS {
     var js: ClusterJS = {
-      name: this.name
+      name: this.name,
+      type: this.type
     };
-    if (this.type) js.type = this.type;
     if (this.host) js.host = this.host;
     if (this.version) js.version = this.version;
     js.timeout = this.timeout;
@@ -217,7 +217,7 @@ export class Cluster implements Instance<ClusterValue, ClusterJS> {
   }
 
   public toString(): string {
-    return `[Cluster ${this.name}]`;
+    return `[Cluster ${this.name} (${this.type})]`;
   }
 
   public equals(other: Cluster): boolean {
@@ -241,7 +241,8 @@ export class Cluster implements Instance<ClusterValue, ClusterJS> {
 
   public toClientCluster(): Cluster {
     return new Cluster({
-      name: this.name
+      name: this.name,
+      type: this.type
     });
   }
 

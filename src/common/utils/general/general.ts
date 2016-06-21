@@ -126,7 +126,8 @@ export function inlineVars(obj: any, vs: Lookup<string>): any {
 
 export function ensureOneOf(value: string, values: string[], messagePrefix: string): void {
   if (values.indexOf(value) !== -1) return;
-  throw new Error(`${messagePrefix} must be on of '${values.join("', '")}' (is '${value}')`);
+  var isMessage = typeof value === 'undefined' ? 'not defined' : `'${value}'`;
+  throw new Error(`${messagePrefix} must be on of '${values.join("', '")}' (is ${isMessage})`);
 }
 
 export function pluralIfNeeded(n: number, thing: string): string {

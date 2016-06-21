@@ -4,12 +4,17 @@ import { arraySum } from '../common/utils/general/general';
 import { Cluster, DataSource, SupportedType, AppSettings } from '../common/models/index';
 import { clusterToYAML, dataSourceToYAML } from '../common/utils/yaml-helper/yaml-helper';
 import { ServerSettings, ServerSettingsJS } from './models/server-settings/server-settings';
-import { loadFileSync, SettingsManager, SettingsLocation, CONSOLE_LOGGER } from './utils/index';
+import { loadFileSync, SettingsManager, SettingsLocation, CONSOLE_LOGGER, NULL_LOGGER } from './utils/index';
 
 const AUTH_MODULE_VERSION = 1;
+const PACKAGE_FILE = path.join(__dirname, '../../package.json');
 
 function exitWithMessage(message: string): void {
   console.log(message);
+
+  // Hack: load the package file for no reason other than to make some time for console.log to flush
+  try { loadFileSync(PACKAGE_FILE, 'json'); } catch (e) { }
+
   process.exit();
 }
 
@@ -25,7 +30,7 @@ function zeroOne(thing: any): number {
 
 var packageObj: any = null;
 try {
-  packageObj = loadFileSync(path.join(__dirname, '../../package.json'), 'json');
+  packageObj = loadFileSync(PACKAGE_FILE, 'json');
 } catch (e) {
   exitWithError(`Could not read package.json: ${e.message}`);
 }
@@ -36,7 +41,7 @@ Usage: pivot [options]
 
 Possible usage:
 
-  pivot --example
+  pivot --examples
   pivot --druid your.broker.host:8082
 
 General arguments:
@@ -54,7 +59,7 @@ Data connection options:
   Exactly one data connection option must be provided. 
   
   -c, --config <path>          Use this local configuration (YAML) file
-      --example                Start Pivot with some example data for testing / demo  
+      --examples               Start Pivot with some example data for testing / demo  
   -f, --file <path>            Start Pivot on top of this file based data source (must be JSON, CSV, or TSV)
   -d, --druid <host>           The Druid broker node to connect to
       --postgres <host>        The Postgres cluster to connect to
@@ -77,7 +82,8 @@ function parseArgs() {
       "version": Boolean,
       "verbose": Boolean,
       "port": Number,
-      "example": String,
+      "examples": Boolean,
+      "example": String, // deprecated
       "config": String,
 
       "print-config": Boolean,
@@ -114,7 +120,12 @@ if (parsedArgs['version']) {
   exitWithMessage(VERSION);
 }
 
-const SETTINGS_INPUTS = ['config', 'example', 'file', 'druid', 'postgres', 'mysql'];
+if (parsedArgs['example']) {
+  delete parsedArgs['example'];
+  parsedArgs['examples'] = true;
+}
+
+const SETTINGS_INPUTS = ['config', 'examples', 'file', 'druid', 'postgres', 'mysql'];
 
 var numSettingsInputs = arraySum(SETTINGS_INPUTS.map((input) => zeroOne(parsedArgs[input])));
 
@@ -126,16 +137,19 @@ if (numSettingsInputs > 1) {
   exitWithError(`only one of --${SETTINGS_INPUTS.join(', --')} can be given on the command line`);
 }
 
+export const PRINT_CONFIG = Boolean(parsedArgs['print-config']);
+export const START_SERVER = !PRINT_CONFIG;
+
+const LOGGER = START_SERVER ? CONSOLE_LOGGER : NULL_LOGGER;
+
+if (START_SERVER) {
+  LOGGER.log(`Starting Pivot v${VERSION}`);
+}
+
 var serverSettingsFilePath = parsedArgs['config'];
 
-if (parsedArgs['example']) {
-  delete parsedArgs['druid'];
-  var example = parsedArgs['example'];
-  if (example === 'wiki') {
-    serverSettingsFilePath = path.join(__dirname, `../../config-example-${example}.yaml`);
-  } else {
-    exitWithMessage(`Unknown example '${example}'. Possible examples are: wiki`);
-  }
+if (parsedArgs['examples']) {
+  serverSettingsFilePath = path.join(__dirname, `../../config-examples.yaml`);
 }
 
 var anchorPath: string;
@@ -153,6 +167,10 @@ if (serverSettingsFilePath) {
   serverSettingsJS = {};
 }
 
+if (parsedArgs['port']) {
+  serverSettingsJS.port = parsedArgs['port'];
+}
+
 export const SERVER_SETTINGS = ServerSettings.fromJS(serverSettingsJS, anchorPath);
 
 // --- Auth -------------------------------
@@ -161,7 +179,7 @@ var auth = serverSettingsJS.auth;
 var authModule: any = null;
 if (auth) {
   auth = path.resolve(anchorPath, auth);
-  console.log(`Using auth ${auth}`);
+  LOGGER.log(`Using auth ${auth}`);
   try {
     authModule = require(auth);
   } catch (e) {
@@ -190,8 +208,8 @@ if (serverSettingsFilePath) {
   var initAppSettings = AppSettings.BLANK;
 
   // If a file is specified add it as a dataSource
-  var filesToLoad = parsedArgs['file'] || [];
-  for (var fileToLoad of filesToLoad) {
+  var fileToLoad = parsedArgs['file'];
+  if (fileToLoad) {
     initAppSettings = initAppSettings.addDataSource(new DataSource({
       name: path.basename(fileToLoad, path.extname(fileToLoad)),
       engine: 'native',
@@ -223,12 +241,10 @@ if (serverSettingsFilePath) {
   };
 }
 
-export const PRINT_CONFIG = Boolean(parsedArgs['print-config']);
-export const START_SERVER = !PRINT_CONFIG;
 export const VERBOSE = Boolean(parsedArgs['verbose'] || serverSettingsJS.verbose);
 
 export const SETTINGS_MANAGER = new SettingsManager(settingsLocation, {
-  logger: CONSOLE_LOGGER,
+  logger: LOGGER,
   verbose: VERBOSE,
   anchorPath,
   initialLoadTimeout: SERVER_SETTINGS.pageMustLoadTimeout
@@ -236,15 +252,15 @@ export const SETTINGS_MANAGER = new SettingsManager(settingsLocation, {
 
 // --- Printing -------------------------------
 
-if (!PRINT_CONFIG) {
-  console.log(`Starting Pivot v${VERSION}`);
-} else {
+if (PRINT_CONFIG) {
   var withComments = Boolean(parsedArgs['with-comments']);
 
-  SETTINGS_MANAGER.getSettings().then(appSettings => {
+  SETTINGS_MANAGER.getSettings({
+    timeout: 10000
+  }).then(appSettings => {
     var { dataSources, clusters } = appSettings;
 
-    if (!dataSources.length) throw new Error('Could not find any data sources please verify network connectivity');
+    if (!dataSources.length) throw new Error('Could not find any data sources, please verify network connectivity');
 
     var lines = [
       `# generated by Pivot version ${VERSION}`,
@@ -272,6 +288,6 @@ if (!PRINT_CONFIG) {
 
     console.log(lines.join('\n'));
   }).catch((e: Error) => {
-    console.error("There was an error generating a config: " + e.message);
+    exitWithError("There was an error generating a config: " + e.message);
   });
 }

@@ -22,6 +22,11 @@ export interface SettingsManagerOptions {
   anchorPath: string;
 }
 
+export interface GetSettingsOptions {
+  dataSourceOfInterest?: string;
+  timeout?: number;
+}
+
 export class SettingsManager {
   public logger: Logger;
   public verbose: boolean;
@@ -134,12 +139,17 @@ export class SettingsManager {
     });
   }
 
-  getSettings(dataSourceOfInterest?: string): Q.Promise<AppSettings> {
-    return this.currentWork
-      .timeout(this.initialLoadTimeout)
-      .catch(e => {
-        this.logger.error(`Initial load timeout hit, continuing`);
-      })
+  getSettings(opts: GetSettingsOptions = {}): Q.Promise<AppSettings> {
+    var currentWork = this.currentWork;
+
+    if (opts.timeout !== 0) {
+      currentWork = currentWork.timeout(opts.timeout || this.initialLoadTimeout)
+        .catch(e => {
+          this.logger.error(`Initial load timeout hit, continuing`);
+        });
+    }
+
+    return currentWork
       .then(() => {
         // ToDo: utilize dataSourceOfInterest
         return Q.all(this.clusterManagers.map(clusterManager => clusterManager.refresh()));

@@ -119,6 +119,12 @@ describe('General', () => {
       }).to.throw("Car must be on of 'Honda', 'Toyota', 'BMW' (is 'United Kingdom')");
     });
 
+    it('throw error not one of (undefined)', () => {
+      expect(() => {
+        ensureOneOf(undefined, ['Honda', 'Toyota', 'BMW'], 'Car');
+      }).to.throw("Car must be on of 'Honda', 'Toyota', 'BMW' (is not defined)");
+    });
+
   });
 
 });

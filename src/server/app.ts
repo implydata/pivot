@@ -13,6 +13,7 @@ if (!WallTime.rules) {
   WallTime.init(tzData.rules, tzData.zones);
 }
 
+import { GetSettingsOptions } from '../server/utils/settings-manager/settings-manager';
 import { PivotRequest } from './utils/index';
 import { VERSION, AUTH, SERVER_SETTINGS, SETTINGS_MANAGER } from './config';
 import * as plywoodRoutes from './routes/plywood/plywood';
@@ -39,8 +40,8 @@ addRoutes('/', express.static(path.join(__dirname, '../../assets')));
 app.use((req: PivotRequest, res: Response, next: Function) => {
   req.user = null;
   req.version = VERSION;
-  req.getSettings = (dataSourceOfInterest?: string) => {
-    return SETTINGS_MANAGER.getSettings(dataSourceOfInterest);
+  req.getSettings = (opts: GetSettingsOptions = {}) => {
+    return SETTINGS_MANAGER.getSettings(opts);
   };
   next();
 });
