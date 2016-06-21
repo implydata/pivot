@@ -281,9 +281,7 @@ export class AppSettingsMock {
           version: '0.9.1',
           timeout: 30000,
           sourceListScan: 'auto',
-          sourceListRefreshOnLoad: false,
           sourceListRefreshInterval: 10000,
-          sourceReintrospectOnLoad: false,
           sourceReintrospectInterval: 10000,
 
           introspectionStrategy: 'segment-metadata-fallback'
@@ -308,9 +306,7 @@ export class AppSettingsMock {
           version: '0.9.1',
           timeout: 30000,
           sourceListScan: 'auto',
-          sourceListRefreshOnLoad: false,
           sourceListRefreshInterval: 10000,
-          sourceReintrospectOnLoad: false,
           sourceReintrospectInterval: 10000,
 
           introspectionStrategy: "segment-metadata-fallback"

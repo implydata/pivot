@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 
 import { List } from 'immutable';
-import { moveInList, verifyUrlSafeName, makeTitle, inlineVars } from './general';
+import { moveInList, verifyUrlSafeName, makeTitle, inlineVars, ensureOneOf } from './general';
 
 describe('General', () => {
   describe('moveInList', () => {
@@ -103,6 +103,20 @@ describe('General', () => {
       };
 
       expect(() => inlineVars(json, vars)).to.throw("could not find variable 'FOX_SAYS'");
+    });
+
+  });
+
+
+  describe('ensureOneOf', () => {
+    it('does not thrown an error is one of', () => {
+      ensureOneOf('Honda', ['Honda', 'Toyota', 'BMW'], 'Car');
+    });
+
+    it('throw error not one of', () => {
+      expect(() => {
+        ensureOneOf('United Kingdom', ['Honda', 'Toyota', 'BMW'], 'Car');
+      }).to.throw("xx");
     });
 
   });

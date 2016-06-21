@@ -13,9 +13,8 @@ describe('Cluster', () => {
         version: '0.9.1',
         timeout: 30000,
         sourceListScan: 'auto',
-        sourceListRefreshOnLoad: false,
+        sourceListRefreshOnLoad: true,
         sourceListRefreshInterval: 10000,
-        sourceReintrospectOnLoad: false,
         sourceReintrospectInterval: 10000,
 
         introspectionStrategy: 'segment-metadata-fallback'
@@ -26,9 +25,8 @@ describe('Cluster', () => {
         host: '192.168.99.100',
         timeout: 30000,
         sourceListScan: 'auto',
-        sourceListRefreshOnLoad: false,
         sourceListRefreshInterval: 10000,
-        sourceReintrospectOnLoad: false,
+        sourceReintrospectOnLoad: true,
         sourceReintrospectInterval: 10000,
 
         database: 'datazoo',

@@ -30,12 +30,11 @@ describe('AppSettings', () => {
       var oldJS: any = {
         customization: {},
         druidHost: '192.168.99.100',
-        timeout: 30000,
+        timeout: 30003,
         sourceListScan: 'auto',
-        sourceListRefreshOnLoad: false,
-        sourceListRefreshInterval: 10000,
-        sourceReintrospectOnLoad: false,
-        sourceReintrospectInterval: 10000,
+        sourceListRefreshInterval: 10001,
+        sourceReintrospectInterval: 10002,
+        sourceReintrospectOnLoad: true,
         dataSources: [
           DataSourceMock.WIKI_JS
         ]
@@ -47,12 +46,33 @@ describe('AppSettings', () => {
           "type": "druid",
           "host": "192.168.99.100",
           "introspectionStrategy": "segment-metadata-fallback",
-          "sourceListRefreshInterval": 10000,
-          "sourceListRefreshOnLoad": false,
+          "sourceListRefreshInterval": 10001,
           "sourceListScan": "auto",
-          "sourceReintrospectInterval": 10000,
-          "sourceReintrospectOnLoad": false,
-          "timeout": 30000
+          "sourceReintrospectInterval": 10002,
+          "sourceReintrospectOnLoad": true,
+          "timeout": 30003
+        }
+      ]);
+    });
+
+    it("deals with old config style no sourceListScan=disabled", () => {
+      var oldJS: any = {
+        druidHost: '192.168.99.100',
+        sourceListScan: 'disable',
+        dataSources: [
+          DataSourceMock.WIKI_JS
+        ]
+      };
+
+      expect(AppSettings.fromJS(oldJS).toJS().clusters).to.deep.equal([
+        {
+          "host": "192.168.99.100",
+          "introspectionStrategy": "segment-metadata-fallback",
+          "name": "druid",
+          "sourceListRefreshInterval": 15000,
+          "sourceListScan": "disable",
+          "timeout": 40000,
+          "type": "druid"
         }
       ]);
     });

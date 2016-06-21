@@ -1,6 +1,6 @@
 import * as Q from 'q';
 import { External, Dataset, basicExecutorFactory } from 'plywood';
-import { inlineVars } from '../../../common/utils/general/general';
+import { inlineVars, pluralIfNeeded } from '../../../common/utils/general/general';
 import { AppSettings, Cluster, DataSource } from '../../../common/models/index';
 import { Logger } from '../logger/logger';
 import { loadFileSync } from '../file/file';
@@ -74,10 +74,10 @@ export class SettingsManager {
     this.makeMaxTimeCheckTimer();
   }
 
-  private addClusterManager(cluster: Cluster): Q.Promise<any> {
+  private addClusterManager(cluster: Cluster, dataSources: DataSource[]): Q.Promise<any> {
     const { verbose, logger, anchorPath } = this;
 
-    var initialExternals = this.appSettings.getDataSourcesForCluster(cluster.name).map(dataSource => {
+    var initialExternals = dataSources.map(dataSource => {
       return {
         name: dataSource.name,
         external: dataSource.toExternal(),
@@ -86,6 +86,7 @@ export class SettingsManager {
     });
 
     // Make a cluster manager for each cluster and assign the correct initial externals to it.
+    logger.log(`Adding cluster manager for '${cluster.name}' with ${pluralIfNeeded(dataSources.length, 'dataSource')}`);
     var clusterManager = new ClusterManager(cluster, {
       logger,
       verbose,
@@ -95,7 +96,6 @@ export class SettingsManager {
       generateExternalName: this.generateDataSourceName.bind(this)
     });
 
-    logger.log(`Adding cluster manager for '${cluster.name}'`);
     this.clusterManagers.push(clusterManager);
     return clusterManager.init();
   }
@@ -170,7 +170,7 @@ export class SettingsManager {
         logger.log(`${newCluster.name} UPDATED cluster`);
       },
       onEnter: (newCluster) => {
-        tasks.push(this.addClusterManager(newCluster));
+        tasks.push(this.addClusterManager(newCluster, newSettings.getDataSourcesForCluster(newCluster.name)));
       }
     });
 
@@ -268,6 +268,8 @@ export class SettingsManager {
   }
 
   makeMaxTimeCheckTimer() {
+    const { logger } = this;
+
     // Periodically check if max time needs to be updated
     setInterval(() => {
       this.appSettings.dataSources.forEach((dataSource) => {
@@ -275,11 +277,11 @@ export class SettingsManager {
           DataSource.updateMaxTime(dataSource)
             .then(
               (updatedDataSource) => {
-                this.logger.log(`Getting the latest MaxTime for '${updatedDataSource.name}'`);
+                logger.log(`Getting the latest MaxTime for '${updatedDataSource.name}'`);
                 this.appSettings = this.appSettings.addOrUpdateDataSource(updatedDataSource);
               },
               (e) => {
-                this.logger.error(`Error getting MaxTime for ${dataSource.name}: ${e.message}`);
+                logger.error(`Error getting MaxTime for ${dataSource.name}: ${e.message}`);
               }
             );
         }

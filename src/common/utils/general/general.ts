@@ -123,3 +123,12 @@ export function inlineVars(obj: any, vs: Lookup<string>): any {
     return v.substr(1, v.length - 2);
   }));
 }
+
+export function ensureOneOf(value: string, values: string[], messagePrefix: string): void {
+  if (values.indexOf(value) !== -1) return;
+  throw new Error(`${messagePrefix} must be on of '${values.join("', '")}' (is '${value}')`);
+}
+
+export function pluralIfNeeded(n: number, thing: string): string {
+  return `${n} ${thing}${n === 1 ? '' : 's'}`;
+}

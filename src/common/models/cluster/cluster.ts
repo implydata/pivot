@@ -1,5 +1,6 @@
 import { Class, Instance, isInstanceOf } from 'immutable-class';
 import { External } from 'plywood';
+import { ensureOneOf } from '../../utils/general/general';
 
 export type SupportedType = 'druid' | 'mysql' | 'postgres';
 export type SourceListScan = 'disable' | 'auto';
@@ -50,9 +51,12 @@ function parseIntFromPossibleString(x: any) {
 
 var check: Class<ClusterValue, ClusterJS>;
 export class Cluster implements Instance<ClusterValue, ClusterJS> {
+  static TYPE_VALUES: SupportedType[] = ['druid', 'mysql', 'postgres'];
   static DEFAULT_TIMEOUT = 40000;
   static DEFAULT_SOURCE_LIST_REFRESH_INTERVAL = 15000;
   static DEFAULT_INTROSPECTION_STRATEGY = 'segment-metadata-fallback';
+  static DEFAULT_SOURCE_LIST_SCAN: SourceListScan = 'disable';
+  static SOURCE_LIST_SCAN_VALUES: SourceListScan[] = ['disable', 'auto'];
 
   static isCluster(candidate: any): candidate is Cluster {
     return isInstanceOf(candidate, Cluster);
@@ -125,12 +129,15 @@ export class Cluster implements Instance<ClusterValue, ClusterJS> {
     this.name = name;
 
     this.type = parameters.type;
+    if (this.type) ensureOneOf(this.type, Cluster.TYPE_VALUES, `In cluster '${this.name}' type`);
+
     this.host = parameters.host;
 
     this.version = parameters.version;
 
     this.timeout = parameters.timeout || Cluster.DEFAULT_TIMEOUT;
-    this.sourceListScan = parameters.sourceListScan;
+    this.sourceListScan = parameters.sourceListScan || Cluster.DEFAULT_SOURCE_LIST_SCAN;
+    ensureOneOf(this.sourceListScan, Cluster.SOURCE_LIST_SCAN_VALUES, `In cluster '${this.name}' sourceListScan`);
 
     this.sourceListRefreshOnLoad = parameters.sourceListRefreshOnLoad || false;
     this.sourceListRefreshInterval = parameters.sourceListRefreshInterval || Cluster.DEFAULT_SOURCE_LIST_REFRESH_INTERVAL;
@@ -190,10 +197,11 @@ export class Cluster implements Instance<ClusterValue, ClusterJS> {
     if (this.version) js.version = this.version;
     js.timeout = this.timeout;
     js.sourceListScan = this.sourceListScan;
-    js.sourceListRefreshOnLoad = this.sourceListRefreshOnLoad;
-    js.sourceListRefreshInterval = this.sourceListRefreshInterval;
-    js.sourceReintrospectOnLoad = this.sourceReintrospectOnLoad;
-    js.sourceReintrospectInterval = this.sourceReintrospectInterval;
+
+    if (this.sourceListRefreshOnLoad) js.sourceListRefreshOnLoad = this.sourceListRefreshOnLoad;
+    if (this.sourceListRefreshInterval) js.sourceListRefreshInterval = this.sourceListRefreshInterval;
+    if (this.sourceReintrospectOnLoad) js.sourceReintrospectOnLoad = this.sourceReintrospectOnLoad;
+    if (this.sourceReintrospectInterval) js.sourceReintrospectInterval = this.sourceReintrospectInterval;
 
     if (this.introspectionStrategy) js.introspectionStrategy = this.introspectionStrategy;
     if (this.requestDecorator) js.requestDecorator = this.requestDecorator;
@@ -246,6 +254,10 @@ export class Cluster implements Instance<ClusterValue, ClusterJS> {
       allowSelectQueries: true,
       allowEternity: false
     });
+  }
+
+  public shouldScanSources(): boolean {
+    return this.sourceListScan === 'auto';
   }
 
   change(propertyName: string, newValue: any): Cluster {

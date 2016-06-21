@@ -82,7 +82,7 @@ export class ClusterManager {
   public init(): Q.Promise<any> {
     return Q(null)
       .then(() => this.introspectVersion())
-      .then(() => this.reintrospectSources())
+      .then(() => this.introspectSources())
       .then(() => this.scanSourceList());
   }
 
@@ -214,9 +214,10 @@ export class ClusterManager {
   }
 
   private introspectManagedExternal(managedExternal: ManagedExternal): Q.Promise<any> {
-    const { logger, cluster } = this;
+    const { logger, verbose, cluster } = this;
     if (managedExternal.suppressIntrospection) return Q(null);
 
+    if (verbose) logger.log(`Cluster '${cluster.name}' introspecting '${managedExternal.name}'`);
     return managedExternal.external.introspect()
       .then(
         (introspectedExternal) => {
@@ -233,8 +234,9 @@ export class ClusterManager {
   // See if any new sources were added to the cluster
   public scanSourceList(): Q.Promise<any> {
     const { logger, cluster, verbose } = this;
-    if (!cluster.sourceListScan) return Q(null);
+    if (!cluster.shouldScanSources()) return Q(null);
 
+    logger.log(`Scanning cluster '${cluster.name}' for new sources`);
     return (External.getConstructorFor(cluster.type) as any).getSourceList(this.requester)
       .then(
         (sources: string[]) => {
@@ -268,7 +270,7 @@ export class ClusterManager {
   }
 
   // See if any new dimensions or measures were added to the existing externals
-  public reintrospectSources(): Q.Promise<any> {
+  public introspectSources(): Q.Promise<any> {
     return Q.all(this.managedExternals.map((managedExternal) => {
       return this.introspectManagedExternal(managedExternal);
     }));
@@ -280,7 +282,7 @@ export class ClusterManager {
     var process = Q(null);
 
     if (cluster.sourceReintrospectOnLoad) {
-      process = process.then(() => this.reintrospectSources());
+      process = process.then(() => this.introspectSources());
     }
 
     if (cluster.sourceListRefreshOnLoad) {
