@@ -5,6 +5,8 @@ import { immutableEqual } from "immutable-class";
 import { Duration, Timezone } from 'chronoshift';
 import { Dataset } from 'plywood';
 import { Fn } from '../../../common/utils/general/general';
+import { classNames } from "../../utils/dom/dom";
+
 import { SvgIcon } from '../svg-icon/svg-icon';
 import { Clicker, Essence, DataSource, User, Customization, ExternalView } from '../../../common/models/index';
 
@@ -20,6 +22,7 @@ export interface CubeHeaderBarProps extends React.Props<any> {
   onNavClick: Fn;
   getUrlPrefix?: () => string;
   refreshMaxTime?: Fn;
+  updatingMaxTime?: boolean;
   openRawDataModal?: Fn;
   customization?: Customization;
   getDownloadableDataset?: () => Dataset;
@@ -196,6 +199,12 @@ export class CubeHeaderBar extends React.Component<CubeHeaderBarProps, CubeHeade
   onSettingsMenuClick(e: MouseEvent) {
     const { settingsMenuOpen } = this.state;
     if (settingsMenuOpen) return this.onSettingsMenuClose();
+
+    if (e.metaKey && e.altKey) {
+      console.log(this.props.essence.toJS());
+      return;
+    }
+
     this.setState({
       settingsMenuOpen: e.target as Element
     });
@@ -222,7 +231,7 @@ export class CubeHeaderBar extends React.Component<CubeHeaderBarProps, CubeHeade
 
 
   render() {
-    var { user, onNavClick, essence, customization } = this.props;
+    var { user, onNavClick, essence, customization, updatingMaxTime } = this.props;
 
     var userButton: JSX.Element = null;
     if (user) {
@@ -246,7 +255,7 @@ export class CubeHeaderBar extends React.Component<CubeHeaderBarProps, CubeHeade
         <div className="title">{essence.dataSource.title}</div>
       </div>
       <div className="right-bar">
-        <div className="icon-button auto-refresh" onClick={this.onAutoRefreshMenuClick.bind(this)}>
+        <div className={classNames("icon-button", "auto-refresh", { "refreshing": updatingMaxTime })} onClick={this.onAutoRefreshMenuClick.bind(this)}>
           <SvgIcon className="auto-refresh-icon" svg={require('../../icons/full-refresh.svg')}/>
         </div>
         <div className="icon-button hiluk" onClick={this.onHilukMenuClick.bind(this)}>

@@ -37,8 +37,8 @@ export function queryUrlExecutorFactory(name: string, url: string, version: stri
       .then(Qajax.filterSuccess)
       .then(Qajax.toJSON)
       .then(
-        (dataJS) => {
-          return Dataset.fromJS(dataJS);
+        (res) => {
+          return Dataset.fromJS(res.result);
         },
         (xhr: XMLHttpRequest): Dataset => {
           if (!xhr) return null; // This is only here to stop TS complaining

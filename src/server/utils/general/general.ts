@@ -1,8 +1,8 @@
 import { Request } from 'express';
-import { User } from '../../../common/models/index';
-import { DataSourceManager } from '../data-source-manager/data-source-manager';
+import { User, AppSettings } from '../../../common/models/index';
 
 export interface PivotRequest extends Request {
+  version: string;
   user: User;
-  dataSourceManager?: DataSourceManager;
+  getSettings(dataSourceOfInterest?: string): Q.Promise<AppSettings>;
 }
