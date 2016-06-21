@@ -15,7 +15,7 @@
     overflow: hidden;
     pointer-events: none;
 
-    &:after {
+    &::after {
       content: '';
       position: absolute;
       width: $shpitz-size;
@@ -30,7 +30,7 @@
       left: 50%;
       margin-left: $clip-size * -0.5;
 
-      &:after {
+      &::after {
         bottom: 0;
         left: 50%;
         margin-left: $shpitz-size * -0.5;
@@ -43,7 +43,7 @@
       left: 50%;
       margin-left: $clip-size * -0.5;
 
-      &:after {
+      &::after {
         top: 0;
         left: 50%;
         margin-left: $shpitz-size * -0.5;
@@ -56,7 +56,7 @@
       top: 50%;
       margin-top: $clip-size * -0.5;
 
-      &:after {
+      &::after {
         right: 0;
         top: 50%;
         margin-top: $shpitz-size * -0.5;
@@ -69,7 +69,7 @@
       top: 50%;
       margin-top: $clip-size * -0.5;
 
-      &:after {
+      &::after {
         left: 0;
         top: 50%;
         margin-top: $shpitz-size * -0.5;
@@ -134,20 +134,20 @@
         margin-left: 3px;
       }
 
-      &:active:after { display: none; }
+      &:active::after { display: none; }
 
-      &.help:after { content: 'Google Groups'; }
-      &.auto-refresh:after { content: 'Refresh options'; }
-      &.hiluk:after { content: 'Share link'; }
-      &.user:after { content: 'User'; }
-      &.github:after { content: 'Pivot on Github'; }
-      &.settings:after { content: 'Settings'; }
+      &.help::after { content: 'Google Groups'; }
+      &.auto-refresh::after { content: 'Refresh options'; }
+      &.hiluk::after { content: 'Share link'; }
+      &.user::after { content: 'User'; }
+      &.github::after { content: 'Pivot on Github'; }
+      &.settings::after { content: 'Settings'; }
 
-      &:hover:after {
+      &:hover::after {
         opacity: 1;
       }
 
-      &:after {
+      &::after {
         @extend %menu-cont;
         opacity: 0;
         pointer-events: none;
@@ -383,7 +383,7 @@
 }
 
 %white-shadow {
-  &:after {
+  &::after {
     @include pin-full;
     content: '';
     pointer-events: none;
