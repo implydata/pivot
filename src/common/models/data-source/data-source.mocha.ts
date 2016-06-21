@@ -3,10 +3,19 @@ import { testImmutableClass } from 'immutable-class/build/tester';
 import * as Q from 'q';
 
 import { $, Expression, AttributeInfo } from 'plywood';
+import { Cluster } from "../cluster/cluster";
 import { DataSource, DataSourceJS } from './data-source';
 import { DataSourceMock} from './data-source.mock';
 
 describe('DataSource', () => {
+  var druidCluster = Cluster.fromJS({
+    name: 'druid',
+    type: 'druid'
+  });
+
+  var context = {
+    cluster: druidCluster
+  };
 
   it('is an immutable class', () => {
     testImmutableClass<DataSourceJS>(DataSource, [
@@ -177,7 +186,7 @@ describe('DataSource', () => {
             "expression": "$main.countDistinct($unique_user)"
           }
         ]
-      });
+      }, context);
 
       expect(AttributeInfo.toJSs(dataSource.deduceAttributes())).to.deep.equal([
         {
@@ -556,7 +565,7 @@ describe('DataSource', () => {
   });
 
 
-  describe("#addAttributes", () => {
+  describe("#addAttributes (new dim)", () => {
     var dataSource = DataSource.fromJS({
       name: 'wiki',
       title: 'Wiki',
@@ -574,7 +583,7 @@ describe('DataSource', () => {
 
     it('adds new dimensions', () => {
       var columns: any = [
-        { "name": "time", "type": "TIME" },
+        { "name": "__time", "type": "TIME" },
         { "name": "added", "makerAction": { "action": "sum", "expression": { "name": "added", "op": "ref" }}, "type": "NUMBER", "unsplitable": true },
         { "name": "count", "makerAction": { "action": "count"}, "type": "NUMBER", "unsplitable": true },
         { "name": "delta_hist", "special": "histogram", "type": "NUMBER" },

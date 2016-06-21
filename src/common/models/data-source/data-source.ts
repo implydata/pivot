@@ -52,6 +52,8 @@ function makeUniqueMeasureList(measures: Measure[]): List<Measure> {
 }
 
 
+export type Introspection = 'none' | 'no-autofill' | 'autofill-dimensions-only' | 'autofill-measures-only' | 'autofill-all';
+
 export interface DataSourceValue {
   name: string;
   title?: string;
@@ -60,7 +62,7 @@ export interface DataSourceValue {
   subsetFilter?: Expression;
   rollup?: boolean;
   options?: DataSourceOptions;
-  introspection?: string;
+  introspection?: Introspection;
   attributeOverrides?: Attributes;
   attributes?: Attributes;
   derivedAttributes?: Lookup<Expression>;
@@ -89,10 +91,11 @@ export interface DataSourceJS {
   subsetFilter?: ExpressionJS;
   rollup?: boolean;
   options?: DataSourceOptions;
-  introspection?: string;
+  introspection?: Introspection;
   attributeOverrides?: AttributeJSs;
   attributes?: AttributeJSs;
   derivedAttributes?: Lookup<ExpressionJS>;
+
   dimensions?: DimensionJS[];
   measures?: MeasureJS[];
   timeAttribute?: string;
@@ -180,8 +183,8 @@ function filterFromLongFrom(longForm: LongForm): Expression {
 
 var check: Class<DataSourceValue, DataSourceJS>;
 export class DataSource implements Instance<DataSourceValue, DataSourceJS> {
-  static DEFAULT_INTROSPECTION = 'autofill-all';
-  static INTROSPECTION_VALUES = ['none', 'no-autofill', 'autofill-dimensions-only', 'autofill-measures-only', 'autofill-all'];
+  static DEFAULT_INTROSPECTION: Introspection = 'autofill-all';
+  static INTROSPECTION_VALUES: Introspection[] = ['none', 'no-autofill', 'autofill-dimensions-only', 'autofill-measures-only', 'autofill-all'];
   static DEFAULT_TIMEZONE = Timezone.UTC;
   static DEFAULT_DURATION = Duration.fromJS('P1D');
 
@@ -328,7 +331,7 @@ export class DataSource implements Instance<DataSourceValue, DataSourceJS> {
   public subsetFilter: Expression;
   public rollup: boolean;
   public options: DataSourceOptions;
-  public introspection: string;
+  public introspection: Introspection;
   public attributes: Attributes;
   public attributeOverrides: Attributes;
   public derivedAttributes: Lookup<Expression>;

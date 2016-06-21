@@ -124,8 +124,6 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
     var jsArrayLength = jsArray.length;
     if (!(8 <= jsArrayLength && jsArrayLength <= 11)) return null;
 
-
-    if (visualization === 'time-series') visualization = 'line-chart'; // Back compat (used to be named time-series)
     var essence: Essence;
     try {
       essence = Essence.fromJS({
@@ -188,6 +186,7 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
     const { dataSource, visualizations } = context;
 
     var visualizationID = parameters.visualization;
+    if (visualizationID === 'time-series') visualizationID = 'line-chart'; // Back compat (used to be named time-series)
     var visualization = helper.find(visualizations, v => v.id === visualizationID);
 
     var timezone = parameters.timezone ? Timezone.fromJS(parameters.timezone) : null;
@@ -272,7 +271,7 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
       pinnedSort,
       compare,
       highlight
-      } = parameters;
+    } = parameters;
 
     if (!dataSource) throw new Error('Essence must have a dataSource');
 
@@ -300,22 +299,24 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
       highlight = null;
     }
 
-    // Place vis here because it needs to know about splits and colors (and maybe later other things)
-    if (!visualization) {
-      var visAndResolve = Essence.getBestVisualization(visualizations, dataSource, splits, colors, null);
-      visualization = visAndResolve.visualization;
-    }
+    if (visualizations) {
+      // Place vis here because it needs to know about splits and colors (and maybe later other things)
+      if (!visualization) {
+        var visAndResolve = Essence.getBestVisualization(visualizations, dataSource, splits, colors, null);
+        visualization = visAndResolve.visualization;
+      }
 
-    var visResolve = visualization.handleCircumstance(dataSource, splits, colors, true);
-    if (visResolve.isAutomatic()) {
-      var adjustment = visResolve.adjustment;
-      splits = adjustment.splits;
-      colors = adjustment.colors || null;
-      visResolve = visualization.handleCircumstance(dataSource, splits, colors, true);
+      var visResolve = visualization.handleCircumstance(dataSource, splits, colors, true);
+      if (visResolve.isAutomatic()) {
+        var adjustment = visResolve.adjustment;
+        splits = adjustment.splits;
+        colors = adjustment.colors || null;
+        visResolve = visualization.handleCircumstance(dataSource, splits, colors, true);
 
-      if (!visResolve.isReady()) {
-        console.log(visResolve);
-        throw new Error(visualization.title + ' must be ready after automatic adjustment');
+        if (!visResolve.isReady()) {
+          console.log(visResolve);
+          throw new Error(visualization.title + ' must be ready after automatic adjustment');
+        }
       }
     }
 

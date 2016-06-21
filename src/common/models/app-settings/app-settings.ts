@@ -36,6 +36,7 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
     } else if (hasOwnProperty(parameters, 'druidHost') || hasOwnProperty(parameters, 'brokerHost')) {
       var clusterJS: any = JSON.parse(JSON.stringify(parameters));
       clusterJS.name = 'druid';
+      clusterJS.type = 'druid';
       clusterJS.host = clusterJS.druidHost || clusterJS.brokerHost;
       clusters = [Cluster.fromJS(clusterJS)];
 

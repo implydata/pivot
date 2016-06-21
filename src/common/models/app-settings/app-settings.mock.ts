@@ -266,7 +266,7 @@ const SMALL_WIKI_DATA = [
 ];
 
 export class AppSettingsMock {
-  public static get WIKI_ONLY_JS(): AppSettingsJS {
+  public static wikiOnlyJS(): AppSettingsJS {
     return {
       customization: {
         title: "Hello World",
@@ -295,7 +295,7 @@ export class AppSettingsMock {
     };
   }
 
-  public static get WIKI_TWITTER_JS(): AppSettingsJS {
+  public static wikiTwitterJS(): AppSettingsJS {
     return {
       customization: {
         title: "Hello World"
@@ -324,7 +324,7 @@ export class AppSettingsMock {
   }
 
   static wikiOnly() {
-    return AppSettings.fromJS(AppSettingsMock.WIKI_ONLY_JS);
+    return AppSettings.fromJS(AppSettingsMock.wikiOnlyJS());
   }
 
   static wikiOnlyWithExecutor() {
@@ -338,6 +338,6 @@ export class AppSettingsMock {
   }
 
   static wikiTwitter() {
-    return AppSettings.fromJS(AppSettingsMock.WIKI_TWITTER_JS);
+    return AppSettings.fromJS(AppSettingsMock.wikiTwitterJS());
   }
 }
