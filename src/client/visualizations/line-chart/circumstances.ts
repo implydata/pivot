@@ -24,7 +24,7 @@ export default CircumstancesHandler.EMPTY()
   })
 
   .when(CircumstancesHandler.areExactSplitKinds('time'))
-  .or(CircumstancesHandler.haveExactProperties({'bucketingStrategy' : "!never_bucket", "kind": 'number'}))
+  .or(CircumstancesHandler.haveExactProperties({bucketingStrategy : '!never_bucket', kind: 'number'}))
   .then((splits: Splits, dataSource: DataSource, colors: Colors) => {
     var timeBoost = 0;
 
@@ -98,6 +98,7 @@ export default CircumstancesHandler.EMPTY()
   })
 
   .when(CircumstancesHandler.areExactSplitKinds('*', 'time'))
+  .or(CircumstancesHandler.haveExactProperties({bucketingStrategy: ['*', '!never_bucket'], kind: ['*', 'number']}))
   .then((splits: Splits, dataSource: DataSource, colors: Colors) => {
     var timeSplit = splits.get(1);
     var timeDimension = timeSplit.getDimension(dataSource.dimensions);

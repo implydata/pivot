@@ -396,7 +396,7 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
 
         var className = 'row';
         var checkbox: JSX.Element = null;
-        if ((filterSet || colors) && !continuous) {
+        if (((filterSet || colors) && !continuous) || (continuous && colors)) {
           var selected: boolean;
           if (colors) {
             selected = false;
