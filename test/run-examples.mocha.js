@@ -1,5 +1,5 @@
-const { expect } = require('chai');
-const { spawn } = require('child_process');
+const expect = require('chai').expect;
+const spawn = require('child_process').spawn;
 const request = require('request');
 
 const TEST_PORT = 18082;
