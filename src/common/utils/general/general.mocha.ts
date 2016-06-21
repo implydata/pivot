@@ -116,7 +116,7 @@ describe('General', () => {
     it('throw error not one of', () => {
       expect(() => {
         ensureOneOf('United Kingdom', ['Honda', 'Toyota', 'BMW'], 'Car');
-      }).to.throw("xx");
+      }).to.throw("Car must be on of 'Honda', 'Toyota', 'BMW' (is 'United Kingdom')");
     });
 
   });

@@ -76,7 +76,6 @@ describe('Essence', () => {
         filter: {
           op: "literal",
           value: true
-
         },
         pinnedDimensions: [],
         singleMeasure: 'count',
