@@ -18,6 +18,8 @@ describe('CubeHeaderBar', () => {
         clicker={null}
         essence={EssenceMock.wiki()}
         onNavClick={null}
+        selectedDataSource={null}
+        dataSources={null}
       />
     );
 

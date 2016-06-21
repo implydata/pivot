@@ -389,6 +389,14 @@ Can customize the header background color and logo icon by supplying a color str
     headerBackground: '#2D95CA'
 ```
 
+Can customize the initial view switching between side-menu or tabs on header to switch between DataSources.
+
+```yaml
+  customization:
+    tabsMode: true
+```
+
+
 ### External links
 
 Pivot supports defining external view links with access to `dataSource`, `filter`, `splits`, and `timezone` objects at link generation time.

@@ -292,6 +292,7 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
           maxSplits={maxSplits}
           onNavClick={this.sideDrawerOpen.bind(this, true)}
           customization={customization}
+          dataSources={dataSources}
         />;
         break;
 

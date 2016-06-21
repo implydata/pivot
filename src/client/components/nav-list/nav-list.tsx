@@ -4,6 +4,7 @@ import * as React from 'react';
 import { Fn } from '../../../common/utils/general/general';
 import { classNames } from '../../utils/dom/dom';
 import { SvgIcon } from '../svg-icon/svg-icon';
+import { Customization } from '../../../common/models/index';
 
 export interface NavLink {
   name: string;
@@ -18,6 +19,7 @@ export interface NavListProps extends React.Props<any> {
   navLinks: NavLink[];
   iconSvg?: string;
   selected?: string;
+  customization?: Customization;
 }
 
 export interface NavListState {
@@ -51,7 +53,7 @@ export class NavList extends React.Component< NavListProps, NavListState> {
   }
 
   render() {
-    const { title } = this.props;
+    const { title, customization } = this.props;
 
     var className = "nav-list";
     var titleSection: JSX.Element = null;
@@ -59,6 +61,10 @@ export class NavList extends React.Component< NavListProps, NavListState> {
       titleSection = <div className="group-title">{title}</div>;
     } else {
       className += " no-title";
+    }
+    if (customization && customization.tabsMode) {
+      titleSection = null;
+      className = 'tabs';
     }
 
     return <div className={className}>

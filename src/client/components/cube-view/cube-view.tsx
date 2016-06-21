@@ -22,6 +22,7 @@ import { ResizeHandle } from '../resize-handle/resize-handle';
 
 import { visualizations } from '../../visualizations/index';
 import * as localStorage from '../../utils/local-storage/local-storage';
+import { List } from 'immutable';
 
 export interface CubeViewLayout {
   dimensionPanelWidth: number;
@@ -38,6 +39,7 @@ export interface CubeViewProps extends React.Props<any> {
   dataSource: DataSource;
   onNavClick?: Fn;
   customization?: Customization;
+  dataSources: List<DataSource>;
 }
 
 export interface CubeViewState {
@@ -337,7 +339,7 @@ export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
   render() {
     var clicker = this.clicker;
 
-    var { getUrlPrefix, onNavClick, user, customization } = this.props;
+    var { getUrlPrefix, onNavClick, user, customization, dataSources, dataSource } = this.props;
     var { layout, essence, menuStage, visualizationStage, dragOver } = this.state;
 
     if (!essence) return null;
@@ -384,6 +386,8 @@ export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
         getDownloadableDataset={() => this.downloadableDataset}
         changeTimezone={this.changeTimezone.bind(this)}
         timezone={essence.timezone}
+        selectedDataSource={dataSource}
+        dataSources={dataSources}
       />
       <div className="container" ref='container'>
         <DimensionMeasurePanel

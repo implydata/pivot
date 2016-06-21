@@ -12,6 +12,8 @@ import { HilukMenu } from '../hiluk-menu/hiluk-menu';
 import { AutoRefreshMenu } from '../auto-refresh-menu/auto-refresh-menu';
 import { UserMenu } from '../user-menu/user-menu';
 import { SettingsMenu } from '../settings-menu/settings-menu';
+import { List } from 'immutable';
+import { NavList } from '../nav-list/nav-list';
 
 export interface CubeHeaderBarProps extends React.Props<any> {
   clicker: Clicker;
@@ -25,6 +27,8 @@ export interface CubeHeaderBarProps extends React.Props<any> {
   getDownloadableDataset?: () => Dataset;
   changeTimezone?: (timezone: Timezone) => void;
   timezone?: Timezone;
+  selectedDataSource: DataSource;
+  dataSources: List<DataSource>;
 }
 
 export interface CubeHeaderBarState {
@@ -220,6 +224,38 @@ export class CubeHeaderBar extends React.Component<CubeHeaderBarProps, CubeHeade
     />;
   }
 
+  // Render Left part
+  renderLeftHeaderMenu() {
+    var { dataSources, selectedDataSource, onNavClick, essence, customization } = this.props;
+    var renderLeftHeaderMenu: JSX.Element = null;
+    if (customization && customization.tabsMode) {
+      var navLinks = dataSources.toArray().map(ds => {
+        return {
+          name: ds.name,
+          title: ds.title,
+          href: '#' + ds.name
+        };
+      });
+      renderLeftHeaderMenu = <div className="left-bar" >
+        <NavList
+          title="Data Cubes"
+          selected={selectedDataSource ? selectedDataSource.name : null}
+          navLinks={navLinks}
+          iconSvg={require('../../icons/full-cube.svg')}
+          customization={customization}
+        />
+      </div>;
+    } else {
+      renderLeftHeaderMenu = <div className="left-bar" onClick={onNavClick}>
+        <div className="menu-icon">
+          <SvgIcon svg={require('../../icons/menu.svg')}/>
+        </div>
+        <div className="title">{essence.dataSource.title}</div>
+      </div>;
+    }
+    return renderLeftHeaderMenu;
+  }
+
 
   render() {
     var { user, onNavClick, essence, customization } = this.props;
@@ -239,12 +275,7 @@ export class CubeHeaderBar extends React.Component<CubeHeaderBarProps, CubeHeade
     }
 
     return <header className="cube-header-bar" style={headerStyle}>
-      <div className="left-bar" onClick={onNavClick}>
-        <div className="menu-icon">
-          <SvgIcon svg={require('../../icons/menu.svg')}/>
-        </div>
-        <div className="title">{essence.dataSource.title}</div>
-      </div>
+      {this.renderLeftHeaderMenu()}
       <div className="right-bar">
         <div className="icon-button auto-refresh" onClick={this.onAutoRefreshMenuClick.bind(this)}>
           <SvgIcon className="auto-refresh-icon" svg={require('../../icons/full-refresh.svg')}/>
