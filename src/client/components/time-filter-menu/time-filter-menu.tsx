@@ -18,7 +18,14 @@ export interface Preset {
 }
 
 var $maxTime = $(FilterClause.MAX_TIME_REF_NAME);
+var $now = $(FilterClause.NOW_REF_NAME);
+
 var latestPresets: Preset[] = [
+  { name: '1M',  selection: $now.timeRange('PT1M', -1) },
+  { name: '5M',  selection: $now.timeRange('PT1M', -5) },
+  { name: '15M',  selection: $now.timeRange('PT1M', -15) },
+  { name: '30M',  selection: $now.timeRange('PT1M', -30) },
+  { name: '45M',  selection: $now.timeRange('PT1M', -45) },
   { name: '1H',  selection: $maxTime.timeRange('PT1H', -1) },
   { name: '6H',  selection: $maxTime.timeRange('PT6H', -1) },
   { name: '1D',  selection: $maxTime.timeRange('P1D', -1)  },
@@ -26,7 +33,6 @@ var latestPresets: Preset[] = [
   { name: '30D', selection: $maxTime.timeRange('P1D', -30) }
 ];
 
-var $now = $(FilterClause.NOW_REF_NAME);
 var currentPresets: Preset[] = [
   { name: 'D', selection: $now.timeBucket('P1D') },
   { name: 'W', selection: $now.timeBucket('P1W') },
@@ -198,9 +204,11 @@ export class TimeFilterMenu extends React.Component<TimeFilterMenuProps, TimeFil
 
     var previewTimeRange = essence.evaluateSelection(hoverPreset ? hoverPreset.selection : timeSelection);
     var previewText = previewTimeRange ? formatTimeRange(previewTimeRange, timezone, DisplayYear.IF_DIFF) : STRINGS.noFilter;
+    var latestPresetsButtons = latestPresets.map(presetToButton);
     var maxTimeBasedPresets = <div>
       <div className="type">{STRINGS.latest}</div>
-      <div className="buttons">{latestPresets.map(presetToButton)}</div>
+      <div className="buttons">{latestPresetsButtons.slice(0, 5)}</div><p></p>
+      <div className="buttons">{latestPresetsButtons.slice(5, 10)}</div>
     </div>;
 
     return <div className="cont">
