@@ -283,7 +283,10 @@ export class Scroller extends React.Component<ScrollerProps, ScrollerState> {
   }
 
   updateViewport() {
-    const rect = this.getDOMElement('Scroller').getBoundingClientRect();
+    const scroller = this.getDOMElement('Scroller');
+    if (!scroller) return;
+
+    const rect = scroller.getBoundingClientRect();
     const { top, right, bottom, left } = this.props.layout;
 
     const newHeight = rect.height - top - bottom;

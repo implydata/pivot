@@ -192,7 +192,14 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
 
   changeHash(hash: string, force = false): void {
     this.hashUpdating = true;
-    window.location.hash = `#${hash}`;
+
+    // Hash initialization, no need to add the intermediary url in the history
+    if (window.location.hash === `#${hash.split('/')[0]}`) {
+      window.history.replaceState(undefined, undefined, `#${hash}`);
+    } else {
+      window.location.hash = `#${hash}`;
+    }
+
     setTimeout(() => {
       this.hashUpdating = false;
     }, 5);
