@@ -44,8 +44,7 @@ describe('CLI basics', function () {
 
   it('complains if there are too many settings inputs', (testComplete) => {
     exec('bin/pivot --example wiki --druid localhost', (error: Error, stdout: Buffer, stderr: Buffer) => {
-      expect(error.message).to.equal('Command failed: bin/pivot --example wiki --druid localhost\n' +
-        'only one of --config, --example, --file, --druid, --postgres, --mysql can be given on the command line\n');
+      expect(error.message).to.contain('only one of --config, --example, --file, --druid, --postgres, --mysql can be given on the command line');
       testComplete();
     });
   });
