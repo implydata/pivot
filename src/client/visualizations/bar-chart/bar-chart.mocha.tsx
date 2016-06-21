@@ -10,8 +10,8 @@ import { EssenceMock, StageMock } from '../../../common/models/mocks';
 import { $, Expression } from 'plywood';
 import { BarChart } from './bar-chart';
 
-describe('BarChart', () => {
-  it.skip('adds the correct class', () => {
+describe.skip('BarChart', () => {
+  it('adds the correct class', () => {
     var renderedComponent = TestUtils.renderIntoDocument(
       <BarChart
         clicker={null}
