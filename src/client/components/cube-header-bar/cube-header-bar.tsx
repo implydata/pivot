@@ -63,7 +63,7 @@ export class CubeHeaderBar extends React.Component<CubeHeaderBarProps, CubeHeade
       this.setAutoRefreshFromDataSource(nextProps.essence.dataSource);
     }
 
-    if (this.props.updatingMaxTime && nextProps.updatingMaxTime) {
+    if (this.props.updatingMaxTime && !nextProps.updatingMaxTime) {
       setTimeout(() => {
         this.setState({ animating: false });
       }, 1000);
