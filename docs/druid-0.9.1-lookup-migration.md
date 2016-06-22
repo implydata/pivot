@@ -30,7 +30,7 @@ By fixing the version you will prevent Pivot form auto-detecting the new Druid v
 
 ### Step 3
 
-Roll out Druid 0.9.1 to your cluster
+Roll out Druid 0.9.1 to your cluster.
 
 ### Step 4
 
@@ -45,15 +45,15 @@ Update the 'druid' cluster in the Pivot config and explicitly set the `version` 
 
 Make sure to restart Pivot.
 
-In this configuration all the Druid 0.9.1 features will be used except the new lookups
+In this configuration all the Druid 0.9.1 features will be used except the new lookups.
 
 ### Step 5
 
-Follow the [instructions]() and add the new style lookups alongside the legacy lookups to Druid
+Follow the [instructions]() and add the new style lookups alongside the legacy lookups to Druid.
 
 ### Step 6
 
-Remove the explicit version pinning from the Pivot config. (Alternatively you can set it to `0.9.1`)
+Remove the explicit version pinning from the Pivot config. (Alternatively you can set it to `0.9.1`).
 
 Make sure to restart Pivot.
 
