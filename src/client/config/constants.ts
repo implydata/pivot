@@ -67,7 +67,7 @@ export const STRINGS = {
   timezone: 'Timezone',
   splitDelimiter: 'by',
   any: 'any',
-  noQueryableDataSources: 'There are no queryable data sources configured'
+  noQueryableDataSources: 'There are no queryable data sources configured',
   include: 'Include',
   exclude: 'Exclude',
   intersection: 'Intersection',
