@@ -188,8 +188,8 @@ export class Dimension implements Instance<DimensionValue, DimensionJS> {
   }
 
   public isBucketableContinuous() {
-    const { bucketingStrategy, isContinuous } = this;
-    return isContinuous() && bucketingStrategy !== NEVER_BUCKET;
+    const { bucketingStrategy } = this;
+    return this.isContinuous() && bucketingStrategy !== NEVER_BUCKET;
   }
 
   change(propertyName: string, newValue: any): Dimension {
