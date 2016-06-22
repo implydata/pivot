@@ -62,7 +62,10 @@ addRoutes('/health', healthRoutes);
 addRoutes('/plywood', plywoodRoutes);
 addRoutes('/plyql', plyqlRoutes);
 addRoutes('/mkurl', mkurlRoutes);
-//addRoutes('/settings', settingsRoutes); // ToDo: uncomment when needed 
+
+if (process.env['PIVOT_ENABLE_SETTINGS']) {
+  addRoutes('/settings', settingsRoutes);
+}
 
 // View routes
 if (SERVER_SETTINGS.iframe === 'deny') {
