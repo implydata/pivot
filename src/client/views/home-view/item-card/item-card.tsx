@@ -8,6 +8,7 @@ export interface ItemCardProps extends React.Props<any> {
   title: string;
   description: string;
   icon: string;
+  onClick: () => void;
 }
 
 export interface ItemCardState {
@@ -15,9 +16,9 @@ export interface ItemCardState {
 
 export class ItemCard extends React.Component< ItemCardProps, ItemCardState> {
   render() {
-    const { title, description, icon } = this.props;
+    const { title, description, icon, onClick } = this.props;
 
-    return <div className="item-card">
+    return <div className="item-card" onClick={onClick}>
       <div className="inner-container">
         <SvgIcon svg={require(`../../../icons/${icon}.svg`)}/>
         <div className="text">

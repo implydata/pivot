@@ -22,12 +22,17 @@ export interface HomeViewState {
 
 export class HomeView extends React.Component< HomeViewProps, HomeViewState> {
 
+  goToCube(cube: DataSource) {
+    window.location.hash = '#' + cube.name;
+  }
+
   renderCube(cube: DataSource): JSX.Element {
     return <ItemCard
       key={cube.name}
       title={cube.title}
       description={cube.description}
       icon="full-cube"
+      onClick={this.goToCube.bind(this, cube)}
     />;
   }
 
@@ -35,7 +40,7 @@ export class HomeView extends React.Component< HomeViewProps, HomeViewState> {
     return <div className="datacubes">
       <div className="title">{STRINGS.dataSources}</div>
       <div className="cubes-container">
-        {cubes.map(this.renderCube)}
+        {cubes.map(this.renderCube, this)}
 
         {/* So that the last item doesn't span on the entire row*/}
         <div className="item-card empty"/>
