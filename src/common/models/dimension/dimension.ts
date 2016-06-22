@@ -15,7 +15,7 @@ function typeToKind(type: string): string {
   return type.toLowerCase().replace(/_/g, '-').replace(/-range$/, '');
 }
 
-export const NEVER = "never";
+export const NEVER_BUCKET = "never";
 
 export type BucketingStrategy = "always" | "never";
 

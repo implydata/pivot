@@ -15,7 +15,7 @@ import {
   Measure,
   VisualizationProps,
   DatasetLoad,
-  NEVER
+  NEVER_BUCKET
 } from '../../../common/models/index';
 
 import { SPLIT, VIS_H_PADDING } from '../../config/constants';
@@ -532,7 +532,7 @@ export class BarChart extends BaseVisualization<BarChartState> {
     const dimension = split.getDimension(essence.dataSource.dimensions);
 
     var labels: JSX.Element[] = [];
-    if (dimension.isContinuous() && dimension.bucketingStrategy !== NEVER) {
+    if (dimension.isContinuous() && dimension.bucketingStrategy !== NEVER_BUCKET) {
       var lastIndex = data.length - 1;
       var ascending = split.sortAction.direction === SortAction.ASCENDING;
       var leftThing = ascending ? 'start' : 'end';

@@ -27,7 +27,7 @@ describe('Dimension', () => {
         },
         kind: 'string',
         url: 'https://www.country.com/%s',
-        bucketingStrategy: 'never_bucket'
+        bucketingStrategy: 'never'
       },
       {
         name: 'time',

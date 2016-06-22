@@ -64,7 +64,7 @@ export class DimensionMock {
         'type': 'SET'
       },
       kind: 'number',
-      bucketingStrategy: 'never_bucket'
+      bucketingStrategy: 'never'
     };
   }
 

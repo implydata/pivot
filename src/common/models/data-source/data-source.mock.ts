@@ -103,7 +103,7 @@ export class DataSourceMock {
           kind: 'number',
           name: 'userId',
           title: 'User Id',
-          bucketingStrategy: 'never_bucket'
+          bucketingStrategy: 'never'
         },
         {
           expression: {
