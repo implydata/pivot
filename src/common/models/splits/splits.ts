@@ -167,7 +167,7 @@ export class Splits implements Instance<SplitsValue, SplitsJS> {
       var splitExpression = splitCombine.expression;
       var splitDimension = dimensions.find(d => splitExpression.equals(d.expression));
       var splitKind = splitDimension.kind;
-      if (!splitDimension || !(splitKind === 'time' || splitKind === 'number') || splitDimension.bucketingStrategy === NEVER_BUCKET || splitCombine.bucketAction) return splitCombine;
+      if (!splitDimension || !(splitKind === 'time' || splitKind === 'number') || splitDimension.bucketingStrategy === NEVER_BUCKET) return splitCombine;
       changed = true;
 
       var selectionSet = filter.getLiteralSet(splitExpression);

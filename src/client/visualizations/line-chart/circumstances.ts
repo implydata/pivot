@@ -62,6 +62,7 @@ export default CircumstancesHandler.EMPTY()
 
   .when(CircumstancesHandler.areExactSplitKinds('time', '*'))
   .or(CircumstancesHandler.haveExactProperties({bucketingStrategy: [`!${NEVER_BUCKET}`, '*'], kind: ['number', '!number']}))
+  .or(CircumstancesHandler.haveExactProperties({bucketingStrategy: [`!${NEVER_BUCKET}`, `${NEVER_BUCKET}`], kind: ['number', 'number']}))
   .then((splits: Splits, dataSource: DataSource, colors: Colors) => {
     var timeSplit = splits.get(0);
     var timeDimension = timeSplit.getDimension(dataSource.dimensions);
