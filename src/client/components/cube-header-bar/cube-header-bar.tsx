@@ -40,6 +40,7 @@ export interface CubeHeaderBarState {
 }
 
 export class CubeHeaderBar extends React.Component<CubeHeaderBarProps, CubeHeaderBarState> {
+  public mounted: boolean;
   private autoRefreshTimer: NodeJS.Timer;
 
   constructor() {
@@ -54,6 +55,7 @@ export class CubeHeaderBar extends React.Component<CubeHeaderBarProps, CubeHeade
   }
 
   componentDidMount() {
+    this.mounted = true;
     const { dataSource } = this.props.essence;
     this.setAutoRefreshFromDataSource(dataSource);
   }
@@ -63,16 +65,18 @@ export class CubeHeaderBar extends React.Component<CubeHeaderBarProps, CubeHeade
       this.setAutoRefreshFromDataSource(nextProps.essence.dataSource);
     }
 
-    if (this.props.updatingMaxTime && !nextProps.updatingMaxTime) {
+    if (!this.mounted) return;
+    if (!this.props.updatingMaxTime && nextProps.updatingMaxTime) {
       setTimeout(() => {
-        this.setState({ animating: false });
+        this.setState({ animating: true });
       }, 1000);
     } else {
-      this.setState({ animating: nextProps.updatingMaxTime });
+      this.setState({ animating: false });
     }
   }
 
   componentWillUnmount() {
+    this.mounted = false;
     this.clearTimerIfExists();
   }
 
