@@ -121,6 +121,7 @@ export class ClusterManager {
     if (cluster.type === 'druid' && requestDecoratorModule) {
       logger.log(`Cluster '${cluster.name}' creating requestDecorator`);
       druidRequestDecorator = requestDecoratorModule.druidRequestDecoratorFactory(logger, {
+        options: decoratorOptions,
         cluster
       });
     }
@@ -128,7 +129,7 @@ export class ClusterManager {
     this.requester = properRequesterFactory({
       type: cluster.type,
       host: cluster.host,
-      timeout: cluster.timeout,
+      timeout: cluster.getTimeout(),
       verbose: this.verbose,
       concurrentLimit: 5,
 
@@ -143,8 +144,8 @@ export class ClusterManager {
   private updateSourceListRefreshTimer() {
     const { logger, cluster } = this;
 
-    if (this.sourceListRefreshInterval !== cluster.sourceListRefreshInterval) {
-      this.sourceListRefreshInterval = cluster.sourceListRefreshInterval;
+    if (this.sourceListRefreshInterval !== cluster.getSourceListRefreshInterval()) {
+      this.sourceListRefreshInterval = cluster.getSourceListRefreshInterval();
 
       if (this.sourceListRefreshTimer) {
         logger.log(`Clearing sourceListRefresh timer in cluster '${cluster.name}'`);
@@ -165,8 +166,8 @@ export class ClusterManager {
   private updateSourceReintrospectTimer() {
     const { logger, cluster } = this;
 
-    if (this.sourceReintrospectInterval !== cluster.sourceReintrospectInterval) {
-      this.sourceReintrospectInterval = cluster.sourceReintrospectInterval;
+    if (this.sourceReintrospectInterval !== cluster.getSourceReintrospectInterval()) {
+      this.sourceReintrospectInterval = cluster.getSourceReintrospectInterval();
 
       if (this.sourceReintrospectTimer) {
         logger.log(`Clearing sourceReintrospect timer in cluster '${cluster.name}'`);
