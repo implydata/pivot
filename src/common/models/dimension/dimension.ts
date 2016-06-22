@@ -182,6 +182,11 @@ export class Dimension implements Instance<DimensionValue, DimensionJS> {
     return kind === 'time' || kind === 'number';
   }
 
+  public isBucketableNumber() {
+    const { kind, bucketingStrategy } = this;
+    return kind === 'number' && bucketingStrategy !== NEVER_BUCKET;
+  }
+
   public isBucketableContinuous() {
     const { bucketingStrategy, isContinuous } = this;
     return isContinuous() && bucketingStrategy !== NEVER_BUCKET;

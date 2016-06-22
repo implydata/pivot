@@ -44,7 +44,7 @@ export default CircumstancesHandler.EMPTY()
       }
 
 
-      if (splitDimension.isBucketableContinuous()) {
+      if (splitDimension.isBucketableNumber()) {
         continuousBoost = 4;
       }
 
