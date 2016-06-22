@@ -1,0 +1,57 @@
+@import '../../imports';
+
+.filter-options-dropdown {
+  .selected-item {
+    padding: 8px 15px 0 4px;
+
+    .icon {
+      padding: 0;
+      bottom: 4px;
+    }
+
+    &.active {
+      background: darken($white, 5%);
+
+      svg path {
+        fill: darken($gray, 12%);
+      }
+    }
+
+    .caret-icon {
+      right: 5px;
+    }
+  }
+
+  .dropdown-menu {
+    width: 180px;
+
+    .filter-option {
+      display: block;
+
+      .option-label {
+        display: inline-block;
+        padding: 2px 10px;
+      }
+    }
+  }
+
+  .icon {
+    display: inline-block;
+    padding: 5px 0;
+    cursor: pointer;
+    width: 19px;
+  }
+
+  svg path {
+    fill: #bbb;
+    width: 19px;
+  }
+
+  &:hover,
+  &.active {
+    svg path {
+      fill: #888;
+    }
+  }
+
+}

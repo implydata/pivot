@@ -8,13 +8,22 @@ import { Stage, Clicker, Essence, DataSource, Filter, FilterClause, Dimension, M
 import { collect } from '../../../common/utils/general/general';
 import { enterKey } from '../../utils/dom/dom';
 import { ClearableInput } from '../clearable-input/clearable-input';
-import { Checkbox } from '../checkbox/checkbox';
+import { Checkbox, CheckboxType } from '../checkbox/checkbox';
 import { Loader } from '../loader/loader';
 import { QueryError } from '../query-error/query-error';
 import { HighlightString } from '../highlight-string/highlight-string';
 import { Button } from '../button/button';
+import { Dropdown, DropdownProps } from "../dropdown/dropdown";
+import { SvgIcon } from '../svg-icon/svg-icon';
+import { FilterOptionsDropdown } from '../filter-options-dropdown/filter-options-dropdown';
 
 const TOP_N = 100;
+
+export interface FilterOption {
+  name: string;
+  svg: string;
+  checkType?: CheckboxType;
+}
 
 export interface StringFilterMenuProps extends React.Props<any> {
   clicker: Clicker;
@@ -29,6 +38,7 @@ export interface StringFilterMenuState {
   dataset?: Dataset;
   error?: any;
   fetchQueued?: boolean;
+  selectedFilterOption?: FilterOption;
   searchText?: string;
   selectedValues?: Set;
   colors?: Colors;
@@ -45,6 +55,7 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
       dataset: null,
       error: null,
       fetchQueued: false,
+      selectedFilterOption: null,
       searchText: '',
       selectedValues: null,
       colors: null
@@ -231,8 +242,14 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
     return !essence.filter.equals(this.constructFilter());
   }
 
+  onSelectFilterOption(option: FilterOption) {
+    this.setState({
+      selectedFilterOption : option
+    });
+  }
+
   renderTable() {
-    var { loading, dataset, error, fetchQueued, searchText, selectedValues } = this.state;
+    var { loading, dataset, error, fetchQueued, searchText, selectedValues, selectedFilterOption } = this.state;
     var { dimension } = this.props;
 
     var rows: Array<JSX.Element> = [];
@@ -248,6 +265,8 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
         });
       }
 
+      var checkboxType = selectedFilterOption ? selectedFilterOption.checkType : 'check' as CheckboxType;
+
       rows = rowData.map((d) => {
         var segmentValue = d[dimension.name];
         var segmentValueStr = String(segmentValue);
@@ -260,7 +279,7 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
           onClick={this.onValueClick.bind(this, segmentValue)}
         >
           <div className="row-wrapper">
-            <Checkbox selected={selected}/>
+            <Checkbox type={checkboxType} selected={selected}/>
             <HighlightString className="label" text={segmentValueStr} highlightText={searchText}/>
           </div>
         </div>;
@@ -278,13 +297,16 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
     ].join(' ');
 
     return <div className={className}>
-      <div className="search-box">
-        <ClearableInput
-          placeholder="Search"
-          focusOnMount={true}
-          value={searchText}
-          onChange={this.onSearchChange.bind(this)}
-        />
+      <div className="side-by-side">
+        <FilterOptionsDropdown selectedOption={selectedFilterOption} onSelectOption={this.onSelectFilterOption.bind(this)} />
+        <div className="search-box">
+          <ClearableInput
+            placeholder="Search"
+            focusOnMount={true}
+            value={searchText}
+            onChange={this.onSearchChange.bind(this)}
+          />
+        </div>
       </div>
       <div className="rows">
         {rows}
