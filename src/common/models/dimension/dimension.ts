@@ -1,8 +1,8 @@
 import { List } from 'immutable';
 import { Class, Instance, isInstanceOf, immutableArraysEqual } from 'immutable-class';
 
-import { $, Expression, ExpressionJS, Action, NumberRangeJS, ApplyAction, AttributeInfo } from 'plywood';
-import { verifyUrlSafeName, makeTitle, hasOwnProperty } from '../../utils/general/general';
+import { $, Expression, ExpressionJS } from 'plywood';
+import { verifyUrlSafeName, makeTitle } from '../../utils/general/general';
 import { Granularity, GranularityJS, granularityFromJS, granularityToJS, granularityEquals } from "../granularity/granularity";
 
 var geoName = /continent|country|city|region/i;
