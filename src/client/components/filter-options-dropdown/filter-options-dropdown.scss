@@ -2,23 +2,15 @@
 
 .filter-options-dropdown {
   .selected-item {
-    padding: 8px 15px 0 4px;
+    padding: 8px 16px 0 4px;
 
     .icon {
       padding: 0;
       bottom: 4px;
     }
 
-    &.active {
-      background: darken($white, 5%);
-
-      svg path {
-        fill: darken($gray, 12%);
-      }
-    }
-
     .caret-icon {
-      right: 5px;
+      right: 6px;
     }
   }
 
@@ -35,23 +27,14 @@
     }
   }
 
-  .icon {
+  svg.icon {
     display: inline-block;
     padding: 5px 0;
     cursor: pointer;
     width: 19px;
-  }
 
-  svg path {
-    fill: #bbb;
-    width: 19px;
-  }
-
-  &:hover,
-  &.active {
-    svg path {
+    path {
       fill: #888;
     }
   }
-
 }
