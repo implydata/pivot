@@ -48,6 +48,7 @@ export class HomeHeaderBar extends React.Component<HomeHeaderBarProps, HomeHeade
         <div className="title">{title}</div>
       </div>
       <div className="right-bar">
+        {this.props.children}
         <a className="icon-button help" href="https://groups.google.com/forum/#!forum/imply-user-group" target="_blank">
           <SvgIcon className="help-icon" svg={require('../../icons/help.svg')}/>
         </a>

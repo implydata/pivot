@@ -1,0 +1,48 @@
+@import '../../../imports';
+
+.item-card {
+
+  width: 280px;
+  height: 100px;
+  padding: 1px 1px 0 0;
+
+  .inner-container {
+    background-color: $white;
+    box-shadow: 0 1px 1px 0 rgba($black, 0.1);
+
+    width: 100%;
+    height: 100%;
+    padding: 20px 10px;
+
+    white-space: nowrap;
+
+    > * {
+      display: inline-block;
+    }
+
+    .svg-icon {
+      height: 20px;
+      margin-right: 10px;
+
+      path {
+        fill: $brand;
+      }
+    }
+
+    .text {
+      padding-top: 3px;
+      white-space: normal;
+      width: calc(100% - 30px);
+
+      .title {
+        color: $text-standard;
+        font-size: 1.2em;
+        margin-bottom: 10px;
+      }
+
+      .description {
+        color: $text-light;
+      }
+    }
+  }
+}
