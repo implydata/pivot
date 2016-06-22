@@ -10,7 +10,8 @@ For updates follow [@implydata](https://twitter.com/implydata) on Twitter.
 - Pivot can connect to Postgres and MySQL
 - Full support of Druid 0.9.1
 - Auth module versioning
-- Druid Request decorator versioning
+- Command line flag changes (see [writeup](docs/pivot-0.9.x-migration.md))
+- Druid Request decorator changes (see [writeup](docs/pivot-0.9.x-migration.md))
 - Ability to [generate programmatic links](docs/generating-links-into-pivot.md) into Pivot
 - Ability to configure `serverHost`
 - Auto refresh icon rotation

@@ -8,13 +8,14 @@ import { Logger } from '../logger/logger';
 
 const DRUID_REQUEST_DECORATOR_MODULE_VERSION = 1;
 
-export interface RequestDecoratorFactoryOptions {
+export interface RequestDecoratorFactoryParams {
+  options: any;
   cluster: Cluster;
 }
 
 export interface DruidRequestDecoratorModule {
   version: number;
-  druidRequestDecoratorFactory: (logger: Logger, options: RequestDecoratorFactoryOptions) => DruidRequestDecorator;
+  druidRequestDecoratorFactory: (logger: Logger, params: RequestDecoratorFactoryParams) => DruidRequestDecorator;
 }
 
 // For each external we want to maintain its source and weather it should introspect at all
@@ -121,7 +122,7 @@ export class ClusterManager {
     if (cluster.type === 'druid' && requestDecoratorModule) {
       logger.log(`Cluster '${cluster.name}' creating requestDecorator`);
       druidRequestDecorator = requestDecoratorModule.druidRequestDecoratorFactory(logger, {
-        options: decoratorOptions,
+        options: cluster.decoratorOptions,
         cluster
       });
     }

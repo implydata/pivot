@@ -138,7 +138,7 @@ if (numSettingsInputs > 1) {
   if (parsedArgs['druid'] && parsedArgs['config']) {
     console.error(`Looks like you are using --config and --druid in conjunction with each other`);
     console.error(`This usage is no longer supported. If you are migrating from Pivot < 0.9.x`);
-    console.error(`Please visit: (...)`);
+    console.error(`Please visit: (https://github.com/implydata/pivot/blob/master/docs/pivot-0.9.x-migration.md)`);
   }
   process.exit(1);
 }
