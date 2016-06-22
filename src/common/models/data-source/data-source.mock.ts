@@ -94,6 +94,25 @@ export class DataSourceMock {
           kind: 'string',
           name: 'twitterHandle',
           title: 'Twitter Handle'
+        },
+        {
+          expression: {
+            name: 'userId',
+            op: 'ref'
+          },
+          kind: 'number',
+          name: 'userId',
+          title: 'User Id',
+          bucketingStrategy: 'never_bucket'
+        },
+        {
+          expression: {
+            name: 'orderSize',
+            op: 'ref'
+          },
+          kind: 'number',
+          name: 'orderSize',
+          title: 'Order Size'
         }
       ],
       measures: [
@@ -114,8 +133,8 @@ export class DataSourceMock {
       defaultSortMeasure: 'count',
       defaultPinnedDimensions: ['tweet'],
       refreshRule: {
-        refresh: "PT1M",
-        rule: "fixed"
+        rule: 'query',
+        refresh: 'P1D'
       }
     };
   }

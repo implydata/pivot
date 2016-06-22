@@ -119,11 +119,11 @@ describe('General', () => {
     });
 
     it('works in number case', () => {
-      expect(formatFilterClause(DimensionMock.number(), numberFilter, Timezone.UTC)).to.equal('Numeric (3)');
+      expect(formatFilterClause(DimensionMock.orderSize(), numberFilter, Timezone.UTC)).to.equal('Numeric (3)');
     });
 
     it('works in number verbose', () => {
-      expect(formatFilterClause(DimensionMock.number(), numberFilter, Timezone.UTC, true)).to.equal('Numeric: 1, 2, 3');
+      expect(formatFilterClause(DimensionMock.orderSize(), numberFilter, Timezone.UTC, true)).to.equal('Numeric: 1, 2, 3');
     });
 
     it('works in string case', () => {

@@ -1,6 +1,6 @@
 import { $, SortAction } from 'plywood';
 import { List } from 'immutable';
-import { Splits, DataSource, Resolve, SplitCombine, Colors, Dimension } from '../../../common/models/index';
+import { Splits, DataSource, Resolve, SplitCombine, Colors, Dimension, NEVER_BUCKET } from '../../../common/models/index';
 import { CircumstancesHandler } from '../../../common/utils/circumstances-handler/circumstances-handler';
 
 export default CircumstancesHandler.EMPTY()
@@ -43,7 +43,8 @@ export default CircumstancesHandler.EMPTY()
         autoChanged = true;
       }
 
-      if (splitDimension.kind === 'number') {
+
+      if (splitDimension.kind === 'number' && splitDimension.bucketingStrategy !== NEVER_BUCKET) {
         continuousBoost = 4;
       }
 

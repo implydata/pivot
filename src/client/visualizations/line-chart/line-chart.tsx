@@ -53,6 +53,29 @@ function findClosest(data: Datum[], dragDate: Date, scaleX: (v: continuousValueT
   return closestDatum;
 }
 
+function getDatumValue(dataset: Dataset, dimensionName: string, last: boolean): NumberRange | TimeRange {
+  var data = dataset.data;
+  var index = last ? data.length - 1 : 0;
+  var datum = data[index];
+  var value = datum[dimensionName];
+  if (value) return value as NumberRange | TimeRange;
+  if (datum[SPLIT]) return getDatumValue(datum[SPLIT] as Dataset, dimensionName, last);
+  return null;
+}
+
+function getAxisRangeFromDataset(dataset: Dataset, dimensionName: string) {
+  var start = getDatumValue(dataset, dimensionName, false).start;
+  var end = getDatumValue(dataset, dimensionName, true).end;
+
+  // right now dataset might not be sorted properly
+  if (start < end ) {
+    return Range.fromJS({start, end});
+  } else {
+    return Range.fromJS({ start: end, end: start });
+  }
+
+}
+
 function roundTo(v: number, roundTo: number) {
   return Math.round(Math.floor(v / roundTo)) * roundTo;
 }
@@ -545,12 +568,7 @@ export class LineChart extends BaseVisualization<LineChartState> {
         // Not filtered on time or has unbounded filter
         if ((!axisRange && dataset) || (dataset && (!axisRange.start || !axisRange.end))) {
           var myDataset = dataset.data[0]['SPLIT'] as Dataset;
-
-          var start = (myDataset.data[0][continuousDimension.name] as NumberRange | TimeRange).start;
-          var end = (myDataset.data[myDataset.data.length - 1][continuousDimension.name] as NumberRange | TimeRange).end;
-
-          // right now dataset might not be sorted properly
-          if (start < end ) axisRange = Range.fromJS({start, end});
+          axisRange = getAxisRangeFromDataset(myDataset, continuousDimension.name);
         }
 
         if (axisRange) {
