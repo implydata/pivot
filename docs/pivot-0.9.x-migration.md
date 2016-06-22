@@ -77,7 +77,7 @@ arbitrary properties
 
 If you are using a druidRequestDecorator then you will need to adjust it a little bit:
 
-* the config key was renamed form `druidRequestDecorator` to `requestDecorator`
+* the config key was renamed from `druidRequestDecorator` to `requestDecorator`
 * the logger is no longer a function but a Logger instance instead of `logger('blah')` use `logger.log('blah')`
 * the config is no longer passed in, instead the contents of `decoratorOptions` and the `cluster` objects are passed in
 * a `version` (`1`) now needs to be exported form the module
