@@ -318,7 +318,7 @@ export class LineChart extends BaseVisualization<LineChartState> {
       var bubbleRange = dragRange || essence.getSingleHighlightSet().elements[0];
 
       var shownRange = roundDragRange || bubbleRange;
-      var segmentLabel = formatValue(bubbleRange, timezone, DisplayYear.NEVER);
+      var segmentLabel = formatValue(shownRange, timezone, DisplayYear.NEVER);
 
       if (colors) {
         var categoryDimension = essence.splits.get(0).getDimension(essence.dataSource.dimensions);

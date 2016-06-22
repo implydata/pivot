@@ -3,7 +3,7 @@ import { Class, Instance, isInstanceOf, immutableArraysEqual } from 'immutable-c
 import { Timezone, Duration, day, hour } from 'chronoshift';
 import { $, Expression, RefExpression, TimeRange, TimeBucketAction, SortAction, NumberRange, Range } from 'plywood';
 import { immutableListsEqual } from '../../utils/general/general';
-import { Dimension, NEVER_BUCKET } from '../dimension/dimension';
+import { Dimension, NEVER } from '../dimension/dimension';
 import { Filter } from '../filter/filter';
 import { SplitCombine, SplitCombineJS, SplitCombineContext } from '../split-combine/split-combine';
 import { NumberBucketAction } from "plywood";
@@ -167,7 +167,7 @@ export class Splits implements Instance<SplitsValue, SplitsJS> {
       var splitExpression = splitCombine.expression;
       var splitDimension = dimensions.find(d => splitExpression.equals(d.expression));
       var splitKind = splitDimension.kind;
-      if (!splitDimension || !(splitKind === 'time' || splitKind === 'number') || splitDimension.bucketingStrategy === NEVER_BUCKET || splitCombine.bucketAction) return splitCombine;
+      if (!splitDimension || !(splitKind === 'time' || splitKind === 'number') || splitDimension.bucketingStrategy === NEVER || splitCombine.bucketAction) return splitCombine;
       changed = true;
 
       var selectionSet = filter.getLiteralSet(splitExpression);
