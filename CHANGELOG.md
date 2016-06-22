@@ -10,7 +10,7 @@ For updates follow [@implydata](https://twitter.com/implydata) on Twitter.
 - Pivot can connect to Postgres and MySQL
 - Full support of Druid 0.9.1
 - Auth module visioning
-- Druid Request decorator visioning
+- Druid Request decorator versioning
 
 ## 0.8.42
 
