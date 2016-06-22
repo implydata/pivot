@@ -137,7 +137,7 @@ if (numSettingsInputs > 1) {
   console.error(`only one of --${SETTINGS_INPUTS.join(', --')} can be given on the command line`);
   if (parsedArgs['druid'] && parsedArgs['config']) {
     console.error(`Looks like you are using --config and --druid in conjunction with each other`);
-    console.error(`This usage in no longer supported. If you are migrating from Pivot < 0.9.x`);
+    console.error(`This usage is no longer supported. If you are migrating from Pivot < 0.9.x`);
     console.error(`Please visit: (...)`);
   }
   process.exit(1);
