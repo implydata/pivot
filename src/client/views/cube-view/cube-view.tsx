@@ -158,12 +158,8 @@ export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
     DataSource.updateMaxTime(dataSource)
       .then((updatedDataSource) => {
         if (!this.mounted) return;
-        this.setState({ essence: essence.updateDataSource(updatedDataSource) });
+        this.setState({ essence: essence.updateDataSource(updatedDataSource), updatingMaxTime: false  });
       });
-
-    setTimeout(() => {
-      this.setState({ updatingMaxTime: false });
-    }, 1000);
   }
 
   componentWillMount() {

@@ -6,7 +6,6 @@
   .refreshing svg {
     animation-name: rotate;
     animation-duration: 1s;
-    animation-iteration-count: infinite;
 
     @keyframes rotate {
       from { transform: rotate(0deg); }

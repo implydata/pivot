@@ -36,6 +36,7 @@ export interface CubeHeaderBarState {
   autoRefreshRate?: Duration;
   settingsMenuOpen?: Element;
   userMenuOpenOn?: Element;
+  animating?: boolean;
 }
 
 export class CubeHeaderBar extends React.Component<CubeHeaderBarProps, CubeHeaderBarState> {
@@ -47,7 +48,8 @@ export class CubeHeaderBar extends React.Component<CubeHeaderBarProps, CubeHeade
       hilukMenuOpenOn: null,
       autoRefreshMenuOpenOn: null,
       autoRefreshRate: null,
-      userMenuOpenOn: null
+      userMenuOpenOn: null,
+      animating: false
     };
   }
 
@@ -59,6 +61,14 @@ export class CubeHeaderBar extends React.Component<CubeHeaderBarProps, CubeHeade
   componentWillReceiveProps(nextProps: CubeHeaderBarProps) {
     if (this.props.essence.dataSource.name !== nextProps.essence.dataSource.name) {
       this.setAutoRefreshFromDataSource(nextProps.essence.dataSource);
+    }
+
+    if ((nextProps.updatingMaxTime === false) && this.props.updatingMaxTime) {
+      setTimeout(() => {
+        this.setState({ animating: false });
+      }, 1000);
+    } else {
+      this.setState({ animating: nextProps.updatingMaxTime });
     }
   }
 
@@ -231,7 +241,8 @@ export class CubeHeaderBar extends React.Component<CubeHeaderBarProps, CubeHeade
 
 
   render() {
-    var { user, onNavClick, essence, customization, updatingMaxTime } = this.props;
+    var { user, onNavClick, essence, customization } = this.props;
+    var { animating } = this.state;
 
     var userButton: JSX.Element = null;
     if (user) {
@@ -255,7 +266,7 @@ export class CubeHeaderBar extends React.Component<CubeHeaderBarProps, CubeHeade
         <div className="title">{essence.dataSource.title}</div>
       </div>
       <div className="right-bar">
-        <div className={classNames("icon-button", "auto-refresh", { "refreshing": updatingMaxTime })} onClick={this.onAutoRefreshMenuClick.bind(this)}>
+        <div className={classNames("icon-button", "auto-refresh", { "refreshing": animating })} onClick={this.onAutoRefreshMenuClick.bind(this)}>
           <SvgIcon className="auto-refresh-icon" svg={require('../../icons/full-refresh.svg')}/>
         </div>
         <div className="icon-button hiluk" onClick={this.onHilukMenuClick.bind(this)}>
