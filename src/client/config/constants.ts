@@ -32,7 +32,7 @@ export const STRINGS: any = {
   copyUrl: 'Copy URL',
   copyValue: 'Copy value',
   current: 'Current',
-  dataSources: 'DataSources',
+  dataSources: 'Data Cubes',
   dimensions: 'Dimensions',
   download: 'Download',
   end: 'End',

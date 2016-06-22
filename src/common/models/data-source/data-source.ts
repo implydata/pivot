@@ -659,7 +659,6 @@ export class DataSource implements Instance<DataSourceValue, DataSourceJS> {
   }
 
   public isQueryable(): boolean {
-    console.log(this.executor);
     return Boolean(this.executor);
   }
 
