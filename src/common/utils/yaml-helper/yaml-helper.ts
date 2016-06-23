@@ -49,7 +49,7 @@ export function clusterToYAML(cluster: Cluster, withComments: boolean): string[]
   yamlPropAdder(lines, withComments, {
     object: cluster,
     propName: 'type',
-    comment: 'The type od the data store can be (druid, mysql, or postgres)'
+    comment: 'The type of the data store can be (druid, mysql, or postgres)'
   });
 
   yamlPropAdder(lines, withComments, {
