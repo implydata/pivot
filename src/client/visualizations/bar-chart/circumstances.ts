@@ -43,7 +43,8 @@ export default CircumstancesHandler.EMPTY()
         autoChanged = true;
       }
 
-      if (splitDimension.kind === 'number') {
+
+      if (splitDimension.isBucketableNumber()) {
         continuousBoost = 4;
       }
 

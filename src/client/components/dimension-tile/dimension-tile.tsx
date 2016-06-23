@@ -100,7 +100,7 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
 
     var sortExpression: Expression = null;
 
-    if (dimension.isContinuous()) {
+    if (dimension.isBucketableContinuous()) {
       const dimensionExpression = dimension.expression as RefExpression;
       const attributeName = dimensionExpression.name;
 
@@ -396,7 +396,7 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
 
         var className = 'row';
         var checkbox: JSX.Element = null;
-        if ((filterSet || colors) && !continuous) {
+        if (((filterSet || colors) && !continuous) || (continuous && colors)) {
           var selected: boolean;
           if (colors) {
             selected = false;
@@ -491,7 +491,7 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
       showSearch={showSearch}
       icons={icons}
       className={className}
-      actions={continuous ? this.getGranularityActions() : null}
+      actions={dimension.isBucketableContinuous() ? this.getGranularityActions() : null}
       >
       <div className="rows">
         {rows}

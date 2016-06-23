@@ -3,9 +3,8 @@ require('./filter-menu.css');
 import * as React from 'react';
 import { Fn } from '../../../common/utils/general/general';
 import { Stage, Clicker, Essence, DataSource, Filter, Dimension, DragPosition } from '../../../common/models/index';
+
 import { BubbleMenu } from '../bubble-menu/bubble-menu';
-
-
 import { StringFilterMenu } from '../string-filter-menu/string-filter-menu';
 import { TimeFilterMenu } from '../time-filter-menu/time-filter-menu';
 import { NumberFilterMenu } from '../number-filter-menu/number-filter-menu';
@@ -45,7 +44,7 @@ export class FilterMenu extends React.Component<FilterMenuProps, FilterMenuState
         essence={essence}
         onClose={onClose}
       />;
-    } else if (dimension.kind === 'number') {
+    } else if (dimension.isBucketableNumber()) {
       menuSize = Stage.fromSize(250, 274);
       menuCont = <NumberFilterMenu
         clicker={clicker}

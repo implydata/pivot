@@ -9,7 +9,7 @@ export class CircumstancesHandler {
     return (splits: Splits) => splits.length() === 0;
   }
 
-  private static testKind(kind: string, selector: string): boolean {
+  private static testProperty(property: string, selector: string): boolean {
     if (selector === '*') {
       return true;
     }
@@ -17,7 +17,7 @@ export class CircumstancesHandler {
     var bareSelector = selector.replace(/^!/, '');
 
     // This can be enriched later, right now it's just a 1-1 match
-    var result = kind === bareSelector;
+    var result = property === bareSelector;
 
     if (selector.charAt(0) === '!') {
       return !result;
@@ -27,16 +27,25 @@ export class CircumstancesHandler {
   }
 
 
-  public static strictCompare(selectors: string[], kinds: string[]): boolean {
-    if (selectors.length !== kinds.length) return false;
-
-    return selectors.every((selector, i) => CircumstancesHandler.testKind(kinds[i], selector));
+  public static strictCompare(selectors: string[], properties: string[]): boolean {
+    if (selectors.length !== properties.length) return false;
+    return selectors.every((selector, i) => CircumstancesHandler.testProperty(properties[i], selector));
   }
 
-  public static areExactSplitKinds = (...selectors: string[]) => {
+  public static areExactSplitKinds = (...kindSelectors: string[]) => {
+    return CircumstancesHandler.haveExactProperties({'kind': kindSelectors});
+  }
+
+  public static haveExactProperties = (desiredProperties: Lookup<string | string[]>) => {
     return (splits: Splits, dataSource: DataSource): boolean => {
-      var kinds: string[] = splits.toArray().map((split: SplitCombine) => split.getDimension(dataSource.dimensions).kind);
-      return CircumstancesHandler.strictCompare(selectors, kinds);
+    for (var property in desiredProperties) {
+      var properties: string[] = splits.toArray().map((split: SplitCombine) => (split.getDimension(dataSource.dimensions) as any)[property]);
+      var desiredProp = desiredProperties[property];
+      var selectors: string[] = typeof desiredProp === 'string' ? [desiredProp] : desiredProp;
+      if (!CircumstancesHandler.strictCompare(selectors, properties)) return false;
+    }
+
+    return true;
     };
   }
 
