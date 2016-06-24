@@ -3,48 +3,38 @@ require('./filter-options-dropdown.css');
 import * as React from 'react';
 import { STRINGS } from '../../config/constants';
 
+import { Filter, FilterMode } from '../../../common/models/index';
+
 import { Dropdown, DropdownProps } from "../dropdown/dropdown";
 import { SvgIcon } from '../svg-icon/svg-icon';
 import { CheckboxType } from '../checkbox/checkbox';
 
 export interface FilterOption {
-  name: string;
+  label: string;
+  value: FilterMode;
   svg: string;
   checkType?: CheckboxType;
 }
 
-var filterOptions: FilterOption[] = [
+const FILTER_OPTIONS: FilterOption[] = [
   {
-    name: STRINGS.include,
+    label: STRINGS.include,
+    value: Filter.INCLUDED,
     svg: require('../../icons/filter-include.svg'),
     checkType: 'check'
   },
   {
-    name: STRINGS.exclude,
+    label: STRINGS.exclude,
+    value: Filter.EXCLUDED,
     svg: require('../../icons/filter-exclude.svg'),
     checkType: 'cross'
-  },
-  {
-    name: STRINGS.intersection,
-    svg: require('../../icons/filter-intersection.svg'),
-    checkType: 'check'
-  },
-  {
-    name: STRINGS.stringSearch,
-    svg: require('../../icons/filter-string.svg'),
-    checkType: 'check'
-  },
-  {
-    name: STRINGS.regex,
-    svg: require('../../icons/filter-regex.svg'),
-    checkType: 'check'
   }
 ];
 
 
 export interface FilterOptionsDropdownProps extends React.Props<any> {
-  selectedOption: FilterOption;
-  onSelectOption: (o: FilterOption) => void;
+  selectedOption: FilterMode;
+  onSelectOption: (o: FilterMode) => void;
 }
 
 export interface FilterOptionsDropdownState {
@@ -55,22 +45,31 @@ export class FilterOptionsDropdown extends React.Component<FilterOptionsDropdown
     super();
   }
 
+  onSelectOption(option: FilterOption) {
+    this.props.onSelectOption(option.value);
+  }
+
   renderFilterOption(option: FilterOption) {
-    return <span className="filter-option"><SvgIcon className="icon" svg={option.svg}/><span className="option-label">{option.name}</span></span>;
+    return <span className="filter-option">
+      <SvgIcon className="icon" svg={option.svg}/>
+      <span className="option-label">{option.label}</span>
+    </span>;
   }
 
   render() {
     var { selectedOption, onSelectOption } = this.props;
 
+    var selectedItem = FILTER_OPTIONS.filter(o => o.value === selectedOption)[0] || FILTER_OPTIONS[0];
+
     var dropdown = React.createElement(Dropdown, {
       className: 'filter-options',
-      items: filterOptions,
-      selectedItem: selectedOption || filterOptions[0],
-      equal: (a, b) => a.name === b.name,
-      keyItem: (d) => d.name,
+      items: FILTER_OPTIONS,
+      selectedItem: selectedItem,
+      equal: (a, b) => a.value === b.value,
+      keyItem: (d) => d.value,
       renderItem: this.renderFilterOption.bind(this),
       renderSelectedItem: (d) => <SvgIcon className="icon" svg={d.svg}/>,
-      onSelect: onSelectOption.bind(this)
+      onSelect: this.onSelectOption.bind(this)
     } as DropdownProps<FilterOption>);
 
     return <div className="filter-options-dropdown">{dropdown}</div>;

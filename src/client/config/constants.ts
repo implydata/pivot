@@ -23,7 +23,7 @@ export const SPLIT = 'SPLIT';
 export const MAX_SEARCH_LENGTH = 300;
 export const SEARCH_WAIT = 900;
 
-export const STRINGS = {
+export const STRINGS: any = {
   home: 'Home',
   settings: 'Settings',
   dimensions: 'Dimensions',

@@ -4,7 +4,7 @@ import * as React from 'react';
 import { $, ply, r, Expression, Executor, Dataset, SortAction, Set } from 'plywood';
 import { Fn } from '../../../common/utils/general/general';
 import { STRINGS, MAX_SEARCH_LENGTH, SEARCH_WAIT } from '../../config/constants';
-import { Stage, Clicker, Essence, DataSource, Filter, FilterClause, Dimension, Measure, Colors, DragPosition } from '../../../common/models/index';
+import { Stage, Clicker, Essence, DataSource, Filter, FilterClause, FilterMode, Dimension, Measure, Colors, DragPosition } from '../../../common/models/index';
 import { collect } from '../../../common/utils/general/general';
 import { enterKey } from '../../utils/dom/dom';
 import { ClearableInput } from '../clearable-input/clearable-input';
@@ -19,12 +19,6 @@ import { FilterOptionsDropdown } from '../filter-options-dropdown/filter-options
 
 const TOP_N = 100;
 
-export interface FilterOption {
-  name: string;
-  svg: string;
-  checkType?: CheckboxType;
-}
-
 export interface StringFilterMenuProps extends React.Props<any> {
   clicker: Clicker;
   dimension: Dimension;
@@ -38,10 +32,10 @@ export interface StringFilterMenuState {
   dataset?: Dataset;
   error?: any;
   fetchQueued?: boolean;
-  selectedFilterOption?: FilterOption;
   searchText?: string;
   selectedValues?: Set;
   colors?: Colors;
+  filterMode?: FilterMode;
 }
 
 export class StringFilterMenu extends React.Component<StringFilterMenuProps, StringFilterMenuState> {
@@ -55,7 +49,6 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
       dataset: null,
       error: null,
       fetchQueued: false,
-      selectedFilterOption: null,
       searchText: '',
       selectedValues: null,
       colors: null
@@ -127,8 +120,17 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
     });
 
     this.fetchData(essence, dimension);
+
+    if (colors) {
+      this.setState({filterMode: Filter.INCLUDED});
+    } else {
+      var filterMode = essence.filter.getModeForDimension(dimension);
+      if (filterMode) this.setState({filterMode});
+    }
   }
 
+  // This is never called : either the component is open and nothing else can update its props,
+  // or it's closed and doesn't exist.
   componentWillReceiveProps(nextProps: StringFilterMenuProps) {
     var { essence, dimension } = this.props;
     var nextEssence = nextProps.essence;
@@ -160,13 +162,14 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
 
   constructFilter(): Filter {
     var { essence, dimension, changePosition } = this.props;
-    var { selectedValues } = this.state;
+    var { selectedValues, filterMode } = this.state;
     var { filter } = essence;
 
     if (selectedValues.size()) {
       var clause = new FilterClause({
         expression: dimension.expression,
-        selection: r(selectedValues)
+        selection: r(selectedValues),
+        exclude: filterMode === Filter.EXCLUDED
       });
       if (changePosition) {
         if (changePosition.isInsert()) {
@@ -242,14 +245,12 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
     return !essence.filter.equals(this.constructFilter());
   }
 
-  onSelectFilterOption(option: FilterOption) {
-    this.setState({
-      selectedFilterOption : option
-    });
+  onSelectFilterOption(filterMode: FilterMode) {
+    this.setState({filterMode});
   }
 
   renderTable() {
-    var { loading, dataset, error, fetchQueued, searchText, selectedValues, selectedFilterOption } = this.state;
+    var { loading, dataset, error, fetchQueued, searchText, selectedValues, filterMode } = this.state;
     var { dimension } = this.props;
 
     var rows: Array<JSX.Element> = [];
@@ -265,7 +266,7 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
         });
       }
 
-      var checkboxType = selectedFilterOption ? selectedFilterOption.checkType : 'check' as CheckboxType;
+      var checkboxType = filterMode === Filter.EXCLUDED ? 'cross' : 'check';
 
       rows = rowData.map((d) => {
         var segmentValue = d[dimension.name];
@@ -279,7 +280,7 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
           onClick={this.onValueClick.bind(this, segmentValue)}
         >
           <div className="row-wrapper">
-            <Checkbox type={checkboxType} selected={selected}/>
+            <Checkbox type={checkboxType as CheckboxType} selected={selected}/>
             <HighlightString className="label" text={segmentValueStr} highlightText={searchText}/>
           </div>
         </div>;
@@ -298,7 +299,10 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
 
     return <div className={className}>
       <div className="side-by-side">
-        <FilterOptionsDropdown selectedOption={selectedFilterOption} onSelectOption={this.onSelectFilterOption.bind(this)} />
+        <FilterOptionsDropdown
+          selectedOption={filterMode}
+          onSelectOption={this.onSelectFilterOption.bind(this)}
+        />
         <div className="search-box">
           <ClearableInput
             placeholder="Search"
