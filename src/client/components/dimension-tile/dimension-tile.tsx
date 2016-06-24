@@ -218,16 +218,22 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
       this.fetchData(nextEssence, nextDimension, nextSortOn, unfolded, persistedGranularity);
     }
 
-    if (nextColors) {
+    this.setFilterModeFromProps(nextProps);
+  }
+
+  setFilterModeFromProps(props: DimensionTileProps) {
+    if (props.colors) {
       this.setState({filterMode: Filter.INCLUDED});
     } else {
-      var filterMode = nextEssence.filter.getModeForDimension(nextDimension);
+      var filterMode = props.essence.filter.getModeForDimension(props.dimension);
       if (filterMode) this.setState({filterMode});
     }
   }
 
   componentDidMount() {
     this.mounted = true;
+
+    this.setFilterModeFromProps(this.props);
   }
 
   componentWillUnmount() {
