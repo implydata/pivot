@@ -40,7 +40,7 @@ export class DimensionMeasurePanel extends React.Component<DimensionMeasurePanel
     var numMeasures = dataSource.measures.size;
 
     var dimensionsFlex = clamp(
-      Math.round(TOTAL_FLEXES * numDimensions / (numDimensions + numMeasures)),
+      Math.ceil(TOTAL_FLEXES * numDimensions / (numDimensions + numMeasures)),
       MIN_FLEX,
       TOTAL_FLEXES - MIN_FLEX
     );
