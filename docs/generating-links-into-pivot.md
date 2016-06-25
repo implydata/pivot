@@ -16,7 +16,7 @@ The dataSource name to be used in the link
 
 The essence JSON that describes the state
 
-#### Example 1
+### Example 1
 
 Here is an example that will show the `totals` visualization filtered on the year 2015 with `count` and `added` metrics selected,
 the `page` dimension pinned.
@@ -68,7 +68,7 @@ Posting this will reply with:
 ```
 
 
-#### Example 2
+### Example 2
 
 Here is an example that will show the `line-chart` visualization filtered on the last day of data, 
 split on `time` (bucketed by hour), with `count`, `added`, `deleted`, and `delta` measures selected.
