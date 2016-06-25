@@ -154,7 +154,7 @@ If you don't want to write out the full json of the filter you can write a [Plyw
   "essence": {
     "visualization": "line-chart",
     "timezone": "Etc/UTC",
-    "filter": "$("time").in(new Date("2015-01-01Z"), new Date("2016-01-01Z")).toJS()",
+    "filter": "`$('time').in(new Date('2015-01-01Z'), new Date('2016-01-01Z')).toJS()`",
     "splits": [],
     "singleMeasure": "count",
     "selectedMeasures": [
