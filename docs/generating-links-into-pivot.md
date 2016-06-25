@@ -16,8 +16,6 @@ The dataSource name to be used in the link
 
 The essence JSON that describes the state
 
-### Examples
-
 #### Example 1
 
 Here is an example that will show the `totals` visualization filtered on the year 2015 with `count` and `added` metrics selected,
