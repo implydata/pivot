@@ -16,7 +16,9 @@ The dataSource name to be used in the link
 
 The essence JSON that describes the state
 
-### Example
+### Examples
+
+#### Example 1
 
 Here is an example that will show the `totals` visualization filtered on the year 2015 with `count` and `added` metrics selected,
 the `page` dimension pinned.
@@ -66,6 +68,9 @@ Posting this will reply with:
   "url": "http://my.pivot.host#wiki/totals/2/EQUQLgxg9AqgKgYWAGgN7APYAdgC5gQAWAhgJYB2KwA..."
 }
 ```
+
+
+#### Example 2
 
 Here is an example that will show the `line-chart` visualization filtered on the last day of data, 
 split on `time` (bucketed by hour), with `count`, `added`, `deleted`, and `delta` measures selected.
@@ -140,7 +145,9 @@ Posting this will reply with:
 }
 ```
 
-Also, if you don't want to write out the full json of the filter you can write a [Plywood](https://github.com/implydata/plywood) expression and call `.toJS()` in the filter entry like so.
+#### Tip
+
+If you don't want to write out the full json of the filter you can write a [Plywood](https://github.com/implydata/plywood) expression and call `.toJS()` in the filter entry like so.
 
 ```json
 {
