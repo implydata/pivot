@@ -6,6 +6,7 @@ import { properRequesterFactory } from '../requester/requester';
 import { Cluster } from '../../../common/models/index';
 import { Logger } from '../logger/logger';
 
+const CONNECTION_RETRY_TIMEOUT = 30000;
 const DRUID_REQUEST_DECORATOR_MODULE_VERSION = 1;
 
 export interface RequestDecoratorFactoryParams {
@@ -231,7 +232,7 @@ export class ClusterManager {
           },
           (e: Error) => {
             var msSinceLastTry = Date.now() - lastTryAt;
-            var msToWait = Math.max(1, 30000 - msSinceLastTry);
+            var msToWait = Math.max(1, CONNECTION_RETRY_TIMEOUT - msSinceLastTry);
             logger.error(`Failed to connect to cluster '${cluster.name}' because ${e.message} (will retry in ${msToWait}ms)`);
             setTimeout(attemptConnection, msToWait);
           }
