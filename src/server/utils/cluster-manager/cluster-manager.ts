@@ -60,6 +60,8 @@ export class ClusterManager {
   private sourceReintrospectInterval: number = 0;
   private sourceReintrospectTimer: NodeJS.Timer = null;
 
+  private initialConnectionTimer: NodeJS.Timer = null;
+
   constructor(cluster: Cluster, options: ClusterManagerOptions) {
     if (!cluster) throw new Error('must have cluster');
     this.logger = options.logger;
@@ -106,6 +108,10 @@ export class ClusterManager {
     if (this.sourceReintrospectTimer) {
       clearInterval(this.sourceReintrospectTimer);
       this.sourceReintrospectTimer = null;
+    }
+    if (this.initialConnectionTimer) {
+      clearTimeout(this.initialConnectionTimer);
+      this.initialConnectionTimer = null;
     }
   }
 
@@ -172,7 +178,7 @@ export class ClusterManager {
 
       if (this.sourceListRefreshTimer) {
         logger.log(`Clearing sourceListRefresh timer in cluster '${cluster.name}'`);
-        clearTimeout(this.sourceListRefreshTimer);
+        clearInterval(this.sourceListRefreshTimer);
         this.sourceListRefreshTimer = null;
       }
 
@@ -194,7 +200,7 @@ export class ClusterManager {
 
       if (this.sourceReintrospectTimer) {
         logger.log(`Clearing sourceReintrospect timer in cluster '${cluster.name}'`);
-        clearTimeout(this.sourceReintrospectTimer);
+        clearInterval(this.sourceReintrospectTimer);
         this.sourceReintrospectTimer = null;
       }
 
@@ -234,7 +240,7 @@ export class ClusterManager {
             var msSinceLastTry = Date.now() - lastTryAt;
             var msToWait = Math.max(1, CONNECTION_RETRY_TIMEOUT - msSinceLastTry);
             logger.error(`Failed to connect to cluster '${cluster.name}' because ${e.message} (will retry in ${msToWait}ms)`);
-            setTimeout(attemptConnection, msToWait);
+            this.initialConnectionTimer = setTimeout(attemptConnection, msToWait);
           }
         );
     };
