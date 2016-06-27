@@ -26,7 +26,9 @@ var handler = CircumstancesHandler.EMPTY()
 
   .when(CircumstancesHandler.areExactSplitKinds('time'))
   .or(CircumstancesHandler.areExactSplitKinds('number'))
-  .then((splits: Splits, dataSource: DataSource, colors: Colors) => {
+  .then((splits: Splits, dataSource: DataSource, colors: Colors, current: boolean) => {
+    var timeBoost = 0;
+
     var continuousSplit = splits.get(0);
     var continuousDimension = dataSource.getDimensionByExpression(continuousSplit.expression);
 
@@ -53,8 +55,10 @@ var handler = CircumstancesHandler.EMPTY()
       autoChanged = true;
     }
 
-    if (!autoChanged) return Resolve.ready(10);
-    return Resolve.automatic(8, {splits: new Splits(List([continuousSplit]))});
+    if (continuousDimension.kind === 'time') timeBoost = 7;
+
+    if (!autoChanged) return Resolve.ready(current ? 10 : (2 + timeBoost));
+    return Resolve.automatic(timeBoost, {splits: new Splits(List([continuousSplit]))});
   })
 
   .when(CircumstancesHandler.areExactSplitKinds('time', '*'))
