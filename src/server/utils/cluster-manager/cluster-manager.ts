@@ -77,9 +77,9 @@ export class ClusterManager {
     this.updateRequestDecorator();
     this.updateRequester();
 
-    for (var managedExternal of this.managedExternals) {
+    this.managedExternals.forEach((managedExternal) => {
       managedExternal.external = managedExternal.external.attachRequester(this.requester);
-    }
+    });
   }
 
   // Do initialization
@@ -303,7 +303,7 @@ export class ClusterManager {
           if (verbose) logger.log(`For cluster '${cluster.name}' got sources: [${sources.join(', ')}]`);
           // For every un-accounted source: make an external and add it to the managed list.
           var introspectionTasks: Q.Promise<any>[] = [];
-          for (var source of sources) {
+          sources.forEach((source) => {
             var existingExternalsForSource = this.managedExternals.filter(managedExternal => getSourceFromExternal(managedExternal.external) === source);
             if (existingExternalsForSource.length) {
               if (verbose) logger.log(`Cluster '${cluster.name}' already has an external for '${source}' ('${existingExternalsForSource[0].name}')`);
@@ -320,7 +320,7 @@ export class ClusterManager {
                   .then(() => this.introspectManagedExternal(newManagedExternal))
               );
             }
-          }
+          });
 
           return Q.all(introspectionTasks);
         },

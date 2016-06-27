@@ -1,9 +1,9 @@
 const expect = require('chai').expect;
 const spawn = require('child_process').spawn;
 const request = require('request');
-const mockDruid = require('./utils/mock-druid');
-const extractConfig = require('./utils/extract-config');
-const extend = require('./utils/extend');
+const mockDruid = require('../utils/mock-druid');
+const extractConfig = require('../utils/extract-config');
+const extend = require('../utils/extend');
 
 const TEST_PORT = 18082;
 
