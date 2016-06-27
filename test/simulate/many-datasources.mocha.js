@@ -146,7 +146,7 @@ function startDruid() {
   });
 }
 
-describe('run druid', function () {
+describe('druid', function () {
   this.timeout(5000);
 
   before((done) => {

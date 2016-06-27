@@ -5,38 +5,42 @@ const request = require('request');
 const TEST_PORT = 18082;
 
 var child;
-var ready = false;
-var stdout = '';
-var stderr = '';
 
-describe('run typo', function () {
+describe('file', function () {
   this.timeout(5000);
 
   before((done) => {
-    child = spawn('bin/pivot', `--druid 11.22.33.44 -p ${TEST_PORT}`.split(' '));
+    child = spawn('bin/pivot', `--file assets/data/wikiticker-2015-09-12-anonymous.json -p ${TEST_PORT}`.split(' '));
 
     child.stderr.on('data', (data) => {
-      stderr += data.toString();
+      throw new Error(data.toString());
     });
 
     child.stdout.on('data', (data) => {
-      stdout += data.toString();
-      if (!ready && stdout.indexOf(`Pivot is listening on address`) !== -1) {
-        ready = true;
+      data = data.toString();
+      if (data.indexOf(`Pivot is listening on address`) !== -1) {
         done();
       }
+    });
+  });
+
+  it('works with GET /health', (testComplete) => {
+    request.get(`http://localhost:${TEST_PORT}/health`, (err, response, body) => {
+      expect(err).to.equal(null);
+      expect(response.statusCode).to.equal(200);
+      expect(body).to.contain('I am healthy @');
+      testComplete();
     });
   });
 
   it('works with GET /', (testComplete) => {
     request.get(`http://localhost:${TEST_PORT}/`, (err, response, body) => {
       expect(err).to.equal(null);
-      expect(stderr).to.contain('Settings load timeout hit, continuing');
       expect(response.statusCode).to.equal(200);
       expect(body).to.contain('<!DOCTYPE html>');
       expect(body).to.contain('<title>Pivot');
       expect(body).to.contain('<div class="app-container"></div>');
-      expect(body).to.contain('"dataSources":[]');
+      expect(body).to.contain('var __CONFIG__ = {');
       expect(body).to.contain('</html>');
       testComplete();
     });
@@ -45,5 +49,6 @@ describe('run typo', function () {
   after(() => {
     child.kill('SIGHUP');
   });
+
 
 });

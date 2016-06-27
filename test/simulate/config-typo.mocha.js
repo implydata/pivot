@@ -10,7 +10,7 @@ var ready = false;
 var stdout = '';
 var stderr = '';
 
-describe('run config typo', function () {
+describe('config typo', function () {
   this.timeout(5000);
 
   before((done) => {
