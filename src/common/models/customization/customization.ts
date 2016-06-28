@@ -77,8 +77,8 @@ export class Customization implements Instance<CustomizationValue, Customization
   public headerBackground: string;
   public customLogoSvg: string;
   public externalViews: ExternalView[];
-  private timezones: Timezone[];
-  private title: string;
+  public timezones: Timezone[];
+  public title: string;
 
 
   constructor(parameters: CustomizationValue) {
