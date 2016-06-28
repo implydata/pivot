@@ -74,11 +74,11 @@ export class Customization implements Instance<CustomizationValue, Customization
     return new Customization(value);
   }
 
-  private title: string;
-  private headerBackground: string;
-  private customLogoSvg: string;
-  private externalViews: ExternalView[];
+  public headerBackground: string;
+  public customLogoSvg: string;
+  public externalViews: ExternalView[];
   private timezones: Timezone[];
+  private title: string;
 
 
   constructor(parameters: CustomizationValue) {
