@@ -46,10 +46,11 @@ const TIMEZONES: Timezone[] = [
 ];
 
 export interface SettingsMenuProps extends React.Props<any> {
-  changeTimezone?: (timezone: Timezone) => void;
-  timezone?: Timezone;
   openOn: Element;
   onClose: Fn;
+  changeTimezone?: (timezone: Timezone) => void;
+  timezone?: Timezone;
+  timezones?: Timezone[];
 }
 
 export interface SettingsMenuState {
@@ -68,12 +69,12 @@ export class SettingsMenu extends React.Component<SettingsMenuProps, SettingsMen
   }
 
   renderTimezonesDropdown() {
-    const { timezone } = this.props;
+    const { timezone, timezones } = this.props;
     return React.createElement(Dropdown, {
       label: STRINGS.timezone,
       selectedItem: timezone,
       renderItem: (d: Timezone) => d.toString().replace(/_/g, ' '),
-      items: TIMEZONES,
+      items: timezones || TIMEZONES,
       onSelect: this.changeTimezone.bind(this)
     });
   }

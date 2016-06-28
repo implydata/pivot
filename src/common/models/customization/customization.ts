@@ -1,4 +1,5 @@
 import { Class, Instance, isInstanceOf, isImmutableClass, immutableArraysEqual } from 'immutable-class';
+import { Timezone } from 'chronoshift';
 import { ExternalView, ExternalViewValue} from '../external-view/external-view';
 
 export interface CustomizationValue {
@@ -6,6 +7,7 @@ export interface CustomizationValue {
   headerBackground?: string;
   customLogoSvg?: string;
   externalViews?: ExternalView[];
+  timezones?: Timezone[];
 }
 
 export interface CustomizationJS {
@@ -13,6 +15,7 @@ export interface CustomizationJS {
   headerBackground?: string;
   customLogoSvg?: string;
   externalViews?: ExternalViewValue[];
+  timezones?: string[];
 }
 
 var check: Class<CustomizationValue, CustomizationJS>;
@@ -35,6 +38,20 @@ export class Customization implements Instance<CustomizationValue, Customization
       externalViews = paramViewsJS.map((view, i) => ExternalView.fromJS(view));
       value.externalViews = externalViews;
     }
+
+    var timezonesJS = parameters.timezones;
+    var timezones: Timezone[] = null;
+    if (Array.isArray(timezonesJS)) {
+      timezones = timezonesJS.map((tz) => {
+        try {
+          return Timezone.fromJS(tz);
+        } catch (e) {
+          throw new Error(`unrecognized timezone: '${tz}'`);
+        }
+      });
+      value.timezones = timezones;
+    }
+
     return new Customization(value);
   }
 
@@ -42,12 +59,15 @@ export class Customization implements Instance<CustomizationValue, Customization
   public headerBackground: string;
   public customLogoSvg: string;
   public externalViews: ExternalView[];
+  public timezones: Timezone[];
+
 
   constructor(parameters: CustomizationValue) {
     this.title = parameters.title || Customization.DEFAULT_TITLE;
     this.headerBackground = parameters.headerBackground || null;
     this.customLogoSvg = parameters.customLogoSvg || null;
     if (parameters.externalViews) this.externalViews = parameters.externalViews;
+    if (parameters.timezones) this.timezones = parameters.timezones;
   }
 
 
@@ -56,7 +76,8 @@ export class Customization implements Instance<CustomizationValue, Customization
       title: this.title,
       headerBackground: this.headerBackground,
       customLogoSvg: this.customLogoSvg,
-      externalViews: this.externalViews
+      externalViews: this.externalViews,
+      timezones: this.timezones
     };
   }
 
@@ -68,6 +89,9 @@ export class Customization implements Instance<CustomizationValue, Customization
     if (this.externalViews) {
       js.externalViews = this.externalViews.map(view => view.toJS());
     }
+    if (this.timezones) {
+      js.timezones = this.timezones.map(tz => tz.toJS());
+    }
     return js;
   }
 
@@ -76,7 +100,7 @@ export class Customization implements Instance<CustomizationValue, Customization
   }
 
   public toString(): string {
-    return `[custom: (${this.headerBackground}) logo: ${Boolean(this.customLogoSvg)}, externalViews: ${Boolean(this.externalViews)}]`;
+    return `[custom: (${this.headerBackground}) logo: ${Boolean(this.customLogoSvg)}, externalViews: ${Boolean(this.externalViews)}, timezones: ${Boolean(this.timezones)}]`;
   }
 
   public equals(other: Customization): boolean {
@@ -84,7 +108,8 @@ export class Customization implements Instance<CustomizationValue, Customization
       this.title === other.title &&
       this.headerBackground === other.headerBackground &&
       this.customLogoSvg === other.customLogoSvg &&
-      immutableArraysEqual(this.externalViews, other.externalViews);
+      immutableArraysEqual(this.externalViews, other.externalViews) &&
+      immutableArraysEqual(this.timezones, other.timezones);
   }
 
   public getTitle(version: string): string {
