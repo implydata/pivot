@@ -104,7 +104,7 @@ describe('DataSource', () => {
             }
           ]
         });
-      }).to.throw("name articleName found in both dimensions and measures");
+      }).to.throw("name 'articleName' found in both dimensions and measures in data source: 'wiki'");
     });
 
     it("throws an error if duplicate name is used in measures", () => {
@@ -135,7 +135,7 @@ describe('DataSource', () => {
             }
           ]
         });
-      }).to.throw("duplicate measure name articleName found");
+      }).to.throw("duplicate measure name 'articleName' found in data source: 'wiki'");
     });
 
     it("throws an error if duplicate name is used in dimensions", () => {
@@ -166,7 +166,7 @@ describe('DataSource', () => {
             }
           ]
         });
-      }).to.throw("duplicate dimension name articleName found");
+      }).to.throw("duplicate dimension name 'articleName' found in data source: 'wiki'");
     });
 
   });

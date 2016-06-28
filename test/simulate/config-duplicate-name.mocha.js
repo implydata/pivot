@@ -8,6 +8,7 @@ const TEST_PORT = 18082;
 var child;
 var ready = false;
 var stderr = '';
+var stdout = '';
 
 describe('config duplicate names', function () {
   this.timeout(5000);
@@ -26,10 +27,20 @@ describe('config duplicate names', function () {
         done();
       }
     });
+
+    // add this anyway so done is called even if error doesn't happen
+    child.stdout.on('data', (data) => {
+      stdout += data.toString();
+      if (!ready && stdout.indexOf(`Pivot is listening on address`) !== -1) {
+        ready = true;
+        done();
+      }
+    });
+
   });
 
   it('throws correct error', (testComplete) => {
-    expect(stderr.indexOf(`Fatal settings load error: name language found in both dimensions and measures`)).to.equal(0);
+    expect(stderr.indexOf(`Fatal settings load error: name 'language' found in both dimensions and measures in data source: 'wiki'`)).to.equal(0);
     testComplete();
   });
 

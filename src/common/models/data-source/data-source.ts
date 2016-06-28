@@ -31,14 +31,14 @@ function formatTimeDiff(diff: number): string {
   return diff + ' days';
 }
 
-function checkUnique(dimensions: List<Dimension>, measures: List<Measure>) {
+function checkUnique(dimensions: List<Dimension>, measures: List<Measure>, dataSourceName: string) {
   var seenDimensions: Lookup<number> = {};
   var seenMeasures: Lookup<number> = {};
 
   if (dimensions) {
     dimensions.forEach((d) => {
       var dimensionName = d.name.toLowerCase();
-      if (seenDimensions[dimensionName]) throw new Error(`duplicate dimension name ${d.name} found`);
+      if (seenDimensions[dimensionName]) throw new Error(`duplicate dimension name '${d.name}' found in data source: '${dataSourceName}'`);
       seenDimensions[dimensionName] = 1;
     });
   }
@@ -46,8 +46,8 @@ function checkUnique(dimensions: List<Dimension>, measures: List<Measure>) {
   if (measures) {
     measures.forEach((m) => {
       var measureName = m.name.toLowerCase();
-      if (seenMeasures[measureName]) throw new Error(`duplicate measure name ${m.name} found`);
-      if (seenDimensions[measureName]) throw new Error(`name ${m.name} found in both dimensions and measures`);
+      if (seenMeasures[measureName]) throw new Error(`duplicate measure name '${m.name}' found in data source: '${dataSourceName}'`);
+      if (seenDimensions[measureName]) throw new Error(`name '${m.name}' found in both dimensions and measures in data source: '${dataSourceName}'`);
       seenMeasures[measureName] = 1;
     });
   }
@@ -384,7 +384,7 @@ export class DataSource implements Instance<DataSourceValue, DataSourceJS> {
 
     var dimensions = parameters.dimensions;
     var measures = parameters.measures;
-    checkUnique(dimensions, measures);
+    checkUnique(dimensions, measures, name);
 
     this.dimensions = dimensions || List([]);
     this.measures = measures || List([]);
