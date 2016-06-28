@@ -29,22 +29,22 @@ export class Customization implements Instance<CustomizationValue, Customization
   static DEFAULT_TITLE = 'Pivot (%v)';
 
   static DEFAULT_TIMEZONES: Timezone[] = [
-  new Timezone("America/Juneau"), // -9.0
-  new Timezone("America/Los_Angeles"), // -8.0
-  new Timezone("America/Yellowknife"), // -7.0
-  new Timezone("America/Phoenix"), // -7.0
-  new Timezone("America/Denver"), // -7.0
-  new Timezone("America/Mexico_City"), // -6.0
-  new Timezone("America/Chicago"), // -6.0
-  new Timezone("America/New_York"), // -5.0
-  new Timezone("America/Argentina/Buenos_Aires"), // -4.0
-  Timezone.UTC,
-  new Timezone("Asia/Jerusalem"), // +2.0
-  new Timezone("Europe/Paris"), // +1.0
-  new Timezone("Asia/Kathmandu"), // +5.8
-  new Timezone("Asia/Hong_Kong"), // +8.0
-  new Timezone("Asia/Seoul"), // +9.0
-  new Timezone("Pacific/Guam") // +10.0
+    new Timezone("America/Juneau"), // -9.0
+    new Timezone("America/Los_Angeles"), // -8.0
+    new Timezone("America/Yellowknife"), // -7.0
+    new Timezone("America/Phoenix"), // -7.0
+    new Timezone("America/Denver"), // -7.0
+    new Timezone("America/Mexico_City"), // -6.0
+    new Timezone("America/Chicago"), // -6.0
+    new Timezone("America/New_York"), // -5.0
+    new Timezone("America/Argentina/Buenos_Aires"), // -4.0
+    Timezone.UTC,
+    new Timezone("Asia/Jerusalem"), // +2.0
+    new Timezone("Europe/Paris"), // +1.0
+    new Timezone("Asia/Kathmandu"), // +5.8
+    new Timezone("Asia/Hong_Kong"), // +8.0
+    new Timezone("Asia/Seoul"), // +9.0
+    new Timezone("Pacific/Guam") // +10.0
   ];
 
   static isCustomization(candidate: any): candidate is Customization {
