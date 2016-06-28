@@ -50,7 +50,7 @@ describe('Customization', () => {
         externalViews: [],
         timezones: ["Pacific/Niue", "Not a timezone"]
       });
-    }).to.throw("unrecognized timezone: 'Not a timezone'");
+    }).to.throw("Unable to find time zone named Not a timezone");
   });
 
 });

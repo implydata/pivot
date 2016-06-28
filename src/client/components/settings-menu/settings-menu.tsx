@@ -7,43 +7,6 @@ import { Stage } from '../../../common/models/index';
 import { STRINGS } from '../../config/constants';
 import { BubbleMenu } from '../bubble-menu/bubble-menu';
 import { Dropdown } from '../dropdown/dropdown';
-var { WallTime } = require('chronoshift');
-if (!WallTime.rules) {
-  var tzData = require("chronoshift/lib/walltime/walltime-data.js");
-  WallTime.init(tzData.rules, tzData.zones);
-}
-
-/*
- some fun timezones
-
- new Timezone("Pacific/Niue"), // -11.0
- new Timezone("Pacific/Marquesas"), // -9.5
- new Timezone("America/Tijuana"), // -8.0
- new Timezone("America/St_Johns"), // -3.5
- new Timezone("Asia/Kathmandu"), // +5.8
- new Timezone("Australia/Broken_Hill"), // +9.5
- new Timezone("Pacific/Kiritimati") // +14.0
-
- */
-
-const TIMEZONES: Timezone[] = [
-  new Timezone("America/Juneau"), // -9.0
-  new Timezone("America/Los_Angeles"), // -8.0
-  new Timezone("America/Yellowknife"), // -7.0
-  new Timezone("America/Phoenix"), // -7.0
-  new Timezone("America/Denver"), // -7.0
-  new Timezone("America/Mexico_City"), // -6.0
-  new Timezone("America/Chicago"), // -6.0
-  new Timezone("America/New_York"), // -5.0
-  new Timezone("America/Argentina/Buenos_Aires"), // -4.0
-  Timezone.UTC,
-  new Timezone("Asia/Jerusalem"), // +2.0
-  new Timezone("Europe/Paris"), // +1.0
-  new Timezone("Asia/Kathmandu"), // +5.8
-  new Timezone("Asia/Hong_Kong"), // +8.0
-  new Timezone("Asia/Seoul"), // +9.0
-  new Timezone("Pacific/Guam") // +10.0
-];
 
 export interface SettingsMenuProps extends React.Props<any> {
   openOn: Element;
@@ -74,7 +37,7 @@ export class SettingsMenu extends React.Component<SettingsMenuProps, SettingsMen
       label: STRINGS.timezone,
       selectedItem: timezone,
       renderItem: (d: Timezone) => d.toString().replace(/_/g, ' '),
-      items: timezones || TIMEZONES,
+      items: timezones,
       onSelect: this.changeTimezone.bind(this)
     });
   }
