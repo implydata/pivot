@@ -84,9 +84,12 @@ export class TimeFilterMenu extends React.Component<TimeFilterMenuProps, TimeFil
     var selectedTimeRange = (selectedTimeRangeSet && selectedTimeRangeSet.size() === 1) ? selectedTimeRangeSet.elements[0] : null;
     var clause = filter.clauseForExpression(dimensionExpression);
 
+    var extentRange = selectedTimeRangeSet.extent();
+    var lessThanFullDay = extentRange.end.valueOf() - extentRange.start.valueOf() < day.canonicalLength;
+
     this.setState({
       timeSelection,
-      tab: (!clause || clause.relative) ? 'relative' : 'specific',
+      tab: (!clause || clause.relative || lessThanFullDay) ? 'relative' : 'specific',
       startTime: selectedTimeRange ? day.floor(selectedTimeRange.start, timezone) : null,
       endTime: selectedTimeRange ? day.ceil(selectedTimeRange.end, timezone) : null
     });
