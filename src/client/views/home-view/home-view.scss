@@ -6,16 +6,15 @@
   }
 
   .container {
-    @include unpin-top($header-height + 30px);
-    left: 50%;
-    transform: translate(-50%);
+    @include unpin-top($header-height + 36px);
+    padding: 0 12%;
 
     .datacubes {
       > .title {
         text-transform: uppercase;
         color: $brand;
-        margin-bottom: 20px;
-        font-size: 1.4em;
+        margin-bottom: 10px;
+        font-size: 15px;
       }
 
       .cubes-container {
@@ -24,7 +23,7 @@
 
         .item-card {
           flex: 1 0;
-          min-width: 280px;
+          min-width: 310px;
 
           &.empty {
             height: 0;
