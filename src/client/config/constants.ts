@@ -49,7 +49,7 @@ export const STRINGS: any = {
   limit: 'Limit',
   logout: 'Logout',
   measures: 'Measures',
-  noDescription: 'No description found',
+  noDescription: 'No description',
   noFilter: 'No filter',
   noQueryableDataSources: 'There are no queryable data sources configured',
   ok: 'OK',
