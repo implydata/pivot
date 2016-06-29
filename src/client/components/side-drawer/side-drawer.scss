@@ -33,6 +33,12 @@
         fill: #888;
       }
     }
+
+    &.selected {
+      svg path {
+        fill: $brand;
+      }
+    }
   }
 
   .items {

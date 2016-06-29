@@ -284,6 +284,7 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
         customization={customization}
         isCube={viewType === CUBE && !linkViewConfig}
         isLink={viewType === LINK || !!linkViewConfig}
+        isHome={viewType === HOME}
       />;
     }
 
