@@ -420,7 +420,7 @@ export class BarChart extends BaseVisualization<BarChartState> {
 
     data.forEach((d, i) => {
       let segmentValue = d[dimension.name];
-      let segmentValueStr = String(formatValue(segmentValue, timezone, DisplayYear.NEVER));
+      let segmentValueStr = formatValue(segmentValue, timezone, DisplayYear.NEVER);
       let subPath = path.concat(d);
 
       let bar: any;
@@ -461,7 +461,7 @@ export class BarChart extends BaseVisualization<BarChartState> {
 
         bar = <g
           className={classNames('bar', { selected: selected, 'not-selected': (!selected && faded), isHovered })}
-          key={segmentValueStr}
+          key={String(segmentValue)}
           transform={`translate(${roundToPx(x)}, 0)`}
           >
           <rect
