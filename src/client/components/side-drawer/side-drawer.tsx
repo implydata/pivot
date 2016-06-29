@@ -16,7 +16,8 @@ export interface SideDrawerProps extends React.Props<any> {
   onOpenAbout: Fn;
   onClose: Fn;
   customization?: Customization;
-  showOverviewLink?: boolean;
+  isCube?: boolean;
+  isLink?: boolean;
 }
 
 export interface SideDrawerState {
@@ -26,7 +27,6 @@ export class SideDrawer extends React.Component<SideDrawerProps, SideDrawerState
 
   constructor() {
     super();
-    //this.state = {};
 
     this.globalMouseDownListener = this.globalMouseDownListener.bind(this);
     this.globalKeyDownListener = this.globalKeyDownListener.bind(this);
@@ -60,11 +60,13 @@ export class SideDrawer extends React.Component<SideDrawerProps, SideDrawerState
   }
 
   renderOverviewLink() {
-    const { showOverviewLink } = this.props;
-    if (!showOverviewLink) return null;
+    const { isCube, isLink } = this.props;
+
+    if (!isCube && !isLink) return null;
+
     return <div className="home-link" onClick={this.onHomeClick.bind(this)}>
       <SvgIcon svg={require('../../icons/home.svg')}/>
-      <span>Overview</span>
+      <span>{isCube ? 'Home' : 'Overview'}</span>
     </div>;
   }
 
