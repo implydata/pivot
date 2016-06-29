@@ -65,9 +65,11 @@ export class SideDrawer extends React.Component<SideDrawerProps, SideDrawerState
 
     if (!isCube && !isLink && !isHome) return null;
 
-    return <div className={classNames('home-link', {selected: isHome})} onClick={this.onHomeClick.bind(this)}>
-      <SvgIcon svg={require('../../icons/home.svg')}/>
-      <span>{isCube || isHome ? 'Home' : 'Overview'}</span>
+    return <div className="home-container">
+      <div className={classNames('home-link', {selected: isHome})} onClick={this.onHomeClick.bind(this)}>
+        <SvgIcon svg={require('../../icons/home.svg')}/>
+        <span>{isCube || isHome ? 'Home' : 'Overview'}</span>
+      </div>
     </div>;
   }
 
