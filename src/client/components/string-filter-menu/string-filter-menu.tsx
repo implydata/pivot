@@ -1,7 +1,7 @@
 require('./string-filter-menu.css');
 
 import * as React from 'react';
-import { $, ply, r, Expression, Executor, Dataset, SortAction, Set } from 'plywood';
+import { $, ply, r, Expression, Executor, Dataset, SortAction, Set, Datum } from 'plywood';
 import { Fn } from '../../../common/utils/general/general';
 import { STRINGS, MAX_SEARCH_LENGTH, SEARCH_WAIT } from '../../config/constants';
 import { Stage, Clicker, Essence, DataSource, Filter, FilterClause, FilterMode, Dimension, Measure, Colors, DragPosition } from '../../../common/models/index';
@@ -90,6 +90,24 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
       .then(
         (dataset: Dataset) => {
           if (!this.mounted) return;
+          // selectedValues is set before this.mounted flag
+          const { selectedValues } = this.state;
+          if (selectedValues && selectedValues.elements.length > 0) {
+            var selectedElements = selectedValues.elements;
+            var dimensionName = dimension.name;
+            var filtered = dataset.data.filter((d) => {
+              var dimValue = d[dimensionName];
+              return selectedElements.indexOf(dimValue !== null ? String(dimValue) : null) === -1;
+            });
+
+            var selectedDummies: Datum[] = selectedElements.map((v) => {
+              var dummyDatum: Datum = {};
+              dummyDatum[dimensionName] = v;
+              return dummyDatum;
+            });
+
+            dataset.data = selectedDummies.concat(filtered);
+          }
           this.setState({
             loading: false,
             dataset,
