@@ -218,6 +218,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
     const DimensionsList = ImmutableList.specialize<Dimension>();
 
     return <DimensionsList
+      label="Dimensions"
       items={tempCube.dimensions}
       onChange={onChange.bind(this)}
       getModal={getModal}
@@ -251,6 +252,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
     const MeasuresList = ImmutableList.specialize<Measure>();
 
     return <MeasuresList
+      label="Measures"
       items={tempCube.measures}
       onChange={onChange.bind(this)}
       getModal={getModal}
