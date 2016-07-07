@@ -261,22 +261,22 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
     var hasMore = false;
     if (dataset) {
       hasMore = dataset.data.length > TOP_N;
-      var rowData = dataset.data.slice(0, TOP_N);
+      var promotedElements = promotedValues ? promotedValues.elements : [];
+      var rowData = dataset.data.slice(0, TOP_N).filter((d) => {
+        return promotedElements.indexOf(d[dimension.name]) === -1;
+      });
+      var rowStrings = promotedElements.concat(rowData.map((d) => d[dimension.name]));
 
       if (searchText) {
         var searchTextLower = searchText.toLowerCase();
-        rowData = rowData.filter((d) => {
-          return String(d[dimension.name]).toLowerCase().indexOf(searchTextLower) !== -1;
+        rowStrings = rowStrings.filter((d) => {
+          return String(d).toLowerCase().indexOf(searchTextLower) !== -1;
         });
       }
 
       var checkboxType = filterMode === Filter.EXCLUDED ? 'cross' : 'check';
-      var promotedElements = promotedValues ? promotedValues.elements : [];
 
-      rows = promotedElements.concat(rowData)
-        .filter((d) => { return promotedElements.indexOf(d[dimension.name]) === -1; })
-        .map((d) => {
-          var segmentValue = typeof d === 'string' ? d : d[dimension.name];
+      rows = rowStrings.map((segmentValue) => {
           var segmentValueStr = String(segmentValue);
           var selected = selectedValues && selectedValues.contains(segmentValue);
 
