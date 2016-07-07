@@ -34,6 +34,7 @@ export interface StringFilterMenuState {
   fetchQueued?: boolean;
   searchText?: string;
   selectedValues?: Set;
+  promotedValues?: Set; // initial selected values
   colors?: Colors;
   filterMode?: FilterMode;
 }
@@ -51,6 +52,7 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
       fetchQueued: false,
       searchText: '',
       selectedValues: null,
+      promotedValues: null,
       colors: null
     };
 
@@ -90,24 +92,6 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
       .then(
         (dataset: Dataset) => {
           if (!this.mounted) return;
-          // selectedValues is set before this.mounted flag
-          const { selectedValues } = this.state;
-          if (selectedValues && selectedValues.elements.length > 0) {
-            var selectedElements = selectedValues.elements;
-            var dimensionName = dimension.name;
-            var filtered = dataset.data.filter((d) => {
-              var dimValue = d[dimensionName];
-              return selectedElements.indexOf(dimValue !== null ? String(dimValue) : null) === -1;
-            });
-
-            var selectedDummies: Datum[] = selectedElements.map((v) => {
-              var dummyDatum: Datum = {};
-              dummyDatum[dimensionName] = v;
-              return dummyDatum;
-            });
-
-            dataset.data = selectedDummies.concat(filtered);
-          }
           this.setState({
             loading: false,
             dataset,
@@ -132,8 +116,10 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
     var myColors = (colors && colors.dimension === dimension.name ? colors : null);
 
     var valueSet = filter.getLiteralSet(dimension.expression);
+    var selectedValues = valueSet || (myColors ? myColors.toSet() : null) || Set.EMPTY;
     this.setState({
-      selectedValues: valueSet || (myColors ? myColors.toSet() : null) || Set.EMPTY,
+      selectedValues: selectedValues,
+      promotedValues: selectedValues,
       colors: myColors
     });
 
@@ -268,7 +254,7 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
   }
 
   renderTable() {
-    var { loading, dataset, error, fetchQueued, searchText, selectedValues, filterMode } = this.state;
+    var { loading, dataset, error, fetchQueued, searchText, selectedValues, promotedValues, filterMode } = this.state;
     var { dimension } = this.props;
 
     var rows: Array<JSX.Element> = [];
@@ -285,23 +271,26 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
       }
 
       var checkboxType = filterMode === Filter.EXCLUDED ? 'cross' : 'check';
+      var promotedElements = promotedValues ? promotedValues.elements : [];
 
-      rows = rowData.map((d) => {
-        var segmentValue = d[dimension.name];
-        var segmentValueStr = String(segmentValue);
-        var selected = selectedValues && selectedValues.contains(segmentValue);
+      rows = promotedElements.concat(rowData)
+        .filter((d) => { return promotedElements.indexOf(d[dimension.name]) === -1; })
+        .map((d) => {
+          var segmentValue = typeof d === 'string' ? d : d[dimension.name];
+          var segmentValueStr = String(segmentValue);
+          var selected = selectedValues && selectedValues.contains(segmentValue);
 
-        return <div
-          className={'row' + (selected ? ' selected' : '')}
-          key={segmentValueStr}
-          title={segmentValueStr}
-          onClick={this.onValueClick.bind(this, segmentValue)}
-        >
-          <div className="row-wrapper">
-            <Checkbox type={checkboxType as CheckboxType} selected={selected}/>
-            <HighlightString className="label" text={segmentValueStr} highlightText={searchText}/>
-          </div>
-        </div>;
+          return <div
+            className={'row' + (selected ? ' selected' : '')}
+            key={segmentValueStr}
+            title={segmentValueStr}
+            onClick={this.onValueClick.bind(this, segmentValue)}
+          >
+            <div className="row-wrapper">
+              <Checkbox type={checkboxType as CheckboxType} selected={selected}/>
+              <HighlightString className="label" text={segmentValueStr} highlightText={searchText}/>
+            </div>
+          </div>;
       });
     }
 
