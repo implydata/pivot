@@ -6,7 +6,7 @@ import { Fn } from '../../../common/utils/general/general';
 import { STRINGS, MAX_SEARCH_LENGTH, SEARCH_WAIT } from '../../config/constants';
 import { Stage, Clicker, Essence, DataSource, Filter, FilterClause, FilterMode, Dimension, Measure, Colors, DragPosition } from '../../../common/models/index';
 import { collect } from '../../../common/utils/general/general';
-import { enterKey } from '../../utils/dom/dom';
+import { enterKey, classNames } from '../../utils/dom/dom';
 import { ClearableInput } from '../clearable-input/clearable-input';
 import { Checkbox, CheckboxType } from '../checkbox/checkbox';
 import { Loader } from '../loader/loader';
@@ -281,7 +281,7 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
           var selected = selectedValues && selectedValues.contains(segmentValue);
 
           return <div
-            className={'row' + (selected ? ' selected' : '')}
+            className={classNames('row', { 'selected': selected })}
             key={segmentValueStr}
             title={segmentValueStr}
             onClick={this.onValueClick.bind(this, segmentValue)}
@@ -299,12 +299,7 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
       message = <div className="message">{'No results for "' + searchText + '"'}</div>;
     }
 
-    var className = [
-      'menu-table',
-      (hasMore ? 'has-more' : 'no-more')
-    ].join(' ');
-
-    return <div className={className}>
+    return <div className={classNames('menu-table', hasMore ? 'has-more' : 'no-more')}>
       <div className="side-by-side">
         <FilterOptionsDropdown
           selectedOption={filterMode}
