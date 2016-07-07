@@ -23,7 +23,7 @@ export function addErrorMonitor() {
       method: "POST",
       url: 'error',
       data: err
-    }).done();
+    });
 
     window.onerror = originalOnError; // only trigger once
 

@@ -38,4 +38,16 @@ describe('error route', () => {
       });
   });
 
+  it('validates error has a message', (testComplete) => {
+    supertest(app)
+      .post('/')
+      .set('Content-Type', "application/json")
+      .send({ query: 'select things' })
+      .expect(400)
+      .end((err, res) => {
+        expect(res.body.error).to.deep.equal('Error must have a message');
+        testComplete();
+      });
+  });
+
 });
