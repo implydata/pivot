@@ -62,7 +62,7 @@ export class FilterOptionsDropdown extends React.Component<FilterOptionsDropdown
     var selectedItem = FILTER_OPTIONS.filter(o => o.value === selectedOption)[0] || FILTER_OPTIONS[0];
 
     var dropdown = React.createElement(Dropdown, {
-      className: 'filter-options',
+      menuClassName: 'filter-options',
       items: FILTER_OPTIONS,
       selectedItem: selectedItem,
       equal: (a, b) => a.value === b.value,
