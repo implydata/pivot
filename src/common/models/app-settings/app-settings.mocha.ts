@@ -139,6 +139,7 @@ describe('AppSettings', () => {
                 "unsplitable": true
               }
             ],
+            "clusterName": "druid",
             "defaultDuration": "P3D",
             "defaultFilter": {
               "op": "literal",
@@ -172,7 +173,6 @@ describe('AppSettings', () => {
                 "title": "Article Name"
               }
             ],
-            "engine": "druid",
             "introspection": "none",
             "measures": [
               {
