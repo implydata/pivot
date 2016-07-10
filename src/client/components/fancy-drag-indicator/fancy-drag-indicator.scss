@@ -19,7 +19,7 @@ $arrow-width: 16px;
   .drag-ghost-arrow {
     position: absolute;
     // left: 0; It gets left from the JS
-    top: -14px;
+    top: -12px;
     width: $arrow-width;
     margin-left: -$arrow-width / 2;
   }
