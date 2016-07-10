@@ -11,14 +11,15 @@ $arrow-width: 16px;
     top: $control-padding-v;
     bottom: $control-padding-v;
     width: $item-width;
-    border: 1px dashed $border-darker;
+    //border: 2px solid rgba($border-darker, 0.14);
+    background: rgba($border-darker, 0.14);
     border-radius: 4px;
   }
 
   .drag-ghost-arrow {
     position: absolute;
     // left: 0; It gets left from the JS
-    top: -12px;
+    top: -14px;
     width: $arrow-width;
     margin-left: -$arrow-width / 2;
   }
