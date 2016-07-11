@@ -275,7 +275,8 @@ describe('DataSource', () => {
               type: 'STRING'
             }
           ],
-          "defaultSplits": "__time"
+          "defaultSplits": "__time",
+          "priority": 13
         }
       };
 
@@ -341,6 +342,9 @@ describe('DataSource', () => {
           }
         ],
         "name": "wiki",
+        "options": {
+          "priority": 13
+        },
         "refreshRule": {
           "refresh": "PT1M",
           "rule": "query"
