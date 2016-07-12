@@ -293,12 +293,6 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
 
     if (!filter) {
       filter = dataSource.getDefaultFilter();
-      if (dataSource.timeAttribute) {
-        filter = filter.setSelection(
-          dataSource.timeAttribute,
-          $(FilterClause.MAX_TIME_REF_NAME).timeRange(dataSource.getDefaultDuration(), -1)
-        );
-      }
     }
 
     multiMeasureMode = Boolean(multiMeasureMode);

@@ -25,6 +25,7 @@ import { hasOwnProperty, verifyUrlSafeName, makeUrlSafeName, makeTitle, immutabl
 import { getWallTimeString } from '../../utils/time/time';
 import { Dimension, DimensionJS } from '../dimension/dimension';
 import { Measure, MeasureJS } from '../measure/measure';
+import { FilterClause } from '../filter-clause/filter-clause';
 import { Filter, FilterJS } from '../filter/filter';
 import { Splits, SplitsJS } from '../splits/splits';
 import { MaxTime, MaxTimeJS } from '../max-time/max-time';
@@ -939,7 +940,14 @@ export class DataSource implements Instance<DataSourceValue, DataSourceJS> {
   }
 
   public getDefaultFilter(): Filter {
-    return this.defaultFilter || DataSource.DEFAULT_DEFAULT_FILTER;
+    var filter = this.defaultFilter || DataSource.DEFAULT_DEFAULT_FILTER;
+    if (this.timeAttribute) {
+      filter = filter.setSelection(
+        this.timeAttribute,
+        $(FilterClause.MAX_TIME_REF_NAME).timeRange(this.getDefaultDuration(), -1)
+      );
+    }
+    return filter;
   }
 
   public getDefaultSplits(): Splits {
