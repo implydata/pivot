@@ -222,7 +222,7 @@ export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
     const { hash, dataSource, updateViewHash } = this.props;
     if (!nextProps.dataSource) throw new Error('must have data source');
 
-    if (dataSource.name !== nextProps.dataSource.name && hash !== nextProps.hash) {
+    if (dataSource.name !== nextProps.dataSource.name || hash !== nextProps.hash) {
       var hashEssence = this.getEssenceFromHash(nextProps.dataSource, nextProps.hash);
       if (!hashEssence) {
         hashEssence = this.getEssenceFromDataSource(nextProps.dataSource);
