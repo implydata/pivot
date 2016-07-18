@@ -136,7 +136,7 @@ describe('reintrospect on load', function () {
       expect(runSegmentMetadataRunNumber).to.equal(2);
 
       var config = extractConfig(body);
-      expect(config.appSettings.dataSources[0].dimensions).to.deep.equal([
+      expect(config.appSettings.dataCubes[0].dimensions).to.deep.equal([
         {
           "expression": {
             "name": "__time",
@@ -157,7 +157,7 @@ describe('reintrospect on load', function () {
         }
       ]);
 
-      expect(config.appSettings.dataSources[0].measures).to.deep.equal([
+      expect(config.appSettings.dataCubes[0].measures).to.deep.equal([
         {
           "expression": {
             "action": {
@@ -214,7 +214,7 @@ describe('reintrospect on load', function () {
       expect(runSegmentMetadataRunNumber).to.equal(3);
 
       var config = extractConfig(body);
-      expect(config.appSettings.dataSources[0].dimensions).to.deep.equal([
+      expect(config.appSettings.dataCubes[0].dimensions).to.deep.equal([
         {
           "expression": {
             "name": "__time",
@@ -244,7 +244,7 @@ describe('reintrospect on load', function () {
         }
       ]);
 
-      expect(config.appSettings.dataSources[0].measures).to.deep.equal([
+      expect(config.appSettings.dataCubes[0].measures).to.deep.equal([
         {
           "expression": {
             "action": {

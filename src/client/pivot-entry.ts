@@ -104,9 +104,7 @@ if (config.appSettings.dataCubes.length) {
 }
 
 
-// Polyfill
-// from https://github.com/reppners/ios-html5-drag-drop-shim/tree/effectAllowed_dropEffect
-// /polyfill/mobile-drag-and-drop-polyfill/mobile-drag-and-drop-polyfill.js
+// Polyfill =====================================
 
 // From ../../assets/polyfill/drag-drop-polyfill.js
 var div = document.createElement('div');

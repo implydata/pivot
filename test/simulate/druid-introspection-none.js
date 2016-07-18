@@ -56,9 +56,9 @@ describe('druid reintrospect on load', function () {
       expect(body).to.contain('</html>');
 
       var config = extractConfig(body);
-      var dataSources = config.appSettings.dataSources;
-      expect(dataSources).to.have.length(1);
-      var wikiDataSource = dataSources[0];
+      var dataCubes = config.appSettings.dataCubes;
+      expect(dataCubes).to.have.length(1);
+      var wikiDataSource = dataCubes[0];
 
       expect(wikiDataSource.name).to.equal('wiki');
 

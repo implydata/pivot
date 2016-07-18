@@ -244,7 +244,7 @@ describe('DataCube', () => {
   });
 
 
-  describe.only("back compat", () => {
+  describe("back compat", () => {
     it("works in a generic case", () => {
       var legacyDataCubeJS: any = {
         "name": "wiki",

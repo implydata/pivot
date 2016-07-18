@@ -1,9 +1,9 @@
-# Only the dataSources key will be used from the exmaple config
-dataSources:
+# Only the dataCubes key will be used from the exmaple config
+dataCubes:
 
   - name: wiki
 
-    # This is the title that will grace this data source in the the menus
+    # This is the title that will grace this data cube in the the menus
     title: Wikipedia Example
 
     # Use the native engine, all calculations will be done in Node.JS. Good for up to 100k rows of data.
@@ -18,11 +18,11 @@ dataSources:
     # Run `assets/data/process-wikiticker-2015-09-12` to get the full example file
 
     # The primary time attribute of the data refers to the attribute that must always be filtered on
-    # This is particularly useful for Druid data sources as they must always have a time filter.
+    # This is particularly useful for Druid data cubes as they must always have a time filter.
     timeAttribute: time
 
-    # The refresh rule describes how often the data source looks for new data. Default: 'query'/PT1M (every minute)
-    # In this case it has to be fixed since this data source is static
+    # The refresh rule describes how often the data cube looks for new data. Default: 'query'/PT1M (every minute)
+    # In this case it has to be fixed since this data cube is static
     refreshRule:
       rule: fixed # also possible: 'query' and 'realtime'
       time: 2015-09-13T00:00:00Z
