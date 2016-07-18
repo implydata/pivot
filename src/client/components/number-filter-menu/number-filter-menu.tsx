@@ -73,14 +73,22 @@ export class NumberFilterMenu extends React.Component<NumberFilterMenuProps, Num
 
   componentWillMount() {
     var { essence, dimension } = this.props;
+
     var valueSet = essence.filter.getLiteralSet(dimension.expression);
-    var hasRange = valueSet && valueSet.elements.length !== 0;
+    var hasFilter = valueSet && valueSet.elements.length !== 0;
     var start: number = null;
     var end: number = null;
-    if (hasRange) {
-      var range = valueSet.elements[0];
-      start = range.start;
-      end = range.end;
+
+    if (hasFilter) {
+      if (valueSet.setType === 'NUMBER_RANGE') {
+        var range = valueSet.elements[0];
+        start = range.start;
+        end = range.end;
+      } else if (valueSet.setType === 'NUMBER') {
+        var number = valueSet.elements[0];
+        start = number;
+        end = number;
+      }
     }
 
     this.setState({

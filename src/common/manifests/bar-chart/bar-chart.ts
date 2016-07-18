@@ -41,7 +41,7 @@ var handler = CircumstancesHandler.EMPTY()
             direction: SortAction.DESCENDING
           }));
         } else {
-          if (splitDimension.isContinuous()) {
+          if (splitDimension.shouldBucket()) {
             split = split.changeSortAction(new SortAction({
               expression: $(splitDimension.name),
               direction: SortAction.ASCENDING
@@ -51,7 +51,7 @@ var handler = CircumstancesHandler.EMPTY()
           }
         }
         autoChanged = true;
-      } else if (splitDimension.isContinuous() && split.sortAction.refName() !== splitDimension.name) {
+      } else if (splitDimension.shouldBucket() && split.sortAction.refName() !== splitDimension.name) {
         split = split.changeSortAction(new SortAction({
           expression: $(splitDimension.name),
           direction: split.sortAction.direction
