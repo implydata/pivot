@@ -15,7 +15,7 @@
  */
 
 import { $, Executor, Dataset, basicExecutorFactory } from 'plywood';
-import { DataSource, DataSourceJS } from './data-source';
+import { DataCube, DataCubeJS } from './data-cube';
 
 var executor = basicExecutorFactory({
   datasets: {
@@ -24,8 +24,8 @@ var executor = basicExecutorFactory({
   }
 });
 
-export class DataSourceMock {
-  public static get WIKI_JS(): DataSourceJS {
+export class DataCubeMock {
+  public static get WIKI_JS(): DataCubeJS {
     return {
       name: 'wiki',
       title: 'Wiki',
@@ -79,7 +79,7 @@ export class DataSourceMock {
     };
   }
 
-  public static get TWITTER_JS(): DataSourceJS {
+  public static get TWITTER_JS(): DataCubeJS {
     return {
       name: 'twitter',
       title: 'Twitter',
@@ -123,10 +123,10 @@ export class DataSourceMock {
   }
 
   static wiki() {
-    return DataSource.fromJS(DataSourceMock.WIKI_JS, { executor });
+    return DataCube.fromJS(DataCubeMock.WIKI_JS, { executor });
   }
 
   static twitter() {
-    return DataSource.fromJS(DataSourceMock.TWITTER_JS, { executor });
+    return DataCube.fromJS(DataCubeMock.TWITTER_JS, { executor });
   }
 }

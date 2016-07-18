@@ -17,10 +17,10 @@
 import { Class, Instance, isInstanceOf } from 'immutable-class';
 import { Timezone } from 'chronoshift';
 import { $, Expression } from 'plywood';
-import { Essence, DataSource, Filter, Splits, Customization} from '../../../common/models/index';
+import { Essence, DataCube, Filter, Splits, Customization} from '../../../common/models/index';
 
 export interface LinkGenerator {
-  (dataSource: DataSource, timezone: Timezone, filter: Filter, splits: Splits): string;
+  (dataCube: DataCube, timezone: Timezone, filter: Filter, splits: Splits): string;
 }
 
 export interface ExternalViewValue {
@@ -60,13 +60,13 @@ export class ExternalView implements Instance<ExternalViewValue, ExternalViewVal
     this.linkGenerator = linkGenerator;
     var linkGeneratorFnRaw: LinkGenerator = null;
     try {
-      linkGeneratorFnRaw = new Function('dataSource', 'timezone', 'filter', 'splits', linkGenerator) as LinkGenerator;
+      linkGeneratorFnRaw = new Function('dataCube', 'timezone', 'filter', 'splits', linkGenerator) as LinkGenerator;
     } catch (e) {
       throw new Error(`Error constructing link generator function: ${e.message}`);
     }
-    this.linkGeneratorFn = (dataSource: DataSource, timezone: Timezone, filter: Filter, splits: Splits) => {
+    this.linkGeneratorFn = (dataCube: DataCube, timezone: Timezone, filter: Filter, splits: Splits) => {
       try {
-        return linkGeneratorFnRaw(dataSource, timezone, filter, splits);
+        return linkGeneratorFnRaw(dataCube, timezone, filter, splits);
       } catch (e) {
         console.warn(`Error with custom link generating function '${title}': ${e.message} [${linkGenerator}]`);
         return null;

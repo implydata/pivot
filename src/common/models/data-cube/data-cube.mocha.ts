@@ -20,10 +20,10 @@ import * as Q from 'q';
 
 import { $, Expression, AttributeInfo } from 'plywood';
 import { Cluster } from "../cluster/cluster";
-import { DataSource, DataSourceJS } from './data-source';
-import { DataSourceMock} from './data-source.mock';
+import { DataCube, DataCubeJS } from './data-cube';
+import { DataCubeMock} from './data-cube.mock';
 
-describe('DataSource', () => {
+describe('DataCube', () => {
   var druidCluster = Cluster.fromJS({
     name: 'druid',
     type: 'druid'
@@ -34,16 +34,16 @@ describe('DataSource', () => {
   };
 
   it('is an immutable class', () => {
-    testImmutableClass<DataSourceJS>(DataSource, [
-      DataSourceMock.TWITTER_JS,
-      DataSourceMock.WIKI_JS
+    testImmutableClass<DataCubeJS>(DataCube, [
+      DataCubeMock.TWITTER_JS,
+      DataCubeMock.WIKI_JS
     ]);
   });
 
   describe("validates", () => {
     it("throws an error if bad name is used", () => {
       expect(() => {
-        DataSource.fromJS({
+        DataCube.fromJS({
           name: 'wiki hello',
           clusterName: 'druid',
           source: 'wiki',
@@ -70,7 +70,7 @@ describe('DataSource', () => {
 
     it("throws an error if the defaultSortMeasure can not be found", () => {
       expect(() => {
-        DataSource.fromJS({
+        DataCube.fromJS({
           name: 'wiki',
           clusterName: 'druid',
           source: 'wiki',
@@ -98,7 +98,7 @@ describe('DataSource', () => {
 
     it("throws an error if duplicate name is used across measures and dimensions", () => {
       expect(() => {
-        DataSource.fromJS({
+        DataCube.fromJS({
           name: 'wiki',
           clusterName: 'druid',
           source: 'wiki',
@@ -120,12 +120,12 @@ describe('DataSource', () => {
             }
           ]
         });
-      }).to.throw("name 'articleName' found in both dimensions and measures in data source: 'wiki'");
+      }).to.throw("name 'articleName' found in both dimensions and measures in data cube: 'wiki'");
     });
 
     it("throws an error if duplicate name is used in measures", () => {
       expect(() => {
-        DataSource.fromJS({
+        DataCube.fromJS({
           name: 'wiki',
           clusterName: 'druid',
           source: 'wiki',
@@ -151,12 +151,12 @@ describe('DataSource', () => {
             }
           ]
         });
-      }).to.throw("duplicate measure name 'articleName' found in data source: 'wiki'");
+      }).to.throw("duplicate measure name 'articleName' found in data cube: 'wiki'");
     });
 
     it("throws an error if duplicate name is used in dimensions", () => {
       expect(() => {
-        DataSource.fromJS({
+        DataCube.fromJS({
           name: 'wiki',
           clusterName: 'druid',
           source: 'wiki',
@@ -182,14 +182,14 @@ describe('DataSource', () => {
             }
           ]
         });
-      }).to.throw("duplicate dimension name 'articleName' found in data source: 'wiki'");
+      }).to.throw("duplicate dimension name 'articleName' found in data cube: 'wiki'");
     });
 
   });
 
   describe("#getIssues", () => {
     it("raises issues", () => {
-      var dataSource = DataSource.fromJS({
+      var dataCube = DataCube.fromJS({
         name: 'wiki',
         clusterName: 'druid',
         source: 'wiki',
@@ -232,7 +232,7 @@ describe('DataSource', () => {
         ]
       });
 
-      expect(dataSource.getIssues()).to.deep.equal([
+      expect(dataCube.getIssues()).to.deep.equal([
         "failed to validate dimension 'gaga': could not resolve $gaga",
         "failed to validate dimension 'bucketArticleName': numberBucket must have input of type NUMBER or NUMBER_RANGE (is STRING)",
         "failed to validate measure 'added': could not resolve $added",
@@ -246,7 +246,7 @@ describe('DataSource', () => {
 
   describe.only("back compat", () => {
     it("works in a generic case", () => {
-      var legacyDataSourceJS: any = {
+      var legacyDataCubeJS: any = {
         "name": "wiki",
         "engine": "druid",
         "source": "wiki",
@@ -280,9 +280,9 @@ describe('DataSource', () => {
         }
       };
 
-      var dataSource = DataSource.fromJS(legacyDataSourceJS, context);
+      var dataCube = DataCube.fromJS(legacyDataCubeJS, context);
 
-      expect(dataSource.toJS()).to.deep.equal({
+      expect(dataCube.toJS()).to.deep.equal({
         "attributeOverrides": [
           {
             "name": "page",
@@ -343,7 +343,7 @@ describe('DataSource', () => {
 
   describe("#deduceAttributes", () => {
     it("works in a generic case", () => {
-      var dataSource = DataSource.fromJS({
+      var dataCube = DataCube.fromJS({
         "name": "wiki",
         "clusterName": "druid",
         "source": "wiki",
@@ -391,7 +391,7 @@ describe('DataSource', () => {
         ]
       }, context);
 
-      expect(AttributeInfo.toJSs(dataSource.deduceAttributes())).to.deep.equal([
+      expect(AttributeInfo.toJSs(dataCube.deduceAttributes())).to.deep.equal([
         {
           "name": "__time",
           "type": "TIME"
@@ -429,7 +429,7 @@ describe('DataSource', () => {
 
 
   describe("#addAttributes", () => {
-    var dataSourceStub = DataSource.fromJS({
+    var dataCubeStub = DataCube.fromJS({
       name: 'wiki',
       title: 'Wiki',
       clusterName: 'druid',
@@ -452,8 +452,8 @@ describe('DataSource', () => {
         { name: 'unique_user', special: 'unique' }
       ]);
 
-      var dataSource1 = dataSourceStub.addAttributes(attributes1);
-      expect(dataSource1.toJS()).to.deep.equal({
+      var dataCube1 = dataCubeStub.addAttributes(attributes1);
+      expect(dataCube1.toJS()).to.deep.equal({
         "name": "wiki",
         "title": "Wiki",
         "description": "",
@@ -545,8 +545,8 @@ describe('DataSource', () => {
         { name: 'user', type: 'STRING' }
       ]);
 
-      var dataSource2 = dataSource1.addAttributes(attributes2);
-      expect(dataSource2.toJS()).to.deep.equal({
+      var dataCube2 = dataCube1.addAttributes(attributes2);
+      expect(dataCube2.toJS()).to.deep.equal({
         "name": "wiki",
         "title": "Wiki",
         "description": "",
@@ -667,8 +667,8 @@ describe('DataSource', () => {
         { name: 'unique_user:#love$', special: 'unique' }
       ]);
 
-      var dataSource = dataSourceStub.addAttributes(attributes1);
-      expect(dataSource.toJS()).to.deep.equal({
+      var dataCube = dataCubeStub.addAttributes(attributes1);
+      expect(dataCube.toJS()).to.deep.equal({
         "attributes": [
           {
             "name": "__time",
@@ -776,7 +776,7 @@ describe('DataSource', () => {
         { name: 'deleted', type: 'NUMBER' }
       ]);
 
-      var dataSourceWithDim = DataSource.fromJS({
+      var dataCubeWithDim = DataCube.fromJS({
         name: 'wiki',
         title: 'Wiki',
         clusterName: 'druid',
@@ -801,15 +801,15 @@ describe('DataSource', () => {
         ]
       });
 
-      var dataSource = dataSourceWithDim.addAttributes(attributes1);
-      expect(dataSource.toJS().measures.map(m => m.name)).to.deep.equal(['deleted']);
+      var dataCube = dataCubeWithDim.addAttributes(attributes1);
+      expect(dataCube.toJS().measures.map(m => m.name)).to.deep.equal(['deleted']);
     });
 
   });
 
 
   describe("#addAttributes (new dim)", () => {
-    var dataSource = DataSource.fromJS({
+    var dataCube = DataCube.fromJS({
       name: 'wiki',
       title: 'Wiki',
       clusterName: 'druid',
@@ -834,9 +834,9 @@ describe('DataSource', () => {
         { "name": "page_unique", "special": "unique", "type": "STRING" }
       ];
 
-      var dataSource1 = dataSource.addAttributes(AttributeInfo.fromJSs(columns));
+      var dataCube1 = dataCube.addAttributes(AttributeInfo.fromJSs(columns));
 
-      expect(dataSource1.toJS().dimensions).to.deep.equal([
+      expect(dataCube1.toJS().dimensions).to.deep.equal([
         {
           "expression": {
             "name": "__time",
@@ -858,9 +858,9 @@ describe('DataSource', () => {
       ]);
 
       columns.push({ "name": "channel", "type": "STRING" });
-      var dataSource2 = dataSource1.addAttributes(AttributeInfo.fromJSs(columns));
+      var dataCube2 = dataCube1.addAttributes(AttributeInfo.fromJSs(columns));
 
-      expect(dataSource2.toJS().dimensions).to.deep.equal([
+      expect(dataCube2.toJS().dimensions).to.deep.equal([
         {
           "expression": {
             "name": "__time",

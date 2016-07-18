@@ -23,7 +23,7 @@ import { PivotRequest } from '../../utils/index';
 var router = Router();
 
 router.post('/', (req: PivotRequest, res: Response) => {
-  var { version, dataSource, expression, timezone } = req.body;
+  var { version, dataCube, expression, timezone } = req.body;
 
   if (version && version !== req.version) {
     res.status(412).send({
@@ -33,9 +33,9 @@ router.post('/', (req: PivotRequest, res: Response) => {
     return;
   }
 
-  if (typeof dataSource !== 'string') {
+  if (typeof dataCube !== 'string') {
     res.status(400).send({
-      error: 'must have a dataSource'
+      error: 'must have a dataCube'
     });
     return;
   }
@@ -64,20 +64,20 @@ router.post('/', (req: PivotRequest, res: Response) => {
     return;
   }
 
-  req.getSettings(dataSource)
+  req.getSettings(dataCube)
     .then((appSettings) => {
-      var myDataSource = appSettings.getDataSource(dataSource);
-      if (!myDataSource) {
-        res.status(400).send({ error: 'unknown data source' });
+      var myDataCube = appSettings.getDataCube(dataCube);
+      if (!myDataCube) {
+        res.status(400).send({ error: 'unknown data cube' });
         return;
       }
 
-      if (!myDataSource.executor) {
-        res.status(400).send({ error: 'un queryable data source' });
+      if (!myDataCube.executor) {
+        res.status(400).send({ error: 'un queryable data cube' });
         return;
       }
 
-      return myDataSource.executor(ex, { timezone: queryTimezone }).then(
+      return myDataCube.executor(ex, { timezone: queryTimezone }).then(
         (data: PlywoodValue) => {
           res.json({
             result: Dataset.isDataset(data) ? data.toJS() : data

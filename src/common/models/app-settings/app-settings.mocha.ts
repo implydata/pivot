@@ -18,7 +18,7 @@ import { expect } from 'chai';
 import { testImmutableClass } from 'immutable-class/build/tester';
 
 import { $, Expression } from 'plywood';
-import { DataSourceMock } from '../data-source/data-source.mock';
+import { DataCubeMock } from '../data-cube/data-cube.mock';
 import { AppSettings } from './app-settings';
 import { AppSettingsMock } from './app-settings.mock';
 
@@ -38,7 +38,7 @@ describe('AppSettings', () => {
     it("errors if there is no matching cluster", () => {
       var js = AppSettingsMock.wikiOnlyJS();
       js.clusters = [];
-      expect(() => AppSettings.fromJS(js, context)).to.throw("Can not find cluster 'druid' for data source 'wiki'");
+      expect(() => AppSettings.fromJS(js, context)).to.throw("Can not find cluster 'druid' for data cube 'wiki'");
     });
 
   });
@@ -46,9 +46,9 @@ describe('AppSettings', () => {
 
   describe("upgrades", () => {
     it("deals with old config style", () => {
-      var wikiDataSourceJS = DataSourceMock.WIKI_JS;
-      delete wikiDataSourceJS.clusterName;
-      (wikiDataSourceJS as any).engine = 'druid';
+      var wikiDataCubeJS = DataCubeMock.WIKI_JS;
+      delete wikiDataCubeJS.clusterName;
+      (wikiDataCubeJS as any).engine = 'druid';
 
       var oldJS: any = {
         customization: {},
@@ -58,8 +58,8 @@ describe('AppSettings', () => {
         sourceListRefreshInterval: 10001,
         sourceReintrospectInterval: 10002,
         sourceReintrospectOnLoad: true,
-        dataSources: [
-          wikiDataSourceJS
+        dataCubes: [
+          wikiDataCubeJS
         ]
       };
 
@@ -81,8 +81,8 @@ describe('AppSettings', () => {
       var oldJS: any = {
         druidHost: '192.168.99.100',
         sourceListScan: 'disable',
-        dataSources: [
-          DataSourceMock.WIKI_JS
+        dataCubes: [
+          DataCubeMock.WIKI_JS
         ]
       };
 
@@ -104,7 +104,7 @@ describe('AppSettings', () => {
       expect(AppSettings.BLANK.toJS()).to.deep.equal({
         "clusters": [],
         "customization": {},
-        "dataSources": []
+        "dataCubes": []
       });
     });
 
@@ -123,7 +123,7 @@ describe('AppSettings', () => {
           "headerBackground": "brown",
           "title": "Hello World"
         },
-        "dataSources": [
+        "dataCubes": [
           {
             "attributes": [
               {
