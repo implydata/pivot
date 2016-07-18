@@ -102,7 +102,7 @@ describe('plywood router', () => {
           .sort('$Count', 'descending')
           .limit(2)
           .toJS(),
-        dataCube: 'wiki'
+        dataSource: 'wiki' // back compat
       })
       .expect('Content-Type', "application/json; charset=utf-8")
       .expect(200)

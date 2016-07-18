@@ -128,7 +128,7 @@ describe('mkurl router', () => {
       .set('Content-Type', "application/json")
       .send({
         domain: 'http://localhost:9090',
-        dataCube: 'wiki',
+        dataSource: 'wiki', // back compat
         essence: {
           visualization: 'totals',
           timezone: 'Etc/UTC',
