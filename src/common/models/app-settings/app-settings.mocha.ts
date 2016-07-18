@@ -157,61 +157,29 @@ describe('AppSettings', () => {
             ],
             "defaultSortMeasure": "count",
             "defaultTimezone": "Etc/UTC",
+            "description": "Wiki description",
             "dimensions": [
               {
-                "expression": {
-                  "name": "time",
-                  "op": "ref"
-                },
+                "formula": "$time",
                 "kind": "time",
                 "name": "time",
                 "title": "Time"
               },
               {
-                "expression": {
-                  "name": "articleName",
-                  "op": "ref"
-                },
+                "formula": "$articleName",
                 "kind": "string",
                 "name": "articleName",
                 "title": "Article Name"
               }
             ],
-            "introspection": "none",
             "measures": [
               {
-                "expression": {
-                  "action": {
-                    "action": "sum",
-                    "expression": {
-                      "name": "count",
-                      "op": "ref"
-                    }
-                  },
-                  "expression": {
-                    "name": "main",
-                    "op": "ref"
-                  },
-                  "op": "chain"
-                },
+                "formula": "$main.sum($count)",
                 "name": "count",
                 "title": "Count"
               },
               {
-                "expression": {
-                  "action": {
-                    "action": "sum",
-                    "expression": {
-                      "name": "added",
-                      "op": "ref"
-                    }
-                  },
-                  "expression": {
-                    "name": "main",
-                    "op": "ref"
-                  },
-                  "op": "chain"
-                },
+                "formula": "$main.sum($added)",
                 "name": "added",
                 "title": "Added"
               }
@@ -224,7 +192,6 @@ describe('AppSettings', () => {
             "source": "wiki",
             "subsetFilter": null,
             "timeAttribute": "time",
-            "description": "Wiki description",
             "title": "Wiki"
           }
         ]

@@ -23,7 +23,8 @@ import { PivotRequest } from '../../utils/index';
 var router = Router();
 
 router.post('/', (req: PivotRequest, res: Response) => {
-  var { version, dataCube, expression, timezone } = req.body;
+  var { version, dataCube, dataSource, expression, timezone } = req.body;
+  dataCube = dataCube || dataSource; // back compat
 
   if (version && version !== req.version) {
     res.status(412).send({

@@ -112,12 +112,8 @@ export class Measure implements Instance<MeasureValue, MeasureJS> {
       } else if (special === 'histogram') {
         return [
           new Measure({
-            name: makeUrlSafeName(name + '_p95'),
-            formula: $main.quantile(ref, 0.95).toString()
-          }),
-          new Measure({
-            name: makeUrlSafeName(name + '_p99'),
-            formula: $main.quantile(ref, 0.99).toString()
+            name: makeUrlSafeName(name + '_p98'),
+            formula: $main.quantile(ref, 0.98).toString()
           })
         ];
       }

@@ -64,12 +64,12 @@ describe('druid reintrospect on load', function () {
 
       expect(wikiDataSource.dimensions.map(basicString)).to.deep.equal([
         "time ~ $time",
-        "is-english ~ $channel.is(\"en\")",
-        "user-number ~ $user.extract((\\d+))",
-        "user-first-letter ~ $user.substr(0,1)",
+        "is-english ~ $channel == 'en'",
+        "user-number ~ $user.extract(\"(\\d+)\")",
+        "user-first-letter ~ $user.substr(0, 1)",
         "channel ~ $channel",
-        "channel-lookup ~ $channel.lookup(channel-lookup).fallback(\"LOL NO\")",
-        "user-letter-phonetic ~ $userChars.lookup(nato-phonetic)"
+        "channel-lookup ~ $channel.lookup('channel-lookup').fallback('LOL NO')",
+        "user-letter-phonetic ~ $userChars.lookup('nato-phonetic')"
       ]);
 
       expect(wikiDataSource.measures.map(basicString)).to.deep.equal([

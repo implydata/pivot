@@ -349,7 +349,6 @@ describe('DataCube', () => {
         "source": "wiki",
         "subsetFilter": null,
         introspection: 'autofill-all',
-        "defaultDuration": "P1D",
         "defaultFilter": { "op": "literal", "value": true },
         "defaultSortMeasure": "added",
         "defaultTimezone": "Etc/UTC",
@@ -465,7 +464,6 @@ describe('DataCube', () => {
         },
         "subsetFilter": null,
         introspection: 'autofill-all',
-        "defaultDuration": "P1D",
         "defaultFilter": { "op": "literal", "value": true },
         "defaultSortMeasure": "added",
         "defaultTimezone": "Etc/UTC",
@@ -478,60 +476,28 @@ describe('DataCube', () => {
         ],
         "dimensions": [
           {
-            "expression": {
-              "name": "__time",
-              "op": "ref"
-            },
             "kind": "time",
             "name": "__time",
-            "title": "Time"
+            "title": "Time",
+            "formula": "$__time"
           },
           {
-            "expression": {
-              "name": "page",
-              "op": "ref"
-            },
             "kind": "string",
             "name": "page",
-            "title": "Page"
+            "title": "Page",
+            "formula": "$page"
           }
         ],
         "measures": [
           {
-            "expression": {
-              "action": {
-                "action": "sum",
-                "expression": {
-                  "name": "added",
-                  "op": "ref"
-                }
-              },
-              "expression": {
-                "name": "main",
-                "op": "ref"
-              },
-              "op": "chain"
-            },
             "name": "added",
-            "title": "Added"
+            "title": "Added",
+            "formula": "$main.sum($added)"
           },
           {
-            "expression": {
-              "action": {
-                "action": "countDistinct",
-                "expression": {
-                  "name": "unique_user",
-                  "op": "ref"
-                }
-              },
-              "expression": {
-                "name": "main",
-                "op": "ref"
-              },
-              "op": "chain"
-            },
             "name": "unique_user",
-            "title": "Unique User"
+            "title": "Unique User",
+            "formula": "$main.countDistinct($unique_user)"
           }
         ]
       });
@@ -558,7 +524,6 @@ describe('DataCube', () => {
         },
         "subsetFilter": null,
         introspection: 'autofill-all',
-        "defaultDuration": "P1D",
         "defaultFilter": { "op": "literal", "value": true },
         "defaultSortMeasure": "added",
         "defaultTimezone": "Etc/UTC",
@@ -573,87 +538,39 @@ describe('DataCube', () => {
         ],
         "dimensions": [
           {
-            "expression": {
-              "name": "__time",
-              "op": "ref"
-            },
             "kind": "time",
             "name": "__time",
-            "title": "Time"
+            "title": "Time",
+            "formula": "$__time"
           },
           {
-            "expression": {
-              "name": "page",
-              "op": "ref"
-            },
             "kind": "string",
             "name": "page",
-            "title": "Page"
+            "title": "Page",
+            "formula": "$page"
           },
           {
-            "expression": {
-              "name": "user",
-              "op": "ref"
-            },
             "kind": "string",
             "name": "user",
-            "title": "User"
+            "title": "User",
+            "formula": "$user"
           }
         ],
         "measures": [
           {
-            "expression": {
-              "action": {
-                "action": "sum",
-                "expression": {
-                  "name": "added",
-                  "op": "ref"
-                }
-              },
-              "expression": {
-                "name": "main",
-                "op": "ref"
-              },
-              "op": "chain"
-            },
             "name": "added",
-            "title": "Added"
+            "title": "Added",
+            "formula": "$main.sum($added)"
           },
           {
-            "expression": {
-              "action": {
-                "action": "countDistinct",
-                "expression": {
-                  "name": "unique_user",
-                  "op": "ref"
-                }
-              },
-              "expression": {
-                "name": "main",
-                "op": "ref"
-              },
-              "op": "chain"
-            },
             "name": "unique_user",
-            "title": "Unique User"
+            "title": "Unique User",
+            "formula": "$main.countDistinct($unique_user)"
           },
           {
-            "expression": {
-              "action": {
-                "action": "sum",
-                "expression": {
-                  "name": "deleted",
-                  "op": "ref"
-                }
-              },
-              "expression": {
-                "name": "main",
-                "op": "ref"
-              },
-              "op": "chain"
-            },
             "name": "deleted",
-            "title": "Deleted"
+            "title": "Deleted",
+            "formula": "$main.sum($deleted)"
           }
         ]
       });
@@ -688,7 +605,7 @@ describe('DataCube', () => {
             "type": "STRING"
           }
         ],
-        "defaultDuration": "P1D",
+        "clusterName": "druid",
         "defaultFilter": {
           "op": "literal",
           "value": true
@@ -697,62 +614,29 @@ describe('DataCube', () => {
         "defaultTimezone": "Etc/UTC",
         "dimensions": [
           {
-            "expression": {
-              "name": "__time",
-              "op": "ref"
-            },
             "kind": "time",
             "name": "__time",
-            "title": "Time"
+            "title": "Time",
+            "formula": "$__time"
           },
           {
-            "expression": {
-              "name": "page:#love$",
-              "op": "ref"
-            },
             "kind": "string",
             "name": "page_love_",
-            "title": "Page Love"
+            "title": "Page Love",
+            "formula": "${page:#love$}"
           }
         ],
-        "engine": "druid",
         "introspection": "autofill-all",
         "measures": [
           {
-            "expression": {
-              "action": {
-                "action": "sum",
-                "expression": {
-                  "name": "added:#love$",
-                  "op": "ref"
-                }
-              },
-              "expression": {
-                "name": "main",
-                "op": "ref"
-              },
-              "op": "chain"
-            },
             "name": "added_love_",
-            "title": "Added Love"
+            "title": "Added Love",
+            "formula": "$main.sum(${added:#love$})"
           },
           {
-            "expression": {
-              "action": {
-                "action": "countDistinct",
-                "expression": {
-                  "name": "unique_user:#love$",
-                  "op": "ref"
-                }
-              },
-              "expression": {
-                "name": "main",
-                "op": "ref"
-              },
-              "op": "chain"
-            },
             "name": "unique_user_love_",
-            "title": "Unique User Love"
+            "title": "Unique User Love",
+            "formula": "$main.countDistinct(${unique_user:#love$})"
           }
         ],
         "name": "wiki",
@@ -838,22 +722,16 @@ describe('DataCube', () => {
 
       expect(dataCube1.toJS().dimensions).to.deep.equal([
         {
-          "expression": {
-            "name": "__time",
-            "op": "ref"
-          },
           "kind": "time",
           "name": "__time",
-          "title": "Time"
+          "title": "Time",
+          "formula": "$__time"
         },
         {
-          "expression": {
-            "name": "page",
-            "op": "ref"
-          },
           "kind": "string",
           "name": "page",
-          "title": "Page"
+          "title": "Page",
+          "formula": "$page"
         }
       ]);
 
@@ -862,31 +740,22 @@ describe('DataCube', () => {
 
       expect(dataCube2.toJS().dimensions).to.deep.equal([
         {
-          "expression": {
-            "name": "__time",
-            "op": "ref"
-          },
           "kind": "time",
           "name": "__time",
-          "title": "Time"
+          "title": "Time",
+          "formula": "$__time"
         },
         {
-          "expression": {
-            "name": "page",
-            "op": "ref"
-          },
           "kind": "string",
           "name": "page",
-          "title": "Page"
+          "title": "Page",
+          "formula": "$page"
         },
         {
-          "expression": {
-            "name": "channel",
-            "op": "ref"
-          },
           "kind": "string",
           "name": "channel",
-          "title": "Channel"
+          "title": "Channel",
+          "formula": "$channel"
         }
       ]);
 

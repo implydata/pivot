@@ -138,19 +138,13 @@ describe('reintrospect on load', function () {
       var config = extractConfig(body);
       expect(config.appSettings.dataCubes[0].dimensions).to.deep.equal([
         {
-          "expression": {
-            "name": "__time",
-            "op": "ref"
-          },
+          "formula": "$__time",
           "kind": "time",
           "name": "__time",
           "title": "Time"
         },
         {
-          "expression": {
-            "name": "channel",
-            "op": "ref"
-          },
+          "formula": "$channel",
           "kind": "string",
           "name": "channel",
           "title": "Channel"
@@ -159,22 +153,9 @@ describe('reintrospect on load', function () {
 
       expect(config.appSettings.dataCubes[0].measures).to.deep.equal([
         {
-          "expression": {
-            "action": {
-              "action": "sum",
-              "expression": {
-                "name": "count",
-                "op": "ref"
-              }
-            },
-            "expression": {
-              "name": "main",
-              "op": "ref"
-            },
-            "op": "chain"
-          },
           "name": "count",
-          "title": "Count"
+          "title": "Count",
+          "formula": "$main.sum($count)"
         }
       ]);
 
@@ -216,28 +197,19 @@ describe('reintrospect on load', function () {
       var config = extractConfig(body);
       expect(config.appSettings.dataCubes[0].dimensions).to.deep.equal([
         {
-          "expression": {
-            "name": "__time",
-            "op": "ref"
-          },
+          "formula": "$__time",
           "kind": "time",
           "name": "__time",
           "title": "Time"
         },
         {
-          "expression": {
-            "name": "channel",
-            "op": "ref"
-          },
+          "formula": "$channel",
           "kind": "string",
           "name": "channel",
           "title": "Channel"
         },
         {
-          "expression": {
-            "name": "page",
-            "op": "ref"
-          },
+          "formula": "$page",
           "kind": "string",
           "name": "page",
           "title": "Page"
@@ -246,40 +218,14 @@ describe('reintrospect on load', function () {
 
       expect(config.appSettings.dataCubes[0].measures).to.deep.equal([
         {
-          "expression": {
-            "action": {
-              "action": "sum",
-              "expression": {
-                "name": "count",
-                "op": "ref"
-              }
-            },
-            "expression": {
-              "name": "main",
-              "op": "ref"
-            },
-            "op": "chain"
-          },
           "name": "count",
-          "title": "Count"
+          "title": "Count",
+          "formula": "$main.sum($count)"
         },
         {
-          "expression": {
-            "action": {
-              "action": "sum",
-              "expression": {
-                "name": "added",
-                "op": "ref"
-              }
-            },
-            "expression": {
-              "name": "main",
-              "op": "ref"
-            },
-            "op": "chain"
-          },
           "name": "added",
-          "title": "Added"
+          "title": "Added",
+          "formula": "$main.sum($added)"
         }
       ]);
 

@@ -23,7 +23,8 @@ import { PivotRequest } from '../../utils/index';
 var router = Router();
 
 router.post('/', (req: PivotRequest, res: Response) => {
-  var { domain, dataCube, essence } = req.body;
+  var { domain, dataCube, dataSource, essence } = req.body;
+  dataCube = dataCube || dataSource; // back compat
 
   if (typeof domain !== 'string') {
     res.status(400).send({
