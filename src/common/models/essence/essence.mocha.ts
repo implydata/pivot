@@ -34,20 +34,20 @@ describe('Essence', () => {
         kind: 'time',
         name: 'time',
         title: 'Time',
-        expression: '$time'
+        formula: '$time'
       },
       {
         kind: 'string',
         name: 'twitterHandle',
         title: 'Twitter Handle',
-        expression: '$twitterHandle'
+        formula: '$twitterHandle'
       }
     ],
     measures: [
       {
         name: 'count',
         title: 'count',
-        expression: '$main.count()'
+        formula: '$main.count()'
       }
     ],
     timeAttribute: 'time',

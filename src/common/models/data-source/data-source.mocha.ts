@@ -55,13 +55,13 @@ describe('DataSource', () => {
           dimensions: [
             {
               name: 'articleName',
-              expression: '$articleName'
+              formula: '$articleName'
             }
           ],
           measures: [
             {
               name: 'count',
-              expression: '$main.sum($count)'
+              formula: '$main.sum($count)'
             }
           ]
         });
@@ -83,13 +83,13 @@ describe('DataSource', () => {
           dimensions: [
             {
               name: 'articleName',
-              expression: '$articleName'
+              formula: '$articleName'
             }
           ],
           measures: [
             {
               name: 'count',
-              expression: '$main.sum($count)'
+              formula: '$main.sum($count)'
             }
           ]
         });
@@ -110,13 +110,13 @@ describe('DataSource', () => {
           dimensions: [
             {
               name: 'articleName',
-              expression: '$articleName'
+              formula: '$articleName'
             }
           ],
           measures: [
             {
               name: 'articleName',
-              expression: '$main.sum($count)'
+              formula: '$main.sum($count)'
             }
           ]
         });
@@ -137,17 +137,17 @@ describe('DataSource', () => {
           dimensions: [
             {
               name: 'notArticleName',
-              expression: '$notArticleName'
+              formula: '$notArticleName'
             }
           ],
           measures: [
             {
               name: 'articleName',
-              expression: '$main.sum($count)'
+              formula: '$main.sum($count)'
             },
             {
               name: 'articleName',
-              expression: '$articleName'
+              formula: '$articleName'
             }
           ]
         });
@@ -168,17 +168,17 @@ describe('DataSource', () => {
           dimensions: [
             {
               name: 'articleName',
-              expression: '$articleName'
+              formula: '$articleName'
             },
             {
               name: 'articleName',
-              expression: '$articleName.substr(0,2)'
+              formula: '$articleName.substr(0,2)'
             }
           ],
           measures: [
             {
               name: 'articleName',
-              expression: '$main.sum($count)'
+              formula: '$main.sum($count)'
             }
           ]
         });
@@ -201,33 +201,33 @@ describe('DataSource', () => {
         dimensions: [
           {
             name: 'gaga',
-            expression: '$gaga'
+            formula: '$gaga'
           },
           {
             name: 'bucketArticleName',
-            expression: $('articleName').numberBucket(5).toJS()
+            formula: '$articleName.numberBucket(5)'
           }
         ],
         measures: [
           {
             name: 'count',
-            expression: '$main.sum($count)'
+            formula: '$main.sum($count)'
           },
           {
             name: 'added',
-            expression: '$main.sum($added)'
+            formula: '$main.sum($added)'
           },
           {
             name: 'sumArticleName',
-            expression: '$main.sum($articleName)'
+            formula: '$main.sum($articleName)'
           },
           {
             name: 'koalaCount',
-            expression: '$koala.sum($count)'
+            formula: '$koala.sum($count)'
           },
           {
             name: 'countByThree',
-            expression: '$count / 3'
+            formula: '$count / 3'
           }
         ]
       });
@@ -255,7 +255,7 @@ describe('DataSource', () => {
           {
             "kind": "time",
             "name": "__time",
-            "expression": "$__time"
+            "formula": "$__time"
           },
           {
             "name": "page"
@@ -264,7 +264,7 @@ describe('DataSource', () => {
         "measures": [
           {
             "name": "added",
-            "expression": "$main.sum($added)"
+            "formula": "$main.sum($added)"
           }
         ],
         "options": {
@@ -302,43 +302,24 @@ describe('DataSource', () => {
         "description": "",
         "dimensions": [
           {
-            "expression": {
-              "name": "__time",
-              "op": "ref"
-            },
             "kind": "time",
             "name": "__time",
-            "title": "Time"
+            "title": "Time",
+            "formula": "$__time"
           },
           {
-            "expression": {
-              "name": "page",
-              "op": "ref"
-            },
             "kind": "string",
             "name": "page",
-            "title": "Page"
+            "title": "Page",
+            "formula": "$page"
           }
         ],
         "introspection": "none",
         "measures": [
           {
-            "expression": {
-              "action": {
-                "action": "sum",
-                "expression": {
-                  "name": "added",
-                  "op": "ref"
-                }
-              },
-              "expression": {
-                "name": "main",
-                "op": "ref"
-              },
-              "op": "chain"
-            },
             "name": "added",
-            "title": "Added"
+            "title": "Added",
+            "formula": "$main.sum($added)"
           }
         ],
         "name": "wiki",
@@ -376,36 +357,36 @@ describe('DataSource', () => {
           {
             "kind": "time",
             "name": "__time",
-            "expression": "$__time"
+            "formula": "$__time"
           },
           {
             "name": "page"
           },
           {
             "name": "pageInBrackets",
-            "expression": "'[' ++ $page ++ ']'"
+            "formula": "'[' ++ $page ++ ']'"
           },
           {
             "name": "userInBrackets",
-            "expression": "'[' ++ $user ++ ']'"
+            "formula": "'[' ++ $user ++ ']'"
           },
           {
             "name": "languageLookup",
-            "expression": "$language.lookup(wiki_language_lookup)"
+            "formula": "$language.lookup(wiki_language_lookup)"
           }
         ],
         "measures": [
           {
             "name": "added",
-            "expression": "$main.sum($added)"
+            "formula": "$main.sum($added)"
           },
           {
             "name": "addedByDeleted",
-            "expression": "$main.sum($added) / $main.sum($deleted)"
+            "formula": "$main.sum($added) / $main.sum($deleted)"
           },
           {
             "name": "unique_user",
-            "expression": "$main.countDistinct($unique_user)"
+            "formula": "$main.countDistinct($unique_user)"
           }
         ]
       }, context);
@@ -811,11 +792,11 @@ describe('DataSource', () => {
         dimensions: [
           {
             name: 'added',
-            expression: '$added'
+            formula: '$added'
           },
           {
             name: 'added_',
-            expression: '${added!!!}'
+            formula: '${added!!!}'
           }
         ]
       });

@@ -195,7 +195,7 @@ export function dimensionToYAML(dimension: Dimension): string[] {
     lines.push(`kind: ${dimension.kind}`);
   }
 
-  lines.push(`expression: ${dimension.expression.toString()}`);
+  lines.push(`formula: ${dimension.formula}`);
 
   lines.push('');
   return yamlObject(lines);
@@ -207,8 +207,7 @@ export function measureToYAML(measure: Measure): string[] {
     `title: ${measure.title}`
   ];
 
-  var ex = measure.expression;
-  lines.push(`expression: ${ex.toString()}`);
+  lines.push(`formula: ${measure.formula}`);
 
   var format = measure.format;
   if (format !== Measure.DEFAULT_FORMAT) {
@@ -351,7 +350,7 @@ export function dataSourceToYAML(dataSource: DataSource, withComments: boolean):
       "  # kind: string",
       "  # ^ (optional) the kind of the dimension. Can be 'string', 'time', 'number', or 'boolean'. Defaults to 'string'",
       "  #",
-      "  # expression: $channel",
+      "  # formula: $channel",
       "  # ^ (optional) the Plywood bucketing expression for this dimension. Defaults to '$name'",
       "  #   if, say, channel was called 'cnl' in the data you would put '$cnl' here",
       "  #   See also the expressions API reference: https://plywood.imply.io/expressions",
@@ -371,10 +370,10 @@ export function dataSourceToYAML(dataSource: DataSource, withComments: boolean):
       "  #",
       "  # - name: is_usa",
       "  #   title: Is USA?",
-      "  #   expression: $country == 'United States'",
+      "  #   formula: $country == 'United States'",
       "  #",
       "  # - name: file_version",
-      "  #   expression: $filename.extract('(\\d+\\.\\d+\\.\\d+)')",
+      "  #   formula: $filename.extract('(\\d+\\.\\d+\\.\\d+)')",
       ""
     );
   }
@@ -395,7 +394,7 @@ export function dataSourceToYAML(dataSource: DataSource, withComments: boolean):
       "  # title: Average Revenue",
       "  # ^ (optional) the human readable title. If not set a title is generated from the 'name'",
       "  #",
-      "  # expression: $main.sum($revenue) / $main.sum($volume) * 10",
+      "  # formula: $main.sum($revenue) / $main.sum($volume) * 10",
       "  # ^ (optional) the Plywood bucketing expression for this dimension.",
       "  #   Usually defaults to '$main.sum($name)' but if the name contains 'min' or 'max' will use that as the aggregate instead of sum.",
       "  #   this is the place to define your fancy formulas",
@@ -411,11 +410,11 @@ export function dataSourceToYAML(dataSource: DataSource, withComments: boolean):
       "  #",
       "  # - name: ecpm",
       "  #   title: eCPM",
-      "  #   expression: $main.sum($revenue) / $main.sum($impressions) * 1000",
+      "  #   formula: $main.sum($revenue) / $main.sum($impressions) * 1000",
       "  #",
       "  # - name: usa_revenue",
       "  #   title: USA Revenue",
-      "  #   expression: $main.filter($country == 'United States').sum($revenue)",
+      "  #   formula: $main.filter($country == 'United States').sum($revenue)",
       ""
     );
   }

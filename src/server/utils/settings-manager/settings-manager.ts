@@ -15,7 +15,7 @@
  */
 
 import * as Q from 'q';
-import { External, Dataset, basicExecutorFactory } from 'plywood';
+import { External, Dataset, basicExecutorFactory, helper } from 'plywood';
 import { inlineVars, pluralIfNeeded } from '../../../common/utils/general/general';
 import { AppSettings, Cluster, DataSource } from '../../../common/models/index';
 import { MANIFESTS } from '../../../common/manifests/index';
@@ -103,6 +103,10 @@ export class SettingsManager {
     this.makeMaxTimeCheckTimer();
   }
 
+  private getClusterManagerFor(clusterName: string): ClusterManager {
+    return helper.find(this.clusterManagers, (clusterManager) => clusterManager.cluster.name === clusterName);
+  }
+
   private addClusterManager(cluster: Cluster, dataSources: DataSource[]): Q.Promise<any> {
     const { verbose, logger, anchorPath } = this;
 
@@ -135,6 +139,10 @@ export class SettingsManager {
       clusterManager.destroy();
       return false;
     });
+  }
+
+  private getFileManagerFor(uri: string): FileManager {
+    return helper.find(this.fileManagers, (fileManager) => fileManager.uri === uri);
   }
 
   private addFileManager(dataSource: DataSource): Q.Promise<any> {
@@ -246,20 +254,27 @@ export class SettingsManager {
   updateSettings(newSettings: AppSettings): Q.Promise<any> {
     if (this.settingsLocation.readOnly) return Q.reject(new Error('must be writable'));
 
-    var clusterManagers = this.clusterManagers;
     this.appSettings = newSettings.attachExecutors((dataSource) => {
       if (dataSource.clusterName === 'native') {
-        return null; // ToDo: fix this.
-      } else {
-        for (var clusterManager of clusterManagers) {
-          if (clusterManager.cluster.name === dataSource.clusterName) {
-            var external = clusterManager.getExternalByName(dataSource.name);
-            if (!external) return null;
-            return basicExecutorFactory({
-              datasets: { main: external }
-            });
-          }
+        var fileManager = this.getFileManagerFor(dataSource.source);
+        if (fileManager) {
+          var dataset = fileManager.dataset;
+          if (!dataset) return null;
+          return basicExecutorFactory({
+            datasets: { main: dataset }
+          });
         }
+
+      } else {
+        var clusterManager = this.getClusterManagerFor(dataSource.clusterName);
+        if (clusterManager) {
+          var external = clusterManager.getExternalByName(dataSource.name);
+          if (!external) return null;
+          return basicExecutorFactory({
+            datasets: { main: external }
+          });
+        }
+
       }
       return null;
     });

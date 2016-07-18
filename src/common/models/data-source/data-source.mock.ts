@@ -41,34 +41,28 @@ export class DataSourceMock {
       ],
       dimensions: [
         {
-          expression: {
-            name: 'time',
-            op: 'ref'
-          },
           kind: 'time',
           name: 'time',
-          title: 'Time'
+          title: 'Time',
+          formula: '$time'
         },
         {
-          expression: {
-            name: 'articleName',
-            op: 'ref'
-          },
           kind: 'string',
           name: 'articleName',
-          title: 'Article Name'
+          title: 'Article Name',
+          formula: '$articleName'
         }
       ],
       measures: [
         {
           name: 'count',
           title: 'Count',
-          expression: $('main').sum('$count').toJS()
+          formula: '$main.sum($count)'
         },
         {
           name: 'added',
           title: 'Added',
-          expression: $('main').sum('$added').toJS()
+          formula: '$main.sum($added)'
         }
       ],
       timeAttribute: 'time',
@@ -96,33 +90,23 @@ export class DataSourceMock {
       introspection: 'none',
       dimensions: [
         {
-          expression: {
-            name: 'time',
-            op: 'ref'
-          },
           kind: 'time',
           name: 'time',
-          title: 'Time'
+          title: 'Time',
+          formula: '$time'
         },
         {
-          expression: {
-            name: 'twitterHandle',
-            op: 'ref'
-          },
           kind: 'string',
           name: 'twitterHandle',
-          title: 'Twitter Handle'
+          title: 'Twitter Handle',
+          formula: '$twitterHandle'
         }
       ],
       measures: [
         {
           name: 'count',
           title: 'count',
-          expression: {
-            name: 'count',
-            op: 'ref'
-          }
-
+          formula: '$main.count()'
         }
       ],
       timeAttribute: 'time',

@@ -199,12 +199,12 @@ function measuresFromLongForm(longForm: LongForm): Measure[] {
     return new Measure({
       name,
       title: title,
-      expression: myExpression.substitute((ex) => {
+      formula: myExpression.substitute((ex) => {
         if (ex instanceof RefExpression && ex.name === 'filtered') {
           return $('main').filter($(metricColumn).is(r(value)));
         }
         return null;
-      })
+      }).toString()
     });
   });
 }
@@ -320,8 +320,8 @@ export class DataSource implements Instance<DataSourceValue, DataSourceJS> {
     if (timeAttribute && !Dimension.getDimensionByExpression(dimensions, timeAttribute)) {
       dimensions = dimensions.unshift(new Dimension({
         name: timeAttributeName,
-        expression: timeAttribute,
-        kind: 'time'
+        kind: 'time',
+        formula: timeAttribute.toString()
       }));
     }
 
@@ -863,7 +863,7 @@ export class DataSource implements Instance<DataSourceValue, DataSourceJS> {
           dimensions = dimensions.unshift(new Dimension({
             name: urlSafeName,
             kind: 'time',
-            expression
+            formula: expression.toString()
           }));
           break;
 
@@ -882,7 +882,7 @@ export class DataSource implements Instance<DataSourceValue, DataSourceJS> {
             if (this.getDimensionByExpression(expression)) continue;
             dimensions = dimensions.push(new Dimension({
               name: urlSafeName,
-              expression
+              formula: expression.toString()
             }));
           }
           break;
@@ -893,7 +893,7 @@ export class DataSource implements Instance<DataSourceValue, DataSourceJS> {
           if (this.getDimensionByExpression(expression)) continue;
           dimensions = dimensions.push(new Dimension({
             name: urlSafeName,
-            expression
+            formula: expression.toString()
           }));
           break;
 
@@ -904,7 +904,7 @@ export class DataSource implements Instance<DataSourceValue, DataSourceJS> {
           dimensions = dimensions.push(new Dimension({
             name: urlSafeName,
             kind: 'boolean',
-            expression
+            formula: expression.toString()
           }));
           break;
 
@@ -926,7 +926,7 @@ export class DataSource implements Instance<DataSourceValue, DataSourceJS> {
     if (!this.rolledUp() && !measures.find(m => m.name === 'count')) {
       measures = measures.unshift(new Measure({
         name: 'count',
-        expression: $main.count()
+        formula: $main.count().toString()
       }));
     }
 

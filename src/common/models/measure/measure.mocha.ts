@@ -26,12 +26,12 @@ describe('Measure', () => {
       {
         name: 'price',
         title: 'Price',
-        expression: $('main').sum('$price').toJS()
+        formula: '$main.sum($price)'
       },
       {
         name: 'avg_price',
         title: 'Average Price',
-        expression: $('main').average('$price').toJS()
+        formula: '$main.average($price)'
       }
     ]);
   });
