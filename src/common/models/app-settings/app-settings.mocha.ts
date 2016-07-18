@@ -44,7 +44,14 @@ describe('AppSettings', () => {
   });
 
 
-  describe("upgrades", () => {
+  describe("back compat", () => {
+    it("works with dataSources", () => {
+      var oldJS: any = AppSettingsMock.wikiOnlyJS();
+      oldJS.dataSources = oldJS.dataCubes;
+      delete oldJS.dataCubes;
+      expect(AppSettings.fromJS(oldJS, context).toJS()).to.deep.equal(AppSettingsMock.wikiOnlyJS());
+    });
+
     it("deals with old config style", () => {
       var wikiDataCubeJS = DataCubeMock.WIKI_JS;
       delete wikiDataCubeJS.clusterName;
@@ -58,7 +65,7 @@ describe('AppSettings', () => {
         sourceListRefreshInterval: 10001,
         sourceReintrospectInterval: 10002,
         sourceReintrospectOnLoad: true,
-        dataCubes: [
+        dataSources: [
           wikiDataCubeJS
         ]
       };
@@ -81,7 +88,7 @@ describe('AppSettings', () => {
       var oldJS: any = {
         druidHost: '192.168.99.100',
         sourceListScan: 'disable',
-        dataCubes: [
+        dataSources: [
           DataCubeMock.WIKI_JS
         ]
       };

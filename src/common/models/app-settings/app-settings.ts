@@ -68,7 +68,7 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
     }
 
     var executorFactory = context.executorFactory;
-    var dataCubes = (parameters.dataCubes || []).map(dataCubeJS => {
+    var dataCubes = (parameters.dataCubes || (parameters as any).dataSources || []).map((dataCubeJS: DataCubeJS) => {
       var dataCubeClusterName = dataCubeJS.clusterName || (dataCubeJS as any).engine;
       if (dataCubeClusterName !== 'native') {
         var cluster = helper.findByName(clusters, dataCubeClusterName);
