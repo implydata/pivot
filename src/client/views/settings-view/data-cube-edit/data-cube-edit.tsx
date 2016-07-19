@@ -300,7 +300,8 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
     const getRows = (items: List<Measure>) => items.toArray().map((measure) => {
       return {
         title: measure.title,
-        description: measure.expression.toString()
+        description: measure.expression.toString(),
+        icon: `measure`
       };
     });
 
