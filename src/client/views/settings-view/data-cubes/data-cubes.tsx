@@ -56,29 +56,27 @@ export class DataCubes extends React.Component<DataCubesProps, DataCubesState> {
   }
 
   removeCube(cube: DataCube) {
-    // var index = this.state.newSettings.dataCubes.indexOf(cube);
+    var settings: AppSettings = this.state.newSettings
+    var index = settings.dataCubes.indexOf(cube);
 
-    // if (index < 0) return;
+    if (index < 0) return;
 
-    // var newCubes = this.state.newSettings.dataCubes.splice(index, 1);
+    var newCubes = settings.dataCubes;
+    newCubes.splice(index, 1);
 
-    // this.setState({
-    //   newSettings: this.state.newSettings.changedDataCubes(newCubes)
-    // })
+    this.props.onSave(settings.changeDataCubes(newCubes), 'Cube removed');
   }
 
   createCube() {
-    var dataCubes = this.state.newSettings.dataCubes;
-    dataCubes.push(DataCube.fromJS({
-      name: 'new-datacube',
-      clusterName: 'druid',
-      source: 'new-source'
-    }));
+    var settings: AppSettings = this.state.newSettings;
 
-    this.props.onSave(
-      this.state.newSettings.changeDataCubes(dataCubes),
-      'Cube added'
-    );
+    var newCube = DataCube.fromJS({
+      name: 'new-datacube',
+      clusterName: settings.clusters.length > 0 ? settings.clusters[0].name : 'native',
+      source: 'new-source'
+    });
+
+    this.props.onSave(settings.addDataCube(newCube), 'Cube added');
   }
 
   render() {
