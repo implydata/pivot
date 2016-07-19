@@ -96,7 +96,6 @@ export class General extends React.Component<GeneralProps, GeneralState> {
             path={'customization.title'}
             onChange={this.onChange.bind(this)}
             focusOnStartUp={true}
-            validator={/^.+$/}
           />
         </form>
       </div>
