@@ -117,7 +117,7 @@
     background-color: $hover;
   }
 
-  &.active, &:active {
+  &.active {
     background-color: $highlight;
   }
 }
