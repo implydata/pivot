@@ -165,7 +165,6 @@ export class ImmutableList<T> extends React.Component<ImmutableListProps<T>, Imm
       <div className="list-title">
         <div className="label">{label}</div>
         <div className="actions">
-          <button>Introspect</button>
           <button onClick={this.addItem.bind(this)}>Add item</button>
         </div>
       </div>
