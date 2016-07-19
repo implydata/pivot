@@ -41,7 +41,7 @@ var handler = CircumstancesHandler.EMPTY()
             direction: SortAction.DESCENDING
           }));
         } else {
-          if (splitDimension.shouldBucket()) {
+          if (splitDimension.isContinuous()) {
             split = split.changeSortAction(new SortAction({
               expression: $(splitDimension.name),
               direction: SortAction.ASCENDING
