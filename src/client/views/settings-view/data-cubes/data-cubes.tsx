@@ -79,10 +79,19 @@ export class DataCubes extends React.Component<DataCubesProps, DataCubesState> {
     this.props.onSave(settings.addDataCube(newCube), 'Cube added');
   }
 
+  renderEmpty(): JSX.Element {
+    return <div className="data-cubes empty">
+      <div className="title">No data cubes</div>
+      <div className="subtitle actionable" onClick={this.createCube.bind(this)}>Create a new data cube</div>
+    </div>;
+  }
+
   render() {
     const { newSettings } = this.state;
 
     if (!newSettings) return null;
+
+    if (!newSettings.dataCubes.length) return this.renderEmpty();
 
     const columns: SimpleTableColumn[] = [
       {label: 'Name', field: 'title', width: 170, cellIcon: 'full-cube'},
