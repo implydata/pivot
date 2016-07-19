@@ -74,6 +74,7 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
 
   cancel() {
     this.initFromProps(this.props);
+    this.goBack();
   }
 
   save() {
@@ -87,6 +88,8 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
     if (this.props.onSave) {
       this.props.onSave(newSettings);
     }
+
+    this.goBack();
   }
 
   goBack() {

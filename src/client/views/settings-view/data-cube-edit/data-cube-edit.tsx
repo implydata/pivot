@@ -112,6 +112,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
 
   cancel() {
     this.initFromProps(this.props);
+    this.goBack();
   }
 
   save() {
@@ -125,6 +126,8 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
     if (this.props.onSave) {
       this.props.onSave(newSettings);
     }
+
+    this.goBack();
   }
 
   goBack() {
