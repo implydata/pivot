@@ -46,6 +46,10 @@ export const CUBE_EDIT = {
     error: '',
     help: 'The cube\'s description'
   },
+  introspection: {
+    error: '',
+    help: 'The cube\'s introspection strategy. Default is \'no-autofill\'.'
+  },
   clusterName: {
     error: 'The cluster name should not be empty',
     help: 'The cube\'s cluster, really.'

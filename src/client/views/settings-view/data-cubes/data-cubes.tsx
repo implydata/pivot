@@ -56,7 +56,7 @@ export class DataCubes extends React.Component<DataCubesProps, DataCubesState> {
   }
 
   removeCube(cube: DataCube) {
-    var settings: AppSettings = this.state.newSettings
+    var settings: AppSettings = this.state.newSettings;
     var index = settings.dataCubes.indexOf(cube);
 
     if (index < 0) return;

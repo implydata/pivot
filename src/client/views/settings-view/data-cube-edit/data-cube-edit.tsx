@@ -21,6 +21,8 @@ import { List } from 'immutable';
 import { Fn } from '../../../../common/utils/general/general';
 import { classNames } from '../../../utils/dom/dom';
 
+import { DATA_CUBES_STRATEGIES_LABELS } from '../../../config/constants';
+
 import { SvgIcon } from '../../../components/svg-icon/svg-icon';
 import { FormLabel } from '../../../components/form-label/form-label';
 import { Button } from '../../../components/button/button';
@@ -154,11 +156,22 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
     }
   }
 
+  getIntrospectionStrategies(): ListItem[] {
+    const labels = DATA_CUBES_STRATEGIES_LABELS as any;
+
+    return [{
+      label: `Default (${labels[DataCube.DEFAULT_INTROSPECTION]})`,
+      value: undefined
+    }].concat(DataCube.INTROSPECTION_VALUES.map((value) => {
+      return {value, label: labels[value]};
+    }));
+  }
+
   renderGeneral(): JSX.Element {
     const helpTexts: any = {};
     const { tempCube, errors } = this.state;
 
-    const EngineDropDown = ImmutableDropdown.specialize<ListItem>();
+    const MyDropDown = ImmutableDropdown.specialize<ListItem>();
 
     const engineTypes = Cluster.TYPE_VALUES.map(type => {return {value: type, label: type}; });
 
@@ -192,13 +205,28 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
         helpText={LABELS.clusterName.help}
         errorText={errors.clusterName ? LABELS.clusterName.error : undefined}
       />
-      <EngineDropDown
+      <MyDropDown
         items={engineTypes}
         instance={tempCube}
         path={'clusterName'}
         equal={(a: ListItem, b: ListItem) => a.value === b.value}
         renderItem={(a: ListItem) => a.label}
         keyItem={(a: ListItem) => a.value}
+        onChange={this.onSimpleChange.bind(this)}
+      />
+
+      <FormLabel
+        label="Introspection strategy"
+        helpText={LABELS.introspection.help}
+        errorText={errors.introspection ? LABELS.introspection.error : undefined}
+      />
+      <MyDropDown
+        items={this.getIntrospectionStrategies()}
+        instance={tempCube}
+        path={'introspection'}
+        equal={(a: ListItem, b: ListItem) => a.value === b.value}
+        renderItem={(a: ListItem) => a.label}
+        keyItem={(a: ListItem) => a.value || 'default_value'}
         onChange={this.onSimpleChange.bind(this)}
       />
 
