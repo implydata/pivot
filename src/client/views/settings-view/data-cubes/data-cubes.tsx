@@ -27,6 +27,7 @@ import { Button } from '../../../components/button/button';
 import { AppSettings, Cluster, DataCube} from '../../../../common/models/index';
 
 import { SimpleTable, SimpleTableColumn, SimpleTableAction } from '../../../components/simple-table/simple-table';
+import { RemoveModal } from '../remove-modal/remove-modal';
 
 export interface DataCubesProps extends React.Props<any> {
   settings?: AppSettings;
@@ -36,6 +37,7 @@ export interface DataCubesProps extends React.Props<any> {
 export interface DataCubesState {
   newSettings?: AppSettings;
   hasChanged?: boolean;
+  pendingDeletion?: DataCube;
 }
 
 export class DataCubes extends React.Component<DataCubesProps, DataCubesState> {
@@ -47,7 +49,9 @@ export class DataCubes extends React.Component<DataCubesProps, DataCubesState> {
 
   componentWillReceiveProps(nextProps: DataCubesProps) {
     if (nextProps.settings) this.setState({
-      newSettings: nextProps.settings
+      newSettings: nextProps.settings,
+      hasChanged: false,
+      pendingDeletion: undefined
     });
   }
 
@@ -55,7 +59,17 @@ export class DataCubes extends React.Component<DataCubesProps, DataCubesState> {
     window.location.hash += `/${cube.name}`;
   }
 
-  removeCube(cube: DataCube) {
+  askForCubeRemoval(cube: DataCube) {
+    this.setState({pendingDeletion: cube});
+  }
+
+  cancelRemoval() {
+    this.setState({pendingDeletion: undefined});
+  }
+
+  removeCube() {
+    var cube = this.state.pendingDeletion;
+
     var settings: AppSettings = this.state.newSettings;
     var index = settings.dataCubes.indexOf(cube);
 
@@ -87,7 +101,7 @@ export class DataCubes extends React.Component<DataCubesProps, DataCubesState> {
   }
 
   render() {
-    const { newSettings } = this.state;
+    const { newSettings, pendingDeletion } = this.state;
 
     if (!newSettings) return null;
 
@@ -102,7 +116,7 @@ export class DataCubes extends React.Component<DataCubesProps, DataCubesState> {
 
     const actions: SimpleTableAction[] = [
       {icon: 'full-edit', callback: this.editCube.bind(this)},
-      {icon: 'full-remove', callback: this.removeCube.bind(this)}
+      {icon: 'full-remove', callback: this.askForCubeRemoval.bind(this)}
     ];
 
     return <div className="data-cubes">
@@ -111,13 +125,18 @@ export class DataCubes extends React.Component<DataCubesProps, DataCubesState> {
         <Button className="save" title="Add a cube" type="primary" onClick={this.createCube.bind(this)}/>
       </div>
       <div className="content">
-      <SimpleTable
-        columns={columns}
-        rows={newSettings.dataCubes}
-        actions={actions}
-        onRowClick={this.editCube.bind(this)}
-      ></SimpleTable>
+        <SimpleTable
+          columns={columns}
+          rows={newSettings.dataCubes}
+          actions={actions}
+          onRowClick={this.editCube.bind(this)}
+        ></SimpleTable>
       </div>
+      {pendingDeletion ? <RemoveModal
+        itemTitle={pendingDeletion.title}
+        onOK={this.removeCube.bind(this)}
+        onCancel={this.cancelRemoval.bind(this)}
+      /> : null}
     </div>;
   }
 }

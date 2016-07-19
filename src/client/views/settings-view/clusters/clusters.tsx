@@ -93,12 +93,12 @@ export class Clusters extends React.Component<ClustersProps, ClustersState> {
         {hasChanged ? <Button className="save" title="Save" type="primary" onClick={this.save.bind(this)}/> : null}
       </div>
       <div className="content">
-      <SimpleTable
-        columns={columns}
-        rows={newSettings.clusters}
-        actions={actions}
-        onRowClick={this.editCluster.bind(this)}
-      ></SimpleTable>
+        <SimpleTable
+          columns={columns}
+          rows={newSettings.clusters}
+          actions={actions}
+          onRowClick={this.editCluster.bind(this)}
+        ></SimpleTable>
       </div>
     </div>;
   }

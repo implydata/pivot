@@ -14,35 +14,21 @@
  * limitations under the License.
  */
 
-@import '../../imports';
+@import '../../../imports';
 
-.button {
-  &.primary {
-    // ToDo: make everything that is a button a button and inline these
-    @extend %button-primary;
+.remove-modal {
+  @import '../form';
+
+  .line {
+    margin-bottom: 15px;
+    font-size: 14px;
   }
 
-  &.secondary {
-    @extend %button-secondary;
-  }
+  .button-group {
+    margin-top: 40px;
 
-  &.warn {
-    @extend %button-warn;
-  }
-
-  &.mini {
-    height: $input-height-mini;
-    padding-left: 10px;
-    padding-right: 10px;
-    min-width: 40px;
-  }
-
-  &.icon {
-    min-width: 27px;
-    padding: 2px 0;
-
-    svg {
-      height: 19px;
+    > *:not(:last-child) {
+      margin-right: 10px;
     }
   }
 }
