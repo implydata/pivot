@@ -64,8 +64,8 @@ export class RemoveModal extends React.Component<RemoveModalProps, RemoveModalSt
       title={`Delete "${itemTitle}"`}
       onClose={this.props.onCancel}
     >
-      <div className="line">Are you sure you would like to delete the data cube "{itemTitle}"?</div>
-      <div className="line">This action is not reversible.</div>
+      <p>Are you sure you would like to delete the data cube "{itemTitle}"?</p>
+      <p>This action is not reversible.</p>
 
       <div className="button-group">
         <Button className="delete" title="Delete" type="warn" onClick={this.props.onOK}/>
