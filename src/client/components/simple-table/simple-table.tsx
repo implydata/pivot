@@ -102,7 +102,7 @@ export class SimpleTable extends React.Component<SimpleTableProps, SimpleTableSt
         className='cell action'
         key={`action-${i}`}
         onClick={action.callback.bind(this, row)}
-      ><SvgIcon className="icon" svg={require(`../../icons/${action.icon}.svg`)}/></div>);
+      ><SvgIcon svg={require(`../../icons/${action.icon}.svg`)}/></div>);
     }
 
     return items;
@@ -123,7 +123,7 @@ export class SimpleTable extends React.Component<SimpleTableProps, SimpleTableSt
     for (let i = 0; i < columns.length; i++) {
       let col = columns[i];
 
-      let icon = col.cellIcon ? <SvgIcon className="icon" svg={require(`../../icons/${col.cellIcon}.svg`)}/> : null;
+      let icon = col.cellIcon ? <SvgIcon svg={require(`../../icons/${col.cellIcon}.svg`)}/> : null;
 
       items.push(<div
         className={classNames('cell', {'has-icon': !!col.cellIcon})}
@@ -220,7 +220,7 @@ export class SimpleTable extends React.Component<SimpleTableProps, SimpleTableSt
           key={`icon-${j}`}
           style={{width: ACTION_WIDTH}}
         >
-          <SvgIcon className="icon" svg={require(`../../icons/${action.icon}.svg`)}/>
+          <SvgIcon svg={require(`../../icons/${action.icon}.svg`)}/>
         </div>;
       });
 

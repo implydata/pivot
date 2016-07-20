@@ -75,7 +75,7 @@
           padding-left: 34px;
         }
 
-        .icon {
+        .svg-icon {
           position: absolute;
           top: 10px;
           left: 6px;
@@ -89,14 +89,20 @@
       }
 
       &.action {
-        padding: 10px;
+        text-align: center;
+        padding-top: 10px;
 
         .icon {
           width: 19px;
           height: 19px;
 
-          path {
-            fill: $brand;
+          .svg-icon {
+            width: 100%;
+            height: 100%;
+
+            path {
+              fill: $brand;
+            }
           }
 
           &.hover {
