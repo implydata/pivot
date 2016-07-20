@@ -62,7 +62,7 @@ export class DimensionModal extends React.Component<DimensionModalProps, Dimensi
     if (props.dimension) {
       this.setState({
         newDimension: new Dimension(props.dimension.valueOf()),
-        canSave: true
+        canSave: false
       });
     }
   }
@@ -150,7 +150,7 @@ export class DimensionModal extends React.Component<DimensionModalProps, Dimensi
       </form>
 
       <div className="button-group">
-        {canSave ? <Button className="save" title="Save" type="primary" onClick={this.save.bind(this)}/> : null}
+        <Button className={classNames("save", {disabled: !canSave})} title="Save" type="primary" onClick={this.save.bind(this)}/>
         <Button className="cancel" title="Cancel" type="secondary" onClick={this.props.onClose}/>
       </div>
 

@@ -55,7 +55,7 @@ export class MeasureModal extends React.Component<MeasureModalProps, MeasureModa
     if (props.measure) {
       this.setState({
         newMeasure: new Measure(props.measure.valueOf()),
-        canSave: true
+        canSave: false
       });
     }
   }
@@ -144,7 +144,7 @@ export class MeasureModal extends React.Component<MeasureModalProps, MeasureModa
       </form>
 
       <div className="button-group">
-        {canSave ? <Button className="save" title="Save" type="primary" onClick={this.save.bind(this)}/> : null}
+        <Button className={classNames("save", {disabled: !canSave})} title="Save" type="primary" onClick={this.save.bind(this)}/>
         <Button className="cancel" title="Cancel" type="secondary" onClick={this.props.onClose}/>
       </div>
 
