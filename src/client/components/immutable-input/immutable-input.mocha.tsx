@@ -124,8 +124,8 @@ describe('ImmutableInput', () => {
           validator={/^.+$/}
           onChange={onChange}
           onInvalid={onInvalid}
-          toValue={toValue}
-          fromValue={fromValue}
+          stringToValue={toValue}
+          valueToString={fromValue}
         />
       );
 

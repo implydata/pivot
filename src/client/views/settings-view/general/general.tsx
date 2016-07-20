@@ -114,8 +114,8 @@ export class General extends React.Component<GeneralProps, GeneralState> {
             path={'customization.timezones'}
             onChange={this.onChange.bind(this)}
 
-            fromValue={(value: any) => value ? value.join(', ') : undefined}
-            toValue={this.parseTimezones.bind(this)}
+            valueToString={(value: any) => value ? value.join(', ') : undefined}
+            stringToValue={this.parseTimezones.bind(this)}
           />
         </form>
       </div>
