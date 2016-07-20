@@ -22,6 +22,8 @@
 
   .scroller {
     height: 100%;
+    cursor: auto;
+
 
     .column-headers {
       font-size: 12px;
@@ -61,6 +63,10 @@
         display: inline-block;
       }
 
+      &.hover {
+        // Unleash the power of CSS here
+      }
+
       .cell {
         @include ellipsis;
         padding: 14px 10px 5px 0;
@@ -85,15 +91,25 @@
       &.action {
         padding: 10px;
 
-        .svg-icon {
+        .icon {
           width: 19px;
           height: 19px;
 
           path {
             fill: $brand;
           }
+
+          &.hover {
+            // Add awesome styles here
+          }
         }
       }
+    }
+  }
+
+  &.clickable {
+    .scroller {
+      cursor: pointer;
     }
   }
 }
