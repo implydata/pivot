@@ -64,7 +64,7 @@
       }
 
       &.hover {
-        // Unleash the power of CSS here
+        background: $hover;
       }
 
       .cell {
@@ -106,7 +106,16 @@
           }
 
           &.hover {
-            // Add awesome styles here
+            &:after {
+              content: '';
+              position: absolute;
+              top: -6px;
+              left: 0;
+              width: 30px;
+              height: 30px;
+              border-radius: 30px;
+              background: rgba($brand, 0.3);
+            }
           }
         }
       }
