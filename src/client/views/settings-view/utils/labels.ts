@@ -34,6 +34,10 @@ export const GENERAL = {
   title: {
     error: 'The title should not be empty',
     help: 'What will appear as the tab\'s title in your browser. Use \'%v\' as a placeholder for Pivot\'s version.'
+  },
+  timezones: {
+    error: 'The timezones should be an array',
+    help: 'The possible timezones'
   }
 };
 

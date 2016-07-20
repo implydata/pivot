@@ -74,6 +74,7 @@ export class General extends React.Component<GeneralProps, GeneralState> {
     }
   }
 
+
   render() {
     const { hasChanged, newSettings, errors } = this.state;
 
@@ -96,6 +97,19 @@ export class General extends React.Component<GeneralProps, GeneralState> {
             path={'customization.title'}
             onChange={this.onChange.bind(this)}
             focusOnStartUp={true}
+          />
+
+          <FormLabel
+            label="Timezones"
+            helpText={LABELS.timezones.help}
+            errorText={errors.timezones ? LABELS.timezones.error : undefined}
+          />
+          <ImmutableInput
+            instance={newSettings}
+            path={'customization.timezones'}
+            onChange={this.onChange.bind(this)}
+            fromValue={(value: any) => value ? value.join(', ') : undefined}
+            toValue={(str: string) => str.split(/\s*,\s*/)}
           />
         </form>
       </div>

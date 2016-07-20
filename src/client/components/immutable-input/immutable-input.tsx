@@ -30,7 +30,9 @@ export interface ImmutableInputProps extends React.Props<any> {
   focusOnStartUp?: boolean;
   onChange?: (newInstance: any, valid: boolean, path?: string) => void;
   onInvalid?: (invalidValue: string) => void;
-  validator?: RegExp;
+  validator?: RegExp | ((str: string) => boolean);
+  toValue?: (str: string) => any;
+  fromValue?: (value: any) => string;
 }
 
 export interface ImmutableInputState {
@@ -78,15 +80,35 @@ export class ImmutableInput extends React.Component<ImmutableInputProps, Immutab
     }
   }
 
-  onChange(event: KeyboardEvent) {
-    const { path, onChange, instance, validator, onInvalid } = this.props;
+  isValueValid(value: string): boolean {
+    var { validator } = this.props;
 
-    var newValue: any = (event.target as HTMLInputElement).value;
+    if (!validator) return true;
+
+    if (validator instanceof RegExp) {
+      return validator.test(value);
+    }
+
+    if (validator instanceof Function) {
+      return !!validator(value);
+    }
+
+    return true;
+  }
+
+  onChange(event: KeyboardEvent) {
+    const { path, onChange, instance, validator, onInvalid, toValue } = this.props;
+
+    var newString = (event.target as HTMLInputElement).value as string;
+
+    var newValue: any = toValue ? toValue(newString) : newString;
+
+    console.log(newValue);
 
     var newInstance: any;
     var invalidValue: string;
 
-    if (validator && !validator.test(newValue)) {
+    if (validator && !this.isValueValid(newString)) {
       newInstance = instance;
       invalidValue = newValue;
       if (onInvalid) onInvalid(newValue);
@@ -107,13 +129,15 @@ export class ImmutableInput extends React.Component<ImmutableInputProps, Immutab
   }
 
   render() {
-    const { path } = this.props;
+    const { path, fromValue } = this.props;
     const { newInstance, invalidValue } = this.state;
     const isInvalid = invalidValue !== undefined;
 
     if (!path || !newInstance) return null;
 
-    const value = ImmutableUtils.getProperty(newInstance, path);
+    var value = ImmutableUtils.getProperty(newInstance, path);
+
+    if (fromValue) value = fromValue(value);
 
     return <input
       className={classNames('immutable-input', {error: isInvalid})}

@@ -111,4 +111,44 @@ describe('ImmutableInput', () => {
 
     expect(node.value).to.equal('pouet');
   });
+
+  describe('with codec (toValue/fromValue)', () => {
+    beforeEach(() => {
+      let toValue = (str: string) => str.toLowerCase();
+      let fromValue = (str: string) => str.toUpperCase();
+
+      component = TestUtils.renderIntoDocument(
+        <ImmutableInput
+          instance={DataCubeMock.twitter()}
+          path={'clusterName'}
+          validator={/^.+$/}
+          onChange={onChange}
+          onInvalid={onInvalid}
+          toValue={toValue}
+          fromValue={fromValue}
+        />
+      );
+
+      node = findDOMNode(component) as any;
+    });
+
+    it('works for valid values', () => {
+      expect(node.value).to.equal('DRUID');
+
+      node.value = 'GIRAFFE';
+      TestUtils.Simulate.change(node);
+
+      expect(onInvalid.callCount).to.equal(0);
+
+      expect(onChange.callCount).to.equal(1);
+      const args = onChange.args[0];
+
+      expect(args[0]).to.be.instanceOf(DataCube);
+      expect(args[0].clusterName).to.equal('giraffe');
+
+      expect(args[1]).to.equal(true);
+
+      expect(args[2]).to.equal('clusterName');
+    });
+  });
 });

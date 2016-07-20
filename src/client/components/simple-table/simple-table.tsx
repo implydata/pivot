@@ -216,7 +216,7 @@ export class SimpleTable extends React.Component<SimpleTableProps, SimpleTableSt
 
       let icons = directActions.map((action, j) => {
         return <div
-          className={classNames("icon", {hover: isRowHovered && j == hoveredActionIndex})}
+          className={classNames("icon", {hover: isRowHovered && j === hoveredActionIndex})}
           key={`icon-${j}`}
           style={{width: ACTION_WIDTH}}
         >
