@@ -101,26 +101,24 @@ export class ImmutableInput extends React.Component<ImmutableInputProps, Immutab
 
     var newString = (event.target as HTMLInputElement).value as string;
 
-    var newValue: any = toValue ? toValue(newString) : newString;
-
-    console.log(newValue);
-
     var newInstance: any;
     var invalidValue: string;
 
-    if (validator && !this.isValueValid(newString)) {
-      newInstance = instance;
-      invalidValue = newValue;
-      if (onInvalid) onInvalid(newValue);
+    try {
+      var newValue: any = toValue ? toValue(newString) : newString;
 
-    } else {
-      try {
-        newInstance = ImmutableUtils.setProperty(instance, path, newValue);
-      } catch (e) {
+      if (validator && !this.isValueValid(newString)) {
         newInstance = instance;
-        invalidValue = newValue;
+        invalidValue = newString;
         if (onInvalid) onInvalid(newValue);
+
+      } else {
+        newInstance = ImmutableUtils.setProperty(instance, path, newValue);
       }
+    } catch (e) {
+      newInstance = instance;
+      invalidValue = newString;
+      if (onInvalid) onInvalid(newValue);
     }
 
     this.setState({newInstance, invalidValue});

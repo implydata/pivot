@@ -16,6 +16,7 @@
 
 require('./general.css');
 
+import { Timezone } from 'chronoshift';
 import * as React from 'react';
 import { Fn } from '../../../../common/utils/general/general';
 import { classNames } from '../../../utils/dom/dom';
@@ -74,6 +75,10 @@ export class General extends React.Component<GeneralProps, GeneralState> {
     }
   }
 
+  parseTimezones(str: string): Timezone[] {
+    return str.split(/\s*,\s*/)
+      .map(Timezone.fromJS);
+  }
 
   render() {
     const { hasChanged, newSettings, errors } = this.state;
@@ -108,8 +113,9 @@ export class General extends React.Component<GeneralProps, GeneralState> {
             instance={newSettings}
             path={'customization.timezones'}
             onChange={this.onChange.bind(this)}
+
             fromValue={(value: any) => value ? value.join(', ') : undefined}
-            toValue={(str: string) => str.split(/\s*,\s*/)}
+            toValue={this.parseTimezones.bind(this)}
           />
         </form>
       </div>
