@@ -34,6 +34,7 @@ export interface MeasureModalProps extends React.Props<any> {
   measure?: Measure;
   onSave?: (measure: Measure) => void;
   onClose?: () => void;
+  isCreating?: boolean;
 }
 
 export interface MeasureModalState {
@@ -101,19 +102,31 @@ export class MeasureModal extends React.Component<MeasureModalProps, MeasureModa
   }
 
   render(): JSX.Element {
+    const { isCreating, measure } = this.props;
     const { newMeasure, canSave } = this.state;
 
     if (!newMeasure) return null;
 
     return <Modal
       className="dimension-modal"
-      title={newMeasure.title}
+      title={measure.title}
       onClose={this.props.onClose}
     >
       <form className="general vertical">
+        { isCreating ? <FormLabel label="Name (you won't be able to change this later)"></FormLabel> : null }
+        { isCreating ?
+        <ImmutableInput
+          focusOnStartUp={isCreating}
+          instance={newMeasure}
+          path={'name'}
+          onChange={this.onChange.bind(this)}
+          validator={/^.+$/}
+        />
+        : null }
+
         <FormLabel label="Title"></FormLabel>
         <ImmutableInput
-          focusOnStartUp={true}
+          focusOnStartUp={!isCreating}
           instance={newMeasure}
           path={'title'}
           onChange={this.onChange.bind(this)}

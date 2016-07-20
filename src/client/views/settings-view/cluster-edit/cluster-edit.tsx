@@ -171,7 +171,7 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
     />;
 
     const saveButton = <Button
-      className={classNames("save", {disabled: !canSave})}
+      className={classNames("save", {disabled: !canSave || !hasChanged})}
       title="Save"
       type="primary"
       onClick={this.save.bind(this)}

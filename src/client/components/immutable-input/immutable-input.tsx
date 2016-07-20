@@ -56,7 +56,7 @@ export class ImmutableInput extends React.Component<ImmutableInputProps, Immutab
   }
 
   componentWillReceiveProps(nextProps: ImmutableInputProps) {
-    if (nextProps.instance !== this.state.newInstance || this.state.invalidValue !== undefined) {
+    if (nextProps.instance !== this.state.newInstance) {
       this.initFromProps(nextProps);
     }
   }

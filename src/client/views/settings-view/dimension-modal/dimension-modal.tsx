@@ -35,6 +35,7 @@ export interface DimensionModalProps extends React.Props<any> {
   dimension?: Dimension;
   onSave?: (dimension: Dimension) => void;
   onClose?: () => void;
+  isCreating?: boolean;
 }
 
 export interface DimensionModalState {
@@ -92,7 +93,7 @@ export class DimensionModal extends React.Component<DimensionModalProps, Dimensi
   }
 
   render(): JSX.Element {
-    const { dimension } = this.props;
+    const { isCreating, dimension } = this.props;
     const { newDimension, canSave } = this.state;
 
     if (!newDimension) return null;
@@ -107,9 +108,20 @@ export class DimensionModal extends React.Component<DimensionModalProps, Dimensi
       onEnter={this.save.bind(this)}
     >
       <form className="general vertical">
+        { isCreating ? <FormLabel label="Name (you won't be able to change this later)"></FormLabel> : null }
+        { isCreating ?
+        <ImmutableInput
+          focusOnStartUp={isCreating}
+          instance={newDimension}
+          path={'name'}
+          onChange={this.onChange.bind(this)}
+          validator={/^.+$/}
+        />
+        : null }
+
         <FormLabel label="Title"></FormLabel>
         <ImmutableInput
-          focusOnStartUp={true}
+          focusOnStartUp={!isCreating}
           instance={newDimension}
           path={'title'}
           onChange={this.onChange.bind(this)}

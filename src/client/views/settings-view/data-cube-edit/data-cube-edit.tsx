@@ -86,7 +86,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
     let cube = props.settings.dataCubes.filter((d) => d.name === props.cubeId)[0];
 
     this.setState({
-      tempCube: cube,
+      tempCube: new DataCube(cube.valueOf()),
       hasChanged: false,
       canSave: true,
       errors: {},
@@ -258,7 +258,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
 
     const getModal = (item: Dimension) => <DimensionModal dimension={item}/>;
 
-    const getNewItem = (name: string) => Dimension.fromJS({name});
+    const getNewItem = () => Dimension.fromJS({name: 'new-dimension'});
 
     const getRows = (items: List<Dimension>) => items.toArray().map((dimension) => {
       return {
@@ -293,7 +293,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
 
     const getModal = (item: Measure) => <MeasureModal measure={item}/>;
 
-    const getNewItem = (name: string) => Measure.fromJS({name});
+    const getNewItem = () => Measure.fromJS({name: 'new-measure'});
 
     const getRows = (items: List<Measure>) => items.toArray().map((measure) => {
       return {
@@ -326,7 +326,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
     />;
 
     const saveButton = <Button
-      className={classNames("save", {disabled: !canSave})}
+      className={classNames("save", {disabled: !canSave || !hasChanged})}
       title="Save"
       type="primary"
       onClick={this.save.bind(this)}
