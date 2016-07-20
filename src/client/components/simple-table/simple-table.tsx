@@ -24,7 +24,7 @@ import { Stage, Clicker, Essence, DataCube, Filter, Dimension, Measure } from '.
 import { classNames } from '../../utils/dom/dom';
 
 import { SvgIcon } from '../svg-icon/svg-icon';
-import { Scroller } from '../scroller/scroller';
+import { Scroller, ScrollerPart } from '../scroller/scroller';
 
 export interface SimpleTableColumn {
   label: string;
@@ -253,28 +253,32 @@ export class SimpleTable extends React.Component<SimpleTableProps, SimpleTableSt
     return Math.floor((x - headerWidth) / ACTION_WIDTH);
   }
 
+  getColumnIndex(x: number, headerWidth: number): number {
+    if (x >= headerWidth) return -1;
+
+    const { columns } = this.props;
+
+    var columnIndex = 0;
+    while ((x -= columns[columnIndex].width) > 0) columnIndex++;
+
+    return columnIndex;
+  }
+
   getHeaderWidth(columns: SimpleTableColumn[]): number {
     return columns.reduce((a, b) => a + b.width, 0);
   }
 
-  onClick(x: number, y: number) {
+  onClick(x: number, y: number, part: ScrollerPart) {
     const { columns, rows, actions } = this.props;
+
+    if (part === Scroller.TOP_RIGHT_CORNER) return;
+
     const headerWidth = this.getHeaderWidth(columns);
 
-    var columnIndex = -1; // -1 means right gutter
+    var columnIndex = this.getColumnIndex(x, headerWidth); // -1 means right gutter
     var rowIndex = this.getRowIndex(y); // -1 means header
 
-    // Not in the right gutter
-    if (x < headerWidth) {
-      columnIndex = 0;
-      while ((x -= columns[columnIndex].width) > 0) columnIndex++;
-    }
-
-    // Corner
-    if (rowIndex === -1 && columnIndex === -1) return;
-
-    // Right gutter
-    if (columnIndex === -1) {
+    if (part === Scroller.RIGHT_GUTTER) {
       let action = actions[this.getActionIndex(x, headerWidth)];
       if (action) {
         this.onActionClick(action, rows[rowIndex]);
@@ -283,7 +287,7 @@ export class SimpleTable extends React.Component<SimpleTableProps, SimpleTableSt
     }
 
     // Header
-    if (rowIndex === -1) {
+    if (part === Scroller.TOP_GUTTER) {
       this.onHeaderClick(columns[columnIndex]);
       return;
     }
@@ -308,16 +312,15 @@ export class SimpleTable extends React.Component<SimpleTableProps, SimpleTableSt
     action.callback(row);
   }
 
-  onMouseMove(x: number, y: number) {
+  onMouseMove(x: number, y: number, part: ScrollerPart) {
     const { rows, columns } = this.props;
     const headerWidth = this.getHeaderWidth(columns);
 
     var rowIndex = this.getRowIndex(y);
-    var actionIndex = this.getActionIndex(x, headerWidth);
 
     this.setState({
       hoveredRowIndex: rowIndex > rows.length ? undefined : rowIndex,
-      hoveredActionIndex: actionIndex
+      hoveredActionIndex: part === Scroller.RIGHT_GUTTER ? this.getActionIndex(x, headerWidth) : undefined
     });
   }
 
