@@ -106,7 +106,7 @@
           }
 
           &.hover {
-            &:after {
+            &::after {
               content: '';
               position: absolute;
               top: -6px;
