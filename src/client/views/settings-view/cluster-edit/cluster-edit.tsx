@@ -74,7 +74,6 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
 
   cancel() {
     this.initFromProps(this.props);
-    this.goBack();
   }
 
   save() {
@@ -88,8 +87,6 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
     if (this.props.onSave) {
       this.props.onSave(newSettings);
     }
-
-    this.goBack();
   }
 
   goBack() {
@@ -163,6 +160,34 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
     </form>;
   }
 
+  renderButtons(): JSX.Element {
+    const { hasChanged, canSave } = this.state;
+
+    const cancelButton = <Button
+      className="cancel"
+      title="Revert changes"
+      type="secondary"
+      onClick={this.cancel.bind(this)}
+    />;
+
+    const saveButton = <Button
+      className={classNames("save", {disabled: !canSave})}
+      title="Save"
+      type="primary"
+      onClick={this.save.bind(this)}
+    />;
+
+    if (!hasChanged) {
+      return <div className="button-group">
+        {saveButton}
+      </div>;
+    }
+
+    return <div className="button-group">
+      {cancelButton}
+      {saveButton}
+    </div>;
+  }
 
   render() {
     const { tempCluster, hasChanged, canSave } = this.state;
@@ -173,10 +198,7 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
       <div className="title-bar">
         <Button className="button back" type="secondary" svg={require('../../../icons/full-back.svg')} onClick={this.goBack.bind(this)}/>
         <div className="title">{tempCluster.name}</div>
-        {hasChanged ? <div className="button-group">
-          <Button className="cancel" title="Cancel" type="secondary" onClick={this.cancel.bind(this)}/>
-          <Button className={classNames("save", {disabled: !canSave})} title="Save" type="primary" onClick={this.save.bind(this)}/>
-        </div> : null}
+        {this.renderButtons()}
       </div>
       <div className="content">
         {this.renderGeneral()}

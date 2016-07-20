@@ -56,7 +56,7 @@ export class ImmutableInput extends React.Component<ImmutableInputProps, Immutab
   }
 
   componentWillReceiveProps(nextProps: ImmutableInputProps) {
-    if (nextProps.instance !== this.state.newInstance) {
+    if (nextProps.instance !== this.state.newInstance || this.state.invalidValue !== undefined) {
       this.initFromProps(nextProps);
     }
   }
@@ -109,16 +109,17 @@ export class ImmutableInput extends React.Component<ImmutableInputProps, Immutab
   render() {
     const { path } = this.props;
     const { newInstance, invalidValue } = this.state;
+    const isInvalid = invalidValue !== undefined;
 
     if (!path || !newInstance) return null;
 
     const value = ImmutableUtils.getProperty(newInstance, path);
 
     return <input
-      className={classNames('immutable-input', {error: invalidValue !== undefined})}
+      className={classNames('immutable-input', {error: isInvalid})}
       ref='me'
       type="text"
-      value={(invalidValue !== undefined ? invalidValue : value) || ''}
+      value={(isInvalid ? invalidValue : value) || ''}
       onChange={this.onChange.bind(this)}
     />;
   }

@@ -125,7 +125,6 @@ addRoutes('/plyql', plyqlRoutes);
 addRoutes('/mkurl', mkurlRoutes);
 addRoutes('/error', errorRoutes);
 
-
 if (process.env['PIVOT_ENABLE_SETTINGS']) {
   addGuardedRoutes('/settings', 'settings', settingsRoutes);
 }

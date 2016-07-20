@@ -89,6 +89,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       tempCube: cube,
       hasChanged: false,
       canSave: true,
+      errors: {},
       cube,
       tab: this.tabs.filter((tab) => tab.value === props.tab)[0]
     });
@@ -112,7 +113,6 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
 
   cancel() {
     this.initFromProps(this.props);
-    this.goBack();
   }
 
   save() {
@@ -126,8 +126,6 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
     if (this.props.onSave) {
       this.props.onSave(newSettings);
     }
-
-    this.goBack();
   }
 
   goBack() {
@@ -317,6 +315,35 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
     />;
   }
 
+  renderButtons(): JSX.Element {
+    const { hasChanged, canSave } = this.state;
+
+    const cancelButton = <Button
+      className="cancel"
+      title="Revert changes"
+      type="secondary"
+      onClick={this.cancel.bind(this)}
+    />;
+
+    const saveButton = <Button
+      className={classNames("save", {disabled: !canSave})}
+      title="Save"
+      type="primary"
+      onClick={this.save.bind(this)}
+    />;
+
+    if (!hasChanged) {
+      return <div className="button-group">
+        {saveButton}
+      </div>;
+    }
+
+    return <div className="button-group">
+      {cancelButton}
+      {saveButton}
+    </div>;
+  }
+
   render() {
     const { tempCube, tab, hasChanged, cube, canSave } = this.state;
 
@@ -326,10 +353,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       <div className="title-bar">
         <Button className="button back" type="secondary" svg={require('../../../icons/full-back.svg')} onClick={this.goBack.bind(this)}/>
         <div className="title">{cube.title}</div>
-        {hasChanged ? <div className="button-group">
-          <Button className="cancel" title="Cancel" type="secondary" onClick={this.cancel.bind(this)}/>
-          <Button className={classNames("save", {disabled: !canSave})} title="Save" type="primary" onClick={this.save.bind(this)}/>
-        </div> : null}
+        {this.renderButtons()}
       </div>
       <div className="content">
         <div className="tabs">
