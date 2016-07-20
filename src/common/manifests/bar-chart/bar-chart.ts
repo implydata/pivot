@@ -32,10 +32,21 @@ var handler = CircumstancesHandler.EMPTY()
 
     splits = splits.map((split: SplitCombine) => {
       var splitDimension = dataCube.getDimensionByExpression(split.expression);
-
+      var sortStrategy = splitDimension.sortStrategy;
       if (!split.sortAction) {
-        // Must sort boolean in deciding order!
-        if (splitDimension.kind === 'boolean') {
+        if (sortStrategy) {
+          if (sortStrategy === 'self') {
+            split = split.changeSortAction(new SortAction({
+              expression: $(splitDimension.name),
+              direction: SortAction.DESCENDING
+            }));
+          } else {
+            split = split.changeSortAction(new SortAction({
+              expression: $(sortStrategy),
+              direction: SortAction.DESCENDING
+            }));
+          }
+        } else if (splitDimension.kind === 'boolean') {  // Must sort boolean in deciding order!
           split = split.changeSortAction(new SortAction({
             expression: $(splitDimension.name),
             direction: SortAction.DESCENDING
