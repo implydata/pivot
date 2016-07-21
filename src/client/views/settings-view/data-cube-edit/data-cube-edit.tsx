@@ -49,10 +49,11 @@ export interface DataCubeEditProps extends React.Props<any> {
 }
 
 export interface DataCubeEditState {
+  tab?: any;
+  cube?: DataCube;
+
   tempCube?: DataCube;
   hasChanged?: boolean;
-  cube?: DataCube;
-  tab?: any;
   canSave?: boolean;
   errors?: any;
 }
@@ -135,7 +136,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
     window.location.hash = hash.replace(`/${cubeId}/${tab}`, '');
   }
 
-  onSimpleChange(newCube: DataCube, isValid: boolean, path: string, error: string) {
+  onChange(newCube: DataCube, isValid: boolean, path: string, error: string) {
     const { cube, errors } = this.state;
 
     errors[path] = isValid ? false : error;
@@ -176,8 +177,8 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
     const { tempCube, errors } = this.state;
 
     var makeLabel = FormLabel.simpleGenerator(LABELS, errors);
-    var makeTextInput = ImmutableInput.simpleGenerator(tempCube, this.onSimpleChange.bind(this));
-    var makeDropDownInput = ImmutableDropdown.simpleGenerator(tempCube, this.onSimpleChange.bind(this));
+    var makeTextInput = ImmutableInput.simpleGenerator(tempCube, this.onChange.bind(this));
+    var makeDropDownInput = ImmutableDropdown.simpleGenerator(tempCube, this.onChange.bind(this));
 
     return <form className="general vertical">
       {makeLabel('title')}
@@ -199,7 +200,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       <ImmutableInput
         instance={tempCube}
         path={'defaultDuration'}
-        onChange={this.onSimpleChange.bind(this)}
+        onChange={this.onChange.bind(this)}
 
         valueToString={(value: Duration) => value ? value.toJS() : undefined}
         stringToValue={(str: string) => str ? Duration.fromJS(str) : undefined}
@@ -209,7 +210,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       <ImmutableInput
         instance={tempCube}
         path={'defaultTimezone'}
-        onChange={this.onSimpleChange.bind(this)}
+        onChange={this.onChange.bind(this)}
 
         valueToString={(value: Timezone) => value ? value.toJS() : undefined}
         stringToValue={(str: string) => str ? Timezone.fromJS(str) : undefined}

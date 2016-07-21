@@ -204,7 +204,7 @@ export const CUBE_EDIT = {
   },
   defaultTimezone: {
     label: 'Default timezone',
-    help: `The default timezone, expressed as an ' +
+    help: `The default timezone, expressed as an
       <a href="https://en.wikipedia.org/wiki/Tz_database" target="_blank">
       Olsen Timezone</a>, that will be selected when the user first opens this
       cube. Default Etc/UTC.`,

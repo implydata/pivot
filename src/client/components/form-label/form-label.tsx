@@ -31,7 +31,8 @@ export interface FormLabelProps extends React.Props<any> {
 }
 
 export interface FormLabelState {
-  helpVisible: boolean;
+  helpVisible?: boolean;
+  hideHelpIfNoError?: boolean;
 }
 
 export class FormLabel extends React.Component<FormLabelProps, FormLabelState> {
@@ -52,8 +53,18 @@ export class FormLabel extends React.Component<FormLabelProps, FormLabelState> {
     this.state = {helpVisible: false};
   }
 
+  componentWillReceiveProps(nextProps: FormLabelProps) {
+    if (nextProps.errorText) {
+      if (!this.state.helpVisible) this.setState({helpVisible: true, hideHelpIfNoError: true});
+    } else if (this.state.hideHelpIfNoError) {
+      this.setState({helpVisible: false, hideHelpIfNoError: false});
+    } else {
+      this.setState({hideHelpIfNoError: false});
+    }
+  }
+
   onHelpClick() {
-    this.setState({helpVisible: !this.state.helpVisible});
+    this.setState({helpVisible: !this.state.helpVisible, hideHelpIfNoError: false});
   }
 
   renderIcon(): JSX.Element {
