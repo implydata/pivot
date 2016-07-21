@@ -24,6 +24,8 @@ import { classNames } from '../../utils/dom/dom';
 
 import { firstUp } from '../../../common/utils/string/string';
 
+export type InputType = 'text' | 'textarea';
+
 export interface ImmutableInputProps extends React.Props<any> {
   instance: any;
   path: string;
@@ -33,6 +35,7 @@ export interface ImmutableInputProps extends React.Props<any> {
   validator?: RegExp | ((str: string) => boolean);
   stringToValue?: (str: string) => any;
   valueToString?: (value: any) => string;
+  type?: InputType;
 }
 
 export interface ImmutableInputState {
@@ -43,6 +46,7 @@ export interface ImmutableInputState {
 
 export class ImmutableInput extends React.Component<ImmutableInputProps, ImmutableInputState> {
   static defaultProps = {
+    type: 'text',
     stringToValue: String,
     valueToString: (value: any) => value ? String(value) : ''
   };
@@ -173,11 +177,21 @@ export class ImmutableInput extends React.Component<ImmutableInputProps, Immutab
   }
 
   render() {
-    const { path, valueToString } = this.props;
+    const { path, valueToString, type } = this.props;
     const { myInstance, invalidString, validString } = this.state;
     const isInvalid = invalidString !== undefined;
 
     if (!path || !myInstance) return null;
+
+    if (type === 'textarea') {
+      return <textarea
+        className={classNames('immutable-input', {error: isInvalid})}
+        ref='me'
+        type="text"
+        value={(isInvalid ? invalidString : validString) || ''}
+        onChange={this.onChange.bind(this)}
+      />;
+    }
 
     return <input
       className={classNames('immutable-input', {error: isInvalid})}

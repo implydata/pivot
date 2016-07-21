@@ -168,7 +168,7 @@ export const GENERAL = {
   }
 };
 
-export const CUBE_EDIT = {
+export const DATA_CUBE_EDIT = {
   title: {
     label: 'Title',
     help: 'What will appear as the tab\'s title in your browser. Use \'%v\' as a placeholder for Pivot\'s version.',
@@ -216,5 +216,11 @@ export const CUBE_EDIT = {
       It is commonly set to the measure that represents the count of events.
       Default: the first measure.`,
     error: ''
+  },
+  attributeOverrides: {
+    label: `Attribute overrides`,
+    help: `While Pivot tries to learn as much as it can from your data cube
+      from Druid directly. It can not (yet) do a perfect job.
+      The attributeOverrides: section of the data cube is there for you to fix that.`
   }
 };

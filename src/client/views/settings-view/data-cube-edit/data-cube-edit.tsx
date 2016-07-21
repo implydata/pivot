@@ -18,6 +18,7 @@ require('./data-cube-edit.css');
 
 import * as React from 'react';
 import { List } from 'immutable';
+import { AttributeInfo } from 'plywood';
 import { Fn } from '../../../../common/utils/general/general';
 import { classNames } from '../../../utils/dom/dom';
 
@@ -38,7 +39,7 @@ import { MeasureModal } from '../measure-modal/measure-modal';
 
 import { AppSettings, ListItem, Cluster, DataCube, Dimension, DimensionJS, Measure, MeasureJS } from '../../../../common/models/index';
 
-import { CUBE_EDIT as LABELS } from '../utils/labels';
+import { DATA_CUBE_EDIT as LABELS } from '../utils/labels';
 
 
 export interface DataCubeEditProps extends React.Props<any> {
@@ -68,6 +69,7 @@ export interface Tab {
 export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEditState> {
   private tabs: Tab[] = [
     {label: 'General', value: 'general', render: this.renderGeneral},
+    {label: 'Attributes', value: 'attributes', render: this.renderAttributes},
     {label: 'Dimensions', value: 'dimensions', render: this.renderDimensions},
     {label: 'Measures', value: 'measures', render: this.renderMeasures}
   ];
@@ -218,6 +220,27 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
 
       {makeLabel('defaultSortMeasure')}
       {makeDropDownInput('defaultSortMeasure', tempCube.measures.map(m => { return { value: m.name, label: m.title } ; }).toArray()) }
+
+    </form>;
+  }
+
+  renderAttributes(): JSX.Element {
+    const { tempCube, errors } = this.state;
+
+    var makeLabel = FormLabel.simpleGenerator(LABELS, errors);
+
+    return <form className="general vertical">
+
+      {makeLabel('attributeOverrides')}
+      <ImmutableInput
+        instance={tempCube}
+        path={'attributeOverrides'}
+        onChange={this.onChange.bind(this)}
+
+        valueToString={(value: AttributeInfo[]) => value ? JSON.stringify(AttributeInfo.toJSs(value), null, 2) : undefined}
+        stringToValue={(str: string) => str ? AttributeInfo.fromJSs(JSON.parse(str)) : undefined}
+        type="textarea"
+      />
 
     </form>;
   }
