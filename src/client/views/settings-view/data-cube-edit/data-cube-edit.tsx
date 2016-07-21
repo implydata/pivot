@@ -205,6 +205,9 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       {makeLabel('source')}
       {makeTextInput('source')}
 
+      {makeLabel('subsetFormula')}
+      {makeTextInput('subsetFormula')}
+
       {makeLabel('defaultDuration')}
       <ImmutableInput
         instance={myDataCube}

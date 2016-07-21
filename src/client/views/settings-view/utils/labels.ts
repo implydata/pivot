@@ -194,6 +194,11 @@ export const DATA_CUBE_EDIT = {
     help: 'The name of cube\'s source. The dataSource, table, of filename of the data for this cube',
     error: 'The source should not be empty'
   },
+  subsetFormula: {
+    label: 'Subset Formula',
+    help: 'A row level filter that is applied to the cube. This filter is never represented in the UI',
+    error: ''
+  },
   defaultDuration: {
     label: 'Default duration',
     help: `The time period, expressed as an
