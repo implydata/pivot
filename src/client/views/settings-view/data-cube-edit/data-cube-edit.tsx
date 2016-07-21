@@ -174,23 +174,10 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
 
   renderGeneral(): JSX.Element {
     const { tempCube, errors } = this.state;
-    const labels = LABELS as any;
 
-    var makeLabel = (name: string) => {
-      return <FormLabel
-        label={labels[name].label}
-        helpText={labels[name].help}
-        errorText={errors[name] ? (errors[name] || labels[name].error) : undefined}
-      />;
-    };
-
+    var makeLabel = FormLabel.simpleGenerator(LABELS, errors);
     var makeTextInput = ImmutableInput.simpleGenerator(tempCube, this.onSimpleChange.bind(this));
     var makeDropDownInput = ImmutableDropdown.simpleGenerator(tempCube, this.onSimpleChange.bind(this));
-
-
-    const MyDropDown = ImmutableDropdown.specialize<ListItem>();
-
-    const engineTypes = Cluster.TYPE_VALUES.map(type => {return {value: type, label: type}; });
 
     return <form className="general vertical">
       {makeLabel('title')}

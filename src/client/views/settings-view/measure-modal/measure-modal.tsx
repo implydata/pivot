@@ -25,9 +25,12 @@ import { SvgIcon } from '../../../components/svg-icon/svg-icon';
 import { FormLabel } from '../../../components/form-label/form-label';
 import { Button } from '../../../components/button/button';
 import { ImmutableInput } from '../../../components/immutable-input/immutable-input';
+import { ImmutableDropdown } from '../../../components/immutable-dropdown/immutable-dropdown';
 import { Modal } from '../../../components/modal/modal';
 
 import { Measure } from '../../../../common/models/index';
+
+import { MEASURE_EDIT as LABELS } from '../utils/labels';
 
 
 export interface MeasureModalProps extends React.Props<any> {
@@ -40,6 +43,7 @@ export interface MeasureModalProps extends React.Props<any> {
 export interface MeasureModalState {
   newMeasure?: Measure;
   canSave?: boolean;
+  errors?: any;
 }
 
 export class MeasureModal extends React.Component<MeasureModalProps, MeasureModalState> {
@@ -47,8 +51,10 @@ export class MeasureModal extends React.Component<MeasureModalProps, MeasureModa
 
   constructor() {
     super();
-    this.state = {canSave: false};
-    this.globalKeyDownListener = this.globalKeyDownListener.bind(this);
+    this.state = {
+      canSave: false,
+      errors: {}
+    };
   }
 
   initStateFromProps(props: MeasureModalProps) {
@@ -66,11 +72,6 @@ export class MeasureModal extends React.Component<MeasureModalProps, MeasureModa
 
   componentDidMount() {
     this.initStateFromProps(this.props);
-    window.addEventListener('keydown', this.globalKeyDownListener);
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener('keydown', this.globalKeyDownListener);
   }
 
   componentDidUpdate() {
@@ -80,66 +81,58 @@ export class MeasureModal extends React.Component<MeasureModalProps, MeasureModa
     }
   }
 
-  globalKeyDownListener(e: KeyboardEvent) {
-    if (enterKey(e) && this.state.canSave) {
-      this.save();
-    }
-  }
+  onChange(newMeasure: Measure, isValid: boolean, path: string, error: string) {
+    var { errors } = this.state;
 
-  onChange(newMeasure: Measure, isValid: boolean) {
+    errors[path] = isValid ? false : error;
+
+    var canSave = true;
+    for (let key in errors) canSave = canSave && (errors[key] === false);
+
     if (isValid) {
       this.setState({
+        errors,
         newMeasure,
-        canSave: !this.props.measure.equals(newMeasure)
+        canSave: canSave && !this.props.measure.equals(newMeasure)
       });
     } else {
-      this.setState({canSave: false});
+      this.setState({
+        errors,
+        canSave: false
+      });
     }
   }
 
   save() {
+    if (!this.state.canSave) return;
     this.props.onSave(this.state.newMeasure);
   }
 
   render(): JSX.Element {
     const { isCreating, measure } = this.props;
-    const { newMeasure, canSave } = this.state;
+    const { newMeasure, canSave, errors } = this.state;
 
     if (!newMeasure) return null;
+
+    var makeLabel = FormLabel.simpleGenerator(LABELS, errors, true);
+    var makeTextInput = ImmutableInput.simpleGenerator(newMeasure, this.onChange.bind(this));
+    var makeDropDownInput = ImmutableDropdown.simpleGenerator(newMeasure, this.onChange.bind(this));
 
     return <Modal
       className="dimension-modal"
       title={measure.title}
       onClose={this.props.onClose}
+      onEnter={this.save.bind(this)}
     >
       <form className="general vertical">
-        { isCreating ? <FormLabel label="Name (you won't be able to change this later)"></FormLabel> : null }
-        { isCreating ?
-        <ImmutableInput
-          focusOnStartUp={isCreating}
-          instance={newMeasure}
-          path={'name'}
-          onChange={this.onChange.bind(this)}
-          validator={/^.+$/}
-        />
-        : null }
+        { isCreating ? makeLabel('title') : null }
+        { isCreating ? makeTextInput('name', /^.+$/, isCreating) : null }
 
-        <FormLabel label="Title"></FormLabel>
-        <ImmutableInput
-          focusOnStartUp={!isCreating}
-          instance={newMeasure}
-          path={'title'}
-          onChange={this.onChange.bind(this)}
-          validator={/^.+$/}
-        />
+        {makeLabel('title')}
+        {makeTextInput('title', /^.+$/, !isCreating)}
 
-        <FormLabel label="Formula"></FormLabel>
-        <ImmutableInput
-          instance={newMeasure}
-          path={'formula'}
-          onChange={this.onChange.bind(this)}
-          validator={/^.+$/}
-        />
+        {makeLabel('formula')}
+        {makeTextInput('formula')}
 
       </form>
 

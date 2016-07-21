@@ -27,6 +27,7 @@ export interface FormLabelProps extends React.Props<any> {
   label?: string;
   helpText?: string;
   errorText?: string;
+  isBubble?: boolean;
 }
 
 export interface FormLabelState {
@@ -34,6 +35,17 @@ export interface FormLabelState {
 }
 
 export class FormLabel extends React.Component<FormLabelProps, FormLabelState> {
+  static simpleGenerator(labels: any, errors: any, isBubble = false) {
+    return (name: string) => {
+      return <FormLabel
+        isBubble={isBubble}
+        label={labels[name].label}
+        helpText={labels[name].help}
+        errorText={errors[name] ? (errors[name] || labels[name].error) : undefined}
+      />;
+    };
+  }
+
   constructor() {
     super();
 
@@ -81,9 +93,9 @@ export class FormLabel extends React.Component<FormLabelProps, FormLabelState> {
   }
 
   render() {
-    const { label, errorText } = this.props;
+    const { label, errorText, isBubble } = this.props;
 
-    return <div className={classNames('form-label', {error: !!errorText})}>
+    return <div className={classNames('form-label', {error: !!errorText, bubble: isBubble})}>
       <div className="label">{label}</div>
       {this.renderIcon()}
       {this.renderAdditionalText()}

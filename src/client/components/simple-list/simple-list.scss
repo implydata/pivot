@@ -43,6 +43,7 @@
 
     .text {
       flex: 1 1;
+      overflow: auto;
       padding: 0 10px;
 
       > * {

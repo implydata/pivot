@@ -14,6 +14,71 @@
  * limitations under the License.
  */
 
+export const DIMENSION_EDIT = {
+  name: {
+    label: `Name (you won't be able to change this later)`,
+    help: `The name of the dimension. This does not have to correspond to the
+      attribute name (but the auto generated dimensions do). This should be a
+      URL safe string. Changing this property will break any URLs that someone
+      might have generated that include this dimension, that's why you can only
+      set it once`,
+    error: ``
+  },
+  title: {
+    label: `Title`,
+    help: `The title for this dimension in the UI. Can be anything and is safe
+    to change at any time.`,
+    error: ``
+  },
+  kind: {
+    label: `Kind`,
+    help: `The dimension's kind`,
+    error: ``
+  },
+  formula: {
+    label: `Formula`,
+    help: `The formula for this dimension. By default it is <code>$name</code> where <em>name</em> is
+      the name of the dimension. You can create derived dimensions by using
+      non-trivial formulas.`,
+    error: ``
+  },
+  url: {
+    label: `URL`,
+    help: `A url associated with the dimension, with optional token '%s' that
+    is replaced by the dimension value to generate a link specific to each value.`,
+    error: ``
+  },
+  granularities: {
+    label: `Granularities`,
+    help: `A set of exactly 5 granularities that you want to be available for bucketing.`,
+    error: ``
+  }
+};
+
+export const MEASURE_EDIT = {
+  name: {
+    label: `Name (you won't be able to change this later)`,
+    help: `The name of the measure. This should be a
+      URL safe string. Changing this property will break any URLs that someone
+      might have generated that include this dimension, that's why you can only
+      set it once`,
+    error: ``
+  },
+  title: {
+    label: `Title`,
+    help: `The title for this measure in the UI. Can be anything and is safe
+    to change at any time.`,
+    error: ``
+  },
+  formula: {
+    label: `Formula`,
+    help: `The <a href="http://plywood.imply.io/expressions" target="_blank">
+      Plywood expression</a> for this dimension. By default it is
+      <code>$main.sum($name)</code> where <em>name</em> is the name of the measure.`,
+    error: ``
+  }
+};
+
 export const CLUSTER_EDIT = {
   type: {
     label: 'Type',
