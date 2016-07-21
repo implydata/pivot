@@ -43,9 +43,9 @@ export const CLUSTER_EDIT = {
   },
   sourceListRefreshOnLoad: {
     label: 'Source List Refresh On Load',
-    help: 'Should the list of sources be reloaded every time that Pivot is ' +
-    'loaded. This will put additional load on the data store but will ensure that ' +
-    'sources are visible in the UI as soon as they are created.',
+    help: `Should the list of sources be reloaded every time that Pivot is
+    loaded. This will put additional load on the data store but will ensure that
+    sources are visible in the UI as soon as they are created.`,
     error: 'The refresh interval can only contain numbers. It should look like this: 15000'
   },
   sourceListRefreshInterval: {
@@ -55,9 +55,9 @@ export const CLUSTER_EDIT = {
   },
   sourceReintrospectOnLoad: {
     label: 'Source Reintrospect On Load',
-    help: 'Should sources be scanned for additional dimensions every time that ' +
-    'Pivot is loaded. This will put additional load on the data store but will ' +
-    'ensure that dimension are visible in the UI as soon as they are created.',
+    help: `Should sources be scanned for additional dimensions every time that
+      Pivot is loaded. This will put additional load on the data store but will
+      ensure that dimension are visible in the UI as soon as they are created.`,
     error: ''
   },
   sourceReintrospectInterval: {
@@ -105,23 +105,51 @@ export const GENERAL = {
 
 export const CUBE_EDIT = {
   title: {
-    error: 'The title should not be empty',
-    help: 'What will appear as the tab\'s title in your browser. Use \'%v\' as a placeholder for Pivot\'s version.'
+    label: 'Title',
+    help: 'What will appear as the tab\'s title in your browser. Use \'%v\' as a placeholder for Pivot\'s version.',
+    error: 'The title should not be empty'
   },
   description: {
-    error: '',
-    help: 'The cube\'s description'
+    label: 'Description',
+    help: 'The cube\'s description',
+    error: ''
   },
   introspection: {
-    error: '',
-    help: 'The cube\'s introspection strategy. Default is \'no-autofill\'.'
+    label: 'Introspection',
+    help: 'The cube\'s introspection strategy. Default is \'no-autofill\'.',
+    error: ''
   },
   clusterName: {
-    error: 'The cluster name should not be empty',
-    help: 'The cube\'s cluster, really.'
+    label: 'Name',
+    help: 'The cube\'s cluster, really.',
+    error: 'The cluster name should not be empty'
   },
   source: {
-    error: 'The source should not be empty',
-    help: 'The cube\'s source ?'
+    label: 'Source',
+    help: 'The cube\'s source ?',
+    error: 'The source should not be empty'
+  },
+  defaultDuration: {
+    label: 'Default duration',
+    help: `The time period, expressed as an
+      <a href="https://en.wikipedia.org/wiki/ISO_8601#Durations" target="_blank">
+      ISO 8601 Duration</a>, that will be shown when the user first opens this
+      cube. Default P1D (1 day).`,
+    error: 'Must be an ISO 8601 Duration'
+  },
+  defaultTimezone: {
+    label: 'Default timezone',
+    help: `The default timezone, expressed as an ' +
+      <a href="https://en.wikipedia.org/wiki/Tz_database" target="_blank">
+      Olsen Timezone</a>, that will be selected when the user first opens this
+      cube. Default Etc/UTC.`,
+    error: 'Must be a valid timezone'
+  },
+  defaultSortMeasure: {
+    label: 'Default sort measure',
+    help: `The name of the measure that will be used for default sorting.
+      It is commonly set to the measure that represents the count of events.
+      Default: the first measure.`,
+    error: ''
   }
 };

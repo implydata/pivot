@@ -83,6 +83,10 @@
       color: $error;
       margin-bottom: 10px;
     }
+
+    a {
+      border-bottom: 1px dashed;
+    }
   }
 
   &.error {

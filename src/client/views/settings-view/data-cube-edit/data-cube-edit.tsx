@@ -21,6 +21,8 @@ import { List } from 'immutable';
 import { Fn } from '../../../../common/utils/general/general';
 import { classNames } from '../../../utils/dom/dom';
 
+import { Duration, Timezone } from 'chronoshift';
+
 import { DATA_CUBES_STRATEGIES_LABELS } from '../../../config/constants';
 
 import { SvgIcon } from '../../../components/svg-icon/svg-icon';
@@ -111,7 +113,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
   }
 
   cancel() {
-    this.initFromProps(this.props);
+    this.setState({tempCube: undefined}, () => this.initFromProps(this.props));
   }
 
   save() {
@@ -133,23 +135,26 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
     window.location.hash = hash.replace(`/${cubeId}/${tab}`, '');
   }
 
-  onSimpleChange(newCube: DataCube, isValid: boolean, path: string) {
+  onSimpleChange(newCube: DataCube, isValid: boolean, path: string, error: string) {
     const { cube, errors } = this.state;
 
-    errors[path] = !isValid;
+    errors[path] = isValid ? false : error;
 
     const hasChanged = !isValid || !cube.equals(newCube);
+
+    var canSave = true;
+    for (let key in errors) canSave = canSave && (errors[key] === false);
 
     if (isValid) {
       this.setState({
         tempCube: newCube,
-        canSave: true,
+        canSave,
         errors,
         hasChanged
       });
     } else {
       this.setState({
-        canSave: false,
+        canSave,
         errors,
         hasChanged
       });
@@ -168,79 +173,64 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
   }
 
   renderGeneral(): JSX.Element {
-    const helpTexts: any = {};
     const { tempCube, errors } = this.state;
+    const labels = LABELS as any;
+
+    var makeLabel = (name: string) => {
+      return <FormLabel
+        label={labels[name].label}
+        helpText={labels[name].help}
+        errorText={errors[name] ? (errors[name] || labels[name].error) : undefined}
+      />;
+    };
+
+    var makeTextInput = ImmutableInput.simpleGenerator(tempCube, this.onSimpleChange.bind(this));
+    var makeDropDownInput = ImmutableDropdown.simpleGenerator(tempCube, this.onSimpleChange.bind(this));
+
 
     const MyDropDown = ImmutableDropdown.specialize<ListItem>();
 
     const engineTypes = Cluster.TYPE_VALUES.map(type => {return {value: type, label: type}; });
 
     return <form className="general vertical">
-      <FormLabel
-        label="Title"
-        helpText={LABELS.title.help}
-        errorText={errors.title ? LABELS.title.error : undefined}
-      />
+      {makeLabel('title')}
+      {makeTextInput('title', /^.+$/, true)}
+
+      {makeLabel('description')}
+      {makeTextInput('description')}
+
+      {makeLabel('clusterName')}
+      {makeDropDownInput('clusterName', Cluster.TYPE_VALUES.map(type => {return {value: type, label: type}; }))}
+
+      {makeLabel('introspection')}
+      {makeDropDownInput('introspection', this.getIntrospectionStrategies())}
+
+      {makeLabel('source')}
+      {makeTextInput('source')}
+
+      {makeLabel('defaultDuration')}
       <ImmutableInput
         instance={tempCube}
-        path={'title'}
+        path={'defaultDuration'}
         onChange={this.onSimpleChange.bind(this)}
-        validator={/^.+$/}
+
+        valueToString={(value: Duration) => value ? value.toJS() : undefined}
+        stringToValue={(str: string) => str ? Duration.fromJS(str) : undefined}
       />
 
-      <FormLabel
-        label="Description"
-        helpText={LABELS.description.help}
-        errorText={errors.description ? LABELS.description.error : undefined}
-      />
+      {makeLabel('defaultTimezone')}
       <ImmutableInput
         instance={tempCube}
-        path={'description'}
+        path={'defaultTimezone'}
         onChange={this.onSimpleChange.bind(this)}
-        validator={/^.+$/}
+
+        valueToString={(value: Timezone) => value ? value.toJS() : undefined}
+        stringToValue={(str: string) => str ? Timezone.fromJS(str) : undefined}
       />
 
-      <FormLabel
-        label="Cluster"
-        helpText={LABELS.clusterName.help}
-        errorText={errors.clusterName ? LABELS.clusterName.error : undefined}
-      />
-      <MyDropDown
-        items={engineTypes}
-        instance={tempCube}
-        path={'clusterName'}
-        equal={(a: ListItem, b: ListItem) => a.value === b.value}
-        renderItem={(a: ListItem) => a.label}
-        keyItem={(a: ListItem) => a.value}
-        onChange={this.onSimpleChange.bind(this)}
-      />
+      {makeLabel('defaultSortMeasure')}
+      {makeDropDownInput('defaultSortMeasure', tempCube.measures.map(m => { return { value: m.name, label: m.title } ; }).toArray()) }
 
-      <FormLabel
-        label="Introspection strategy"
-        helpText={LABELS.introspection.help}
-        errorText={errors.introspection ? LABELS.introspection.error : undefined}
-      />
-      <MyDropDown
-        items={this.getIntrospectionStrategies()}
-        instance={tempCube}
-        path={'introspection'}
-        equal={(a: ListItem, b: ListItem) => a.value === b.value}
-        renderItem={(a: ListItem) => a.label}
-        keyItem={(a: ListItem) => a.value || 'default_value'}
-        onChange={this.onSimpleChange.bind(this)}
-      />
-
-      <FormLabel
-        label="Source"
-        helpText={LABELS.source.help}
-        errorText={errors.source ? LABELS.source.error : undefined}
-      />
-      <ImmutableInput
-        instance={tempCube}
-        path={'source'}
-        onChange={this.onSimpleChange.bind(this)}
-        validator={/^.+$/}
-      />
     </form>;
   }
 

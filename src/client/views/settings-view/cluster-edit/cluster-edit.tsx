@@ -107,16 +107,19 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
 
     const hasChanged = !isValid || !cluster.equals(newCluster);
 
+    var canSave = true;
+    for (let key in errors) canSave = canSave && (errors[key] === false);
+
     if (isValid) {
       this.setState({
         tempCluster: newCluster,
-        canSave: true,
+        canSave,
         errors,
         hasChanged
       });
     } else {
       this.setState({
-        canSave: false,
+        canSave,
         errors,
         hasChanged
       });

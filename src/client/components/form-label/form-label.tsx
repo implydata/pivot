@@ -76,7 +76,7 @@ export class FormLabel extends React.Component<FormLabelProps, FormLabelState> {
 
     return <div className="additional-text">
       {errorText ? <div className="error-text">{errorText}</div> : null}
-      {helpVisible ? <div className="help-text">{helpText}</div> : null}
+      {helpVisible ? <div className="help-text" dangerouslySetInnerHTML={{__html: helpText}}></div> : null}
     </div>;
   }
 
