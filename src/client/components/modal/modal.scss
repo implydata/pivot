@@ -27,6 +27,7 @@
 
   .golden-center {
     @include pin-full;
+    overflow-y: auto;
   }
 
   .modal-window {
