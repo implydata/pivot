@@ -28,7 +28,7 @@ export interface ImmutableInputProps extends React.Props<any> {
   instance: any;
   path: string;
   focusOnStartUp?: boolean;
-  onChange?: (myInstance: any, valid: boolean, path?: string) => void;
+  onChange?: (myInstance: any, valid: boolean, path?: string, error?: string) => void;
   onInvalid?: (invalidString: string) => void;
   validator?: RegExp | ((str: string) => boolean);
   stringToValue?: (str: string) => any;
@@ -45,6 +45,18 @@ export class ImmutableInput extends React.Component<ImmutableInputProps, Immutab
   static defaultProps = {
     stringToValue: String,
     valueToString: (value: any) => value ? String(value) : ''
+  };
+
+  static simpleGenerator (instance: any, changeFn: (myInstance: any, valid: boolean, path?: string) => void) {
+    return (name: string, validator= /^.+$/, focusOnStartUp= false) => {
+      return <ImmutableInput
+        instance={instance}
+        path={name}
+        onChange={changeFn}
+        focusOnStartUp={focusOnStartUp}
+        validator={validator}
+      />;
+    };
   };
 
   private focusAlreadyGiven = false;
@@ -75,8 +87,19 @@ export class ImmutableInput extends React.Component<ImmutableInputProps, Immutab
     });
   }
 
+  reset() {
+    this.setState({
+      invalidString: undefined,
+      validString: undefined
+    });
+  }
+
   componentWillReceiveProps(nextProps: ImmutableInputProps) {
-    if (nextProps.instance !== this.state.myInstance) {
+    if (nextProps.instance === undefined) {
+      this.reset();
+    }
+
+    if (this.state.invalidString === undefined && nextProps.instance !== this.state.myInstance) {
       this.initFromProps(nextProps);
     }
   }
@@ -123,6 +146,8 @@ export class ImmutableInput extends React.Component<ImmutableInputProps, Immutab
     var invalidString: string;
     var validString: string;
 
+    var error = '';
+
     try {
       var newValue: any = stringToValue ? stringToValue(newString) : newString;
 
@@ -138,15 +163,12 @@ export class ImmutableInput extends React.Component<ImmutableInputProps, Immutab
     } catch (e) {
       myInstance = instance;
       invalidString = newString;
+      error = (e as Error).message;
       if (onInvalid) onInvalid(newValue);
     }
 
-    this.setState({
-      myInstance,
-      invalidString,
-      validString
-    }, () => {
-      if (onChange) onChange(myInstance, invalidString === undefined, path);
+    this.setState({myInstance, invalidString, validString}, () => {
+      if (onChange) onChange(myInstance, invalidString === undefined, path, error);
     });
   }
 

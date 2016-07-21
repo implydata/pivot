@@ -35,7 +35,6 @@ import { DimensionModal } from '../dimension-modal/dimension-modal';
 import { MeasureModal } from '../measure-modal/measure-modal';
 
 import { AppSettings, ListItem, Cluster, DataCube, Dimension, DimensionJS, Measure, MeasureJS } from '../../../../common/models/index';
-import { SupportedType as ClusterType } from '../../../../common/models/index';
 
 import { CUBE_EDIT as LABELS } from '../utils/labels';
 
