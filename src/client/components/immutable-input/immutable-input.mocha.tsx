@@ -112,10 +112,10 @@ describe('ImmutableInput', () => {
     expect(node.value).to.equal('pouet');
   });
 
-  describe('with codec (toValue/fromValue)', () => {
+  describe('with stringToValue/valueToString', () => {
     beforeEach(() => {
-      let toValue = (str: string) => str.toLowerCase();
-      let fromValue = (str: string) => str.toUpperCase();
+      let stringToValue = (str: string) => str.toLowerCase();
+      let valueToString = (str: string) => str.toUpperCase();
 
       component = TestUtils.renderIntoDocument(
         <ImmutableInput
@@ -124,8 +124,8 @@ describe('ImmutableInput', () => {
           validator={/^.+$/}
           onChange={onChange}
           onInvalid={onInvalid}
-          stringToValue={toValue}
-          valueToString={fromValue}
+          stringToValue={stringToValue}
+          valueToString={valueToString}
         />
       );
 
