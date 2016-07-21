@@ -19,7 +19,7 @@ require('./dimension-modal.css');
 import * as React from 'react';
 import { Fn } from '../../../../common/utils/general/general';
 import { classNames, enterKey } from '../../../utils/dom/dom';
-
+import { List } from 'immutable';
 
 import { SvgIcon } from '../../../components/svg-icon/svg-icon';
 import { FormLabel } from '../../../components/form-label/form-label';
@@ -34,6 +34,7 @@ import { DIMENSION_EDIT as LABELS } from '../utils/labels';
 
 
 export interface DimensionModalProps extends React.Props<any> {
+  dimensions?: List<Dimension>;
   dimension?: Dimension;
   onSave?: (dimension: Dimension) => void;
   onClose?: () => void;
@@ -107,6 +108,16 @@ export class DimensionModal extends React.Component<DimensionModalProps, Dimensi
     this.props.onSave(this.state.newDimension);
   }
 
+  uniqueName(name: string): boolean {
+    const { dimensions } = this.props;
+
+    if (dimensions.find((m) => m.name === name)) {
+      throw new Error(`Another dimension with this name already exists`);
+    }
+
+    return true;
+  }
+
   render(): JSX.Element {
     const { isCreating, dimension } = this.props;
     const { newDimension, canSave, errors } = this.state;
@@ -126,8 +137,8 @@ export class DimensionModal extends React.Component<DimensionModalProps, Dimensi
       onEnter={this.save.bind(this)}
     >
       <form className="general vertical">
-        { isCreating ? makeLabel('title') : null }
-        { isCreating ? makeTextInput('name', /^.+$/, isCreating) : null }
+        { isCreating ? makeLabel('name') : null }
+        { isCreating ? makeTextInput('name', this.uniqueName.bind(this), isCreating) : null }
 
         {makeLabel('title')}
         {makeTextInput('title', /^.+$/, !isCreating)}

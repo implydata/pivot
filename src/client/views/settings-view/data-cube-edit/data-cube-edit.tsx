@@ -256,7 +256,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       });
     };
 
-    const getModal = (item: Dimension) => <DimensionModal dimension={item}/>;
+    const getModal = (item: Dimension) => <DimensionModal dimension={item} dimensions={myDataCube.dimensions}/>;
 
     const getNewItem = () => Dimension.fromJS({name: 'new-dimension'});
 
@@ -300,7 +300,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       });
     };
 
-    const getModal = (item: Measure) => <MeasureModal measure={item}/>;
+    const getModal = (item: Measure) => <MeasureModal measure={item} measures={myDataCube.measures}/>;
 
     const getNewItem = () => Measure.fromJS({name: 'new-measure'});
 

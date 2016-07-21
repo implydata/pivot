@@ -22,6 +22,7 @@ import { $, Expression, Executor, Dataset } from 'plywood';
 import { Stage, Clicker, Essence, DataCube, Filter, Dimension, Measure } from '../../../common/models/index';
 import { SvgIcon } from '../svg-icon/svg-icon';
 import { classNames } from '../../utils/dom/dom';
+import { firstUp } from '../../../common/utils/string/string';
 
 export interface FormLabelProps extends React.Props<any> {
   label?: string;
@@ -98,7 +99,7 @@ export class FormLabel extends React.Component<FormLabelProps, FormLabelState> {
     if (!helpVisible && !errorText) return null;
 
     return <div className="additional-text">
-      {errorText ? <div className="error-text">{errorText}</div> : null}
+      {errorText ? <div className="error-text">{firstUp(errorText)}</div> : null}
       {helpVisible ? <div className="help-text" dangerouslySetInnerHTML={{__html: helpText}}></div> : null}
     </div>;
   }
