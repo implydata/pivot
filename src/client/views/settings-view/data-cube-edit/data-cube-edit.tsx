@@ -258,9 +258,18 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
   }
 
   renderMeasures(): JSX.Element {
-    const { tempCube } = this.state;
+    var { tempCube } = this.state;
 
     const onChange = (newMeasures: List<Measure>) => {
+
+      var { defaultSortMeasure } = tempCube;
+
+      if (defaultSortMeasure) {
+        if (!newMeasures.find((measure) => measure.name === defaultSortMeasure)) {
+          tempCube = tempCube.changeDefaultSortMeasure(newMeasures.get(0).name);
+        }
+      }
+
       const newCube = tempCube.changeMeasures(newMeasures);
       this.setState({
         tempCube: newCube,
