@@ -33,7 +33,6 @@ function typeToKind(type: string): string {
 
 const NEVER_BUCKET = 'neverBucket';
 export type BucketingStrategy = 'alwaysBucket' | 'neverBucket';
-export type SortStrategy = 'self' | 'measure';
 
 export interface DimensionValue {
   name: string;
@@ -44,7 +43,7 @@ export interface DimensionValue {
   granularities?: Granularity[];
   bucketedBy?: Granularity;
   bucketingStrategy?: BucketingStrategy;
-  sortStrategy?: SortStrategy;
+  sortStrategy?: string;
 }
 
 export interface DimensionJS {
@@ -56,7 +55,7 @@ export interface DimensionJS {
   granularities?: GranularityJS[];
   bucketedBy?: GranularityJS;
   bucketingStrategy?: BucketingStrategy;
-  sortStrategy?: SortStrategy;
+  sortStrategy?: string;
 }
 
 var check: Class<DimensionValue, DimensionJS>;
@@ -127,7 +126,7 @@ export class Dimension implements Instance<DimensionValue, DimensionJS> {
   public granularities: Granularity[];
   public bucketedBy: Granularity;
   public bucketingStrategy: BucketingStrategy;
-  public sortStrategy: SortStrategy;
+  public sortStrategy: string;
 
   constructor(parameters: DimensionValue) {
     var name = parameters.name;
