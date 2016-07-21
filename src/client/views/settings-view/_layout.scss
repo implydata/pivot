@@ -125,4 +125,8 @@
   overflow-y: auto;
 
   padding: 24px 24px;
+
+  .tab-content {
+    overflow: auto;
+  }
 }

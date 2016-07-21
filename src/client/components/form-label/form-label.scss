@@ -68,15 +68,21 @@
     }
   }
 
+  &.bubble .additional-text {
+    @extend %bubble-cont;
+    padding: 10px;
+    max-width: 300px;
+  }
+
   .additional-text {
     position: absolute;
-    left: calc(100% + 20px);
+    left: calc(100% + 10px);
     top: -2px;
     width: 100%;
     max-width: 400px;
 
     font-size: 12px;
-    line-height: 16px;
+    line-height: 17px;
     color: lighten($brand, 10);
 
     .error-text {
@@ -85,7 +91,22 @@
     }
 
     a {
-      border-bottom: 1px dashed;
+      &::after {
+        @include pin-top(15px);
+        content: '';
+        position: absolute;
+        border-bottom: 1px dotted;
+      }
+    }
+
+    em {
+      font-style: italic;
+    }
+
+    code {
+      background: rgba($brand, 0.16);
+      border-radius: $corner;
+      padding: 0 4px;
     }
   }
 
