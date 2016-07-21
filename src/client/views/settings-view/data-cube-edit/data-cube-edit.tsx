@@ -51,9 +51,9 @@ export interface DataCubeEditProps extends React.Props<any> {
 
 export interface DataCubeEditState {
   tab?: any;
-  cube?: DataCube;
+  dataCube?: DataCube;
 
-  tempCube?: DataCube;
+  myDataCube?: DataCube;
   hasChanged?: boolean;
   canSave?: boolean;
   errors?: any;
@@ -87,14 +87,14 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
   }
 
   initFromProps(props: DataCubeEditProps) {
-    let cube = props.settings.dataCubes.filter((d) => d.name === props.cubeId)[0];
+    let dataCube = props.settings.dataCubes.filter((d) => d.name === props.cubeId)[0];
 
     this.setState({
-      tempCube: new DataCube(cube.valueOf()),
+      myDataCube: new DataCube(dataCube.valueOf()),
       hasChanged: false,
       canSave: true,
       errors: {},
-      cube,
+      dataCube,
       tab: this.tabs.filter((tab) => tab.value === props.tab)[0]
     });
   }
@@ -116,15 +116,15 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
   }
 
   cancel() {
-    this.setState({tempCube: undefined}, () => this.initFromProps(this.props));
+    this.setState({myDataCube: undefined}, () => this.initFromProps(this.props));
   }
 
   save() {
     const { settings } = this.props;
-    const { tempCube, cube } = this.state;
+    const { myDataCube, dataCube } = this.state;
 
     var newCubes = settings.dataCubes;
-    newCubes[newCubes.indexOf(cube)] = tempCube;
+    newCubes[newCubes.indexOf(dataCube)] = myDataCube;
     var newSettings = settings.changeDataCubes(newCubes);
 
     if (this.props.onSave) {
@@ -139,18 +139,18 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
   }
 
   onChange(newCube: DataCube, isValid: boolean, path: string, error: string) {
-    const { cube, errors } = this.state;
+    const { dataCube, errors } = this.state;
 
     errors[path] = isValid ? false : error;
 
-    const hasChanged = !isValid || !cube.equals(newCube);
+    const hasChanged = !isValid || !dataCube.equals(newCube);
 
     var canSave = true;
     for (let key in errors) canSave = canSave && (errors[key] === false);
 
     if (isValid) {
       this.setState({
-        tempCube: newCube,
+        myDataCube: newCube,
         canSave,
         errors,
         hasChanged
@@ -176,11 +176,11 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
   }
 
   renderGeneral(): JSX.Element {
-    const { tempCube, errors } = this.state;
+    const { myDataCube, errors } = this.state;
 
     var makeLabel = FormLabel.simpleGenerator(LABELS, errors);
-    var makeTextInput = ImmutableInput.simpleGenerator(tempCube, this.onChange.bind(this));
-    var makeDropDownInput = ImmutableDropdown.simpleGenerator(tempCube, this.onChange.bind(this));
+    var makeTextInput = ImmutableInput.simpleGenerator(myDataCube, this.onChange.bind(this));
+    var makeDropDownInput = ImmutableDropdown.simpleGenerator(myDataCube, this.onChange.bind(this));
 
     return <form className="general vertical">
       {makeLabel('title')}
@@ -200,7 +200,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
 
       {makeLabel('defaultDuration')}
       <ImmutableInput
-        instance={tempCube}
+        instance={myDataCube}
         path={'defaultDuration'}
         onChange={this.onChange.bind(this)}
 
@@ -210,7 +210,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
 
       {makeLabel('defaultTimezone')}
       <ImmutableInput
-        instance={tempCube}
+        instance={myDataCube}
         path={'defaultTimezone'}
         onChange={this.onChange.bind(this)}
 
@@ -219,13 +219,13 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       />
 
       {makeLabel('defaultSortMeasure')}
-      {makeDropDownInput('defaultSortMeasure', tempCube.measures.map(m => { return { value: m.name, label: m.title } ; }).toArray()) }
+      {makeDropDownInput('defaultSortMeasure', myDataCube.measures.map(m => { return { value: m.name, label: m.title } ; }).toArray()) }
 
     </form>;
   }
 
   renderAttributes(): JSX.Element {
-    const { tempCube, errors } = this.state;
+    const { myDataCube, errors } = this.state;
 
     var makeLabel = FormLabel.simpleGenerator(LABELS, errors);
 
@@ -233,7 +233,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
 
       {makeLabel('attributeOverrides')}
       <ImmutableInput
-        instance={tempCube}
+        instance={myDataCube}
         path={'attributeOverrides'}
         onChange={this.onChange.bind(this)}
 
@@ -246,13 +246,13 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
   }
 
   renderDimensions(): JSX.Element {
-    const { tempCube } = this.state;
+    const { myDataCube } = this.state;
 
     const onChange = (newDimensions: List<Dimension>) => {
-      const newCube = tempCube.changeDimensions(newDimensions);
+      const newCube = myDataCube.changeDimensions(newDimensions);
       this.setState({
-        tempCube: newCube,
-        hasChanged: !this.state.cube.equals(newCube)
+        myDataCube: newCube,
+        hasChanged: !this.state.dataCube.equals(newCube)
       });
     };
 
@@ -272,7 +272,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
 
     return <DimensionsList
       label="Dimensions"
-      items={tempCube.dimensions}
+      items={myDataCube.dimensions}
       onChange={onChange.bind(this)}
       getModal={getModal}
       getNewItem={getNewItem}
@@ -281,22 +281,22 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
   }
 
   renderMeasures(): JSX.Element {
-    var { tempCube } = this.state;
+    var { myDataCube } = this.state;
 
     const onChange = (newMeasures: List<Measure>) => {
 
-      var { defaultSortMeasure } = tempCube;
+      var { defaultSortMeasure } = myDataCube;
 
       if (defaultSortMeasure) {
         if (!newMeasures.find((measure) => measure.name === defaultSortMeasure)) {
-          tempCube = tempCube.changeDefaultSortMeasure(newMeasures.get(0).name);
+          myDataCube = myDataCube.changeDefaultSortMeasure(newMeasures.get(0).name);
         }
       }
 
-      const newCube = tempCube.changeMeasures(newMeasures);
+      const newCube = myDataCube.changeMeasures(newMeasures);
       this.setState({
-        tempCube: newCube,
-        hasChanged: !this.state.cube.equals(newCube)
+        myDataCube: newCube,
+        hasChanged: !this.state.dataCube.equals(newCube)
       });
     };
 
@@ -316,7 +316,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
 
     return <MeasuresList
       label="Measures"
-      items={tempCube.measures}
+      items={myDataCube.measures}
       onChange={onChange.bind(this)}
       getModal={getModal}
       getNewItem={getNewItem}
@@ -354,14 +354,14 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
   }
 
   render() {
-    const { tempCube, tab, hasChanged, cube, canSave } = this.state;
+    const { myDataCube, tab, hasChanged, dataCube, canSave } = this.state;
 
-    if (!tempCube || !tab || !cube) return null;
+    if (!myDataCube || !tab || !dataCube) return null;
 
     return <div className="data-cube-edit">
       <div className="title-bar">
         <Button className="button back" type="secondary" svg={require('../../../icons/full-back.svg')} onClick={this.goBack.bind(this)}/>
-        <div className="title">{cube.title}</div>
+        <div className="title">{dataCube.title}</div>
         {this.renderButtons()}
       </div>
       <div className="content">
