@@ -23,12 +23,23 @@
     display: flex;
     padding: 10px 4px;
 
+    border-top: 1px solid transparent;
+    border-bottom: 1px solid transparent;
+
     &:not(:first-child) {
       border-top: 1px solid $border-super-light;
     }
 
-    > * {
+    &.dragged {
+      opacity: 0.4;
+    }
 
+    &.drop-before {
+      border-top: 1px solid $brand;
+    }
+
+    &.drop-after {
+      border-bottom: 1px solid $brand;
     }
 
     .svg-icon {
@@ -38,6 +49,20 @@
 
       path {
         fill: $brand;
+      }
+    }
+
+    .drag-handle {
+      cursor: move;
+
+      .svg-icon path {
+        fill: $text-lighter;
+      }
+
+      &:hover {
+        .svg-icon path {
+          fill: $text-light;
+        }
       }
     }
 
