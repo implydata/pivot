@@ -110,6 +110,10 @@ export class SimpleList extends React.Component<SimpleListProps, SimpleListState
     return rows.map((row, i) => {
       let {title, description, icon} = row;
 
+      let dragHandle = <div className="drag-handle">
+        <SvgIcon svg={require('../../icons/dragger.svg')}/>
+      </div>;
+
       let svg = svgize(icon);
       let text = <div className="text">
         <div className="title">{title}</div>
@@ -139,17 +143,10 @@ export class SimpleList extends React.Component<SimpleListProps, SimpleListState
         className={classes}
         key={`row-${i}`}
         onDragOver={this.dragOver.bind(this, row)}
+        draggable={!!onReorder}
+        onDragStart={this.dragStart.bind(this, row)}
       >
-        { onReorder ? <div
-            className="drag-handle"
-            draggable={true}
-            onDragStart={this.dragStart.bind(this, row)}
-          >
-            <SvgIcon svg={require('../../icons/dragger.svg')}/>
-          </div>
-          : null
-        }
-
+        {onReorder ? dragHandle : null}
         {svg}
         {text}
         {actions}

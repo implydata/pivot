@@ -22,6 +22,7 @@
   .row {
     display: flex;
     padding: 10px 4px;
+    cursor: move;
 
     border-top: 1px solid transparent;
     border-bottom: 1px solid transparent;
@@ -67,16 +68,10 @@
     }
 
     .drag-handle {
-      cursor: move;
+      opacity: 0;
 
       .svg-icon path {
         fill: $text-lightest;
-      }
-
-      &:hover {
-        .svg-icon path {
-          fill: $text-light;
-        }
       }
     }
 
@@ -108,6 +103,12 @@
       button {
         @extend %button-light;
         border-radius: 20px;
+      }
+    }
+
+    &:hover {
+      .drag-handle {
+        opacity: 1;
       }
     }
   }

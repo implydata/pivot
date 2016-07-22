@@ -254,21 +254,21 @@ export function dataCubeToYAML(dataCube: DataCube, withComments: boolean): strin
   yamlPropAdder(lines, withComments, {
     object: dataCube,
     propName: 'defaultTimezone',
-    comment: 'The default timezone for this dataset to operate in defaults to UTC',
+    comment: DATA_CUBE.defaultTimezone.description,
     defaultValue: DataCube.DEFAULT_DEFAULT_TIMEZONE
   });
 
   yamlPropAdder(lines, withComments, {
     object: dataCube,
     propName: 'defaultDuration',
-    comment: 'The default duration for the time filter',
+    comment: DATA_CUBE.defaultDuration.description,
     defaultValue: DataCube.DEFAULT_DEFAULT_DURATION
   });
 
   yamlPropAdder(lines, withComments, {
     object: dataCube,
     propName: 'defaultSortMeasure',
-    comment: 'The default sort measure name (if not set the first measure name is used)',
+    comment: DATA_CUBE.defaultSortMeasure.description,
     defaultValue: dataCube.getDefaultSortMeasure()
   });
 
