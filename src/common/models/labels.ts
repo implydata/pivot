@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+import { DataCube, Dimension, Measure, Cluster } from './index';
+
 export const DIMENSION = {
   name: {
     label: `Name (you won't be able to change this later)`,
-    help: `The name of the dimension. This does not have to correspond to the
+    description: `The name of the dimension. This does not have to correspond to the
       attribute name (but the auto generated dimensions do). This should be a
       URL safe string. Changing this property will break any URLs that someone
       might have generated that include this dimension, that's why you can only
@@ -25,46 +27,46 @@ export const DIMENSION = {
   },
   title: {
     label: `Title`,
-    help: `The title for this dimension in the UI. Can be anything and is safe
+    description: `The title for this dimension in the UI. Can be anything and is safe
     to change at any time.`
   },
   kind: {
     label: `Kind`,
-    help: `The dimension's kind`
+    description: `The dimension's kind`
   },
   formula: {
     label: `Formula`,
-    help: `The formula for this dimension. By default it is <code>$name</code> where <em>name</em> is
+    description: `The formula for this dimension. By default it is <code>$name</code> where <em>name</em> is
       the name of the dimension. You can create derived dimensions by using
       non-trivial formulas.`
   },
   url: {
     label: `URL`,
-    help: `A url associated with the dimension, with optional token '%s' that
+    description: `A url associated with the dimension, with optional token '%s' that
     is replaced by the dimension value to generate a link specific to each value.`
   },
   granularities: {
     label: `Granularities`,
-    help: `A set of exactly 5 granularities that you want to be available for bucketing.`
+    description: `A set of exactly 5 granularities that you want to be available for bucketing.`
   }
 };
 
 export const MEASURE = {
   name: {
     label: `Name (you won't be able to change this later)`,
-    help: `The name of the measure. This should be a
+    description: `The name of the measure. This should be a
       URL safe string. Changing this property will break any URLs that someone
       might have generated that include this dimension, that's why you can only
       set it once`
   },
   title: {
     label: `Title`,
-    help: `The title for this measure in the UI. Can be anything and is safe
+    description: `The title for this measure in the UI. Can be anything and is safe
     to change at any time.`
   },
   formula: {
     label: `Formula`,
-    help: `The <a href="http://plywood.imply.io/expressions" target="_blank">
+    description: `The <a href="http://plywood.imply.io/expressions" target="_blank">
       Plywood expression</a> for this dimension. By default it is
       <code>$main.sum($name)</code> where <em>name</em> is the name of the measure.`
   }
@@ -73,69 +75,69 @@ export const MEASURE = {
 export const CLUSTER = {
   name: {
     label: 'Name',
-    help: `The name of the cluster (to be referenced later from the data cube)`
+    description: `The name of the cluster (to be referenced later from the data cube)`
   },
   type: {
     label: 'Type',
-    help: 'The database type of the cluster'
+    description: 'The database type of the cluster'
   },
   host: {
     label: 'Host',
-    help: 'The host (hostname:port) of the cluster. In the Druid case this must be the broker.'
+    description: 'The host (hostname:port) of the cluster. In the Druid case this must be the broker.'
   },
   version: {
     label: 'Version',
-    help: 'The explicit version to use for this cluster. This does not need to be defined ' +
+    description: 'The explicit version to use for this cluster. This does not need to be defined ' +
     'as the version will naturally be determined through introspection.'
   },
   timeout: {
     label: 'Timeout',
-    help: 'The timeout to set on the queries in ms. Default is <code>40000</code>'
+    description: `The timeout to set on the queries in ms. Default is <code>${Cluster.DEFAULT_TIMEOUT}</code>`
   },
   sourceListScan: {
     label: 'Source List Scan',
-    help: `Should the sources of this cluster be automatically scanned and new
-      sources added as data cubes. Default: <code>disable</code>`
+    description: `Should the sources of this cluster be automatically scanned and new
+      sources added as data cubes. Default: <code>${Cluster.DEFAULT_SOURCE_LIST_SCAN}</code>`
   },
   sourceListRefreshOnLoad: {
     label: 'Source List Refresh On Load',
-    help: `Should the list of sources be reloaded every time that Pivot is
+    description: `Should the list of sources be reloaded every time that Pivot is
     loaded. This will put additional load on the data store but will ensure that
     sources are visible in the UI as soon as they are created.`
   },
   sourceListRefreshInterval: {
     label: 'Source List Refresh Interval',
-    help: 'How often should sources be reloaded in ms.'
+    description: `How often should sources be reloaded in ms. Default: <code>${Cluster.DEFAULT_SOURCE_LIST_REFRESH_INTERVAL}</code>`
   },
   sourceReintrospectOnLoad: {
     label: 'Source Reintrospect On Load',
-    help: `Should sources be scanned for additional dimensions every time that
+    description: `Should sources be scanned for additional dimensions every time that
       Pivot is loaded. This will put additional load on the data store but will
-      ensure that dimension are visible in the UI as soon as they are created.`
+      ensure that dimension are visible in the UI as soon as they are created. Default: <code>${Cluster.DEFAULT_SOURCE_REINTROSPECT_INTERVAL}</code>`
   },
   sourceReintrospectInterval: {
     label: 'Source Reintrospect Interval',
-    help: 'How often should source schema be reloaded in ms.'
+    description: 'How often should source schema be reloaded in ms.'
   },
 
   // Druid specific
   introspectionStrategy: {
     label: 'Introspection Strategy',
-    help: 'The introspection strategy for the Druid external.'
+    description: 'The introspection strategy for the Druid external.'
   },
 
   // PostGres + MySQL specific
   database: {
     label: 'Database',
-    help: 'The database to which to connect to.'
+    description: 'The database to which to connect to.'
   },
   user: {
     label: 'User',
-    help: 'The user to connect as. This user needs no permissions other than SELECT.'
+    description: 'The user to connect as. This user needs no permissions other than SELECT.'
   },
   password: {
     label: 'Password',
-    help: 'The password to use with the provided user.'
+    description: 'The password to use with the provided user.'
   }
 };
 
@@ -143,11 +145,11 @@ export const CLUSTER = {
 export const GENERAL = {
   'customization.title': {
     label: 'Title',
-    help: 'What will appear as the tab\'s title in your browser. Use <code>%v</code> as a placeholder for Pivot\'s version.'
+    description: 'What will appear as the tab\'s title in your browser. Use <code>%v</code> as a placeholder for Pivot\'s version.'
   },
   'customization.timezones': {
     label: 'Timezones',
-    help: `You can customize the timezones that appear in the header bar
+    description: `You can customize the timezones that appear in the header bar
       dropdown by providing an array of timezone strings.`
   }
 };
@@ -155,60 +157,60 @@ export const GENERAL = {
 export const DATA_CUBE = {
   name: {
     label: 'Name',
-    help: `The name of the data cube as used internally in Pivot and used in the
+    description: `The name of the data cube as used internally in Pivot and used in the
       URLs. This should be a URL safe string. Changing this property for a given
       data cube will break any URLs that someone might have generated for that
       data cube in the past.`
   },
   title: {
     label: 'Title',
-    help: `The user visible name that will be used to describe this data cube in
+    description: `The user visible name that will be used to describe this data cube in
       the UI. It is always safe to change this.`
   },
   description: {
     label: 'Description',
-    help: 'The description of the data cube shown in the homepage.'
+    description: 'The description of the data cube shown in the homepage.'
   },
   introspection: {
     label: 'Introspection',
-    help: `How will this cube be introspected. Default is <code>no-autofill\</code>`
+    description: `How will this cube be introspected. Default: <code>${DataCube.DEFAULT_INTROSPECTION}</code>`
   },
   clusterName: {
     label: 'Cluster',
-    help: `The cluster that the data cube belongs to (or <code>native</code>
+    description: `The cluster that the data cube belongs to (or <code>native</code>
       if this is a file based data cube)`
   },
   source: {
     label: 'Source',
-    help: 'The name of cube\'s source. The dataSource, table, of filename of the data for this cube'
+    description: 'The name of cube\'s source. The dataSource, table, of filename of the data for this cube'
   },
   subsetFormula: {
     label: 'Subset Formula',
-    help: 'A row level filter that is applied to the cube. This filter is never represented in the UI'
+    description: 'A row level filter that is applied to the cube. This filter is never represented in the UI'
   },
   defaultDuration: {
     label: 'Default duration',
-    help: `The time period, expressed as an
+    description: `The time period, expressed as an
       <a href="https://en.wikipedia.org/wiki/ISO_8601#Durations" target="_blank">
       ISO 8601 Duration</a>, that will be shown when the user first opens this
-      cube. Default P1D (1 day).`
+      cube. Default: <code>${DataCube.DEFAULT_DEFAULT_DURATION}</code>.`
   },
   defaultTimezone: {
     label: 'Default timezone',
-    help: `The default timezone, expressed as an
+    description: `The default timezone, expressed as an
       <a href="https://en.wikipedia.org/wiki/Tz_database" target="_blank">
       Olsen Timezone</a>, that will be selected when the user first opens this
-      cube. Default Etc/UTC.`
+      cube. Default: <code>${DataCube.DEFAULT_DEFAULT_TIMEZONE}</code>.`
   },
   defaultSortMeasure: {
     label: 'Default sort measure',
-    help: `The name of the measure that will be used for default sorting.
+    description: `The name of the measure that will be used for default sorting.
       It is commonly set to the measure that represents the count of events.
       Default: the first measure.`
   },
   attributeOverrides: {
     label: `Attribute overrides`,
-    help: `While Pivot tries to learn as much as it can from your data cube
+    description: `While Pivot tries to learn as much as it can from your data cube
       from Druid directly. It can not (yet) do a perfect job.
       The attributeOverrides: section of the data cube is there for you to fix that.`
   }
