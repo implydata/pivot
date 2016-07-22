@@ -54,6 +54,7 @@ export class ImmutableInput extends React.Component<ImmutableInputProps, Immutab
   static simpleGenerator (instance: any, changeFn: (myInstance: any, valid: boolean, path?: string) => void) {
     return (name: string, validator= /^.+$/, focusOnStartUp= false) => {
       return <ImmutableInput
+        key={name}
         instance={instance}
         path={name}
         onChange={changeFn}
@@ -99,7 +100,7 @@ export class ImmutableInput extends React.Component<ImmutableInputProps, Immutab
   }
 
   componentWillReceiveProps(nextProps: ImmutableInputProps) {
-    if (nextProps.instance === undefined || this.props.valueToString !== nextProps.valueToString || this.props.stringToValue !== nextProps.stringToValue) {
+    if (nextProps.instance === undefined) {
       this.reset(() => this.initFromProps(nextProps));
       return;
     }
