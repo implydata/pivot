@@ -145,7 +145,7 @@ export class SimpleList extends React.Component<SimpleListProps, SimpleListState
             draggable={true}
             onDragStart={this.dragStart.bind(this, row)}
           >
-            <SvgIcon svg={require('../../icons/drag-handle.svg')}/>
+            <SvgIcon svg={require('../../icons/dragger.svg')}/>
           </div>
           : null
         }
