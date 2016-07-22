@@ -21,7 +21,7 @@
 
   .row {
     display: flex;
-    padding: 10px 4px;
+    padding: 10px 4px 10px 6px;
     cursor: move;
 
     border-top: 1px solid transparent;
@@ -33,6 +33,10 @@
 
     &.dragged {
       background: $background-lightest;
+
+      &:hover .drag-handle {
+        opacity: 0;
+      }
     }
 
     &.drop-before::after {
@@ -68,6 +72,10 @@
     }
 
     .drag-handle {
+      position: absolute;
+      top: 10px;
+      left: -14px;
+      pointer-events: none;
       opacity: 0;
 
       .svg-icon path {
