@@ -29,7 +29,7 @@ import { ImmutableDropdown } from '../../../components/immutable-dropdown/immuta
 
 import { AppSettings, Cluster, ListItem } from '../../../../common/models/index';
 
-import { CLUSTER_EDIT as LABELS } from '../utils/labels';
+import { CLUSTER as LABELS } from '../../../../common/models/labels';
 
 // Shamelessly stolen from http://stackoverflow.com/a/10006499
 // (well, traded for an upvote)
