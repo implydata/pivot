@@ -62,7 +62,7 @@ var handler = CircumstancesHandler.EMPTY()
           }
         }
         autoChanged = true;
-      } else if (splitDimension.shouldBucket() && split.sortAction.refName() !== splitDimension.name) {
+      } else if (splitDimension.canBucket() && split.sortAction.refName() !== splitDimension.name) {
         split = split.changeSortAction(new SortAction({
           expression: $(splitDimension.name),
           direction: split.sortAction.direction

@@ -209,7 +209,7 @@ export class Dimension implements Instance<DimensionValue, DimensionJS> {
       this.sortStrategy === other.sortStrategy;
   }
 
-  public shouldBucket(): boolean {
+  public canBucket(): boolean {
     return this.isContinuous() && this.bucketingStrategy !== NEVER_BUCKET;
   }
 
