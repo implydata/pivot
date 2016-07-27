@@ -35,8 +35,8 @@ export * from './colors/colors';
 export * from './visualization-props/visualization-props';
 export * from './manifest/manifest';
 export * from './essence/essence';
-export * from './link-item/link-item';
-export * from './link-view-config/link-view-config';
+export * from './collection-item/collection-item';
+export * from './collection/collection';
 
 export * from './user/user';
 export * from './customization/customization';

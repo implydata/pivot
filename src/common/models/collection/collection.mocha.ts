@@ -17,16 +17,16 @@
 import { expect } from 'chai';
 import { testImmutableClass } from 'immutable-class/build/tester';
 
-import { LinkViewConfigMock } from './link-view-config.mock';
-import { LinkViewConfig } from './link-view-config';
+import { CollectionMock } from './collection.mock';
+import { Collection } from './collection';
 
-describe('LinkViewConfig', () => {
-  var context = LinkViewConfigMock.getContext();
+describe('Collection', () => {
+  var context = CollectionMock.getContext();
 
   it('is an immutable class', () => {
-    testImmutableClass(LinkViewConfig, [
-      LinkViewConfigMock.testOneOnlyJS(),
-      LinkViewConfigMock.testOneTwoJS()
+    testImmutableClass(Collection, [
+      CollectionMock.testOneOnlyJS(),
+      CollectionMock.testOneTwoJS()
     ], { context });
   });
 
