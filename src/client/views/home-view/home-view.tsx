@@ -50,7 +50,7 @@ export class HomeView extends React.Component< HomeViewProps, HomeViewState> {
     const { user } = this.props;
     if (!user || !user.allow['settings']) return null;
 
-    return         <div className="icon-button" onClick={this.goToSettings.bind(this)}>
+    return <div className="icon-button" onClick={this.goToSettings.bind(this)}>
       <SvgIcon svg={require('../../icons/full-settings.svg')}/>
     </div>;
   }
