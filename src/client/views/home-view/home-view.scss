@@ -25,7 +25,8 @@
     @include unpin-top($header-height);
     overflow-y: auto;
 
-    .datacubes {
+    .datacubes,
+    .collections {
       margin-top: 36px;
       margin-bottom: 20px;
       padding: 0 12%;

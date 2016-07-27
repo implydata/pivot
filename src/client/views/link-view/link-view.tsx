@@ -129,7 +129,7 @@ export class LinkView extends React.Component<LinkViewProps, LinkViewState> {
 
     var linkItem = linkViewConfig.findByName(hash);
     if (!linkItem) {
-      linkItem = linkViewConfig.defaultLinkItem();
+      linkItem = linkViewConfig.getDefaultItem();
       updateViewHash(linkItem.name);
     }
 

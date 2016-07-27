@@ -17,7 +17,7 @@
 require('./home-view.css');
 
 import * as React from 'react';
-import { Stage, DataCube, User, Customization } from '../../../common/models/index';
+import { Collection, Stage, DataCube, User, Customization } from '../../../common/models/index';
 import { STRINGS } from '../../config/constants';
 import { Fn } from '../../../common/utils/general/general';
 
@@ -27,6 +27,7 @@ import { ItemCard } from './item-card/item-card';
 
 export interface HomeViewProps extends React.Props<any> {
   dataCubes?: DataCube[];
+  collections?: Collection[];
   user?: User;
   onNavClick?: Fn;
   onOpenAbout: Fn;
@@ -38,12 +39,14 @@ export interface HomeViewState {
 
 export class HomeView extends React.Component< HomeViewProps, HomeViewState> {
 
-  goToCube(cube: DataCube) {
-    window.location.hash = '#' + cube.name;
-  }
+  goToItem(item: DataCube | Collection) {
+    var fragments = item.name;
 
-  goToSettings() {
-    window.location.hash = '#settings';
+    if (Collection.isCollection(item)) {
+      fragments = 'collection/' + fragments;
+    }
+
+    window.location.hash = '#' + fragments;
   }
 
   renderSettingsIcon() {
@@ -55,33 +58,30 @@ export class HomeView extends React.Component< HomeViewProps, HomeViewState> {
     </div>;
   }
 
-  renderCube(cube: DataCube): JSX.Element {
+  renderItem(item: DataCube | Collection): JSX.Element {
     return <ItemCard
-      key={cube.name}
-      title={cube.title}
-      description={cube.description}
-      icon="full-cube"
-      onClick={this.goToCube.bind(this, cube)}
+      key={item.name}
+      title={item.title}
+      description={item.description}
+      icon={item instanceof DataCube ? 'full-cube' : 'full-collection'}
+      onClick={this.goToItem.bind(this, item)}
     />;
   }
 
-  renderCubes(cubes: DataCube[]): JSX.Element {
-    return <div className="datacubes">
-      <div className="title">{STRINGS.dataCubes}</div>
-      <div className="cubes-container">
-        {cubes.map(this.renderCube, this)}
+  renderItems(items: (DataCube | Collection)[]): JSX.Element {
+    return <div className="items-container">
+        {items.map(this.renderItem, this)}
 
         {/* So that the last item doesn't span on the entire row*/}
         <div className="item-card empty"/>
         <div className="item-card empty"/>
         <div className="item-card empty"/>
         <div className="item-card empty"/>
-      </div>
-    </div>;
+      </div>;
   }
 
   render() {
-    const { user, dataCubes, onNavClick, onOpenAbout, customization } = this.props;
+    const { user, dataCubes, onNavClick, onOpenAbout, customization, collections } = this.props;
 
     return <div className="home-view">
       <HomeHeaderBar
@@ -97,7 +97,15 @@ export class HomeView extends React.Component< HomeViewProps, HomeViewState> {
       </HomeHeaderBar>
 
       <div className="container">
-        {this.renderCubes(dataCubes)}
+        <div className="datacubes">
+          <div className="title">{STRINGS.dataCubes}</div>
+          {this.renderItems(dataCubes)}
+        </div>
+
+        <div className="collections">
+          <div className="title">{STRINGS.collections}</div>
+          {this.renderItems(collections)}
+        </div>
       </div>
 
     </div>;

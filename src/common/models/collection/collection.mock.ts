@@ -23,6 +23,7 @@ export class CollectionMock {
   public static testOneOnlyJS(): CollectionJS {
     return {
       title: 'The Links Will Rise Again!',
+      name: 'the_links_will_rise_again',
       items: [
         CollectionItemMock.testOneJS()
       ]
@@ -32,6 +33,7 @@ export class CollectionMock {
   public static testOneTwoJS(): CollectionJS {
     return {
       title: 'The Links Will Be Reloaded!',
+      name: 'the_links_will_be_reloaded',
       items: [
         CollectionItemMock.testOneJS(),
         CollectionItemMock.testTwoJS()

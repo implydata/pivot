@@ -21,12 +21,16 @@ import { Manifest } from '../manifest/manifest';
 import { CollectionItem, CollectionItemJS, CollectionItemContext } from '../collection-item/collection-item';
 
 export interface CollectionValue {
-  title: string;
+  name: string;
+  title?: string;
+  description?: string;
   items: CollectionItem[];
 }
 
 export interface CollectionJS {
-  title: string;
+  name: string;
+  title?: string;
+  description?: string;
   items: CollectionItemJS[];
 }
 
@@ -42,34 +46,49 @@ export class Collection implements Instance<CollectionValue, CollectionJS> {
   static fromJS(parameters: CollectionJS, context?: CollectionContext): Collection {
     if (!context) throw new Error('Collection must have context');
 
+    if (!parameters.name) throw new Error('Collection must have a name');
+
     var items: CollectionItemJS[] = parameters.items || (parameters as any).linkItems || [];
 
     return new Collection({
       title: parameters.title,
+      name: parameters.name,
+      description: parameters.description,
       items: items.map(linkItem => CollectionItem.fromJS(linkItem, context))
     });
   }
 
   public title: string;
+  public name: string;
+  public description: string;
   public items: CollectionItem[];
 
   constructor(parameters: CollectionValue) {
     this.title = parameters.title;
+    this.name = parameters.name;
     this.items = parameters.items;
+    this.description = parameters.description;
   }
 
   public valueOf(): CollectionValue {
     return {
       title: this.title,
+      name: this.name,
+      description: this.description,
       items: this.items
     };
   }
 
   public toJS(): CollectionJS {
-    return {
-      title: this.title,
+    var o: CollectionJS = {
+      name: this.name,
       items: this.items.map(linkItem => linkItem.toJS())
     };
+
+    if (this.description) o.description = this.description;
+    if (this.title) o.title = this.title;
+
+    return o;
   }
 
   public toJSON(): CollectionJS {
@@ -77,16 +96,18 @@ export class Collection implements Instance<CollectionValue, CollectionJS> {
   }
 
   public toString(): string {
-    return `[LinkViewConfig: ${this.title}]`;
+    return `[Collection: ${this.title}]`;
   }
 
   public equals(other: Collection): boolean {
     return Collection.isCollection(other) &&
       this.title === other.title &&
+      this.name === other.name &&
+      this.description === other.description &&
       immutableArraysEqual(this.items, other.items);
   }
 
-  public defaultLinkItem(): CollectionItem {
+  public getDefaultItem(): CollectionItem {
     return this.items[0];
   }
 
