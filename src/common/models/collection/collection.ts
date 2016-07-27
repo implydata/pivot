@@ -41,9 +41,12 @@ export class Collection implements Instance<CollectionValue, CollectionJS> {
 
   static fromJS(parameters: CollectionJS, context?: CollectionContext): Collection {
     if (!context) throw new Error('Collection must have context');
+
+    var items: CollectionItemJS[] = parameters.items || (parameters as any).linkItems || [];
+
     return new Collection({
       title: parameters.title,
-      items: parameters.items.map(linkItem => CollectionItem.fromJS(linkItem, context))
+      items: items.map(linkItem => CollectionItem.fromJS(linkItem, context))
     });
   }
 

@@ -290,7 +290,7 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
   render() {
     var { maxFilters, maxSplits, user, version } = this.props;
     var { viewType, viewHash, selectedDataCube, ReactCSSTransitionGroupAsync, drawerOpen, SideDrawerAsync, appSettings } = this.state;
-    var { dataCubes, customization, linkViewConfig } = appSettings;
+    var { dataCubes, collections, customization, linkViewConfig } = appSettings;
 
     var sideDrawer: JSX.Element = null;
     if (drawerOpen && SideDrawerAsync) {
@@ -326,6 +326,7 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
         view = <HomeView
           user={user}
           dataCubes={dataCubes}
+          collections={collections}
           onNavClick={this.sideDrawerOpen.bind(this, true)}
           onOpenAbout={this.openAboutModal.bind(this)}
           customization={customization}
