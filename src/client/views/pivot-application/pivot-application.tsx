@@ -303,10 +303,7 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
         onClose={closeSideDrawer}
         customization={customization}
         itemHrefFn={this.sideBarHrefFn}
-        isCube={viewType === CUBE && !linkViewConfig}
-        isLink={viewType === LINK || !!linkViewConfig}
-        isHome={viewType === HOME}
-        isSettings={viewType === SETTINGS}
+        viewType={viewType}
       />;
     }
 

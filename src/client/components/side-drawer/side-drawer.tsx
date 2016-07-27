@@ -33,10 +33,7 @@ export interface SideDrawerProps extends React.Props<any> {
   onClose: Fn;
   customization?: Customization;
   itemHrefFn?: (oldDataCube?: DataCube, newDataCube?: DataCube) => string;
-  isHome?: boolean;
-  isCube?: boolean;
-  isLink?: boolean;
-  isSettings?: boolean;
+  viewType: 'home' | 'cube' | 'link' | 'settings';
 }
 
 export interface SideDrawerState {
@@ -83,14 +80,15 @@ export class SideDrawer extends React.Component<SideDrawerProps, SideDrawerState
   }
 
   renderOverviewLink() {
-    const { isHome, isCube, isLink, isSettings } = this.props;
-
-    if (!isCube && !isLink && !isHome && !isSettings) return null;
+    const { viewType } = this.props;
 
     return <div className="home-container">
-      <div className={classNames('home-link', {selected: isHome})} onClick={this.onHomeClick.bind(this)}>
+      <div
+        className={classNames('home-link', {selected: viewType === 'home'})}
+        onClick={this.onHomeClick.bind(this)}
+      >
         <SvgIcon svg={require('../../icons/home.svg')}/>
-        <span>{isLink ? 'Overview' : 'Home'}</span>
+        <span>{viewType === 'link' ? 'Overview' : 'Home'}</span>
       </div>
     </div>;
   }
