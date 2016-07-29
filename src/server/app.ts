@@ -100,7 +100,7 @@ app.use(morgan((m: any, req: PivotRequest, res: Response) => {
     },
     user: req.user,
     metric: 'request/time',
-    value: m['response-time'](req, res)
+    value: Number(m['response-time'](req, res))
   });
   return morgenFormatFunction(m, req, res);
 }));
