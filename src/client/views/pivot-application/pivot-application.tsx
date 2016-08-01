@@ -364,7 +364,6 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
       case SETTINGS:
         view = <SettingsView
           user={user}
-          hash={window.location.hash}
           onNavClick={this.sideDrawerOpen.bind(this, true)}
           onSettingsChange={this.onSettingsChange.bind(this)}
           customization={customization}

@@ -49,6 +49,10 @@ export class HomeView extends React.Component< HomeViewProps, HomeViewState> {
     window.location.hash = '#' + fragments;
   }
 
+  goToSettings() {
+    window.location.hash = '#settings';
+  }
+
   renderSettingsIcon() {
     const { user } = this.props;
     if (!user || !user.allow['settings']) return null;
