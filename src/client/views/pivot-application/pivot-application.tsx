@@ -20,7 +20,7 @@ import * as React from 'react';
 import * as ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import { findByName } from 'plywood';
 
-import { DataCube, AppSettings, User } from '../../../common/models/index';
+import { DataCube, AppSettings, User, Collection } from '../../../common/models/index';
 
 import { createFunctionSlot, FunctionSlot } from '../../utils/function-slot/function-slot';
 import { AboutModal } from '../../components/about-modal/about-modal';
@@ -31,6 +31,7 @@ import { HomeView } from '../home-view/home-view';
 import { LinkView } from '../link-view/link-view';
 import { CubeView } from '../cube-view/cube-view';
 import { SettingsView } from '../settings-view/settings-view';
+import { CollectionView } from '../collection-view/collection-view';
 
 export interface PivotApplicationProps extends React.Props<any> {
   version: string;
@@ -48,16 +49,17 @@ export interface PivotApplicationState {
 
   appSettings?: AppSettings;
   drawerOpen?: boolean;
-  selectedDataCube?: DataCube;
+  selectedItem?: DataCube | Collection;
   viewType?: ViewType;
   viewHash?: string;
   showAboutModal?: boolean;
 }
 
-export type ViewType = "home" | "cube" | "link" | "settings";
+export type ViewType = "home" | "cube" | "collection" | "link" | "settings";
 
 export const HOME: ViewType = "home";
 export const CUBE: ViewType = "cube";
+export const COLLECTION: ViewType = "collection";
 export const LINK: ViewType = "link";
 export const SETTINGS: ViewType = "settings";
 
@@ -71,7 +73,7 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
     this.state = {
       appSettings: null,
       drawerOpen: false,
-      selectedDataCube: null,
+      selectedItem: null,
       viewType: null,
       viewHash: null,
       showAboutModal: false
@@ -88,26 +90,39 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
 
     if (viewType !== SETTINGS && !dataCubes.length) throw new Error('must have data cubes');
 
-    var selectedDataCube = this.getDataCubeFromHash(appSettings.dataCubes, hash);
     var viewHash = this.getViewHashFromHash(hash);
 
-    // If data cube does not exit bounce to home
-    if (viewType === CUBE && !selectedDataCube) {
-      this.changeHash('');
-      viewType = HOME;
+    var selectedItem: DataCube | Collection;
+
+    if (this.viewTypeNeedsAnItem(viewType)) {
+      selectedItem = this.getSelectedItemFromHash(
+        viewType === CUBE ? appSettings.dataCubes : appSettings.collections,
+        hash,
+        viewType
+      );
+
+      // If datacube / collection does not exist, then bounce to home
+      if (!selectedItem) {
+        this.changeHash('');
+        viewType = HOME;
+      }
     }
 
     if (viewType === HOME && dataCubes.length === 1) {
       viewType = CUBE;
-      selectedDataCube = dataCubes[0];
+      selectedItem = dataCubes[0];
     }
 
     this.setState({
       viewType,
       viewHash,
-      selectedDataCube,
+      selectedItem,
       appSettings
     });
+  }
+
+  viewTypeNeedsAnItem(viewType: ViewType): boolean {
+    return [CUBE, COLLECTION].indexOf(viewType) > -1;
   }
 
   componentDidMount() {
@@ -152,7 +167,7 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
   }
 
   hashToState(hash: string) {
-    const { dataCubes } = this.state.appSettings;
+    const { dataCubes, collections } = this.state.appSettings;
     var viewType = this.getViewTypeFromHash(hash);
     var viewHash = this.getViewHashFromHash(hash);
     var newState: PivotApplicationState = {
@@ -161,12 +176,12 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
       drawerOpen: false
     };
 
-    if (viewType === CUBE) {
-      var dataCube = this.getDataCubeFromHash(dataCubes, hash);
-      if (!dataCube) dataCube = dataCubes[0];
-      newState.selectedDataCube = dataCube;
+    if (this.viewTypeNeedsAnItem(viewType)) {
+      let items = viewType === CUBE ? dataCubes : collections;
+      let item = this.getSelectedItemFromHash(items, hash, viewType);
+      newState.selectedItem = item ? item : items[0];
     } else {
-      newState.selectedDataCube = null;
+      newState.selectedItem = null;
     }
 
     this.setState(newState);
@@ -181,17 +196,24 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
     const { user } = this.props;
     const appSettings = this.state.appSettings || this.props.appSettings;
     var viewType = this.parseHash(hash)[0];
+
     if (!viewType || viewType === HOME) return appSettings.linkViewConfig ? LINK : HOME;
+
     if (viewType === SETTINGS && user && user.allow['settings']) return SETTINGS;
+
     if (appSettings.linkViewConfig && viewType === LINK) return LINK;
+
+    if (viewType === COLLECTION) return COLLECTION;
+
     return CUBE;
   }
 
-  getDataCubeFromHash(dataCubes: DataCube[], hash: string): DataCube {
+  getSelectedItemFromHash(items: (DataCube | Collection)[], hash: string, viewType: ViewType): DataCube | Collection {
     // can change header from hash
     var parts = this.parseHash(hash);
-    var dataCubeName = parts.shift();
-    return findByName(dataCubes, dataCubeName);
+    var itemName = parts[viewType === COLLECTION ? 1 : 0];
+
+    return helper.findByName(items, itemName);
   }
 
   getViewHashFromHash(hash: string): string {
@@ -226,7 +248,9 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
 
     var newHash: string;
     if (viewType === CUBE) {
-      newHash = `${this.state.selectedDataCube.name}/${viewHash}`;
+      newHash = `${this.state.selectedItem.name}/${viewHash}`;
+    } else if (viewType === COLLECTION) {
+      newHash = `collection/${this.state.selectedItem.name}`;
     } else if (viewType === LINK) {
       newHash = `${viewType}/${viewHash}`;
     } else {
@@ -243,8 +267,8 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
     if (baseOnly) return urlBase;
 
     var newPrefix: string;
-    if (viewType === CUBE) {
-      newPrefix = `${this.state.selectedDataCube.name}/`;
+    if (this.viewTypeNeedsAnItem(viewType)) {
+      newPrefix = `${this.state.selectedItem.name}/`;
     } else {
       newPrefix = viewType;
     }
@@ -289,7 +313,7 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
 
   render() {
     var { maxFilters, maxSplits, user, version } = this.props;
-    var { viewType, viewHash, selectedDataCube, ReactCSSTransitionGroupAsync, drawerOpen, SideDrawerAsync, appSettings } = this.state;
+    var { viewType, viewHash, selectedItem, ReactCSSTransitionGroupAsync, drawerOpen, SideDrawerAsync, appSettings } = this.state;
     var { dataCubes, collections, customization, linkViewConfig } = appSettings;
 
     var sideDrawer: JSX.Element = null;
@@ -297,7 +321,7 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
       var closeSideDrawer: () => void = this.sideDrawerOpen.bind(this, false);
       sideDrawer = <SideDrawerAsync
         key='drawer'
-        selectedDataCube={selectedDataCube}
+        selectedDataCube={selectedItem as DataCube}
         dataCubes={dataCubes}
         onOpenAbout={this.openAboutModal.bind(this)}
         onClose={closeSideDrawer}
@@ -336,7 +360,7 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
       case CUBE:
         view = <CubeView
           user={user}
-          dataCube={selectedDataCube}
+          dataCube={selectedItem as DataCube}
           hash={viewHash}
           updateViewHash={this.updateViewHash.bind(this)}
           getUrlPrefix={this.getUrlPrefix.bind(this)}
@@ -345,6 +369,15 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
           onNavClick={this.sideDrawerOpen.bind(this, true)}
           customization={customization}
           transitionFnSlot={this.sideBarHrefFn}
+        />;
+        break;
+
+      case COLLECTION:
+        view = <CollectionView
+          user={user}
+          collection={selectedItem as Collection}
+          onNavClick={this.sideDrawerOpen.bind(this, true)}
+          customization={customization}
         />;
         break;
 
