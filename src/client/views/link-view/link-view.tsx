@@ -30,7 +30,6 @@ import { STRINGS } from "../../config/constants";
 import { LinkHeaderBar } from '../../components/link-header-bar/link-header-bar';
 import { ManualFallback } from '../../components/manual-fallback/manual-fallback';
 import { PinboardPanel } from '../../components/pinboard-panel/pinboard-panel';
-import { ButtonGroup } from '../../components/button-group/button-group';
 import { Preset } from '../../components/time-filter-menu/time-filter-menu';
 import { ResizeHandle } from '../../components/resize-handle/resize-handle';
 import { Dropdown } from "../../components/dropdown/dropdown";
@@ -38,10 +37,10 @@ import { getVisualizationComponent } from '../../visualizations/index';
 
 var $maxTime = $(FilterClause.MAX_TIME_REF_NAME);
 var latestPresets: Preset[] = [
-  { name: '5 minutes',  selection: $maxTime.timeRange('PT5M', -1) },
-  { name: 'hour',  selection: $maxTime.timeRange('PT1H', -1) },
-  { name: 'day',  selection: $maxTime.timeRange('P1D', -1)  },
-  { name: 'week',  selection: $maxTime.timeRange('P1W', -1)  }
+  { name: STRINGS.last5Minutes,  selection: $maxTime.timeRange('PT5M', -1) },
+  { name: STRINGS.lastHour,  selection: $maxTime.timeRange('PT1H', -1) },
+  { name: STRINGS.lastDay,  selection: $maxTime.timeRange('P1D', -1)  },
+  { name: STRINGS.lastWeek,  selection: $maxTime.timeRange('P1W', -1)  }
 ];
 
 export interface LinkViewLayout {
@@ -235,7 +234,6 @@ export class LinkView extends React.Component<LinkViewProps, LinkViewState> {
 
     var selected = helper.find(latestPresets, p => p.selection.equals(essence.getTimeSelection()));
     return <PresetDropdown
-      label={STRINGS.last}
       items={latestPresets}
       selectedItem={selected}
       equal={(a, b) => a.name === b.name}
