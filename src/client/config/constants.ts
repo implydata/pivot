@@ -64,6 +64,7 @@ export const STRINGS: any = {
   infoAndFeedback: 'Info & Feedback',
   intersection: 'Intersection',
   latest: 'Latest',
+  last: 'Last',
   limit: 'Limit',
   logout: 'Logout',
   measures: 'Measures',
