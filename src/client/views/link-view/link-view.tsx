@@ -236,8 +236,13 @@ export class LinkView extends React.Component<LinkViewProps, LinkViewState> {
     return <PresetDropdown
       items={latestPresets}
       selectedItem={selected}
-      equal={(a, b) => a.selection === b.selection}
-      renderItem={(p) => p.name}
+      equal={(a, b) => {
+          if (a === b) return true;
+          if (!a !== !b) return false;
+          return a.selection === b.selection;
+        }
+      }
+      renderItem={(p) => p ? p.name : ""}
       onSelect={this.selectPreset.bind(this)}
     />;
   }
