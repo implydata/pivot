@@ -2,6 +2,10 @@
 
 For updates follow [@implydata](https://twitter.com/implydata) on Twitter.
 
+## 0.9.31
+
+- Fix `defaultSplits` in `dataCube` 
+
 ## 0.9.30
 
 - New plywood + more back compat tests
