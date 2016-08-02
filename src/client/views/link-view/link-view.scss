@@ -53,6 +53,7 @@
         line-height: 25px;
         padding: 0 4px 0 38px;
         cursor: pointer;
+        overflow: hidden;
 
         &.selected {
           background: rgba($brand, 0.16);
@@ -86,7 +87,6 @@
         font-size: 17px;
         margin-bottom: 8px;
         padding-right: 152px;
-        overflow: hidden;
       }
 
       .link-description {
