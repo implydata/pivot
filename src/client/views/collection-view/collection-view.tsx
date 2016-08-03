@@ -29,21 +29,25 @@ import { Notifier } from '../../components/notifications/notifications';
 import { HomeHeaderBar } from '../../components/home-header-bar/home-header-bar';
 import { Button } from '../../components/button/button';
 import { SvgIcon } from '../../components/svg-icon/svg-icon';
+import { Router, Route } from '../../components/router/router';
 import { ButtonGroup } from '../../components/button-group/button-group';
 
 import { AppSettings, AppSettingsJS } from '../../../common/models/index';
 
+import { CollectionOverview } from './collection-overview/collection-overview';
 import { CollectionItemCard } from './collection-item-card/collection-item-card';
+import { CollectionItemLightbox } from './collection-item-lightbox/collection-item-lightbox';
 
 
 export interface CollectionViewProps extends React.Props<any> {
-  collection: Collection;
+  collections: Collection[];
   user?: User;
   onNavClick?: Fn;
   customization?: Customization;
 }
 
 export interface CollectionViewState {
+  expandedItem?: CollectionItem;
 }
 
 export class CollectionView extends React.Component<CollectionViewProps, CollectionViewState> {
@@ -52,27 +56,38 @@ export class CollectionView extends React.Component<CollectionViewProps, Collect
     this.state = {};
   }
 
-  renderItem(item: CollectionItem): JSX.Element {
-    return <CollectionItemCard item={item} key={item.name}/>;
+  onURLChange() {
+
   }
 
   render() {
-    const { user, collection, customization, onNavClick } = this.props;
+    const { user, collections, customization, onNavClick } = this.props;
 
     return <div className="collection-view">
       <HomeHeaderBar
         user={user}
         onNavClick={onNavClick}
         customization={customization}
-        title={collection.title}
       />
 
      <div className="main-panel">
-       <div className="collection-items">
-         {collection.items.map(this.renderItem)}
-         <div className="collection-item-card empty"/>
-       </div>
+       <Router
+         onURLChange={this.onURLChange.bind(this)}
+         rootFragment={`collection`}
+         hash={window.location.hash}
+       >
+         <Route fragment=":collectionId/:itemId">
+           <CollectionOverview collections={collections}/>
+           <CollectionItemLightbox collections={collections}/>
+         </Route>
+
+         <Route fragment={`:collectionId=${collections[0].name}`}>
+           <CollectionOverview collections={collections}/>
+         </Route>
+
+       </Router>
      </div>
+
     </div>;
   }
 }

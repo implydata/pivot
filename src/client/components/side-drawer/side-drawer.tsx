@@ -99,13 +99,13 @@ export class SideDrawer extends React.Component<SideDrawerProps, SideDrawerState
 
     var navLinks = items.map(item => {
       var href = Collection.isCollection(item) ? `#collection/${item.name}` : `#${item.name}`;
-      href = itemHrefFn ? itemHrefFn(selectedItem, item) : href;
+      href = itemHrefFn(selectedItem, item) || href;
 
       return {
         name: item.name,
         title: item.title,
         tooltip: item.description,
-        href: href
+        href
       };
     });
 

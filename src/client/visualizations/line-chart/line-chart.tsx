@@ -114,8 +114,9 @@ export class LineChart extends BaseVisualization<LineChartState> {
   }
 
   onMouseDown(measure: Measure, e: MouseEvent) {
+    const { clicker } = this.props;
     const { scaleX } = this.state;
-    if (!scaleX) return;
+    if (!scaleX || !clicker.dropHighlight || !clicker.changeHighlight) return;
 
     var dragStartValue = scaleX.invert(this.getMyEventX(e));
     this.setState({

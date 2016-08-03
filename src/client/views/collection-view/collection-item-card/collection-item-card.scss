@@ -17,6 +17,11 @@
 @import '../../../imports';
 
 .collection-item-card {
+
+  // Importing this here so it only applies to .collection-item-card
+  // otherwise it pollutes the global CSS
+  @import '../../../utils/styles/grid';
+
   min-width: 400px;
   padding: 20px;
 
@@ -30,26 +35,6 @@
   .headband {
     height: 60px;
     border-bottom: 1px solid $border-super-light;
-
-    .left,
-    .right {
-      display: inline-block;
-    }
-
-    .left {
-      width: calc(100% - 30px);
-    }
-
-    .right {
-      width: 30px;
-    }
-
-    .title,
-    .description {
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      overflow: hidden;
-    }
 
     .title {
       color: $text-medium;
@@ -70,8 +55,7 @@
     }
 
     .expand-button {
-      padding-top: 10px;
-      padding-left: 10px;
+      width: 20px;
 
       cursor: pointer;
 

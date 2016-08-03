@@ -119,9 +119,13 @@ export class Table extends BaseVisualization<TableState> {
   onClick(x: number, y: number) {
     var { clicker, essence } = this.props;
     var { splits, dataCube } = essence;
+
+
     var pos = this.calculateMousePosition(x, y);
 
     if (pos.what === 'corner' || pos.what === 'header') {
+      if (!clicker.changeSplits) return;
+
       var sortExpression = $(pos.what === 'corner' ? SplitCombine.SORT_ON_DIMENSION_PLACEHOLDER : pos.measure.name);
       var commonSort = essence.getCommonSort();
       var myDescending = (commonSort && commonSort.expression.equals(sortExpression) && commonSort.direction === SortAction.DESCENDING);
@@ -131,6 +135,8 @@ export class Table extends BaseVisualization<TableState> {
       }), essence.dataCube.dimensions), VisStrategy.KeepAlways);
 
     } else if (pos.what === 'row') {
+      if (!clicker.dropHighlight || !clicker.changeHighlight) return;
+
       var rowHighlight = getFilterFromDatum(essence.splits, pos.row, dataCube);
 
       if (!rowHighlight) return;

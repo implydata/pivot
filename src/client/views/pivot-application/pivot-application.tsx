@@ -375,7 +375,7 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
       case COLLECTION:
         view = <CollectionView
           user={user}
-          collection={selectedItem as Collection}
+          collections={collections}
           onNavClick={this.sideDrawerOpen.bind(this, true)}
           customization={customization}
         />;

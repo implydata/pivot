@@ -18,20 +18,16 @@ require('./collection-item-card.css');
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { Fn } from '../../../../common/utils/general/general';
-import { firstUp } from '../../../../common/utils/string/string';
-import { classNames } from '../../../utils/dom/dom';
 
 import { SvgIcon } from '../../../components/svg-icon/svg-icon';
-import { FormLabel } from '../../../components/form-label/form-label';
-import { Button } from '../../../components/button/button';
 
-import { Collection, CollectionItem, VisualizationProps, Stage } from '../../../../common/models/index';
+import { Collection, CollectionItem, VisualizationProps, Stage, Essence } from '../../../../common/models/index';
 
 import { getVisualizationComponent } from '../../../visualizations/index';
 
 export interface CollectionItemCardProps extends React.Props<any> {
   item: CollectionItem;
+  onExpand?: (item: CollectionItem) => void;
 }
 
 export type DeviceSize = 'small' | 'medium' | 'large';
@@ -76,7 +72,11 @@ export class CollectionItemCard extends React.Component<CollectionItemCardProps,
   }
 
   expand() {
-    console.log(this.props.item);
+    const { onExpand, item } = this.props;
+
+    if (!onExpand) return;
+
+    onExpand(item);
   }
 
   render() {
@@ -85,10 +85,16 @@ export class CollectionItemCard extends React.Component<CollectionItemCardProps,
 
     if (!item) return null;
 
-    const { essence } = item;
+    var { essence } = item;
 
     var visElement: JSX.Element = null;
     if (essence.visResolve.isReady() && visualizationStage) {
+
+      // Forcing single measure mode
+      if (essence.getEffectiveMultiMeasureMode()) {
+        essence = essence.toggleMultiMeasureMode();
+      }
+
       var visProps: VisualizationProps = {
         clicker: {},
         essence,
@@ -99,12 +105,12 @@ export class CollectionItemCard extends React.Component<CollectionItemCardProps,
     }
 
     return <div className="collection-item-card">
-        <div className="headband">
-          <div className="left">
+        <div className="headband grid-row">
+          <div className="grid-col-80 vertical">
             <div className="title">{item.title}</div>
             <div className="description">{item.description}</div>
           </div>
-          <div className="right">
+          <div className="grid-col-20 middle right">
             <div
               className="expand-button"
               onClick={this.expand.bind(this)}

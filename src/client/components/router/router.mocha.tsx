@@ -49,7 +49,7 @@ class Fake extends React.Component<FakeProps, FakeState> {
 }
 // -- end of Fake class
 
-describe('Router', () => {
+describe.skip('Router', () => {
   var children: JSX.Element[];
   var component: React.Component<any, any>;
   var node: any;

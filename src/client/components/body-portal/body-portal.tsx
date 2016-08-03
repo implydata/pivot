@@ -24,6 +24,7 @@ export interface BodyPortalProps extends React.Props<any> {
   top?: number | string;
   fullSize?: boolean;
   disablePointerEvents?: boolean;
+  onMount?: () => void;
 }
 
 export interface BodyPortalState {
@@ -65,6 +66,7 @@ export class BodyPortal extends React.Component<BodyPortalProps, BodyPortalState
 
   componentDidMount() {
     this.teleport();
+    if (this.props.onMount) this.props.onMount();
   }
 
   teleport() {

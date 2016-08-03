@@ -67,9 +67,9 @@ export class Router extends React.Component<RouterProps, RouterState> {
 
     if (hash.charAt(0) === '#') hash = hash.substr(1);
 
-    var fragments = hash.split(HASH_SEPARATOR);
+    hash = hash.replace(new RegExp('^' + this.props.rootFragment, 'gi'), '');
 
-    if (fragments[0] === this.props.rootFragment) fragments.shift();
+    var fragments = hash.split(HASH_SEPARATOR);
 
     return fragments.filter(Boolean);
   }
@@ -84,6 +84,8 @@ export class Router extends React.Component<RouterProps, RouterState> {
   }
 
   replaceHash(newHash: string) {
+    console.log(newHash);
+
     // Acts like window.location.hash = newHash but doesn't clutter the history
     // See http://stackoverflow.com/a/23924886/863119
     window.history.replaceState(undefined, undefined, newHash);
@@ -126,8 +128,11 @@ export class Router extends React.Component<RouterProps, RouterState> {
     // Default route
     if (crumbs.length === 0) {
       let defaultFragment = this.getDefaultFragment(children);
-      this.replaceHash(hash + '/' + defaultFragment);
-      return;
+
+      if (defaultFragment) {
+        this.replaceHash(hash + '/' + defaultFragment);
+        return;
+      }
     }
 
     var route = this.getQualifiedRoute(children, crumbs);
@@ -188,7 +193,12 @@ export class Router extends React.Component<RouterProps, RouterState> {
   }
 
   getQualifiedRoute(candidates: JSX.Element[], crumbs: string[]): QualifiedPath {
-    var isRoute = (element: JSX.Element) => element.type === Route;
+    var isRoute = (element: any) => element.type === Route;
+
+    // In case there's only one route
+    if (isRoute(candidates)) {
+      candidates = ([candidates as any]) as JSX.Element[];
+    }
 
     for (let i = 0; i < candidates.length; i++) {
       let candidate = candidates[i];
@@ -197,7 +207,7 @@ export class Router extends React.Component<RouterProps, RouterState> {
       if (!fragment) continue;
 
       if (crumbs[0] === fragment || fragment.charAt(0) === ':') {
-        if (!(candidate.props.children instanceof Array)) {
+        if (!(candidate.props.children instanceof Array) || !candidate.props.children.some(isRoute)) {
           return {fragment, route: candidate, crumbs};
         } else if (crumbs.length === 1) {
           return {fragment, route: candidate, crumbs};
@@ -225,18 +235,19 @@ export class Router extends React.Component<RouterProps, RouterState> {
     return !(route.props.children instanceof Array);
   }
 
-  getDefaultRoute(route: JSX.Element): JSX.Element {
-    if (!route) return null;
+  getSimpleChildren(parent: JSX.Element): JSX.Element[] {
+    if (!parent) return null;
 
-    return route.props.children.filter((child: JSX.Element) => !this.isRoute(child))[0];
+    return parent.props.children.filter((child: JSX.Element) => !this.isRoute(child));
   }
 
-  getQualifiedChild(candidates: JSX.Element[], crumbs: string[]): JSX.Element {
-    var fillProps = (child: JSX.Element, crumbs: string[], fragment: string): JSX.Element => {
-      let newProps: any = {};
+  getQualifiedChild(candidates: JSX.Element[], crumbs: string[]): JSX.Element | JSX.Element[] {
+    var fillProps = (child: JSX.Element, crumbs: string[], fragment: string, i=0): JSX.Element => {
+      let newProps: any = {key: i};
+      let myCrumbs = crumbs.concat();
       fragment.split(HASH_SEPARATOR).forEach((bit, i) => {
         if (bit.charAt(0) !== ':') return;
-        newProps[bit.slice(1).replace(/=.*$/, '')] = crumbs.shift();
+        newProps[bit.slice(1).replace(/=.*$/, '')] = myCrumbs.shift();
       });
 
       return React.cloneElement(child, newProps);
@@ -248,8 +259,10 @@ export class Router extends React.Component<RouterProps, RouterState> {
       return fillProps(result.route.props.children, result.crumbs, result.fragment);
     }
 
-    if (this.getDefaultRoute(result.route)) {
-      return fillProps(this.getDefaultRoute(result.route), result.crumbs, result.fragment);
+    var children = this.getSimpleChildren(result.route);
+
+    if (children.length > 0) {
+      return children.map((child, i) => fillProps(child, result.crumbs, result.fragment, i));
     }
 
     return null;
@@ -264,6 +277,8 @@ export class Router extends React.Component<RouterProps, RouterState> {
     const crumbs = this.parseHash(hash);
     if (!crumbs || !crumbs.length) return null;
 
-    return this.getQualifiedChild(children as JSX.Element[], crumbs);
+    const qualifiedChildren = this.getQualifiedChild(children as JSX.Element[], crumbs) as any;
+
+    return qualifiedChildren.length > 1 ? <div className="route">{qualifiedChildren}</div> : qualifiedChildren;
   }
 }
