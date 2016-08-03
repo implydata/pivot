@@ -321,8 +321,8 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
       var closeSideDrawer: () => void = this.sideDrawerOpen.bind(this, false);
       sideDrawer = <SideDrawerAsync
         key='drawer'
-        selectedDataCube={selectedItem as DataCube}
-        dataCubes={dataCubes}
+        selectedItem={selectedItem}
+        items={viewType === CUBE ? dataCubes : collections}
         onOpenAbout={this.openAboutModal.bind(this)}
         onClose={closeSideDrawer}
         customization={customization}

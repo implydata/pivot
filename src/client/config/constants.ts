@@ -48,6 +48,7 @@ export const STRINGS: any = {
   copyUrl: 'Copy URL',
   copyValue: 'Copy value',
   current: 'Current',
+  collections: 'Collections',
   dataCubes: 'Data Cubes',
   dimensions: 'Dimensions',
   download: 'Download',

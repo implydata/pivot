@@ -21,19 +21,19 @@ import * as ReactDOM from 'react-dom';
 import { Fn } from '../../../common/utils/general/general';
 import { STRINGS } from '../../config/constants';
 import { isInside, escapeKey, classNames } from '../../utils/dom/dom';
-import { DataCube, Customization, User } from '../../../common/models/index';
+import { DataCube, Customization, User, Collection } from '../../../common/models/index';
 import { NavLogo } from '../nav-logo/nav-logo';
 import { SvgIcon } from '../svg-icon/svg-icon';
 import { NavList } from '../nav-list/nav-list';
 
 export interface SideDrawerProps extends React.Props<any> {
-  selectedDataCube: DataCube;
-  dataCubes: DataCube[];
   user: User;
+  selectedItem: DataCube | Collection;
+  items: (DataCube | Collection)[];
   onOpenAbout: Fn;
   onClose: Fn;
   customization?: Customization;
-  itemHrefFn?: (oldDataCube?: DataCube, newDataCube?: DataCube) => string;
+  itemHrefFn?: (oldItem?: DataCube | Collection, newItem?: DataCube | Collection) => string;
   viewType: 'home' | 'cube' | 'collection' | 'link' | 'settings';
 }
 
@@ -95,15 +95,16 @@ export class SideDrawer extends React.Component<SideDrawerProps, SideDrawerState
   }
 
   render() {
-    var { onClose, selectedDataCube, dataCubes, onOpenAbout, customization, itemHrefFn, user } = this.props;
+    var { onClose, selectedItem, items, onOpenAbout, customization, itemHrefFn, user } = this.props;
 
-    var navLinks = dataCubes.map(ds => {
-      var href = (itemHrefFn && itemHrefFn(selectedDataCube, ds)) || ('#' + ds.name);
+    var navLinks = items.map(item => {
+      var href = Collection.isCollection(item) ? `#collection/${item.name}` : `#${item.name}`;
+      href = itemHrefFn ? itemHrefFn(selectedItem, item) : href;
 
       return {
-        name: ds.name,
-        title: ds.title,
-        tooltip: ds.description,
+        name: item.name,
+        title: item.title,
+        tooltip: item.description,
         href: href
       };
     });
@@ -141,7 +142,7 @@ export class SideDrawer extends React.Component<SideDrawerProps, SideDrawerState
       <NavLogo customLogoSvg={customLogoSvg} onClick={onClose}/>
       {this.renderOverviewLink()}
       <NavList
-        selected={selectedDataCube ? selectedDataCube.name : null}
+        selected={selectedItem ? selectedItem.name : null}
         navLinks={navLinks}
         iconSvg={require('../../icons/full-cube.svg')}
       />

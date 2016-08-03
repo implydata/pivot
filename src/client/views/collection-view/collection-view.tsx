@@ -19,7 +19,7 @@ require('./collection-view.css');
 import * as React from 'react';
 import * as Qajax from 'qajax';
 import { $, Expression, Executor, Dataset } from 'plywood';
-import { Collection, User, Customization } from '../../../common/models/index';
+import { Collection, User, Customization, CollectionItem } from '../../../common/models/index';
 import { Fn } from '../../../common/utils/general/general';
 import { STRINGS } from '../../config/constants';
 
@@ -32,6 +32,8 @@ import { SvgIcon } from '../../components/svg-icon/svg-icon';
 import { ButtonGroup } from '../../components/button-group/button-group';
 
 import { AppSettings, AppSettingsJS } from '../../../common/models/index';
+
+import { CollectionItemCard } from './collection-item-card/collection-item-card';
 
 
 export interface CollectionViewProps extends React.Props<any> {
@@ -47,29 +49,29 @@ export interface CollectionViewState {
 export class CollectionView extends React.Component<CollectionViewProps, CollectionViewState> {
   constructor() {
     super();
-    this.state = {
-    };
+    this.state = {};
   }
 
-  componentDidMount() {
-  }
-
-  componentWillUnmount() {
+  renderItem(item: CollectionItem): JSX.Element {
+    return <CollectionItemCard item={item} key={item.name}/>;
   }
 
   render() {
     const { user, collection, customization, onNavClick } = this.props;
 
-    return <div className="settings-view">
+    return <div className="collection-view">
       <HomeHeaderBar
         user={user}
         onNavClick={onNavClick}
         customization={customization}
-        title={STRINGS.collections}
+        title={collection.title}
       />
 
      <div className="main-panel">
-       {collection.name}
+       <div className="collection-items">
+         {collection.items.map(this.renderItem)}
+         <div className="collection-item-card empty"/>
+       </div>
      </div>
     </div>;
   }
