@@ -15,11 +15,35 @@
  */
 
 import * as Q from 'q';
+import * as fs from 'fs-promise';
+import * as yaml from 'js-yaml';
 import { inlineVars } from '../../../common/utils/general/general';
 import { MANIFESTS } from '../../../common/manifests/index';
 import { AppSettings } from '../../../common/models/index';
-import { loadFileSync } from '../file/file';
+import { appSettingsToYAML } from '../../../common/utils/yaml-helper/yaml-helper';
 
+function readSettingsYamlFactory(filepath: string) {
+  return () => {
+    return Q(fs.readFile(filepath, 'utf-8')
+      .then((fileData) => {
+        var appSettingsJS = yaml.safeLoad(fileData);
+        appSettingsJS = inlineVars(appSettingsJS, process.env);
+        return Q(AppSettings.fromJS(appSettingsJS, { visualizations: MANIFESTS }));
+      })
+    );
+  };
+}
+
+function writeSettingsYamlFactory(filepath: string) {
+  return (appSettings: AppSettings) => {
+    return Q.fcall(() => {
+      return appSettingsToYAML(appSettings, false);
+    })
+      .then((appSettingsYAML) => {
+        return fs.writeFile(filepath, appSettingsYAML);
+      });
+  };
+}
 
 export class SettingsLocation {
   static fromTransient(initAppSettings: AppSettings): SettingsLocation {
@@ -30,16 +54,15 @@ export class SettingsLocation {
 
   static fromReadOnlyFile(filepath: string): SettingsLocation {
     var settingsLocation = new SettingsLocation();
-    settingsLocation.readSettings = () => {
-      var appSettingsJS = loadFileSync(filepath, 'yaml');
-      appSettingsJS = inlineVars(appSettingsJS, process.env);
-      return Q(AppSettings.fromJS(appSettingsJS, { visualizations: MANIFESTS }));
-    };
+    settingsLocation.readSettings = readSettingsYamlFactory(filepath);
     return settingsLocation;
   }
 
   static fromWritableFile(filepath: string): SettingsLocation {
-    throw new Error('todo');
+    var settingsLocation = new SettingsLocation();
+    settingsLocation.readSettings = readSettingsYamlFactory(filepath);
+    settingsLocation.writeSettings = writeSettingsYamlFactory(filepath);
+    return settingsLocation;
   }
 
 

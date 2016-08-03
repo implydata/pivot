@@ -224,7 +224,7 @@ export class SettingsManager {
   updateSettings(newSettings: AppSettings): Q.Promise<any> {
     if (!this.settingsLocation.writeSettings) return Q.reject(new Error('must be writable'));
 
-    this.appSettings = newSettings.attachExecutors((dataCube) => {
+    var loadedNewSettings = newSettings.attachExecutors((dataCube) => {
       if (dataCube.clusterName === 'native') {
         var fileManager = this.getFileManagerFor(dataCube.source);
         if (fileManager) {
@@ -249,7 +249,10 @@ export class SettingsManager {
       return null;
     });
 
-    return Q(null); // ToDo: actually save settings
+    return this.settingsLocation.writeSettings(loadedNewSettings)
+      .then(() => {
+        this.appSettings = loadedNewSettings;
+      });
   }
 
   generateDataCubeName(external: External): string {
