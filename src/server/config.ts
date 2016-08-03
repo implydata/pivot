@@ -253,11 +253,7 @@ const CLUSTER_TYPES: SupportedType[] = ['druid', 'postgres', 'mysql'];
 
 var settingsLocation: SettingsLocation = null;
 if (serverSettingsFilePath) {
-  settingsLocation = {
-    location: 'local',
-    readOnly: false, // ToDo: this should be true
-    uri: serverSettingsFilePath
-  };
+  settingsLocation = SettingsLocation.fromReadOnlyFile(serverSettingsFilePath);
 } else {
   var initAppSettings = AppSettings.BLANK;
 
@@ -288,11 +284,7 @@ if (serverSettingsFilePath) {
     }
   }
 
-  settingsLocation = {
-    location: 'transient',
-    readOnly: false,
-    initAppSettings
-  };
+  settingsLocation = SettingsLocation.fromTransient(initAppSettings);
 }
 
 export const SETTINGS_MANAGER = new SettingsManager(settingsLocation, {
