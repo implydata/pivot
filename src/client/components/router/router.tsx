@@ -37,7 +37,11 @@ export interface QualifiedPath {
 }
 
 export interface RouterProps extends React.Props<any> {
-  onURLChange?: (breadCrumbs: string[]) => void;
+  // this callback is mandatory because the outer parent needs to react (lulz)
+  // to a change and update its state so it rerenders. The router can't trigger
+  // the rerendering by itself, nor should it.
+  onURLChange: (breadCrumbs: string[]) => void;
+
   rootFragment?: string;
 }
 

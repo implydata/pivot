@@ -81,8 +81,9 @@ describe('Router', () => {
     updateHash = (newHash: string) => {
 
       window.location.hash = newHash;
+      let spy = sinon.spy();
 
-      component = ReactDOM.render(<Router rootFragment="root">
+      component = ReactDOM.render(<Router rootFragment="root" onURLChange={spy}>
         {children}
       </Router>, node);
     };

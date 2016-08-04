@@ -47,7 +47,7 @@ export interface CollectionViewProps extends React.Props<any> {
 }
 
 export interface CollectionViewState {
-  crumbs?: string
+  title?: string;
 }
 
 export class CollectionView extends React.Component<CollectionViewProps, CollectionViewState> {
@@ -56,22 +56,26 @@ export class CollectionView extends React.Component<CollectionViewProps, Collect
     this.state = {};
   }
 
-  componentDidMount() {
-    // window.setTimeout(() => this.setState({crumbs: ''}), 1);
-  }
+  onURLChange(crumbs: string[]) {
+    const { collections } = this.props;
 
-  onURLChange(crumbs: string) {
-    this.setState({crumbs});
+    const collection = collections.filter(({name}) => name === crumbs[0])[0];
+
+    this.setState({
+      title: collection ? collection.title : ''
+    })
   }
 
   render() {
     const { user, collections, customization, onNavClick } = this.props;
+    const { title } = this.state;
 
     return <div className="collection-view">
       <HomeHeaderBar
         user={user}
         onNavClick={onNavClick}
         customization={customization}
+        title={title}
       />
 
      <div className="main-panel">
