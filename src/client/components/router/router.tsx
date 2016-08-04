@@ -60,7 +60,9 @@ export class Router extends React.Component<RouterProps, RouterState> {
 
   componentDidMount() {
     window.addEventListener('hashchange', this.globalHashChangeListener);
-    window.setTimeout(() => this.onHashChange(window.location.hash), 10);
+
+    // Timeout to avoid race conditions between renders
+    window.setTimeout(() => this.onHashChange(window.location.hash), 1);
   }
 
   componentWillUnmount() {
@@ -74,9 +76,7 @@ export class Router extends React.Component<RouterProps, RouterState> {
     // interfer
     if (this.removeRootFragmentFromHash(newHash) === newHash) return;
 
-    if (this.state.hash !== newHash) {
-      this.onHashChange(newHash);
-    }
+    if (this.state.hash !== newHash) this.onHashChange(newHash);
   }
 
   removeRootFragmentFromHash(hash: string): string {
@@ -94,9 +94,7 @@ export class Router extends React.Component<RouterProps, RouterState> {
   parseHash(hash: string): string[] {
     if (!hash) return [];
 
-    hash = this.removeRootFragmentFromHash(hash);
-
-    var fragments = hash.split(HASH_SEPARATOR);
+    var fragments = this.removeRootFragmentFromHash(hash).split(HASH_SEPARATOR);
 
     return fragments.filter(Boolean);
   }

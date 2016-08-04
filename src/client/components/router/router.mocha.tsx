@@ -50,209 +50,217 @@ class Fake extends React.Component<FakeProps, FakeState> {
 // -- end of Fake class
 
 describe('Router', () => {
-  // var children: JSX.Element[];
-  // var component: React.Component<any, any>;
-  // var node: any;
+  var children: JSX.Element[];
+  var component: React.Component<any, any>;
+  var node: any;
 
-  // var updateHash: (newHash: string) => void;
-  // var isActiveRoute: (route: string) => void;
+  var updateHash: (newHash: string) => void;
+  var isActiveRoute: (route: string) => void;
 
-  // var findNode = (element: __React.Component<any, any>): Node => {
-  //   var children = findNodes(element);
+  var findNode = (element: __React.Component<any, any>): Node => {
+    var children = findNodes(element);
 
-  //   if (children.length !== 1) {
-  //     throw new Error('Looking for exactly one node, found ' + children.length + ' instead.');
-  //   }
+    if (children.length !== 1) {
+      throw new Error('Looking for exactly one node, found ' + children.length + ' instead.');
+    }
 
-  //   return children[0];
-  // };
+    return children[0];
+  };
 
-  // var findNodes = (element: __React.Component<any, any>): NodeList => {
-  //   let wrapper = findDOMNode(element);
+  var findNodes = (element: __React.Component<any, any>): NodeList => {
+    let wrapper = findDOMNode(element);
 
-  //   if (wrapper.className !== 'route-wrapper') {
-  //     throw new Error('Wrapper should have the proper class name, found ' + wrapper.className + ' instead');
-  //   }
+    if (wrapper.className !== 'route-wrapper') {
+      throw new Error('Wrapper should have the proper class name, found ' + wrapper.className + ' instead');
+    }
 
-  //   return wrapper.childNodes;
-  // };
+    return wrapper.childNodes;
+  };
 
-  // beforeEach(() => {
-  //   updateHash = (newHash: string) => {
+  beforeEach(() => {
+    updateHash = (newHash: string) => {
 
-  //     window.location.hash = newHash;
+      window.location.hash = newHash;
 
-  //     component = ReactDOM.render(<Router rootFragment="root" hash={newHash}>
-  //       {children}
-  //     </Router>, node);
-  //   };
+      component = ReactDOM.render(<Router rootFragment="root">
+        {children}
+      </Router>, node);
+    };
 
-  //   isActiveRoute = (route: string) => {
-  //     expect(window.location.hash, 'window.location.hash should be').to.equal(route);
-  //   };
-  // });
+    isActiveRoute = (route: string) => {
+      expect(window.location.hash, 'window.location.hash should be').to.equal(route);
+    };
+  });
 
-  // describe('with variables only', () => {
-  //   beforeEach(() => {
-  //     node = window.document.createElement('div');
+  describe('with variables only', () => {
+    beforeEach(() => {
+      node = window.document.createElement('div');
 
-  //     children = [
-  //       <Route fragment=":itemId" alwaysShowOrphans={true}>
-  //         <div className="pouet-class">baz</div> // Should alway be visible
-  //         <Route fragment=":action"><Fake/></Route>
-  //       </Route>
-  //     ];
+      children = [
+        <Route fragment=":itemId" alwaysShowOrphans={true}>
+          <div className="pouet-class">baz</div> // Should alway be visible
+          <Route fragment=":action"><Fake/></Route>
+        </Route>
+      ];
 
-  //     updateHash('root/bar');
-  //   });
+      updateHash('root/bar');
+    });
 
-  //   it('works with variables in the hash', () => {
-  //     updateHash('#root/flu/bli');
+    it('works with variables in the hash', () => {
+      updateHash('#root/flu/bli');
 
-  //     var domNodes: NodeList = findNodes(component) as any;
+      var domNodes: NodeList = findNodes(component) as any;
 
-  //     var getChild = (i: number) => domNodes[i] as Element;
+      var getChild = (i: number) => domNodes[i] as Element;
 
-  //     // Orphan that's always visible
-  //     expect(getChild(0).className, 'should contain class').to.equal('pouet-class');
+      // Orphan that's always visible
+      expect(getChild(0).className, 'should contain class').to.equal('pouet-class');
 
-  //     // Fakey thing
-  //     expect(getChild(1).className, 'should contain class').to.equal('fakey-fakey');
-  //     expect(getChild(1).innerHTML).to.equal('bliflu');
+      // Fakey thing
+      expect(getChild(1).className, 'should contain class').to.equal('fakey-fakey');
+      expect(getChild(1).innerHTML).to.equal('bliflu');
 
-  //     isActiveRoute('#root/flu/bli');
-  //   });
+      isActiveRoute('#root/flu/bli');
+    });
 
-  // });
-
-
-  // describe('with initial location', () => {
-  //   beforeEach(() => {
-  //     node = window.document.createElement('div');
-
-  //     children = [
-  //       <Route fragment="foo">
-  //         <div className="foo-class">foo</div>
-  //         <Route fragment="foo-0">
-  //           <div className="foo-0-class">foo-0</div>
-  //         </Route>
-  //         <Route fragment="foo-1">
-  //           <div className="foo-1-class">foo-1</div>
-  //         </Route>
-  //       </Route>,
-
-  //       <Route fragment="bar">
-  //         <div className="bar-class">bar</div>
-  //       </Route>,
-
-  //       <Route fragment="baz">
-  //         <div className="baz-class">baz</div>
-  //         <Route fragment=":itemId"><Fake/></Route> // Fake is gonna get passed whatever replaces :bazId in the hash
-  //       </Route>,
-
-  //       <Route fragment="qux">
-  //         <div className="qux-class">qux</div>
-  //         <Route fragment=":itemId/:action=edit"><Fake/></Route> // default value for variable
-  //       </Route>,
-  //     ];
-
-  //     updateHash('root/bar');
-  //   });
+  });
 
 
-  //   it('initializes to the location', () => {
-  //     expect((findNode(component) as any).className, 'should contain class').to.equal('bar-class');
-  //     isActiveRoute('#root/bar');
-  //   });
+  describe('with initial location', () => {
+    beforeEach(() => {
+      node = window.document.createElement('div');
 
-  //   it('fixes multiple slashes', () => {
-  //     updateHash('#root//foo/foo-1///');
-  //     isActiveRoute('#root/foo/foo-1');
+      children = [
+        <Route fragment="foo">
+          <div className="foo-class">foo</div>
+          <Route fragment="foo-0">
+            <div className="foo-0-class">foo-0</div>
+          </Route>
+          <Route fragment="foo-1">
+            <div className="foo-1-class">foo-1</div>
+          </Route>
+        </Route>,
 
-  //     var domNode: any = findNode(component) as any;
-  //     expect(domNode.className, 'should contain class').to.equal('foo-1-class');
-  //     expect(domNode.innerHTML).to.equal('foo-1');
-  //   });
+        <Route fragment="bar">
+          <div className="bar-class">bar</div>
+        </Route>,
 
-  //   it('fixes wrong fragment and defaults to first route', () => {
-  //     updateHash('#root/ABLAB');
-  //     isActiveRoute('#root/foo');
+        <Route fragment="baz">
+          <div className="baz-class">baz</div>
+          <Route fragment=":itemId"><Fake/></Route> // Fake is gonna get passed whatever replaces :bazId in the hash
+        </Route>,
 
-  //     var domNode: any = findNode(component) as any;
-  //     expect(domNode.className, 'should contain class').to.equal('foo-class');
-  //     expect(domNode.innerHTML).to.equal('foo');
-  //   });
+        <Route fragment="qux">
+          <div className="qux-class">qux</div>
+          <Route fragment=":itemId/:action=edit"><Fake/></Route> // default value for variable
+        </Route>,
+      ];
 
-  //   it('strips extra fragments', () => {
-  //     updateHash('#root/bar/UNNECESSARY');
-  //     isActiveRoute('#root/bar');
-
-  //     updateHash('#root/baz/pouet/UNNECESSARY');
-  //     var domNode: any = findNode(component) as any;
-  //     isActiveRoute('#root/baz/pouet');
-  //     expect(domNode.className, 'should contain class').to.equal('fakey-fakey');
-  //     expect(domNode.innerHTML).to.equal('pouet');
-  //   });
-
-  //   it('follows the window.location.hash\'s changes', () => {
-  //     updateHash('#root/baz');
-
-  //     expect((findNode(component) as any).className, 'should contain class').to.equal('baz-class');
-  //     isActiveRoute('#root/baz');
-  //   });
-
-  //   it('works with variables in the hash', () => {
-  //     updateHash('#root/baz/pouet');
-
-  //     var domNode: any = findNode(component) as any;
-  //     expect(domNode.className, 'should contain class').to.equal('fakey-fakey');
-  //     expect(domNode.innerHTML).to.equal('pouet');
-  //     isActiveRoute('#root/baz/pouet');
-  //   });
-
-  //   it('recognizes default for a variable', () => {
-  //     updateHash('#root/qux/myItem');
-
-  //     var domNode: any = findNode(component) as any;
-  //     expect(domNode.className, 'should contain class').to.equal('fakey-fakey');
-  //     expect(domNode.innerHTML).to.equal('editmyItem');
-  //     isActiveRoute('#root/qux/myItem/edit');
-  //   });
-  // });
-
-  // describe('without initial location', () => {
-
-  //   beforeEach(() => {
-  //     node = window.document.createElement('div');
-
-  //     children = [
-  //       <Route fragment="foo">
-  //         <div className="foo-class">foo</div>
-  //       </Route>,
-
-  //       <Route fragment="bar">
-  //         <div className="bar-class">bar</div>
-  //       </Route>,
-
-  //       <Route fragment="baz">
-  //         <div className="baz-class">baz</div>
-  //       </Route>
-  //     ];
-
-  //     updateHash('root');
-  //   });
+      updateHash('root/bar');
+    });
 
 
-  //   it('defaults to the first route', () => {
-  //     isActiveRoute('#root/foo');
-  //   });
+    it('initializes to the location', (done) => {
+      // Timeout because the router waits for a bit before initializing
+      setTimeout(() => {
+        expect((findNode(component) as any).className, 'should contain class').to.equal('bar-class');
+        isActiveRoute('#root/bar');
+        done();
+      }, 2);
+    });
+
+    it('fixes multiple slashes', () => {
+      updateHash('#root//foo/foo-1///');
+      isActiveRoute('#root/foo/foo-1');
+
+      var domNode: any = findNode(component) as any;
+      expect(domNode.className, 'should contain class').to.equal('foo-1-class');
+      expect(domNode.innerHTML).to.equal('foo-1');
+    });
+
+    it('fixes wrong fragment and defaults to first route', () => {
+      updateHash('#root/ABLAB');
+      isActiveRoute('#root/foo');
+
+      var domNode: any = findNode(component) as any;
+      expect(domNode.className, 'should contain class').to.equal('foo-class');
+      expect(domNode.innerHTML).to.equal('foo');
+    });
+
+    it('strips extra fragments', () => {
+      updateHash('#root/bar/UNNECESSARY');
+      isActiveRoute('#root/bar');
+
+      updateHash('#root/baz/pouet/UNNECESSARY');
+      var domNode: any = findNode(component) as any;
+      isActiveRoute('#root/baz/pouet');
+      expect(domNode.className, 'should contain class').to.equal('fakey-fakey');
+      expect(domNode.innerHTML).to.equal('pouet');
+    });
+
+    it('follows the window.location.hash\'s changes', () => {
+      updateHash('#root/baz');
+
+      expect((findNode(component) as any).className, 'should contain class').to.equal('baz-class');
+      isActiveRoute('#root/baz');
+    });
+
+    it('works with variables in the hash', () => {
+      updateHash('#root/baz/pouet');
+
+      var domNode: any = findNode(component) as any;
+      expect(domNode.className, 'should contain class').to.equal('fakey-fakey');
+      expect(domNode.innerHTML).to.equal('pouet');
+      isActiveRoute('#root/baz/pouet');
+    });
+
+    it('recognizes default for a variable', () => {
+      updateHash('#root/qux/myItem');
+
+      var domNode: any = findNode(component) as any;
+      expect(domNode.className, 'should contain class').to.equal('fakey-fakey');
+      expect(domNode.innerHTML).to.equal('editmyItem');
+      isActiveRoute('#root/qux/myItem/edit');
+    });
+  });
+
+  describe('without initial location', () => {
+
+    beforeEach(() => {
+      node = window.document.createElement('div');
+
+      children = [
+        <Route fragment="foo">
+          <div className="foo-class">foo</div>
+        </Route>,
+
+        <Route fragment="bar">
+          <div className="bar-class">bar</div>
+        </Route>,
+
+        <Route fragment="baz">
+          <div className="baz-class">baz</div>
+        </Route>
+      ];
+
+      updateHash('root');
+    });
 
 
-  //   it('follows the window.location.hash\'s changes', () => {
-  //     updateHash('#root/baz');
+    it('defaults to the first route', (done) => {
+      // Timeout because the router waits for a bit before initializing
+      setTimeout(() => {
+        isActiveRoute('#root/foo');
+        done();
+      }, 2);
+    });
 
-  //     expect((findNode(component) as any).className, 'should contain class').to.equal('baz-class');
-  //     isActiveRoute('#root/baz');
-  //   });
-  // });
+
+    it('follows the window.location.hash\'s changes', () => {
+      updateHash('#root/baz');
+
+      expect((findNode(component) as any).className, 'should contain class').to.equal('baz-class');
+      isActiveRoute('#root/baz');
+    });
+  });
 });
