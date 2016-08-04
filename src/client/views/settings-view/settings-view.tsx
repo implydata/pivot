@@ -180,7 +180,6 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
        <Router
          onURLChange={this.onURLChange.bind(this)}
          rootFragment="settings"
-         hash={window.location.hash}
        >
 
          <Route fragment="general">

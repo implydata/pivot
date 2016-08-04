@@ -37,7 +37,6 @@ export interface QualifiedPath {
 }
 
 export interface RouterProps extends React.Props<any> {
-  hash: string;
   onURLChange?: (breadCrumbs: string[]) => void;
   rootFragment?: string;
 }
@@ -54,22 +53,48 @@ export class Router extends React.Component<RouterProps, RouterState> {
   constructor() {
     super();
     this.state = {};
+
+    this.globalHashChangeListener = this.globalHashChangeListener.bind(this);
   }
 
+
   componentDidMount() {
-    this.onHashChange(window.location.hash);
+    window.addEventListener('hashchange', this.globalHashChangeListener);
+    window.setTimeout(() => this.onHashChange(window.location.hash), 10);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('hashchange', this.globalHashChangeListener);
+  }
+
+  globalHashChangeListener(): void {
+    var newHash = window.location.hash;
+
+    // Means we're going somewhere unknown and this specific router shouldn't
+    // interfer
+    if (this.removeRootFragmentFromHash(newHash) === newHash) return;
+
+    if (this.state.hash !== newHash) {
+      this.onHashChange(newHash);
+    }
+  }
+
+  removeRootFragmentFromHash(hash: string): string {
+    const { rootFragment } = this.props;
+
+    if (!rootFragment) return hash;
+
+    return hash.replace(new RegExp('^#' + rootFragment, 'gi'), '');
   }
 
   componentWillReceiveProps(nextProps: RouterProps) {
-    if (this.props.hash !== nextProps.hash) this.onHashChange(nextProps.hash);
+    this.globalHashChangeListener();
   }
 
   parseHash(hash: string): string[] {
     if (!hash) return [];
 
-    if (hash.charAt(0) === '#') hash = hash.substr(1);
-
-    hash = hash.replace(new RegExp('^' + this.props.rootFragment, 'gi'), '');
+    hash = this.removeRootFragmentFromHash(hash);
 
     var fragments = hash.split(HASH_SEPARATOR);
 
@@ -324,6 +349,6 @@ export class Router extends React.Component<RouterProps, RouterState> {
 
     // I wish it wouldn't need an enclosing element but...
     // https://github.com/facebook/react/issues/2127
-    return <div className="route-wrapper">{qualifiedChildren}</div>;
+    return <div className="route-wrapper" style={{width: '100%', height: '100%'}}>{qualifiedChildren}</div>;
   }
 }

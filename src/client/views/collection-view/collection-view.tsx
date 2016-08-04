@@ -56,13 +56,16 @@ export class CollectionView extends React.Component<CollectionViewProps, Collect
     this.state = {};
   }
 
+  componentDidMount() {
+    // window.setTimeout(() => this.setState({crumbs: ''}), 1);
+  }
+
   onURLChange(crumbs: string) {
     this.setState({crumbs});
   }
 
   render() {
     const { user, collections, customization, onNavClick } = this.props;
-    const { crumbs } = this.state;
 
     return <div className="collection-view">
       <HomeHeaderBar
@@ -75,7 +78,6 @@ export class CollectionView extends React.Component<CollectionViewProps, Collect
        <Router
          onURLChange={this.onURLChange.bind(this)}
          rootFragment={`collection`}
-         hash={window.location.hash}
        >
          <Route fragment=":collectionId" alwaysShowOrphans={true}>
            <CollectionOverview key="overview" collections={collections}/>
