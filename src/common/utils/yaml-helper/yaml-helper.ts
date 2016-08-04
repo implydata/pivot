@@ -208,6 +208,10 @@ export function measureToYAML(measure: Measure): string[] {
     `title: ${measure.title}`
   ];
 
+  if (measure.units) {
+    lines.push(`units: ${measure.units}`);
+  }
+
   lines.push(`formula: ${measure.formula}`);
 
   var format = measure.format;
