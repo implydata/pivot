@@ -20,6 +20,7 @@ import * as React from 'react';
 import * as ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import { findByName } from 'plywood';
 
+import { replaceHash } from '../../utils/url/url';
 import { DataCube, AppSettings, User, Collection } from '../../../common/models/index';
 
 import { createFunctionSlot, FunctionSlot } from '../../utils/function-slot/function-slot';
@@ -83,7 +84,7 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
 
   componentWillMount() {
     var { appSettings } = this.props;
-    var { dataCubes } = appSettings;
+    var { dataCubes, collections } = appSettings;
 
     var hash = window.location.hash;
     var viewType = this.getViewTypeFromHash(hash);
@@ -96,7 +97,7 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
 
     if (this.viewTypeNeedsAnItem(viewType)) {
       selectedItem = this.getSelectedItemFromHash(
-        viewType === CUBE ? appSettings.dataCubes : appSettings.collections,
+        viewType === CUBE ? dataCubes : collections,
         hash,
         viewType
       );
@@ -108,7 +109,7 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
       }
     }
 
-    if (viewType === HOME && dataCubes.length === 1) {
+    if (viewType === HOME && dataCubes.length === 1 && collections.length === 0) {
       viewType = CUBE;
       selectedItem = dataCubes[0];
     }
@@ -232,7 +233,7 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
 
     // Hash initialization, no need to add the intermediary url in the history
     if (window.location.hash === `#${hash.split('/')[0]}`) {
-      window.history.replaceState(undefined, undefined, `#${hash}`);
+      replaceHash('#' + hash);
     } else {
       window.location.hash = `#${hash}`;
     }

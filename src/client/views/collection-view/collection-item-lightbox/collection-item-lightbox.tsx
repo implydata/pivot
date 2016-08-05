@@ -101,6 +101,19 @@ export class CollectionItemLightbox extends React.Component<CollectionItemLightb
     window.location.hash = `#collection/${this.props.collectionId}`;
   }
 
+  swipe(direction: number) {
+    const { collections, collectionId, itemId } = this.props;
+    const { item } = this.state;
+
+    const items = collections.filter(({name}) => name === collectionId)[0].items;
+
+    var newIndex = items.indexOf(item) + direction;
+
+    if (newIndex >= items.length) newIndex = 0;
+    if (newIndex < 0) newIndex = items.length - 1;
+
+    window.location.hash = `#collection/${collectionId}/${items[newIndex].name}`;
+  }
 
   render() {
     const { item, visualizationStage } = this.state;
@@ -122,7 +135,7 @@ export class CollectionItemLightbox extends React.Component<CollectionItemLightb
 
     return <BodyPortal fullSize={true} onMount={this.updateStage.bind(this)}>
       <div className="collection-item-lightbox">
-        <div className="backdrop"></div>
+        <div className="backdrop"/>
         <GoldenCenter>
           <div className="modal-window">
             <div className="headband grid-row">
@@ -151,6 +164,13 @@ export class CollectionItemLightbox extends React.Component<CollectionItemLightb
             </div>
           </div>
         </GoldenCenter>
+        <div className="left-arrow" onClick={this.swipe.bind(this, -1)}>
+          <SvgIcon svg={require(`../../../icons/full-caret-left-line.svg`)}/>
+        </div>
+
+        <div className="right-arrow" onClick={this.swipe.bind(this, 1)}>
+          <SvgIcon svg={require(`../../../icons/full-caret-right-line.svg`)}/>
+        </div>
       </div>
     </BodyPortal>;
   }

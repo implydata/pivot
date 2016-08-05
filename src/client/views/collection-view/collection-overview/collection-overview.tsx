@@ -17,25 +17,9 @@
 require('./collection-overview.css');
 
 import * as React from 'react';
-import * as Qajax from 'qajax';
-import { $, Expression, Executor, Dataset } from 'plywood';
-import { Collection, User, Customization, CollectionItem } from '../../../../common/models/index';
-import { Fn } from '../../../../common/utils/general/general';
-import { STRINGS } from '../../../config/constants';
-
-import { classNames } from '../../../utils/dom/dom';
-import { Notifier } from '../../../components/notifications/notifications';
-
-import { HomeHeaderBar } from '../../../components/home-header-bar/home-header-bar';
-import { Button } from '../../../components/button/button';
-import { SvgIcon } from '../../../components/svg-icon/svg-icon';
-import { Router, Route } from '../../../components/router/router';
-import { ButtonGroup } from '../../../components/button-group/button-group';
-
-import { AppSettings, AppSettingsJS } from '../../../../common/models/index';
+import { Collection, CollectionItem } from '../../../../common/models/index';
 
 import { CollectionItemCard } from '../collection-item-card/collection-item-card';
-import { CollectionItemLightbox } from '../collection-item-lightbox/collection-item-lightbox';
 
 
 export interface CollectionOverviewProps extends React.Props<any> {

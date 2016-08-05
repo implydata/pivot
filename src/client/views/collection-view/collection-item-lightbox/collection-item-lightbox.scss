@@ -32,64 +32,95 @@
   .golden-center {
     @include pin-full;
     overflow-y: auto;
-  }
 
-  .modal-window {
-    @extend %modal-cont;
+    .modal-window {
+      @extend %modal-cont;
 
-    width: 80%;
+      width: 80%;
 
-    .headband {
-      padding: 10px 20px;
+      .headband {
+        padding: 10px 20px;
 
-      .title {
-        color: $text-medium;
-        font-size: 16px;
-        margin-bottom: 5px;
+        .title {
+          color: $text-medium;
+          font-size: 16px;
+          margin-bottom: 5px;
 
-        // Otherwise the bottom of the text gets cut off...
-        // (see http://stackoverflow.com/questions/6421966/css-overflow-x-visible-and-overflow-y-hidden-causing-scrollbar-issue)
-        height: 18px;
-      }
-
-      .description {
-        color: $text-lighter;
-
-        // Otherwise the bottom of the text gets cut off...
-        // (see http://stackoverflow.com/questions/6421966/css-overflow-x-visible-and-overflow-y-hidden-causing-scrollbar-issue)
-        height: 15px;
-      }
-
-      [class$="-button"] {
-        min-width: 20px;
-        line-height: 20px;
-
-        color: $brand;
-
-        path {
-          fill: $brand;
+          // Otherwise the bottom of the text gets cut off...
+          // (see http://stackoverflow.com/questions/6421966/css-overflow-x-visible-and-overflow-y-hidden-causing-scrollbar-issue)
+          height: 18px;
         }
 
-        cursor: pointer;
+        .description {
+          color: $text-lighter;
 
-        &:not(:last-child) {
-          margin-right: 5px;
+          // Otherwise the bottom of the text gets cut off...
+          // (see http://stackoverflow.com/questions/6421966/css-overflow-x-visible-and-overflow-y-hidden-causing-scrollbar-issue)
+          height: 15px;
         }
 
-        &.close-button path {
-          fill: $text-light;
+        [class$="-button"] {
+          min-width: 20px;
+          line-height: 20px;
+
+          color: $brand;
+
+          path {
+            fill: $brand;
+          }
+
+          cursor: pointer;
+
+          &:not(:last-child) {
+            margin-right: 5px;
+          }
+
+          &.close-button path {
+            fill: $text-light;
+          }
+        }
+
+        .separator {
+          border-left: 1px solid $border-extra-light;
+          height: 20px;
+          margin: 0 10px;
         }
       }
 
-      .separator {
-        border-left: 1px solid $border-extra-light;
-        height: 20px;
-        margin: 0 10px;
+      .content {
+        min-height: 400px;
       }
     }
 
-    .content {
-      min-height: 400px;
+  }
+
+  [class$="-arrow"] {
+    $edge-offset: 50px;
+
+    position: absolute;
+    width: 60px;
+    padding: 15px;
+    top: 50%;
+    transform: translate(0, -50%);
+    border-radius: 50%;
+    background-color: hsla(0, 0%, 60%, 0.5);
+    cursor: pointer;
+
+    path {
+      fill: $white;
+    }
+
+    &:hover {
+      background-color: $brand;
+    }
+
+    &.left-arrow {
+      left: $edge-offset;
+    }
+
+    &.right-arrow {
+      right: $edge-offset;
     }
   }
+
 }

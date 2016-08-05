@@ -20,6 +20,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { $, Expression, Executor, Dataset } from 'plywood';
 import { Stage, Clicker, Essence, DataCube, Filter, Dimension, Measure } from '../../../common/models/index';
+import { replaceHash } from '../../utils/url/url';
 import { SvgIcon } from '../svg-icon/svg-icon';
 
 export interface RouteProps extends React.Props<any> { fragment: string; alwaysShowOrphans?: boolean; }
@@ -113,9 +114,7 @@ export class Router extends React.Component<RouterProps, RouterState> {
   }
 
   replaceHash(newHash: string) {
-    // Acts like window.location.hash = newHash but doesn't clutter the history
-    // See http://stackoverflow.com/a/23924886/863119
-    window.history.replaceState(undefined, undefined, newHash);
+    replaceHash(newHash);
     this.onHashChange(newHash);
   }
 
