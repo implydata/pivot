@@ -31,8 +31,8 @@ function typeToKind(type: string): string {
   return type.toLowerCase().replace(/_/g, '-').replace(/-range$/, '');
 }
 
-const NEVER_BUCKET = 'neverBucket';
-export type BucketingStrategy = 'alwaysBucket' | 'neverBucket';
+const DEFAULT_NO_BUCKET = 'defaultNoBucket';
+export type BucketingStrategy = 'defaultBucket' | 'defaultNoBucket';
 
 export interface DimensionValue {
   name: string;
@@ -213,7 +213,7 @@ export class Dimension implements Instance<DimensionValue, DimensionJS> {
   }
 
   public canBucket(): boolean {
-    return this.isContinuous() && this.bucketingStrategy !== NEVER_BUCKET;
+    return this.isContinuous() && this.bucketingStrategy !== DEFAULT_NO_BUCKET;
   }
 
   public isContinuous() {
