@@ -7,10 +7,10 @@ import { escapeKey, enterKey, leftKey, rightKey } from '../../utils/dom/dom';
 export interface GlobalEventListenerProps extends React.Props<any> {
   resize?: () => void;
   mouseDown?: (e: MouseEvent) => void;
-  enter?: () => void;
-  escape?: () => void;
-  right?: () => void;
-  left?: () => void;
+  enter?: (e: KeyboardEvent) => void;
+  escape?: (e: KeyboardEvent) => void;
+  right?: (e: KeyboardEvent) => void;
+  left?: (e: KeyboardEvent) => void;
 }
 
 export interface GlobalEventListenerState {
@@ -86,10 +86,10 @@ export class GlobalEventListener extends React.Component<GlobalEventListenerProp
   }
 
   onKeydown(e: KeyboardEvent) {
-    if (this.props.escape && escapeKey(e)) this.props.escape();
-    if (this.props.enter && enterKey(e)) this.props.enter();
-    if (this.props.right && rightKey(e)) this.props.right();
-    if (this.props.left && leftKey(e)) this.props.left();
+    if (this.props.escape && escapeKey(e)) this.props.escape(e);
+    if (this.props.enter && enterKey(e)) this.props.enter(e);
+    if (this.props.right && rightKey(e)) this.props.right(e);
+    if (this.props.left && leftKey(e)) this.props.left(e);
   }
 
   render(): JSX.Element {
