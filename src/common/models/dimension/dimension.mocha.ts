@@ -86,7 +86,6 @@ describe('Dimension', () => {
         title: 'important countries',
         formula: '$country',
         kind: 'string',
-        bucketingStrategy: 'defaultBucket'
         bucketingStrategy: 'defaultNoBucket'
       });
     });

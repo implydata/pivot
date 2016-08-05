@@ -212,7 +212,7 @@ export class Dimension implements Instance<DimensionValue, DimensionJS> {
       this.sortStrategy === other.sortStrategy;
   }
 
-  public canBucket(): boolean {
+  public canBucketByDefault(): boolean {
     return this.isContinuous() && this.bucketingStrategy !== DEFAULT_NO_BUCKET;
   }
 
