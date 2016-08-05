@@ -72,6 +72,10 @@ export class SettingsManager {
     this.makeMaxTimeCheckTimer();
   }
 
+  public isWritable(): boolean {
+    return Boolean(this.settingsLocation.writeSettings);
+  }
+
   private getClusterManagerFor(clusterName: string): ClusterManager {
     return helper.find(this.clusterManagers, (clusterManager) => clusterManager.cluster.name === clusterName);
   }
