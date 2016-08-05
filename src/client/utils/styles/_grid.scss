@@ -57,6 +57,6 @@
   }
 
   @for $i from 0 through 10 {
-    @include col(($i*10));
+    @include col(($i * 10));
   }
 }

@@ -59,7 +59,7 @@
           height: 15px;
         }
 
-        [class*="-button"] {
+        [class*='-button'] {
           min-width: 30px;
           padding: 5px;
           line-height: 20px;
@@ -87,7 +87,7 @@
         }
 
         .explore-button {
-          border-radius: 0px;
+          border-radius: 0;
         }
 
         .separator {
@@ -104,7 +104,7 @@
 
   }
 
-  [class$="-arrow"] {
+  [class$='-arrow'] {
     $edge-offset: 50px;
 
     position: absolute;
