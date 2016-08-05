@@ -57,16 +57,6 @@ describe('Router', () => {
   var updateHash: (newHash: string) => void;
   var isActiveRoute: (route: string) => void;
 
-  var findNode = (element: __React.Component<any, any>): Node => {
-    var children = findNodes(element);
-
-    if (children.length !== 1) {
-      throw new Error('Looking for exactly one node, found ' + children.length + ' instead.');
-    }
-
-    return children[0];
-  };
-
   var findNodes = (element: __React.Component<any, any>): NodeList => {
     let wrapper = findDOMNode(element);
 
@@ -75,6 +65,16 @@ describe('Router', () => {
     }
 
     return wrapper.childNodes;
+  };
+
+  var findNode = (element: __React.Component<any, any>): Node => {
+    var children = findNodes(element);
+
+    if (children.length !== 1) {
+      throw new Error('Looking for exactly one node, found ' + children.length + ' instead.');
+    }
+
+    return children[0];
   };
 
   beforeEach(() => {
@@ -154,7 +154,7 @@ describe('Router', () => {
         <Route fragment="qux">
           <div className="qux-class">qux</div>
           <Route fragment=":itemId/:action=edit"><Fake/></Route> // default value for variable
-        </Route>,
+        </Route>
       ];
 
       updateHash('root/bar');

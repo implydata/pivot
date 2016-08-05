@@ -227,7 +227,7 @@ export class Router extends React.Component<RouterProps, RouterState> {
     return b;
   }
 
-  getQualifiedPath(candidates: JSX.Element[], crumbs: string[], properties={}, orphans: JSX.Element[]=[]): QualifiedPath {
+  getQualifiedPath(candidates: JSX.Element[], crumbs: string[], properties = {}, orphans: JSX.Element[] = []): QualifiedPath {
     // In case there's only one route
     if (this.isRoute(candidates as any)) {
       candidates = ([candidates as any]) as JSX.Element[];
@@ -307,7 +307,7 @@ export class Router extends React.Component<RouterProps, RouterState> {
   }
 
   getQualifiedChild(candidates: JSX.Element[], crumbs: string[]): JSX.Element | JSX.Element[] {
-    var fillProps = (child: JSX.Element, path: QualifiedPath, i=0): JSX.Element => {
+    var fillProps = (child: JSX.Element, path: QualifiedPath, i = 0): JSX.Element => {
       return React.cloneElement(child, this.extend(path.properties, {key: i}));
     };
 

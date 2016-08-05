@@ -58,7 +58,7 @@ export class CollectionView extends React.Component<CollectionViewProps, Collect
 
     this.setState({
       title: collection ? collection.title : ''
-    })
+    });
   }
 
   render() {
