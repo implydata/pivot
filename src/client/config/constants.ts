@@ -53,6 +53,8 @@ export const STRINGS: any = {
   dimensions: 'Dimensions',
   download: 'Download',
   editThisCube: 'Edit this cube',
+  editTitleAndDesc: 'Edit title and description',
+  editVisualization: 'Edit visualization',
   end: 'End',
   exclude: 'Exclude',
   exportToCSV: 'Export to CSV',

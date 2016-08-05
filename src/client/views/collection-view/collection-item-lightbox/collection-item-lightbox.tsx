@@ -19,12 +19,14 @@ require('./collection-item-lightbox.css');
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
+import { STRINGS } from '../../../config/constants';
+import { isInside, classNames } from '../../../utils/dom/dom';
+
 import { SvgIcon } from '../../../components/svg-icon/svg-icon';
 import { GlobalEventListener } from '../../../components/global-event-listener/global-event-listener';
 import { BodyPortal } from '../../../components/body-portal/body-portal';
 import { GoldenCenter } from '../../../components/golden-center/golden-center';
-
-import { isInside} from '../../../utils/dom/dom';
+import { BubbleMenu } from '../../../components/bubble-menu/bubble-menu';
 
 import { Collection, CollectionItem, VisualizationProps, Stage, Essence } from '../../../../common/models/index';
 
@@ -39,6 +41,7 @@ export interface CollectionItemLightboxProps extends React.Props<any> {
 export interface CollectionItemLightboxState {
   item?: CollectionItem;
   visualizationStage?: Stage;
+  editMenuOpen?: boolean;
 }
 
 export class CollectionItemLightbox extends React.Component<CollectionItemLightboxProps, CollectionItemLightboxState> {
@@ -78,20 +81,58 @@ export class CollectionItemLightbox extends React.Component<CollectionItemLightb
     window.location.hash = '#' + essence.getURL(essence.dataCube.name + '/');
   }
 
-  onEdit() {
+  openEditMenu() {
+    this.setState({
+      editMenuOpen: !this.state.editMenuOpen
+    });
   }
 
-  onMore() {
+  openMoreMenu() {
+
   }
 
-  onClose() {
+  closeModal() {
     window.location.hash = `#collection/${this.props.collectionId}`;
   }
 
+  onEscape() {
+    if (this.state.editMenuOpen) return;
+
+    this.closeModal();
+  }
+
+  renderEditMenu() {
+    var onClose = () => this.setState({editMenuOpen: false});
+
+    return <BubbleMenu
+      className="edit-menu"
+      direction="down"
+      stage={Stage.fromSize(200, 200)}
+      openOn={this.refs['edit-button'] as any}
+      onClose={onClose}
+    >
+      <ul className="bubble-list">
+        <li className="edit-vizualization">{STRINGS.editVisualization}</li>
+        <li className="edit-title-and-desc"><div>{STRINGS.editTitleAndDesc}</div></li>
+      </ul>
+    </BubbleMenu>;
+  }
+
   onMouseDown(e: MouseEvent) {
-    if (!isInside(e.target as Element, this.refs['modal'] as any)) {
-      this.onClose();
-    }
+    const { editMenuOpen } = this.state;
+
+    const target = e.target as Element;
+    const modal = this.refs['modal'] as any;
+    const leftArrow = this.refs['left-arrow'] as any;
+    const rightArrow = this.refs['right-arrow'] as any;
+
+    if (isInside(target, modal)) return;
+    if (isInside(target, leftArrow)) return;
+    if (isInside(target, rightArrow)) return;
+
+    if (editMenuOpen) return;
+
+    this.closeModal();
   }
 
   swipe(direction: number) {
@@ -109,7 +150,7 @@ export class CollectionItemLightbox extends React.Component<CollectionItemLightb
   }
 
   render() {
-    const { item, visualizationStage } = this.state;
+    const { item, visualizationStage, editMenuOpen } = this.state;
 
     if (!item) return null;
 
@@ -131,8 +172,10 @@ export class CollectionItemLightbox extends React.Component<CollectionItemLightb
 
         <GlobalEventListener
           resize={this.updateStage.bind(this)}
-          escape={this.onClose.bind(this)}
+          escape={this.onEscape.bind(this)}
           mouseDown={this.onMouseDown.bind(this)}
+          left={this.swipe.bind(this, -1)}
+          right={this.swipe.bind(this, 1)}
         />
 
         <div className="backdrop"/>
@@ -147,14 +190,18 @@ export class CollectionItemLightbox extends React.Component<CollectionItemLightb
                 <div className="explore-button" onClick={this.onExplore.bind(this)}>
                   Explore
                 </div>
-                <div className="edit-button" onClick={this.onEdit.bind(this)}>
+                <div
+                  className={classNames('edit-button', {active: editMenuOpen})}
+                  onClick={this.openEditMenu.bind(this)}
+                  ref="edit-button"
+                >
                   <SvgIcon svg={require(`../../../icons/full-edit.svg`)}/>
                 </div>
-                <div className="more-button" onClick={this.onMore.bind(this)}>
+                <div className="more-button" onClick={this.openMoreMenu.bind(this)}>
                   <SvgIcon svg={require(`../../../icons/full-more.svg`)}/>
                 </div>
                 <div className="separator"/>
-                <div className="close-button" onClick={this.onClose.bind(this)}>
+                <div className="close-button" onClick={this.closeModal.bind(this)}>
                   <SvgIcon svg={require(`../../../icons/full-remove.svg`)}/>
                 </div>
               </div>
@@ -164,13 +211,15 @@ export class CollectionItemLightbox extends React.Component<CollectionItemLightb
             </div>
           </div>
         </GoldenCenter>
-        <div className="left-arrow" onClick={this.swipe.bind(this, -1)}>
+        <div className="left-arrow" onClick={this.swipe.bind(this, -1)} ref="left-arrow">
           <SvgIcon svg={require(`../../../icons/full-caret-left-line.svg`)}/>
         </div>
 
-        <div className="right-arrow" onClick={this.swipe.bind(this, 1)}>
+        <div className="right-arrow" onClick={this.swipe.bind(this, 1)} ref="right-arrow">
           <SvgIcon svg={require(`../../../icons/full-caret-right-line.svg`)}/>
         </div>
+
+        {editMenuOpen ? this.renderEditMenu() : null}
       </div>
     </BodyPortal>;
   }

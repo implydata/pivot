@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { firstUp } from '../../../common/utils/string/string';
-import { escapeKey, enterKey } from '../../utils/dom/dom';
+import { escapeKey, enterKey, leftKey, rightKey } from '../../utils/dom/dom';
 
 
 export interface GlobalEventListenerProps extends React.Props<any> {
@@ -9,6 +9,8 @@ export interface GlobalEventListenerProps extends React.Props<any> {
   mouseDown?: (e: MouseEvent) => void;
   enter?: () => void;
   escape?: () => void;
+  right?: () => void;
+  left?: () => void;
 }
 
 export interface GlobalEventListenerState {
@@ -20,7 +22,9 @@ export class GlobalEventListener extends React.Component<GlobalEventListenerProp
     resize: 'resize',
     mouseDown: 'mousedown',
     enter: 'keydown',
-    escape: 'keydown'
+    escape: 'keydown',
+    right: 'keydown',
+    left: 'keydown'
   };
 
   constructor() {
@@ -83,6 +87,9 @@ export class GlobalEventListener extends React.Component<GlobalEventListenerProp
 
   onKeydown(e: KeyboardEvent) {
     if (this.props.escape && escapeKey(e)) this.props.escape();
+    if (this.props.enter && enterKey(e)) this.props.enter();
+    if (this.props.right && rightKey(e)) this.props.right();
+    if (this.props.left && leftKey(e)) this.props.left();
   }
 
   render(): JSX.Element {

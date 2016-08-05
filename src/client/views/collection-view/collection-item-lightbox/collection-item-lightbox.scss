@@ -59,9 +59,11 @@
           height: 15px;
         }
 
-        [class$="-button"] {
-          min-width: 20px;
+        [class*="-button"] {
+          min-width: 30px;
+          padding: 5px;
           line-height: 20px;
+          border-radius: 50%;
 
           color: $brand;
 
@@ -78,11 +80,19 @@
           &.close-button path {
             fill: $text-light;
           }
+
+          &:hover, &.active {
+            background-color: $highlight;
+          }
+        }
+
+        .explore-button {
+          border-radius: 0px;
         }
 
         .separator {
           border-left: 1px solid $border-extra-light;
-          height: 20px;
+          height: 30px;
           margin: 0 10px;
         }
       }
