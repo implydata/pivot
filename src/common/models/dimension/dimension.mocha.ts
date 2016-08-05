@@ -80,13 +80,14 @@ describe('Dimension', () => {
         title: 'important countries',
         expression: '$country',
         kind: 'string',
-        bucketingStrategy: 'alwaysBucket'
+        bucketingStrategy: 'neverBucket'
       } as any).toJS()).to.deep.equal({
         name: 'country',
         title: 'important countries',
         formula: '$country',
         kind: 'string',
         bucketingStrategy: 'defaultBucket'
+        bucketingStrategy: 'defaultNoBucket'
       });
     });
 
