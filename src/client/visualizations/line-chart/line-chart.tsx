@@ -57,7 +57,7 @@ function findClosest(data: Datum[], dragDate: Date, scaleX: (v: continuousValueT
   var minDist = Infinity;
   for (var datum of data) {
     var continuousSegmentValue = datum[continuousDimension.name] as (TimeRange | NumberRange);
-    if (!continuousSegmentValue) continue;
+    if (!continuousSegmentValue || !Range.isRange(continuousSegmentValue)) continue; // !Range.isRange => temp solution for non-bucketed reaching here
     var mid = continuousSegmentValue.midpoint();
     var dist = Math.abs(mid.valueOf() - dragDate.valueOf());
     var distPx = Math.abs(scaleX(mid) - scaleX(dragDate));
