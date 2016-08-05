@@ -20,10 +20,11 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
 import { SvgIcon } from '../../../components/svg-icon/svg-icon';
+import { GlobalEventListener } from '../../../components/global-event-listener/global-event-listener';
 import { BodyPortal } from '../../../components/body-portal/body-portal';
 import { GoldenCenter } from '../../../components/golden-center/golden-center';
 
-import { escapeKey, enterKey, uniqueId, classNames } from '../../../utils/dom/dom';
+import { isInside} from '../../../utils/dom/dom';
 
 import { Collection, CollectionItem, VisualizationProps, Stage, Essence } from '../../../../common/models/index';
 
@@ -45,8 +46,6 @@ export class CollectionItemLightbox extends React.Component<CollectionItemLightb
     super();
 
     this.state = {};
-
-    this.globalResizeListener = this.globalResizeListener.bind(this);
   }
 
   componentWillReceiveProps(nextProps: CollectionItemLightboxProps) {
@@ -61,18 +60,6 @@ export class CollectionItemLightbox extends React.Component<CollectionItemLightb
         });
       }
     }
-  }
-
-  componentDidMount() {
-    window.addEventListener('resize', this.globalResizeListener);
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener('resize', this.globalResizeListener);
-  }
-
-  globalResizeListener() {
-    this.updateStage();
   }
 
   updateStage() {
@@ -99,6 +86,12 @@ export class CollectionItemLightbox extends React.Component<CollectionItemLightb
 
   onClose() {
     window.location.hash = `#collection/${this.props.collectionId}`;
+  }
+
+  onMouseDown(e: MouseEvent) {
+    if (!isInside(e.target as Element, this.refs['modal'] as any)) {
+      this.onClose();
+    }
   }
 
   swipe(direction: number) {
@@ -135,9 +128,16 @@ export class CollectionItemLightbox extends React.Component<CollectionItemLightb
 
     return <BodyPortal fullSize={true} onMount={this.updateStage.bind(this)}>
       <div className="collection-item-lightbox">
+
+        <GlobalEventListener
+          resize={this.updateStage.bind(this)}
+          escape={this.onClose.bind(this)}
+          mouseDown={this.onMouseDown.bind(this)}
+        />
+
         <div className="backdrop"/>
         <GoldenCenter>
-          <div className="modal-window">
+          <div className="modal-window" ref="modal">
             <div className="headband grid-row">
               <div className="grid-col-70 vertical">
                 <div className="title">{item.title}</div>
