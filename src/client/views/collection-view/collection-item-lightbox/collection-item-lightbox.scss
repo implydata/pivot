@@ -60,7 +60,7 @@
         }
 
         [class*='-button'] {
-          min-width: 30px;
+          width: 30px;
           padding: 5px;
           line-height: 20px;
           border-radius: 50%;
@@ -87,6 +87,7 @@
         }
 
         .explore-button {
+          width: initial;
           border-radius: 0;
         }
 
