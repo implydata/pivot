@@ -20,7 +20,7 @@ import { arraySum } from '../common/utils/general/general';
 import { Cluster, DataCube, SupportedType, AppSettings } from '../common/models/index';
 import { appSettingsToYAML } from '../common/utils/yaml-helper/yaml-helper';
 import { ServerSettings } from './models/index';
-import { loadFileSync, SettingsManager, SettingsLocation, LOGGER, initLogger, TRACKER, initTracker } from './utils/index';
+import { loadFileSync, SettingsManager, SettingsStore, LOGGER, initLogger, TRACKER, initTracker } from './utils/index';
 
 const AUTH_MODULE_VERSION = 1;
 const PACKAGE_FILE = path.join(__dirname, '../../package.json');
@@ -258,12 +258,12 @@ if (START_SERVER) {
 
 const CLUSTER_TYPES: SupportedType[] = ['druid', 'postgres', 'mysql'];
 
-var settingsLocation: SettingsLocation = null;
+var settingsStore: SettingsStore = null;
 if (serverSettingsFilePath) {
   if (SERVER_SETTINGS.settingsUri) {
-    settingsLocation = SettingsLocation.fromWritableFile(path.resolve(anchorPath, SERVER_SETTINGS.settingsUri));
+    settingsStore = SettingsStore.fromWritableFile(path.resolve(anchorPath, SERVER_SETTINGS.settingsUri));
   } else {
-    settingsLocation = SettingsLocation.fromReadOnlyFile(serverSettingsFilePath);
+    settingsStore = SettingsStore.fromReadOnlyFile(serverSettingsFilePath);
   }
 } else {
   var initAppSettings = AppSettings.BLANK;
@@ -295,10 +295,10 @@ if (serverSettingsFilePath) {
     }
   }
 
-  settingsLocation = SettingsLocation.fromTransient(initAppSettings);
+  settingsStore = SettingsStore.fromTransient(initAppSettings);
 }
 
-export const SETTINGS_MANAGER = new SettingsManager(settingsLocation, {
+export const SETTINGS_MANAGER = new SettingsManager(settingsStore, {
   logger: LOGGER,
   verbose: VERBOSE,
   anchorPath,

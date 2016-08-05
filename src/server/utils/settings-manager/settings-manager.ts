@@ -19,7 +19,7 @@ import { External, Dataset, basicExecutorFactory, helper } from 'plywood';
 import { pluralIfNeeded } from '../../../common/utils/general/general';
 import { AppSettings, Cluster, DataCube } from '../../../common/models/index';
 import { Logger } from '../logger/logger';
-import { SettingsLocation } from '../settings-location/settings-location';
+import { SettingsStore } from '../settings-location/settings-location';
 import { FileManager } from '../file-manager/file-manager';
 import { ClusterManager } from '../cluster-manager/cluster-manager';
 import { updater } from '../updater/updater';
@@ -40,27 +40,27 @@ export class SettingsManager {
   public logger: Logger;
   public verbose: boolean;
   public anchorPath: string;
-  public settingsLocation: SettingsLocation;
+  public settingsStore: SettingsStore;
   public appSettings: AppSettings;
   public fileManagers: FileManager[];
   public clusterManagers: ClusterManager[];
   public currentWork: Q.Promise<any>;
   public initialLoadTimeout: number;
 
-  constructor(settingsLocation: SettingsLocation, options: SettingsManagerOptions) {
+  constructor(settingsStore: SettingsStore, options: SettingsManagerOptions) {
     var logger = options.logger;
     this.logger = logger;
     this.verbose = Boolean(options.verbose);
     this.anchorPath = options.anchorPath;
 
-    this.settingsLocation = settingsLocation;
+    this.settingsStore = settingsStore;
     this.fileManagers = [];
     this.clusterManagers = [];
 
     this.initialLoadTimeout = options.initialLoadTimeout || 30000;
     this.appSettings = AppSettings.BLANK;
 
-    this.currentWork = settingsLocation.readSettings()
+    this.currentWork = settingsStore.readSettings()
       .then((appSettings) => {
         return this.reviseSettings(appSettings);
       })
@@ -73,7 +73,7 @@ export class SettingsManager {
   }
 
   public isWritable(): boolean {
-    return Boolean(this.settingsLocation.writeSettings);
+    return Boolean(this.settingsStore.writeSettings);
   }
 
   private getClusterManagerFor(clusterName: string): ClusterManager {
@@ -226,7 +226,7 @@ export class SettingsManager {
   }
 
   updateSettings(newSettings: AppSettings): Q.Promise<any> {
-    if (!this.settingsLocation.writeSettings) return Q.reject(new Error('must be writable'));
+    if (!this.settingsStore.writeSettings) return Q.reject(new Error('must be writable'));
 
     var loadedNewSettings = newSettings.attachExecutors((dataCube) => {
       if (dataCube.clusterName === 'native') {
@@ -253,7 +253,7 @@ export class SettingsManager {
       return null;
     });
 
-    return this.settingsLocation.writeSettings(loadedNewSettings)
+    return this.settingsStore.writeSettings(loadedNewSettings)
       .then(() => {
         this.appSettings = loadedNewSettings;
       });

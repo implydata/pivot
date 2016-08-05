@@ -45,24 +45,24 @@ function writeSettingsYamlFactory(filepath: string) {
   };
 }
 
-export class SettingsLocation {
-  static fromTransient(initAppSettings: AppSettings): SettingsLocation {
-    var settingsLocation = new SettingsLocation();
-    settingsLocation.readSettings = () => Q(initAppSettings);
-    return settingsLocation;
+export class SettingsStore {
+  static fromTransient(initAppSettings: AppSettings): SettingsStore {
+    var settingsStore = new SettingsStore();
+    settingsStore.readSettings = () => Q(initAppSettings);
+    return settingsStore;
   }
 
-  static fromReadOnlyFile(filepath: string): SettingsLocation {
-    var settingsLocation = new SettingsLocation();
-    settingsLocation.readSettings = readSettingsYamlFactory(filepath);
-    return settingsLocation;
+  static fromReadOnlyFile(filepath: string): SettingsStore {
+    var settingsStore = new SettingsStore();
+    settingsStore.readSettings = readSettingsYamlFactory(filepath);
+    return settingsStore;
   }
 
-  static fromWritableFile(filepath: string): SettingsLocation {
-    var settingsLocation = new SettingsLocation();
-    settingsLocation.readSettings = readSettingsYamlFactory(filepath);
-    settingsLocation.writeSettings = writeSettingsYamlFactory(filepath);
-    return settingsLocation;
+  static fromWritableFile(filepath: string): SettingsStore {
+    var settingsStore = new SettingsStore();
+    settingsStore.readSettings = readSettingsYamlFactory(filepath);
+    settingsStore.writeSettings = writeSettingsYamlFactory(filepath);
+    return settingsStore;
   }
 
 
