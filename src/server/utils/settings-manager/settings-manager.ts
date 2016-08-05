@@ -19,7 +19,7 @@ import { External, Dataset, basicExecutorFactory, helper } from 'plywood';
 import { pluralIfNeeded } from '../../../common/utils/general/general';
 import { AppSettings, Cluster, DataCube } from '../../../common/models/index';
 import { Logger } from '../logger/logger';
-import { SettingsStore } from '../settings-location/settings-location';
+import { SettingsStore } from '../settings-store/settings-store';
 import { FileManager } from '../file-manager/file-manager';
 import { ClusterManager } from '../cluster-manager/cluster-manager';
 import { updater } from '../updater/updater';

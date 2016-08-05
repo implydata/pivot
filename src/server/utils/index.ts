@@ -15,7 +15,7 @@
  */
 
 export * from './requester/requester';
-export * from './settings-location/settings-location';
+export * from './settings-store/settings-store';
 export * from './file/file';
 export * from './general/general';
 export * from './settings-manager/settings-manager';
