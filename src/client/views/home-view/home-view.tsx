@@ -106,10 +106,10 @@ export class HomeView extends React.Component< HomeViewProps, HomeViewState> {
           {this.renderItems(dataCubes)}
         </div>
 
-        <div className="collections">
+        { collections.length > 0 ? <div className="collections">
           <div className="title">{STRINGS.collections}</div>
           {this.renderItems(collections)}
-        </div>
+        </div> : null }
       </div>
 
     </div>;

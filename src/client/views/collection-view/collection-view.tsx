@@ -48,13 +48,14 @@ export class CollectionView extends React.Component<CollectionViewProps, Collect
 
   onURLChange(crumbs: string[]) {
     const { collections } = this.props;
+    var collection: Collection;
 
     if (crumbs.length === 0) {
-      replaceHash(`#collection/${collections[0].name}`);
-      return;
+      collection = collections[0];
+      replaceHash(`#collection/${collection.name}`);
+    } else {
+      collection = collections.filter(({name}) => name === crumbs[0])[0];
     }
-
-    const collection = collections.filter(({name}) => name === crumbs[0])[0];
 
     this.setState({
       title: collection ? collection.title : ''

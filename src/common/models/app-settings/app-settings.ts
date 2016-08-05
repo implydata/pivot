@@ -96,7 +96,7 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
       customization: Customization.fromJS(parameters.customization || {}),
       dataCubes,
       linkViewConfig: makeCollection(parameters.linkViewConfig),
-      collections: parameters.collections ? parameters.collections.map(makeCollection).filter(Boolean) : null
+      collections: parameters.collections ? parameters.collections.map(makeCollection).filter(Boolean) : []
     };
 
     return new AppSettings(value);
@@ -146,7 +146,7 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
     js.clusters = this.clusters.map(cluster => cluster.toJS());
     js.customization = this.customization.toJS();
     js.dataCubes = this.dataCubes.map(dataCube => dataCube.toJS());
-    if (this.collections) js.collections = this.collections.map(c => c.toJS());
+    if (this.collections.length > 0) js.collections = this.collections.map(c => c.toJS());
     if (this.linkViewConfig) js.linkViewConfig = this.linkViewConfig.toJS();
     return js;
   }
