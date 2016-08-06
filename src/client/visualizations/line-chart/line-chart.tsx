@@ -178,6 +178,7 @@ export class LineChart extends BaseVisualization<LineChartState> {
     const { essence } = this.props;
     const { splits, timezone } = essence;
     var continuousSplit = splits.last();
+    if (!continuousSplit.bucketAction) return dragRange; // temp solution for non-bucketed reaching here
 
     if (TimeRange.isTimeRange(dragRange)) {
       var timeBucketAction = continuousSplit.bucketAction as TimeBucketAction;
