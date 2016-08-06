@@ -28,9 +28,8 @@ import { Button } from '../button/button';
 import { ButtonGroup } from '../button-group/button-group';
 import { DateRangePicker } from '../date-range-picker/date-range-picker';
 
-function makeDateIntoTimeRange(input: any): TimeRange {
-  var endShift = Date.parse(input).valueOf() + 1;
-  return new TimeRange({ start: input, end: new Date(endShift) });
+function makeDateIntoTimeRange(input: Date, timezone: Timezone): TimeRange {
+  return new TimeRange({ start: second.shift(input, timezone, - 1), end: second.shift(input, timezone, 1) });
 }
 
 export interface Preset {
@@ -103,7 +102,7 @@ export class TimeFilterMenu extends React.Component<TimeFilterMenuProps, TimeFil
     var timeSelection = filter.getSelection(dimensionExpression);
     var selectedTimeRangeSet = essence.getEffectiveFilter().getLiteralSet(dimensionExpression);
     var selectedTimeRange = (selectedTimeRangeSet && selectedTimeRangeSet.size() === 1) ? selectedTimeRangeSet.elements[0] : null;
-    if (selectedTimeRange && !Range.isRange(selectedTimeRange)) selectedTimeRange = makeDateIntoTimeRange(selectedTimeRange);
+    if (selectedTimeRange && !Range.isRange(selectedTimeRange)) selectedTimeRange = makeDateIntoTimeRange(selectedTimeRange, timezone);
     var clause = filter.clauseForExpression(dimensionExpression);
 
     this.setState({
@@ -225,7 +224,7 @@ export class TimeFilterMenu extends React.Component<TimeFilterMenuProps, TimeFil
       if (value.size() !== 1) throw new Error(`Can only filter on one time`);
 
       let time = value.elements[0];
-      previewTimeRange = makeDateIntoTimeRange(time);
+      previewTimeRange = makeDateIntoTimeRange(time, timezone);
     } else {
       previewTimeRange = essence.evaluateSelection(hoverPreset ? hoverPreset.selection : timeSelection);
     }
