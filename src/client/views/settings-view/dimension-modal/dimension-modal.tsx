@@ -56,8 +56,8 @@ export class DimensionModal extends React.Component<DimensionModalProps, Dimensi
   ];
 
   static BUCKETING_STRATEGIES = [
-    {label: 'Default bucket', value: Dimension.defaultBucket},
-    {label: 'Default don\'t bucket', value: Dimension.defaultNoBucket}
+    {label: 'Bucket', value: Dimension.defaultBucket},
+    {label: 'Don’t Bucket', value: Dimension.defaultNoBucket}
   ];
 
   constructor() {
