@@ -23,23 +23,24 @@
   @import '../../../utils/styles/grid';
 
   min-width: 400px;
-  padding: 20px;
+  padding: 12px;
 
   > * {
+    @extend %module;
     width: 100%;
     padding: 10px 20px;
-    background-color: $white;
-    box-shadow: 0 1px 1px 0 rgba($black, 0.1);
   }
 
   .headband {
-    height: 60px;
+    height: 68px;
     border-bottom: 1px solid $border-super-light;
+    border-radius: $corner $corner 0 0;
 
     .title {
       color: $text-medium;
-      font-size: 15px;
-      margin-bottom: 10px;
+      font-size: 14px;
+      margin-bottom: 5px;
+      margin-top: 1px;
 
       // Otherwise the bottom of the text gets cut off...
       // (see http://stackoverflow.com/questions/6421966/css-overflow-x-visible-and-overflow-y-hidden-causing-scrollbar-issue)
@@ -48,6 +49,7 @@
 
     .description {
       color: $text-lighter;
+      font-size: 12px;
 
       // Otherwise the bottom of the text gets cut off...
       // (see http://stackoverflow.com/questions/6421966/css-overflow-x-visible-and-overflow-y-hidden-causing-scrollbar-issue)
@@ -55,7 +57,7 @@
     }
 
     .expand-button {
-      width: 20px;
+      width: 19px;
 
       cursor: pointer;
 
@@ -70,6 +72,7 @@
   }
 
   .content {
-    min-height: 400px;
+    min-height: 23vw;
+    border-radius: 0 0 $corner $corner;
   }
 }

@@ -35,16 +35,16 @@
 
     .modal-window {
       @extend %modal-cont;
-
-      width: 80%;
+      width: calc(100% - 270px);
 
       .headband {
-        padding: 10px 20px;
+        padding: 20px 20px;
+        //border-bottom: 1px solid $border-super-light;
 
         .title {
           color: $text-medium;
           font-size: 16px;
-          margin-bottom: 5px;
+          margin-bottom: 8px;
           height: 18px;
         }
 
@@ -63,8 +63,9 @@
         }
 
         [class*='-button'] {
-          padding: 5px;
+          padding: 5px 7px;
           line-height: 20px;
+          border-radius: $corner;
 
           color: $brand;
 
@@ -73,6 +74,7 @@
           &.icon {
             border-radius: 50%;
             width: 30px;
+            padding: 5px;
 
             path {
               fill: $brand;
@@ -83,11 +85,25 @@
             margin-right: 5px;
           }
 
-          &.close-button path {
-            fill: $text-light;
+          &.close-button {
+            path {
+              fill: $text-light;
+            }
+
+            &:hover, &.active {
+              background: none;
+
+              path {
+                fill: #666;
+              }
+            }
           }
 
-          &:hover, &.active {
+          &:hover {
+            background-color: $hover;
+          }
+
+          &.active {
             background-color: $highlight;
           }
         }
@@ -100,7 +116,7 @@
       }
 
       .content {
-        min-height: 400px;
+        min-height: calc(100vh - 200px);
       }
     }
 
@@ -115,7 +131,7 @@
     top: 50%;
     transform: translate(0, -50%);
     border-radius: 50%;
-    background-color: hsla(0, 0%, 60%, 0.5);
+    background-color: rgba($white, 0.18);
     cursor: pointer;
 
     path {
@@ -123,7 +139,7 @@
     }
 
     &:hover {
-      background-color: $brand;
+      background-color: rgba($white, 0.26);
     }
 
     &.left-arrow {
