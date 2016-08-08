@@ -67,6 +67,8 @@ export class NotificationCard extends React.Component<NotificationCardProps, Not
   }
 
   disappear() {
+    if (this.timeoutID !== undefined) window.clearTimeout(this.timeoutID);
+
     this.setState({disappearing: true}, () => {
       this.timeoutID = window.setTimeout(this.removeMe.bind(this, this.props.model), 200);
     });
