@@ -17,27 +17,31 @@
 require('./collection-view.css');
 
 import * as React from 'react';
-import { Collection, User, Customization, CollectionItem } from '../../../common/models/index';
+import { Collection, User, Customization, CollectionItem, DataCube } from '../../../common/models/index';
 import { Fn } from '../../../common/utils/general/general';
 
 import { replaceHash } from '../../utils/url/url';
 
-import { HomeHeaderBar } from '../../components/home-header-bar/home-header-bar';
-import { Router, Route } from '../../components/router/router';
+import { CollectionHeaderBar, Router, Route } from '../../components/index';
 
 import { CollectionOverview } from './collection-overview/collection-overview';
 import { CollectionItemLightbox } from './collection-item-lightbox/collection-item-lightbox';
 
 
 export interface CollectionViewProps extends React.Props<any> {
+  dataCubes: DataCube[];
   collections: Collection[];
   user?: User;
   onNavClick?: Fn;
   customization?: Customization;
+  onItemChange?: (collection: Collection, collectionItem: CollectionItem) => void;
+  onEditionRequest?: (collection: Collection, collectionItem: CollectionItem) => void;
+  onAdditionRequest?: (collection: Collection, dataCube: DataCube) => void;
+  onDeletionRequest?: (collection: Collection, collectionItem: CollectionItem) => void;
 }
 
 export interface CollectionViewState {
-  title?: string;
+  collection?: Collection;
 }
 
 export class CollectionView extends React.Component<CollectionViewProps, CollectionViewState> {
@@ -58,20 +62,23 @@ export class CollectionView extends React.Component<CollectionViewProps, Collect
     }
 
     this.setState({
-      title: collection ? collection.title : ''
+      collection
     });
   }
 
   render() {
-    const { user, collections, customization, onNavClick } = this.props;
-    const { title } = this.state;
+    const { user, collections, customization, onNavClick, onEditionRequest, onItemChange, onAdditionRequest, onDeletionRequest, dataCubes } = this.props;
+    const { collection } = this.state;
 
     return <div className="collection-view">
-      <HomeHeaderBar
+      <CollectionHeaderBar
         user={user}
         onNavClick={onNavClick}
         customization={customization}
-        title={title}
+        title={collection ? collection.title : ''}
+        dataCubes={dataCubes}
+        collections={collections}
+        onAddItem={onAdditionRequest.bind(this, collection)}
       />
 
      <div className="main-panel">
@@ -80,7 +87,12 @@ export class CollectionView extends React.Component<CollectionViewProps, Collect
            <CollectionOverview collections={collections}/>
 
            <Route fragment=":itemId">
-             <CollectionItemLightbox collections={collections}/>
+              <CollectionItemLightbox
+                collections={collections}
+                onChange={onItemChange}
+                onEdit={onEditionRequest}
+                onDelete={onDeletionRequest.bind(this, collection)}
+              />
            </Route>
 
          </Route>

@@ -16,41 +16,30 @@
 
 @import '../../imports';
 
-.bubble-menu {
-  @extend %menu-cont;
-  position: absolute;
-  padding: $padding-compact;
+.supervised-cube-header-bar {
+  @extend %header-bar;
 
-  &.mini {
-    padding: $padding-mini;
+  .title {
+    cursor: default;
   }
 
-  .menu-header {
-    @include pin-top($menu-title-bar-height);
-  }
+  .button-group {
+    display: inline-block;
+    padding-top: 6px;
 
-  .bubble-list-title {
-    margin-left: -4px;
-    margin-bottom: 5px;
-    color: $text-light;
-  }
+    > *:not(:last-child) {
+      margin-right: 8px;
+    }
 
-  ul.bubble-list {
-    margin-left: -$padding-compact;
-    margin-right: -$padding-compact;
+    .cancel {
+      color: $white;
+      background-color: hsla(198, 76%, 60%, 1.00);
+    }
 
-    li {
-      padding: 0 $padding-compact;
-      line-height: 25px;
-      cursor: pointer;
-
-      &:hover {
-        background: rgba($brand, 0.12);
-      }
-
-      &.selected {
-        background: $background-light;
-      }
+    .save {
+      color: $brand;
+      background-color: $white;
     }
   }
+
 }

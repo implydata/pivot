@@ -115,5 +115,48 @@ export class Collection implements Instance<CollectionValue, CollectionJS> {
     return helper.findByName(this.items, name);
   }
 
+  public deleteItem(item: CollectionItem): Collection {
+    var index = this.items.indexOf(item);
+
+    if (index === -1) return this;
+
+    var newItems = this.items.concat();
+    newItems.splice(index, 1);
+
+    return this.change('items', newItems);
+  }
+
+  public change(propertyName: string, newValue: any): Collection {
+    var v = this.valueOf();
+
+    if (!v.hasOwnProperty(propertyName)) {
+      throw new Error(`Unknown property : ${propertyName}`);
+    }
+
+    (v as any)[propertyName] = newValue;
+    return new Collection(v);
+  }
+
+  public updateItem(item: CollectionItem): Collection {
+    var index = -1;
+
+    this.items.forEach(({name}, i) => {
+      if (name === item.name) {
+        index = i;
+        return;
+      }
+    });
+
+    if (index === -1) {
+      throw new Error(`Can't add unknown item : ${item.toString()}`);
+    }
+
+    var newItems = this.items.concat();
+
+    newItems[index] = item;
+
+    return this.change('items', newItems);
+  }
+
 }
 check = Collection;

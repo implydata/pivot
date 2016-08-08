@@ -55,6 +55,26 @@ export const DIMENSION = {
   }
 };
 
+export const COLLECTION_ITEM = {
+  name: {
+    label: `Name (you won't be able to change this later)`,
+    description: `The name of the collection item. This should be a
+      URL safe string. Changing this property will break any URLs that someone
+      might have generated that include this dimension, that's why you can only
+      set it once`
+  },
+  title: {
+    label: `Title`,
+    description: `The title for this item in the UI. Can be anything and is safe
+    to change at any time.`
+  },
+  description: {
+    label: 'Description',
+    description: `The description of the collection item (shown in both the
+    overview and the detailed view.`
+  }
+};
+
 export const MEASURE = {
   name: {
     label: `Name (you won't be able to change this later)`,

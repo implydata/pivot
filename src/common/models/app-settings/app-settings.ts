@@ -194,6 +194,12 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
     return new AppSettings(value);
   }
 
+  public addOrUpdateCollection(collection: Collection): AppSettings {
+    var value = this.valueOf();
+    value.collections = helper.overrideByName(value.collections, collection);
+    return new AppSettings(value);
+  }
+
   public attachExecutors(executorFactory: (dataCube: DataCube) => Executor): AppSettings {
     var value = this.valueOf();
     value.dataCubes = value.dataCubes.map((ds) => {

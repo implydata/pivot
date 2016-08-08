@@ -17,6 +17,7 @@
 require('./bar-chart.css');
 
 import * as React from 'react';
+import * as ReactDOM from 'react-dom';
 import { List } from 'immutable';
 import { r, Range, Dataset, Datum, PseudoDatum, SortAction, PlywoodValue, Set, TimeRange } from 'plywood';
 
@@ -36,12 +37,8 @@ import { DisplayYear } from '../../../common/utils/time/time';
 
 import { SPLIT, VIS_H_PADDING } from '../../config/constants';
 import { roundToPx, classNames } from '../../utils/dom/dom';
-import { VisMeasureLabel } from '../../components/vis-measure-label/vis-measure-label';
-import { VerticalAxis } from '../../components/vertical-axis/vertical-axis';
-import { BucketMarks } from '../../components/bucket-marks/bucket-marks';
-import { GridLines } from '../../components/grid-lines/grid-lines';
-import { SegmentBubble } from '../../components/segment-bubble/segment-bubble';
-import { Scroller, ScrollerLayout } from '../../components/scroller/scroller';
+
+import { VisMeasureLabel, VerticalAxis, BucketMarks, GridLines, SegmentBubble, Scroller, ScrollerLayout } from '../../components/index';
 
 import { BaseVisualization, BaseVisualizationState } from '../base-visualization/base-visualization';
 import { BarCoordinates } from './bar-coordinates';
@@ -71,6 +68,7 @@ export interface BubbleInfo {
 export interface BarChartState extends BaseVisualizationState {
   hoverInfo?: BubbleInfo;
   selectionInfo?: BubbleInfo;
+  scrollerYPosition?: number;
 
   // Precalculated stuff
   flatData?: PseudoDatum[];
@@ -117,6 +115,19 @@ export class BarChart extends BaseVisualization<BarChartState> {
       nextEssence.newEffectiveMeasures(essence)
     ) {
       this.fetchData(nextEssence);
+    }
+  }
+
+  componentDidUpdate() {
+    const { scrollerYPosition } = this.state;
+
+    var node = ReactDOM.findDOMNode(this.refs['scroller']);
+    if (!node) return;
+
+    var rect = node.getBoundingClientRect();
+
+    if (scrollerYPosition !== rect.top) {
+      this.setState({scrollerYPosition: rect.top});
     }
   }
 
@@ -176,7 +187,7 @@ export class BarChart extends BaseVisualization<BarChartState> {
     return { path: [], coordinates: null };
   }
 
-  onSimpleScroll(scrollTop: number, scrollLeft: number) {
+  onScrollerScroll(scrollTop: number, scrollLeft: number) {
     this.setState({
       hoverInfo: null,
       scrollLeft,
@@ -193,11 +204,13 @@ export class BarChart extends BaseVisualization<BarChartState> {
   }
 
   onClick(x: number, y: number) {
+    const { essence, clicker } = this.props;
+
+    if (!clicker.changeHighlight || !clicker.dropHighlight) return;
+
     const selectionInfo = this.calculateMousePosition(x, y);
 
     if (!selectionInfo) return;
-
-    const { essence, clicker } = this.props;
 
     if (!selectionInfo.coordinates) {
       clicker.dropHighlight();
@@ -307,11 +320,12 @@ export class BarChart extends BaseVisualization<BarChartState> {
   }
 
   getBubbleTopOffset(y: number, chartIndex: number, chartStage: Stage): number {
-    const { scrollTop } = this.state;
+    const { stage } = this.props;
+    const { scrollTop, scrollerYPosition } = this.state;
     const oneChartHeight = this.getOuterChartHeight(chartStage);
     const chartsAboveMe = oneChartHeight * chartIndex;
 
-    return chartsAboveMe - scrollTop + y - HOVER_BUBBLE_V_OFFSET + CHART_TOP_PADDING;
+    return chartsAboveMe - scrollTop + scrollerYPosition + y - HOVER_BUBBLE_V_OFFSET + CHART_TOP_PADDING;
   }
 
   getBubbleLeftOffset(x: number): number {
@@ -323,9 +337,10 @@ export class BarChart extends BaseVisualization<BarChartState> {
 
   canShowBubble(leftOffset: number, topOffset: number): boolean {
     const { stage } = this.props;
+    const { scrollLeft, scrollerYPosition } = this.state;
 
     if (topOffset <= 0) return false;
-    if (topOffset > stage.height - X_AXIS_HEIGHT) return false;
+    if (topOffset > scrollerYPosition + stage.height - X_AXIS_HEIGHT) return false;
     if (leftOffset - stage.x <= 0) return false;
     if (leftOffset > stage.x + stage.width - Y_AXIS_WIDTH - VIS_H_PADDING) return false;
 
@@ -372,7 +387,7 @@ export class BarChart extends BaseVisualization<BarChartState> {
     if (!this.canShowBubble(leftOffset, topOffset)) return null;
 
     return <SegmentBubble
-      top={stage.y + topOffset}
+      top={topOffset}
       left={leftOffset}
       segmentLabel={segmentLabel}
       measureLabel={measure.formatDatum(path[path.length - 1])}
@@ -636,7 +651,6 @@ export class BarChart extends BaseVisualization<BarChartState> {
         yAxis: null,
         highlight: null
       };
-
     }
 
     let { xAxisStage } = this.getAxisStages(chartStage);
@@ -663,7 +677,7 @@ export class BarChart extends BaseVisualization<BarChartState> {
   }
 
   precalculate(props: VisualizationProps, datasetLoad: DatasetLoad = null) {
-    const { registerDownloadableDataset, essence, stage } = props;
+    const { registerDownloadableDataset, essence } = props;
     const { splits } = essence;
 
     this.coordinatesCache = [];
@@ -893,6 +907,7 @@ export class BarChart extends BaseVisualization<BarChartState> {
     return <div className="internals measure-bar-charts" style={{maxHeight: stage.height}}>
        <Scroller
         layout={scrollerLayout}
+        ref="scroller"
 
         bottomGutter={xAxis}
         rightGutter={rightGutter}
@@ -903,8 +918,7 @@ export class BarChart extends BaseVisualization<BarChartState> {
         onClick={this.onClick.bind(this)}
         onMouseMove={this.onMouseMove.bind(this)}
         onMouseLeave={this.onMouseLeave.bind(this)}
-        onScroll={this.onSimpleScroll.bind(this)}
-
+        onScroll={this.onScrollerScroll.bind(this)}
       />
     </div>;
   }

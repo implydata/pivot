@@ -25,6 +25,7 @@ export * from './measure/measure';
 export * from './filter-clause/filter-clause';
 export * from './filter/filter';
 export * from './list-item/list-item';
+export * from './view-supervisor/view-supervisor';
 export * from './split-combine/split-combine';
 export * from './splits/splits';
 export * from './highlight/highlight';

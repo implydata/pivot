@@ -60,7 +60,13 @@ export class BodyPortal extends React.Component<BodyPortalProps, BodyPortalState
     } else if (typeof top === 'string') {
       style.top = top;
     }
-    style['z-index'] = disablePointerEvents ? 200 : 201;
+
+    // TODO: what was the intent here ?
+    // Disabling it because when showing a tooltip on a modal, the tooltip ends
+    // up behind the modal, which is not the exact goal of it ^^
+    // - Sébastien
+    style['z-index'] = 200; //disablePointerEvents ? 200 : 201;
+
     style['pointer-events'] = disablePointerEvents ? 'none' : 'auto';
   }
 

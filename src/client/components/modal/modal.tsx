@@ -30,7 +30,7 @@ export interface ModalProps extends React.Props<any> {
   id?: string;
   title?: string;
   mandatory?: boolean;
-  onClose: Fn;
+  onClose?: Fn;
   onEnter?: Fn;
   startUpFocusOn?: string;
 }

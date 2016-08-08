@@ -112,57 +112,387 @@ dataCubes:
 
 
 collections:
-  - title: My collection
-    name: my_collection
-    linkItems:
-      - name: 'd0'
-        title: 'Viva La France'
-        description: 'I like logs'
-        group: 'Logz'
-        dataCube: 'wiki'
-        essence:
-          pinnedDimensions: ['channel']
-          selectedMeasures: ['count']
-          splits: 'time'
-
-      - name: 'd1'
-        title: 'Everyday I see the stars and I think to my self what a wonderful world'
-        description: 'I like logs a lot. I like logs a lot. I like logs a lot. I like logs a lot. I like logs a lot. I like logs a lot. I like logs a lot. I like logs a lot. I like logs a lot. I like logs a lot. I like logs a lot. I like logs a lot. I like logs a lot. I like logs a lot. I like logs a lot.'
-        group: 'Logz'
-        dataCube: 'wiki'
-        essence:
-          pinnedDimensions: ['channel']
-          selectedMeasures: ['delta']
-          splits: 'channel'
-
-      - name: 'd2'
-        title: 'Everyday I see the stars and I think to my self what a wonderful world'
-        description: 'I like logs a lot. I like logs a lot. I like logs a lot. I like logs a lot. I like logs a lot. I like logs a lot. I like logs a lot. I like logs a lot. I like logs a lot. I like logs a lot. I like logs a lot. I like logs a lot. I like logs a lot. I like logs a lot. I like logs a lot.'
-        group: 'Logz'
-        dataCube: 'wiki'
-        essence:
-          pinnedDimensions: ['channel']
-          selectedMeasures: ['count', 'delta', 'avg_delta', 'added', 'avg_added', 'deleted', 'avg_deleted', 'unique_users']
-
-  - title: My Other Collection
-    name: my_other_collection
-    linkItems:
-      - name: 'd1'
-        title: 'Viva La France'
-        description: 'I like logs'
-        group: 'Logz'
-        dataCube: 'wiki'
-        essence:
-          pinnedDimensions: ['channel']
-          selectedMeasures: ['count', 'delta', 'avg_delta', 'added', 'avg_added']
-          splits: 'time'
-
-      - name: 'd2'
-        title: 'Everyday I see the stars and I think to my self what a wonderful world'
-        description: 'I like logs a lot. I like logs a lot. I like logs a lot. I like logs a lot. I like logs a lot. I like logs a lot. I like logs a lot. I like logs a lot. I like logs a lot. I like logs a lot. I like logs a lot. I like logs a lot. I like logs a lot. I like logs a lot. I like logs a lot.'
-        group: 'Logz'
-        dataCube: 'wiki'
-        essence:
-          pinnedDimensions: ['channel']
-          selectedMeasures: ['count', 'delta']
-          splits: 'time'
+  - name: my_collection
+    items:
+    - name: d0
+      title: Viva La France
+      description: I like logs
+      group: Logz
+      dataCube: wiki
+      essence:
+        visualization: line-chart
+        timezone: Etc/UTC
+        filter:
+          op: chain
+          expression:
+            op: ref
+            name: time
+          action:
+            action: in
+            expression:
+              op: chain
+              expression:
+                op: ref
+                name: m
+              action:
+                action: timeRange
+                duration: P1D
+                step: -1
+        splits:
+        - expression:
+            op: ref
+            name: time
+          bucketAction:
+            action: timeBucket
+            duration: PT1H
+          sortAction:
+            action: sort
+            expression:
+              op: ref
+              name: time
+            direction: ascending
+        singleMeasure: delta
+        selectedMeasures:
+        - count
+        pinnedDimensions:
+        - channel
+        multiMeasureMode: true
+    - name: d1
+      title: Everyday I see the stars and I think to my self what a wonderful world
+      description: I like logs a lot. I like logs a lot. I like logs a lot. I like logs
+        a lot. I like logs a lot. I like logs a lot. I like logs a lot. I like logs
+        a lot. I like logs a lot. I like logs a lot. I like logs a lot. I like logs
+        a lot. I like logs a lot. I like logs a lot. I like logs a lot.
+      group: Logz
+      dataCube: wiki
+      essence:
+        visualization: table
+        timezone: Etc/UTC
+        filter:
+          op: chain
+          expression:
+            op: ref
+            name: time
+          action:
+            action: in
+            expression:
+              op: chain
+              expression:
+                op: ref
+                name: m
+              action:
+                action: timeRange
+                duration: P1D
+                step: -1
+        splits:
+        - expression:
+            op: ref
+            name: channel
+          sortAction:
+            action: sort
+            expression:
+              op: ref
+              name: delta
+            direction: descending
+          limitAction:
+            action: limit
+            limit: 50
+        singleMeasure: delta
+        selectedMeasures:
+        - delta
+        pinnedDimensions:
+        - channel
+        multiMeasureMode: true
+    - name: d2
+      title: Everyday I see the stars and I think to my self what a wonderful world
+      description: I like logs a lot. I like logs a lot. I like logs a lot. I like logs
+        a lot. I like logs a lot. I like logs a lot. I like logs a lot. I like logs
+        a lot. I like logs a lot. I like logs a lot. I like logs a lot. I like logs
+        a lot. I like logs a lot. I like logs a lot. I like logs a lot.
+      group: Logz
+      dataCube: wiki
+      essence:
+        visualization: totals
+        timezone: Etc/UTC
+        filter:
+          op: chain
+          expression:
+            op: ref
+            name: time
+          action:
+            action: in
+            expression:
+              op: chain
+              expression:
+                op: ref
+                name: m
+              action:
+                action: timeRange
+                duration: P1D
+                step: -1
+        splits: []
+        singleMeasure: delta
+        selectedMeasures:
+        - count
+        - delta
+        - avg_delta
+        - added
+        - avg_added
+        - deleted
+        - avg_deleted
+        - unique_users
+        pinnedDimensions:
+        - channel
+        multiMeasureMode: true
+    - name: bar-chart-item
+      title: Bar Chart
+      description: LULZ
+      group:
+      dataCube: wiki
+      essence:
+        visualization: bar-chart
+        timezone: Etc/UTC
+        filter:
+          op: chain
+          expression:
+            op: ref
+            name: time
+          action:
+            action: in
+            expression:
+              op: chain
+              expression:
+                op: ref
+                name: m
+              action:
+                action: timeRange
+                duration: P1D
+                step: -1
+        splits:
+        - expression:
+            op: ref
+            name: channel
+          sortAction:
+            action: sort
+            expression:
+              op: ref
+              name: delta
+            direction: descending
+          limitAction:
+            action: limit
+            limit: 25
+        singleMeasure: delta
+        selectedMeasures:
+        - count
+        - delta
+        - avg_delta
+        - added
+        pinnedDimensions:
+        - channel
+        - namespace
+        - isRobot
+    - name: multi-measure-line
+      title: Multi Measure Line Chart
+      description: I know charts. I have the best charts.
+      group:
+      dataCube: wiki
+      essence:
+        visualization: line-chart
+        timezone: Etc/UTC
+        filter:
+          op: chain
+          expression:
+            op: ref
+            name: time
+          action:
+            action: in
+            expression:
+              op: chain
+              expression:
+                op: ref
+                name: m
+              action:
+                action: timeRange
+                duration: P1D
+                step: -1
+        splits:
+        - expression:
+            op: ref
+            name: time
+          bucketAction:
+            action: timeBucket
+            duration: PT1H
+          sortAction:
+            action: sort
+            expression:
+              op: ref
+              name: time
+            direction: ascending
+        singleMeasure: delta
+        selectedMeasures:
+        - count
+        - delta
+        - avg_delta
+        - added
+        pinnedDimensions:
+        - channel
+        - namespace
+        - isRobot
+        multiMeasureMode: true
+    - name: two-splits-line
+      title: Two Splits Line
+      description: Omelette du fromage
+      group:
+      dataCube: wiki
+      essence:
+        visualization: line-chart
+        timezone: Etc/UTC
+        filter:
+          op: chain
+          expression:
+            op: ref
+            name: time
+          action:
+            action: in
+            expression:
+              op: chain
+              expression:
+                op: ref
+                name: m
+              action:
+                action: timeRange
+                duration: P1D
+                step: -1
+        splits:
+        - expression:
+            op: ref
+            name: channel
+          sortAction:
+            action: sort
+            expression:
+              op: ref
+              name: delta
+            direction: descending
+        - expression:
+            op: ref
+            name: time
+          bucketAction:
+            action: timeBucket
+            duration: PT1H
+          sortAction:
+            action: sort
+            expression:
+              op: ref
+              name: time
+            direction: ascending
+        singleMeasure: delta
+        selectedMeasures:
+        - count
+        - delta
+        - avg_delta
+        - added
+        pinnedDimensions:
+        - channel
+        - namespace
+        - isRobot
+        colors:
+          dimension: channel
+          limit: 5
+    title: My collection
+  - name: my_other_collection
+    items:
+    - name: d1
+      title: Viva La France
+      description: I like logs
+      group: Logz
+      dataCube: wiki
+      essence:
+        visualization: line-chart
+        timezone: Etc/UTC
+        filter:
+          op: chain
+          expression:
+            op: ref
+            name: time
+          action:
+            action: in
+            expression:
+              op: chain
+              expression:
+                op: ref
+                name: m
+              action:
+                action: timeRange
+                duration: P1D
+                step: -1
+        splits:
+        - expression:
+            op: ref
+            name: time
+          bucketAction:
+            action: timeBucket
+            duration: PT1H
+          sortAction:
+            action: sort
+            expression:
+              op: ref
+              name: time
+            direction: ascending
+        singleMeasure: delta
+        selectedMeasures:
+        - count
+        - delta
+        - avg_delta
+        - added
+        - avg_added
+        pinnedDimensions:
+        - channel
+        multiMeasureMode: true
+    - name: d2
+      title: Everyday I see the stars and I think to my self what a wonderful world
+      description: I like logs a lot. I like logs a lot. I like logs a lot. I like logs
+        a lot. I like logs a lot. I like logs a lot. I like logs a lot. I like logs
+        a lot. I like logs a lot. I like logs a lot. I like logs a lot. I like logs
+        a lot. I like logs a lot. I like logs a lot. I like logs a lot.
+      group: Logz
+      dataCube: wiki
+      essence:
+        visualization: line-chart
+        timezone: Etc/UTC
+        filter:
+          op: chain
+          expression:
+            op: ref
+            name: time
+          action:
+            action: in
+            expression:
+              op: chain
+              expression:
+                op: ref
+                name: m
+              action:
+                action: timeRange
+                duration: P1D
+                step: -1
+        splits:
+        - expression:
+            op: ref
+            name: time
+          bucketAction:
+            action: timeBucket
+            duration: PT1H
+          sortAction:
+            action: sort
+            expression:
+              op: ref
+              name: time
+            direction: ascending
+        singleMeasure: delta
+        selectedMeasures:
+        - count
+        - delta
+        pinnedDimensions:
+        - channel
+        multiMeasureMode: true
+    title: My Other Collection

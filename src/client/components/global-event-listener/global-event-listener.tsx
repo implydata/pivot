@@ -6,6 +6,7 @@ import { escapeKey, enterKey, leftKey, rightKey } from '../../utils/dom/dom';
 
 export interface GlobalEventListenerProps extends React.Props<any> {
   resize?: () => void;
+  scroll?: () => void;
   mouseDown?: (e: MouseEvent) => void;
   enter?: (e: KeyboardEvent) => void;
   escape?: (e: KeyboardEvent) => void;
@@ -20,6 +21,7 @@ export class GlobalEventListener extends React.Component<GlobalEventListenerProp
   public mounted: boolean;
   private propsToEvents: any = {
     resize: 'resize',
+    scroll: 'scroll',
     mouseDown: 'mousedown',
     enter: 'keydown',
     escape: 'keydown',
@@ -33,6 +35,7 @@ export class GlobalEventListener extends React.Component<GlobalEventListenerProp
     this.onResize = this.onResize.bind(this);
     this.onMousedown = this.onMousedown.bind(this);
     this.onKeydown = this.onKeydown.bind(this);
+    this.onScroll = this.onScroll.bind(this);
   }
 
   componentWillReceiveProps(nextProps: GlobalEventListenerProps) {
@@ -70,7 +73,8 @@ export class GlobalEventListener extends React.Component<GlobalEventListenerProp
   }
 
   addListener(event: string) {
-    window.addEventListener(event, (this as any)[`on${firstUp(event)}`]);
+    var useCapture = event === 'scroll';
+    window.addEventListener(event, (this as any)[`on${firstUp(event)}`], useCapture);
   }
 
   removeListener(event: string) {
@@ -79,6 +83,10 @@ export class GlobalEventListener extends React.Component<GlobalEventListenerProp
 
   onResize() {
     if (this.props.resize) this.props.resize();
+  }
+
+  onScroll() {
+    if (this.props.scroll) this.props.scroll();
   }
 
   onMousedown(e: MouseEvent) {

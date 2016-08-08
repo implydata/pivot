@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-@import '../../imports';
+import { Essence } from '../index';
 
-.cube-header-bar {
-  @extend %header-bar;
+export interface ViewSupervisor {
+  cancel: () => void;
 
-  .refreshing svg {
-    animation-name: rotate;
-    animation-duration: 1s;
+  getConfirmationModal?: (newEssence: Essence) => JSX.Element;
+  save?: (newEssence: Essence) => void;
 
-    @keyframes rotate {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-  }
+  title?: string;
+
+  saveLabel?: string;
+
 }

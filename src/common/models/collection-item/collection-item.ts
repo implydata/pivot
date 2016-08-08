@@ -129,5 +129,20 @@ export class CollectionItem implements Instance<CollectionItemValue, CollectionI
       this.essence.equals(other.essence);
   }
 
+  public change(propertyName: string, newValue: any): CollectionItem {
+    var v = this.valueOf();
+
+    if (!v.hasOwnProperty(propertyName)) {
+      throw new Error(`Unknown property : ${propertyName}`);
+    }
+
+    (v as any)[propertyName] = newValue;
+    return new CollectionItem(v);
+  }
+
+  public changeEssence(essence: Essence) {
+    return this.change('essence', essence);
+  }
+
 }
 check = CollectionItem;

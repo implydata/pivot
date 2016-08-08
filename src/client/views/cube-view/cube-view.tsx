@@ -24,10 +24,11 @@ import { Fn } from '../../../common/utils/general/general';
 import { FunctionSlot } from '../../utils/function-slot/function-slot';
 import { DragManager } from '../../utils/drag-manager/drag-manager';
 import { Colors, Clicker, DataCube, Dimension, Essence, Filter, Stage, Measure,
-  SplitCombine, Splits, VisStrategy, VisualizationProps, User, Customization, Manifest } from '../../../common/models/index';
+  SplitCombine, Splits, VisStrategy, VisualizationProps, User, Customization, Manifest, ViewSupervisor } from '../../../common/models/index';
 import { MANIFESTS } from '../../../common/manifests/index';
 
 import { CubeHeaderBar } from '../../components/cube-header-bar/cube-header-bar';
+import { SupervisedCubeHeaderBar } from '../../components/supervised-cube-header-bar/supervised-cube-header-bar';
 import { DimensionMeasurePanel } from '../../components/dimension-measure-panel/dimension-measure-panel';
 import { FilterTile } from '../../components/filter-tile/filter-tile';
 import { SplitTile } from '../../components/split-tile/split-tile';
@@ -57,6 +58,7 @@ export interface CubeViewProps extends React.Props<any> {
   onNavClick?: Fn;
   customization?: Customization;
   transitionFnSlot?: FunctionSlot<string>;
+  supervisor?: ViewSupervisor;
 }
 
 export interface CubeViewState {
@@ -379,7 +381,7 @@ export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
   render() {
     var clicker = this.clicker;
 
-    var { getUrlPrefix, onNavClick, user, customization } = this.props;
+    var { getUrlPrefix, onNavClick, user, customization, supervisor } = this.props;
     var { deviceSize, layout, essence, menuStage, visualizationStage, dragOver, updatingMaxTime } = this.state;
 
     if (!essence) return null;
@@ -421,21 +423,33 @@ export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
       };
     }
 
-    return <div className='cube-view'>
-      <CubeHeaderBar
-        clicker={clicker}
+    var headerBar = <CubeHeaderBar
+      clicker={clicker}
+      essence={essence}
+      user={user}
+      onNavClick={onNavClick}
+      getUrlPrefix={getUrlPrefix}
+      refreshMaxTime={this.refreshMaxTime.bind(this)}
+      openRawDataModal={this.openRawDataModal.bind(this)}
+      customization={customization}
+      getDownloadableDataset={() => this.downloadableDataset}
+      changeTimezone={this.changeTimezone.bind(this)}
+      timezone={essence.timezone}
+      updatingMaxTime={updatingMaxTime}
+    />;
+
+    if (supervisor) {
+      headerBar = <SupervisedCubeHeaderBar
         essence={essence}
-        user={user}
-        onNavClick={onNavClick}
-        getUrlPrefix={getUrlPrefix}
-        refreshMaxTime={this.refreshMaxTime.bind(this)}
-        openRawDataModal={this.openRawDataModal.bind(this)}
         customization={customization}
-        getDownloadableDataset={() => this.downloadableDataset}
         changeTimezone={this.changeTimezone.bind(this)}
         timezone={essence.timezone}
-        updatingMaxTime={updatingMaxTime}
-      />
+        supervisor={supervisor}
+      />;
+    }
+
+    return <div className='cube-view'>
+      {headerBar}
       <div className="container" ref='container'>
         <DimensionMeasurePanel
           style={styles.dimensionMeasurePanel}

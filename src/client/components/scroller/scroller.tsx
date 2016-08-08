@@ -263,6 +263,7 @@ export class Scroller extends React.Component<ScrollerProps, ScrollerState> {
     if (this.props.onClick === undefined) return;
 
     const { x, y, part} = this.getRelativeMouseCoordinates(event);
+    if (y < 0 || x < 0) return;
 
     this.props.onClick(x, y, part);
   }
@@ -271,6 +272,7 @@ export class Scroller extends React.Component<ScrollerProps, ScrollerState> {
     if (this.props.onMouseMove === undefined) return;
 
     const { x, y, part } = this.getRelativeMouseCoordinates(event);
+    if (y < 0 || x < 0) return;
 
     this.props.onMouseMove(x, y, part);
   }

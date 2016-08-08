@@ -13,6 +13,10 @@
       flex-basis: $value * 1%;
       overflow: hidden;
 
+      &.enable-overflow {
+        overflow: initial;
+      }
+
       &:not(.vertical) > *:not(.grid-row) {
         display: inline-block;
         vertical-align: top;

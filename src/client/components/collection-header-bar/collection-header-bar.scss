@@ -16,41 +16,6 @@
 
 @import '../../imports';
 
-.bubble-menu {
-  @extend %menu-cont;
-  position: absolute;
-  padding: $padding-compact;
-
-  &.mini {
-    padding: $padding-mini;
-  }
-
-  .menu-header {
-    @include pin-top($menu-title-bar-height);
-  }
-
-  .bubble-list-title {
-    margin-left: -4px;
-    margin-bottom: 5px;
-    color: $text-light;
-  }
-
-  ul.bubble-list {
-    margin-left: -$padding-compact;
-    margin-right: -$padding-compact;
-
-    li {
-      padding: 0 $padding-compact;
-      line-height: 25px;
-      cursor: pointer;
-
-      &:hover {
-        background: rgba($brand, 0.12);
-      }
-
-      &.selected {
-        background: $background-light;
-      }
-    }
-  }
+.collection-header-bar {
+  @extend %header-bar;
 }

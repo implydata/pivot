@@ -45,33 +45,39 @@
           color: $text-medium;
           font-size: 16px;
           margin-bottom: 5px;
-
-          // Otherwise the bottom of the text gets cut off...
-          // (see http://stackoverflow.com/questions/6421966/css-overflow-x-visible-and-overflow-y-hidden-causing-scrollbar-issue)
           height: 18px;
+        }
+
+        input.title {
+          height: 16px;
+          margin-left: -7px;
         }
 
         .description {
           color: $text-lighter;
-
-          // Otherwise the bottom of the text gets cut off...
-          // (see http://stackoverflow.com/questions/6421966/css-overflow-x-visible-and-overflow-y-hidden-causing-scrollbar-issue)
           height: 15px;
         }
 
+        input.description {
+          margin-left: -7px;
+        }
+
         [class*='-button'] {
-          width: 30px;
           padding: 5px;
           line-height: 20px;
-          border-radius: 50%;
 
           color: $brand;
 
-          path {
-            fill: $brand;
-          }
-
           cursor: pointer;
+
+          &.icon {
+            border-radius: 50%;
+            width: 30px;
+
+            path {
+              fill: $brand;
+            }
+          }
 
           &:not(:last-child) {
             margin-right: 5px;
@@ -84,11 +90,6 @@
           &:hover, &.active {
             background-color: $highlight;
           }
-        }
-
-        .explore-button {
-          width: initial;
-          border-radius: 0;
         }
 
         .separator {

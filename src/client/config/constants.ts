@@ -40,6 +40,9 @@ export const MAX_SEARCH_LENGTH = 300;
 export const SEARCH_WAIT = 900;
 
 export const STRINGS: any = {
+  add: 'Add',
+  addVisualization: 'Add visualization',
+  addFromCube: 'Add from Cube',
   any: 'any',
   autoUpdate: 'Auto update',
   cancel: 'Cancel',
@@ -50,13 +53,16 @@ export const STRINGS: any = {
   current: 'Current',
   collections: 'Collections',
   dataCubes: 'Data Cubes',
+  deleteCollectionItem: 'Delete this view',
   dimensions: 'Dimensions',
   download: 'Download',
+  duplicateCollectionItem: 'Duplicate this view',
   editThisCube: 'Edit this cube',
   editTitleAndDesc: 'Edit title and description',
   editVisualization: 'Edit visualization',
   end: 'End',
   exclude: 'Exclude',
+  explore: 'Explore',
   exportToCSV: 'Export to CSV',
   filter: 'Filter',
   generalSettings: 'General settings',
@@ -87,6 +93,7 @@ export const STRINGS: any = {
   rawData: 'Raw Data',
   regex: 'Regex',
   relative: 'Relative',
+  save: 'Save',
   segment: 'segment',
   select: 'Select',
   settings: 'Settings',
@@ -98,6 +105,7 @@ export const STRINGS: any = {
   stringSearch: 'String search',
   subsplit: 'Split',
   timezone: 'Timezone',
+  undo: 'Click to undo',
   updateTimezone: 'Update Timezone',
   viewRawData: 'View raw data'
 };
