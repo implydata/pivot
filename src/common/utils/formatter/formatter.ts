@@ -108,19 +108,25 @@ export function formatFilterClause(dimension: Dimension, clause: FilterClause, t
 
 export function getFormattedClause(dimension: Dimension, clause: FilterClause, timezone: Timezone, verbose?: boolean): {title: string, values: string} {
   var dimKind = dimension.kind;
-  var title = (verbose || dimKind !== 'time') ? `${dimension.title}:` : '';
   var values: string;
+  var clauseSet = clause.getLiteralSet();
+
+  function getClauseLabel() {
+    var dimTitle = dimension.title;
+    if (dimKind === 'time' && !verbose) return '';
+    if (clauseSet && clauseSet.elements.length > 1 && !verbose) return `${dimTitle}`;
+    return `${dimTitle}:`;
+  }
 
   switch (dimKind) {
     case 'boolean':
     case 'number':
     case 'string':
       if (verbose) {
-        values = clause.getLiteralSet().toString();
+        values = clauseSet.toString();
       } else {
-        var setElements = clause.getLiteralSet().elements;
+        var setElements = clauseSet.elements;
         if (setElements.length > 1) {
-          title = title.replace(/:/g, ''); // no colon if value is just how many values there are
           values = `(${setElements.length})`;
         } else {
           values = formatValue(setElements[0]);
@@ -135,7 +141,7 @@ export function getFormattedClause(dimension: Dimension, clause: FilterClause, t
         var timeRange = selection.value as TimeRange;
         values = formatTimeRange(timeRange, timezone, DisplayYear.IF_DIFF);
       } else if (selectionType === "SET/TIME") {
-        values = clause.getLiteralSet().toString();
+        values = clauseSet.toString();
       }
       break;
 
@@ -143,6 +149,6 @@ export function getFormattedClause(dimension: Dimension, clause: FilterClause, t
       throw new Error(`unknown kind ${dimKind}`);
   }
 
-  return {title, values};
+  return {title: getClauseLabel(), values};
 }
 
