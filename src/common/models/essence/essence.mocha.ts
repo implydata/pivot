@@ -348,17 +348,17 @@ describe('Essence', () => {
         expect(essence.visResolve.state).to.deep.equal("ready");
       });
 
-      it.skip("summoning: should respect user's previous bar chart choice after adding a string split", () => {
-        essence = essence.addSplit(twitterHandleSplit, VisStrategy.UnfairGame);
-        expect(essence.visualization.name).to.deep.equal("bar-chart");
-        expect(essence.visResolve.state).to.deep.equal("ready");
-      });
-
       it("falls back when can't handle splits", () => {
         essence = essence.changeSplits(Splits.EMPTY, VisStrategy.FairGame);
         essence = essence.changeVisualization(BAR_CHART_MANIFEST);
         expect(essence.visualization.name).to.deep.equal("bar-chart");
         expect(essence.visResolve.state).to.deep.equal("manual");
+      });
+
+      it.skip("summoning: should respect user's previous bar chart choice after adding a string split", () => {
+        essence = essence.addSplit(twitterHandleSplit, VisStrategy.UnfairGame);
+        expect(essence.visualization.name).to.deep.equal("bar-chart");
+        expect(essence.visResolve.state).to.deep.equal("ready");
       });
 
       it("falls back when can't handle measures", () => {
