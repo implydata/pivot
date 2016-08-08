@@ -76,6 +76,7 @@ export interface LineChartState extends BaseVisualizationState {
   roundDragRange?: PlywoodRange;
   hoverRange?: PlywoodRange;
   containerYPosition?: number;
+  containerXPosition?: number;
 
   // Cached props
   continuousDimension?: Dimension;
@@ -83,7 +84,6 @@ export interface LineChartState extends BaseVisualizationState {
   scaleX?: any;
   xTicks?: continuousValueType[];
 }
-
 
 export class LineChart extends BaseVisualization<LineChartState> {
   public static id = LINE_CHART_MANIFEST.name;
@@ -103,15 +103,18 @@ export class LineChart extends BaseVisualization<LineChartState> {
   }
 
   componentDidUpdate() {
-    const { containerYPosition } = this.state;
+    const { containerYPosition, containerXPosition } = this.state;
 
     var node = ReactDOM.findDOMNode(this.refs['container']);
     if (!node) return;
 
     var rect = node.getBoundingClientRect();
 
-    if (containerYPosition !== rect.top) {
-      this.setState({containerYPosition: rect.top});
+    if (containerYPosition !== rect.top || containerXPosition !== rect.left) {
+      this.setState({
+        containerYPosition: rect.top,
+        containerXPosition: rect.left
+      });
     }
   }
 
@@ -249,8 +252,11 @@ export class LineChart extends BaseVisualization<LineChartState> {
 
   renderChartBubble(dataset: Dataset, measure: Measure, chartIndex: number, containerStage: Stage, chartStage: Stage, extentY: number[], scaleY: any): JSX.Element {
     const { clicker, essence, openRawDataModal } = this.props;
-    const { containerYPosition, scrollTop, dragRange, roundDragRange, dragOnMeasure, hoverRange, hoverMeasure, scaleX, continuousDimension } = this.state;
     const { colors, timezone } = essence;
+
+    const { containerYPosition, containerXPosition, scrollTop, dragRange, roundDragRange }  = this.state;
+    const { dragOnMeasure, hoverRange, hoverMeasure, scaleX, continuousDimension } = this.state;
+
 
     if (essence.highlightOnDifferentMeasure(LineChart.id, measure.name)) return null;
 
@@ -267,7 +273,7 @@ export class LineChart extends BaseVisualization<LineChartState> {
 
       if (colors) {
         var categoryDimension = essence.splits.get(0).getDimension(essence.dataCube.dimensions);
-        var leftOffset = containerStage.x + VIS_H_PADDING + scaleX(bubbleRange.end);
+        var leftOffset = containerXPosition + VIS_H_PADDING + scaleX(bubbleRange.end);
 
         var hoverDatums = dataset.data.map(d => (d[SPLIT] as Dataset).findDatumByAttribute(continuousDimension.name, bubbleRange));
         var colorValues = colors.getColors(dataset.data.map(d => d[categoryDimension.name]));
@@ -291,7 +297,7 @@ export class LineChart extends BaseVisualization<LineChartState> {
           clicker={dragRange ? null : clicker}
         />;
       } else {
-        var leftOffset = containerStage.x + VIS_H_PADDING + scaleX(bubbleRange.midpoint());
+        var leftOffset = containerXPosition + VIS_H_PADDING + scaleX(bubbleRange.midpoint());
         var highlightDatum = dataset.findDatumByAttribute(continuousDimension.name, shownRange);
         var segmentLabel = formatValue(shownRange, timezone, DisplayYear.NEVER);
 
@@ -306,7 +312,7 @@ export class LineChart extends BaseVisualization<LineChartState> {
       }
 
     } else if (!dragRange && hoverRange && hoverMeasure === measure) {
-      var leftOffset = containerStage.x + VIS_H_PADDING + scaleX((hoverRange as NumberRange | TimeRange).midpoint());
+      var leftOffset = containerXPosition + VIS_H_PADDING + scaleX((hoverRange as NumberRange | TimeRange).midpoint());
       var segmentLabel = formatValue(hoverRange, timezone, DisplayYear.NEVER);
 
       if (colors) {
@@ -558,6 +564,10 @@ export class LineChart extends BaseVisualization<LineChartState> {
   }
 
   hideBubble() {
+    const { hoverRange, hoverMeasure } = this.state;
+
+    if (!hoverRange || !hoverMeasure) return;
+
     this.setState({
       hoverRange: null,
       hoverMeasure: null

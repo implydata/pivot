@@ -69,6 +69,7 @@ export interface BarChartState extends BaseVisualizationState {
   hoverInfo?: BubbleInfo;
   selectionInfo?: BubbleInfo;
   scrollerYPosition?: number;
+  scrollerXPosition?: number;
 
   // Precalculated stuff
   flatData?: PseudoDatum[];
@@ -119,15 +120,15 @@ export class BarChart extends BaseVisualization<BarChartState> {
   }
 
   componentDidUpdate() {
-    const { scrollerYPosition } = this.state;
+    const { scrollerYPosition, scrollerXPosition } = this.state;
 
     var node = ReactDOM.findDOMNode(this.refs['scroller']);
     if (!node) return;
 
     var rect = node.getBoundingClientRect();
 
-    if (scrollerYPosition !== rect.top) {
-      this.setState({scrollerYPosition: rect.top});
+    if (scrollerYPosition !== rect.top || scrollerXPosition !== rect.left) {
+      this.setState({scrollerYPosition: rect.top, scrollerXPosition: rect.left});
     }
   }
 
@@ -320,7 +321,6 @@ export class BarChart extends BaseVisualization<BarChartState> {
   }
 
   getBubbleTopOffset(y: number, chartIndex: number, chartStage: Stage): number {
-    const { stage } = this.props;
     const { scrollTop, scrollerYPosition } = this.state;
     const oneChartHeight = this.getOuterChartHeight(chartStage);
     const chartsAboveMe = oneChartHeight * chartIndex;
@@ -330,19 +330,19 @@ export class BarChart extends BaseVisualization<BarChartState> {
 
   getBubbleLeftOffset(x: number): number {
     const { stage } = this.props;
-    const { scrollLeft } = this.state;
+    const { scrollLeft, scrollerXPosition } = this.state;
 
-    return stage.x + VIS_H_PADDING + x - scrollLeft;
+    return scrollerXPosition + x - scrollLeft;
   }
 
   canShowBubble(leftOffset: number, topOffset: number): boolean {
     const { stage } = this.props;
-    const { scrollLeft, scrollerYPosition } = this.state;
+    const { scrollLeft, scrollerYPosition, scrollerXPosition } = this.state;
 
     if (topOffset <= 0) return false;
     if (topOffset > scrollerYPosition + stage.height - X_AXIS_HEIGHT) return false;
-    if (leftOffset - stage.x <= 0) return false;
-    if (leftOffset > stage.x + stage.width - Y_AXIS_WIDTH - VIS_H_PADDING) return false;
+    if (leftOffset <= 0) return false;
+    if (leftOffset > scrollerXPosition + stage.width - Y_AXIS_WIDTH) return false;
 
     return true;
   }
@@ -362,7 +362,7 @@ export class BarChart extends BaseVisualization<BarChartState> {
 
     return <SegmentBubble
       left={leftOffset}
-      top={stage.y + topOffset}
+      top={topOffset}
       dimension={dimension}
       segmentLabel={segmentLabel}
       measureLabel={measure.formatDatum(path[path.length - 1])}

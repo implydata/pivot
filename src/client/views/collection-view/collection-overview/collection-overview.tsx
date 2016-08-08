@@ -51,8 +51,13 @@ export class CollectionOverview extends React.Component<CollectionOverviewProps,
     window.location.hash = `#collection/${this.state.collection.name}/${item.name}`;
   }
 
-  renderItem(item: CollectionItem): JSX.Element {
-    return <CollectionItemCard item={item} key={item.name} onExpand={this.onExpand.bind(this)}/>;
+  renderItem(item: CollectionItem, i: number): JSX.Element {
+    return <CollectionItemCard
+      item={item}
+      key={item.name}
+      // key={`${item.name}-${i}`}
+      onExpand={this.onExpand.bind(this)}
+    />;
   }
 
   render() {
