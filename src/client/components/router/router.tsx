@@ -23,7 +23,10 @@ import { Stage, Clicker, Essence, DataCube, Filter, Dimension, Measure } from '.
 import { replaceHash } from '../../utils/url/url';
 import { SvgIcon } from '../svg-icon/svg-icon';
 
-export interface RouteProps extends React.Props<any> { fragment: string; alwaysShowOrphans?: boolean; }
+export interface RouteProps extends React.Props<any> {
+  fragment: string;
+  alwaysShowOrphans?: boolean;
+}
 export interface RouteState {}
 export class Route extends React.Component<RouteProps, RouteState> {}
 
