@@ -17,6 +17,7 @@
 require('./collection-view.css');
 
 import * as React from 'react';
+
 import { Collection, User, Customization, CollectionItem, DataCube } from '../../../common/models/index';
 import { Fn } from '../../../common/utils/general/general';
 
@@ -34,10 +35,12 @@ export interface CollectionViewProps extends React.Props<any> {
   user?: User;
   onNavClick?: Fn;
   customization?: Customization;
-  onItemChange?: (collection: Collection, collectionItem: CollectionItem) => void;
-  onEditionRequest?: (collection: Collection, collectionItem: CollectionItem) => void;
-  onAdditionRequest?: (collection: Collection, dataCube: DataCube) => void;
-  onDeletionRequest?: (collection: Collection, collectionItem: CollectionItem) => void;
+  delegate?: {
+    updateItem: (collection: Collection, collectionItem: CollectionItem) => void;
+    editItem: (collection: Collection, collectionItem: CollectionItem) => void;
+    createItem: (collection: Collection, dataCube: DataCube) => void;
+    deleteItem: (collection: Collection, collectionItem: CollectionItem) => void;
+  };
 }
 
 export interface CollectionViewState {
@@ -61,13 +64,11 @@ export class CollectionView extends React.Component<CollectionViewProps, Collect
       collection = collections.filter(({name}) => name === crumbs[0])[0];
     }
 
-    this.setState({
-      collection
-    });
+    this.setState({collection});
   }
 
   render() {
-    const { user, collections, customization, onNavClick, onEditionRequest, onItemChange, onAdditionRequest, onDeletionRequest, dataCubes } = this.props;
+    const { user, collections, customization, onNavClick, delegate, dataCubes } = this.props;
     const { collection } = this.state;
 
     return <div className="collection-view">
@@ -78,7 +79,7 @@ export class CollectionView extends React.Component<CollectionViewProps, Collect
         title={collection ? collection.title : ''}
         dataCubes={dataCubes}
         collections={collections}
-        onAddItem={onAdditionRequest.bind(this, collection)}
+        onAddItem={delegate.createItem.bind(this, collection)}
       />
 
      <div className="main-panel">
@@ -89,9 +90,9 @@ export class CollectionView extends React.Component<CollectionViewProps, Collect
            <Route fragment=":itemId">
               <CollectionItemLightbox
                 collections={collections}
-                onChange={onItemChange}
-                onEdit={onEditionRequest}
-                onDelete={onDeletionRequest.bind(this, collection)}
+                onChange={delegate.updateItem}
+                onEdit={delegate.editItem}
+                onDelete={delegate.deleteItem}
               />
            </Route>
 

@@ -34,7 +34,7 @@ export interface CollectionItemLightboxProps extends React.Props<any> {
   collectionId?: string;
   itemId?: string;
   onEdit?: (collection: Collection, collectionItem: CollectionItem) => void;
-  onDelete?: (collectionItem: CollectionItem) => void;
+  onDelete?: (collection: Collection, collectionItem: CollectionItem) => void;
   onChange?: (collection: Collection, collectionItem: CollectionItem) => void;
 }
 
@@ -154,7 +154,7 @@ export class CollectionItemLightbox extends React.Component<CollectionItemLightb
     const { collection, item } = this.state;
     var onClose = () => this.setState({moreMenuOpen: false});
 
-    const remove = () => onDelete(item);
+    const remove = () => onDelete(collection, item);
 
     return <BubbleMenu
       className="more-menu"
@@ -165,9 +165,7 @@ export class CollectionItemLightbox extends React.Component<CollectionItemLightb
     >
       <ul className="bubble-list">
         <li className="duplicate-item" >{STRINGS.duplicateCollectionItem}</li>
-        <li className="delete-item" onClick={remove}>
-          {STRINGS.deleteCollectionItem}
-        </li>
+        <li className="delete-item" onClick={remove}>{STRINGS.deleteCollectionItem}</li>
       </ul>
     </BubbleMenu>;
   }

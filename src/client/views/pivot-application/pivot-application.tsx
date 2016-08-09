@@ -32,7 +32,7 @@ import { LinkView } from '../link-view/link-view';
 import { CubeView } from '../cube-view/cube-view';
 import { SettingsView } from '../settings-view/settings-view';
 import { CollectionView } from '../collection-view/collection-view';
-import { AddCollectionItemModal } from '../collection-view/add-collection-item-modal/add-collection-item-modal';
+import { CollectionViewDelegate } from './collection-view-delegate/collection-view-delegate';
 
 export interface PivotApplicationProps extends React.Props<any> {
   version: string;
@@ -68,9 +68,11 @@ export const SETTINGS: ViewType = "settings";
 export class PivotApplication extends React.Component<PivotApplicationProps, PivotApplicationState> {
   private hashUpdating: boolean = false;
   private sideBarHrefFn: FunctionSlot<string>;
+  private collectionViewDelegate: CollectionViewDelegate;
 
   constructor() {
     super();
+    this.collectionViewDelegate = new CollectionViewDelegate(this);
     this.sideBarHrefFn = createFunctionSlot<string>();
     this.state = {
       appSettings: null,
@@ -121,6 +123,10 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
       selectedItem,
       appSettings
     });
+  }
+
+  componentDidUpdate() {
+    // this.collectionViewDelegate.update(this.state, this.props, this.setState.bind(this));
   }
 
   viewTypeNeedsAnItem(viewType: ViewType): boolean {
@@ -313,101 +319,6 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
     return <NotificationsAsync/>;
   }
 
-  deleteCollectionItem(collection: Collection, collectionItem: CollectionItem) {
-    const appSettings: AppSettings = this.props.appSettings;
-    const collectionURL = `#collection/${collection.name}`;
-    const oldIndex = collection.items.indexOf(collectionItem);
-
-    const newCollection = collection.deleteItem(collectionItem);
-    const newSettings = appSettings.addOrUpdateCollection(newCollection);
-
-    const undo = () => this.addCollectionItem(newCollection, collectionItem, oldIndex);
-
-    this.setState({
-      appSettings: newSettings
-    }, () => {
-      window.location.hash = collectionURL;
-      Notifier.success('Item removed', undefined, 3, undo);
-    });
-  }
-
-  addCollectionItem(collection: Collection, collectionItem: CollectionItem, index?: number) {
-    const appSettings: AppSettings = this.props.appSettings;
-    const collectionURL = `#collection/${collection.name}`;
-
-    var newItems = collection.items;
-
-    if (index !== undefined) {
-      newItems.splice(index, 0, collectionItem);
-    } else {
-      newItems.push(collectionItem);
-    }
-
-    this.setState({
-      appSettings: appSettings.addOrUpdateCollection(collection.change('items', newItems))
-    }, () => window.location.hash = collectionURL);
-  }
-
-  createCollectionItem(collection: Collection, dataCube: DataCube) {
-    const appSettings: AppSettings = this.props.appSettings;
-    const collectionURL = `#collection/${collection.name}`;
-
-    var onCancel = () => window.location.hash = collectionURL;
-
-    var onSave = (collectionItem: CollectionItem) => this.addCollectionItem(collection, collectionItem);
-
-    var getConfirmationModal = (newEssence: Essence) => {
-      return <AddCollectionItemModal
-        collection={collection}
-        essence={newEssence}
-        dataCube={dataCube}
-        onSave={onSave}
-      />;
-    };
-
-    this.setState({
-      cubeViewSupervisor: {
-        title: STRINGS.addVisualization + ': ' + collection.title,
-        cancel: onCancel,
-        getConfirmationModal: getConfirmationModal,
-        saveLabel: STRINGS.add
-      }
-    }, () => window.location.hash = '#' + dataCube.name);
-  }
-
-  updateCollectionItem(collection: Collection, item: CollectionItem) {
-    const appSettings: AppSettings = this.props.appSettings;
-
-    this.setState({
-      appSettings: appSettings.addOrUpdateCollection(collection.updateItem(item))
-    });
-  }
-
-  editCollectionItem(collection: Collection, item: CollectionItem) {
-    const appSettings: AppSettings = this.props.appSettings;
-    const collectionURL = `#collection/${collection.name}/${item.name}`;
-
-    var onCancel = () => window.location.hash = collectionURL;
-
-    var onSave = (newEssence: Essence) => {
-      let newCollection = collection.updateItem(item.changeEssence(newEssence));
-
-      this.setState({
-        appSettings: appSettings.addOrUpdateCollection(newCollection)
-      }, () => window.location.hash = collectionURL);
-    };
-
-    const { essence } = item;
-
-    this.setState({
-      cubeViewSupervisor: {
-        title: STRINGS.editVisualization + ': ' + collection.title + ' / ' + item.title,
-        cancel: onCancel,
-        save: onSave
-      }
-    }, () => window.location.hash = `#${essence.dataCube.name}/${essence.toHash()}`);
-  }
-
   render() {
     var { maxFilters, maxSplits, user, version } = this.props;
     var {
@@ -487,10 +398,13 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
           dataCubes={dataCubes}
           onNavClick={this.sideDrawerOpen.bind(this, true)}
           customization={customization}
-          onItemChange={this.updateCollectionItem.bind(this)}
-          onEditionRequest={this.editCollectionItem.bind(this)}
-          onAdditionRequest={this.createCollectionItem.bind(this)}
-          onDeletionRequest={this.deleteCollectionItem.bind(this)}
+
+          delegate={this.collectionViewDelegate}
+
+          // onItemChange={this.collectionViewDelegate.updateCollectionItem.bind(this.collectionViewDelegate)}
+          // onEditionRequest={this.collectionViewDelegate.editCollectionItem.bind(this.collectionViewDelegate)}
+          // onAdditionRequest={this.collectionViewDelegate.createCollectionItem.bind(this.collectionViewDelegate)}
+          // onDeletionRequest={this.collectionViewDelegate.deleteCollectionItem.bind(this.collectionViewDelegate)}
         />;
         break;
 

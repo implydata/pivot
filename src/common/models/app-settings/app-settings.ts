@@ -230,6 +230,10 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
     return this.change('dataCubes', dataCubes);
   }
 
+  changeCollections(collections: Collection[]): AppSettings {
+    return this.change('collections', collections);
+  }
+
   addDataCube(dataCube: DataCube): AppSettings {
     return this.changeDataCubes(overrideByName(this.dataCubes, dataCube));
   }
