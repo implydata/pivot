@@ -19,7 +19,7 @@ require('./collection-item-card.css');
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
-import { SvgIcon } from '../../../components/svg-icon/svg-icon';
+import { SvgIcon, GlobalEventListener } from '../../../components/index';
 
 import { Collection, CollectionItem, VisualizationProps, Stage, Essence } from '../../../../common/models/index';
 
@@ -42,20 +42,13 @@ export class CollectionItemCard extends React.Component<CollectionItemCardProps,
     super();
 
     this.state = {};
-
-    this.globalResizeListener = this.globalResizeListener.bind(this);
   }
 
   componentDidMount() {
-    window.addEventListener('resize', this.globalResizeListener);
-    this.globalResizeListener();
+    this.updateVisualizationStage();
   }
 
-  componentWillUnmount() {
-    window.removeEventListener('resize', this.globalResizeListener);
-  }
-
-  globalResizeListener() {
+  updateVisualizationStage() {
     var { visualization } = this.refs;
     var visualizationDOM = ReactDOM.findDOMNode(visualization);
 
@@ -105,16 +98,17 @@ export class CollectionItemCard extends React.Component<CollectionItemCardProps,
     }
 
     return <div className="collection-item-card">
-        <div className="headband grid-row">
+        <GlobalEventListener
+          resize={this.updateVisualizationStage.bind(this)}
+        />
+
+        <div className="headband grid-row" onClick={this.expand.bind(this)}>
           <div className="grid-col-80 vertical">
             <div className="title">{item.title}</div>
             <div className="description">{item.description}</div>
           </div>
           <div className="grid-col-20 middle right">
-            <div
-              className="expand-button"
-              onClick={this.expand.bind(this)}
-            >
+            <div className="expand-button">
               <SvgIcon svg={require(`../../../icons/full-expand.svg`)}/>
             </div>
           </div>

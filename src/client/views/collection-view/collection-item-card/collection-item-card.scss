@@ -35,6 +35,7 @@
     height: 68px;
     border-bottom: 1px solid $border-super-light;
     border-radius: $corner $corner 0 0;
+    cursor: pointer;
 
     .title {
       color: $text-medium;
@@ -59,13 +60,13 @@
     .expand-button {
       width: 19px;
 
-      cursor: pointer;
-
       path {
         fill: $text-lighter;
       }
+    }
 
-      &:hover path {
+    &:hover {
+      .expand-button path {
         fill: $text-medium;
       }
     }
