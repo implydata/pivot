@@ -143,8 +143,8 @@ export class CollectionItemLightbox extends React.Component<CollectionItemLightb
       onClose={onClose}
     >
       <ul className="bubble-list">
-        <li className="edit-vizualization" onClick={edit}>{STRINGS.editVisualization}</li>
         <li className="edit-title-and-desc" onClick={this.editTitleAndDesc.bind(this)}>{STRINGS.editTitleAndDesc}</li>
+        <li className="edit-vizualization" onClick={edit}>{STRINGS.editVisualization}</li>
       </ul>
     </BubbleMenu>;
   }
@@ -222,8 +222,8 @@ export class CollectionItemLightbox extends React.Component<CollectionItemLightb
     if (!editionMode) {
       return <div className="headband grid-row">
         <div className="grid-col-70 vertical">
-          <div className="title">{item.title}</div>
-          <div className="description">{item.description}</div>
+          <div className="title actionable" onClick={this.editTitleAndDesc.bind(this)}>{item.title}</div>
+          <div className="description actionable" onClick={this.editTitleAndDesc.bind(this)}>{item.description}</div>
         </div>
         <div className="grid-col-30 right middle">
           <div className="explore-button" onClick={this.onExplore.bind(this)}>

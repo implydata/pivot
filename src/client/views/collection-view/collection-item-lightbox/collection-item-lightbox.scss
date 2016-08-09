@@ -39,7 +39,10 @@
 
       .headband {
         padding: 20px 20px;
-        //border-bottom: 1px solid $border-super-light;
+
+        .actionable {
+          cursor: pointer;
+        }
 
         .title {
           color: $text-medium;
