@@ -214,7 +214,62 @@ export class LineChart extends BaseVisualization<LineChartState> {
         end: endFloored
       });
     }
+  }
 
+  globalMouseMoveListener(e: MouseEvent) {
+    const { dragStartValue } = this.state;
+    if (dragStartValue === null) return;
+
+    var dragRange = this.getDragRange(e);
+    this.setState({
+      dragRange,
+      roundDragRange: this.floorRange(dragRange)
+    });
+  }
+
+  globalMouseUpListener(e: MouseEvent) {
+    const { clicker, essence } = this.props;
+    const { continuousDimension, dragStartValue, dragRange, dragOnMeasure } = this.state;
+    if (dragStartValue === null) return;
+
+    var highlightRange = this.floorRange(this.getDragRange(e));
+    this.resetDrag();
+
+    // If already highlighted and user clicks within it switches measure
+    if (!dragRange && essence.highlightOn(LineChart.id)) {
+      var existingHighlightRange = essence.getSingleHighlightSet().elements[0];
+      if (existingHighlightRange.contains(highlightRange.start)) {
+        var { highlight } = essence;
+        if (highlight.measure === dragOnMeasure.name) {
+          clicker.dropHighlight();
+        } else {
+          clicker.changeHighlight(
+            LineChart.id,
+            dragOnMeasure.name,
+            highlight.delta
+          );
+        }
+        return;
+      }
+    }
+
+    clicker.changeHighlight(
+      LineChart.id,
+      dragOnMeasure.name,
+      Filter.fromClause(new FilterClause({
+        expression: continuousDimension.expression,
+        selection: r(highlightRange)
+      }))
+    );
+  }
+
+  globalKeyDownListener(e: KeyboardEvent) {
+    if (!escapeKey(e)) return;
+
+    const { dragStartValue } = this.state;
+    if (dragStartValue === null) return;
+
+    this.resetDrag();
   }
 
   resetDrag() {
