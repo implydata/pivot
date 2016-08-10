@@ -29,7 +29,8 @@ import { NavList } from '../nav-list/nav-list';
 export interface SideDrawerProps extends React.Props<any> {
   user: User;
   selectedItem: DataCube | Collection;
-  items: (DataCube | Collection)[];
+  collections: Collection[];
+  dataCubes: DataCube[];
   onOpenAbout: Fn;
   onClose: Fn;
   customization?: Customization;
@@ -94,20 +95,29 @@ export class SideDrawer extends React.Component<SideDrawerProps, SideDrawerState
     </div>;
   }
 
-  render() {
-    var { onClose, selectedItem, items, onOpenAbout, customization, itemHrefFn, user } = this.props;
+  renderItems(items: (DataCube | Collection)[], icon: string, urlPrefix = ''): JSX.Element {
+    if (!items || items.length === 0) return null;
+
+    var { itemHrefFn, selectedItem } = this.props;
 
     var navLinks = items.map(item => {
-      var href = Collection.isCollection(item) ? `#collection/${item.name}` : `#${item.name}`;
-      href = itemHrefFn(selectedItem, item) || href;
-
       return {
         name: item.name,
         title: item.title,
         tooltip: item.description,
-        href
+        href: itemHrefFn(selectedItem, item) || `#${urlPrefix}${item.name}`
       };
     });
+
+    return <NavList
+      selected={selectedItem ? selectedItem.name : null}
+      navLinks={navLinks}
+      iconSvg={require(`../../icons/${icon}`)}
+    />;
+  }
+
+  render() {
+    var { onClose, selectedItem, collections, dataCubes, onOpenAbout, customization, itemHrefFn, user } = this.props;
 
     var infoAndFeedback: any[] = [];
 
@@ -141,11 +151,8 @@ export class SideDrawer extends React.Component<SideDrawerProps, SideDrawerState
     return <div className="side-drawer">
       <NavLogo customLogoSvg={customLogoSvg} onClick={onClose}/>
       {this.renderOverviewLink()}
-      <NavList
-        selected={selectedItem ? selectedItem.name : null}
-        navLinks={navLinks}
-        iconSvg={require('../../icons/full-cube.svg')}
-      />
+      {this.renderItems(dataCubes, 'full-cube.svg')}
+      {this.renderItems(collections, 'full-collection.svg', 'collection/')}
       <NavList navLinks={infoAndFeedback}/>
 
     </div>;
