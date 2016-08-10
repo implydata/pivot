@@ -38,7 +38,7 @@ export class AddCollectionItemModal extends React.Component<AddCollectionItemMod
   }
 
   initFromProps(props: AddCollectionItemModalProps) {
-    var name = 'new-item';
+    var name = String(Date.now());
 
     if (!this.isNameUnique(name)) {
       let i = 1;
@@ -53,7 +53,7 @@ export class AddCollectionItemModal extends React.Component<AddCollectionItemMod
       canSave: true,
       collectionItem: new CollectionItem({
         name,
-        title: '',
+        title: 'New item',
         description: '',
         essence: props.essence,
         group: null,
@@ -127,11 +127,8 @@ export class AddCollectionItemModal extends React.Component<AddCollectionItemMod
       onEnter={this.save.bind(this)}
     >
       <form className="general vertical">
-        {makeLabel('name')}
-        {makeTextInput('name', this.validateName.bind(this), true)}
-
         {makeLabel('title')}
-        {makeTextInput('title', /^.+$/)}
+        {makeTextInput('title', /^.+$/, true)}
 
         {makeLabel('description')}
         {makeTextInput('description')}
