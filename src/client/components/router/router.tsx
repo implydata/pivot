@@ -250,7 +250,7 @@ export class Router extends React.Component<RouterProps, RouterState> {
       if (crumbs[0] === fragment || fragment.charAt(0) === ':') {
         let children = candidate.props.children;
 
-        if (!(children instanceof Array) || crumbs.length === 1) {
+        if (!(Array.isArray(children)) || crumbs.length === 1) {
           return {fragment, route: candidate, crumbs, properties, orphans};
         } else {
           if (candidate.props.alwaysShowOrphans === true) {
@@ -273,7 +273,7 @@ export class Router extends React.Component<RouterProps, RouterState> {
   hasSingleChild(route: JSX.Element): boolean {
     if (!route) return false;
 
-    return !(route.props.children instanceof Array);
+    return !((route.propsArray.isArray.children));
   }
 
   isRoute(candidate: JSX.Element): boolean {

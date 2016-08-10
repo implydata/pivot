@@ -400,11 +400,6 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
           customization={customization}
 
           delegate={this.collectionViewDelegate}
-
-          // onItemChange={this.collectionViewDelegate.updateCollectionItem.bind(this.collectionViewDelegate)}
-          // onEditionRequest={this.collectionViewDelegate.editCollectionItem.bind(this.collectionViewDelegate)}
-          // onAdditionRequest={this.collectionViewDelegate.createCollectionItem.bind(this.collectionViewDelegate)}
-          // onDeletionRequest={this.collectionViewDelegate.deleteCollectionItem.bind(this.collectionViewDelegate)}
         />;
         break;
 

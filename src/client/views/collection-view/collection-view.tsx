@@ -82,24 +82,24 @@ export class CollectionView extends React.Component<CollectionViewProps, Collect
         onAddItem={delegate.createItem.bind(this, collection)}
       />
 
-     <div className="main-panel">
-       <Router onURLChange={this.onURLChange.bind(this)} rootFragment="collection">
-         <Route fragment=":collectionId" alwaysShowOrphans={true}>
-           <CollectionOverview collections={collections}/>
+      <div className="main-panel">
+        <Router onURLChange={this.onURLChange.bind(this)} rootFragment="collection">
+          <Route fragment=":collectionId" alwaysShowOrphans={true}>
+            <CollectionOverview collections={collections}/>
 
-           <Route fragment=":itemId">
+            <Route fragment=":itemId">
               <CollectionItemLightbox
                 collections={collections}
                 onChange={delegate.updateItem}
                 onEdit={delegate.editItem}
                 onDelete={delegate.deleteItem}
               />
-           </Route>
+            </Route>
 
-         </Route>
+          </Route>
 
-       </Router>
-     </div>
+        </Router>
+      </div>
 
     </div>;
   }
