@@ -36,12 +36,20 @@
 
     .cancel {
       color: $white;
-      background-color: hsla(198, 76%, 60%, 1.00);
+      background-color: rgba($white, 0.28);
+
+      &:hover {
+        background-color: rgba($white, 0.36);
+      }
     }
 
     .save {
       color: $brand;
       background-color: $white;
+
+      &:hover {
+        background-color: rgba($white, 0.92);
+      }
     }
   }
 
