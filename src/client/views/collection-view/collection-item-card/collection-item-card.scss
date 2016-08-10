@@ -22,26 +22,23 @@
   // otherwise it pollutes the global CSS
   @import '../../../utils/styles/grid';
 
-  min-width: 400px;
-  padding: 12px;
-
   > * {
     @extend %module;
     width: 100%;
-    padding: 10px 20px;
+    padding: 10px 18px;
   }
 
   .headband {
-    height: 68px;
+    height: 66px;
     border-bottom: 1px solid $border-super-light;
     border-radius: $corner $corner 0 0;
     cursor: pointer;
 
     .title {
-      color: $text-medium;
+      color: #444;
       font-size: 14px;
       margin-bottom: 5px;
-      margin-top: 1px;
+      margin-top: 2px;
 
       // Otherwise the bottom of the text gets cut off...
       // (see http://stackoverflow.com/questions/6421966/css-overflow-x-visible-and-overflow-y-hidden-causing-scrollbar-issue)
@@ -73,7 +70,6 @@
   }
 
   .content {
-    min-height: 23vw;
     border-radius: 0 0 $corner $corner;
   }
 }

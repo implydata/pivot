@@ -17,15 +17,70 @@
 @import '../../../imports';
 
 .collection-overview {
-  display: flex;
   width: 80%;
-  margin: 0 auto;
-  flex-wrap: wrap;
-  padding-top: 30px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-top: 50px;
+  padding-bottom: 40px;
 
   .collection-item-card {
-    flex: 1 0;
+    display: inline-block;
+    width: 33.3333333333%;
+    padding: 10px;
 
-    flex-basis: 50%;
+    .content {
+      height: 12vw;
+    }
   }
 }
+
+@media all and (max-width: 1800px) {
+  .collection-overview {
+    .collection-item-card {
+      width: 50%;
+
+      .content {
+        height: 20vw;
+      }
+    }
+  }
+}
+
+@media all and (max-width: 1080px) {
+  .collection-overview {
+    width: 86%;
+
+    .collection-item-card {
+      padding: 8px;
+
+      .content {
+        height: 24vw;
+      }
+    }
+  }
+}
+
+@media all and (max-width: 900px) {
+  .collection-overview {
+    width: 80%;
+
+    .collection-item-card {
+      width: 100%;
+
+      .content {
+        height: 40vw;
+      }
+    }
+  }
+}
+
+@media all and (max-width: 700px) {
+  .collection-overview {
+    width: 86%;
+
+    .collection-item-card {
+      width: 100%;
+    }
+  }
+}
+

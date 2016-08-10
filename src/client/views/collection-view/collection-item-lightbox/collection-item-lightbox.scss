@@ -38,31 +38,42 @@
       width: calc(100% - 270px);
 
       .headband {
-        padding: 20px 20px;
+        padding: 16px 20px;
+        border-bottom: 1px solid $border-super-light;
 
         .actionable {
           cursor: pointer;
         }
 
         .title {
-          color: $text-medium;
+          color: #444;
           font-size: 16px;
-          margin-bottom: 8px;
+          margin-bottom: 7px;
+          margin-top: 5px;
           height: 18px;
-        }
-
-        input.title {
-          height: 16px;
-          margin-left: -7px;
         }
 
         .description {
           color: $text-lighter;
           height: 15px;
+          margin-bottom: 1px;
+        }
+
+        input.title,
+        input.description {
+          margin-left: -7px;
+          font-size: 13px;
+          height: 30px;
+          color: #444;
+        }
+
+        input.title {
+          margin-top: -4px;
+          margin-bottom: 4px;
         }
 
         input.description {
-          margin-left: -7px;
+          margin-bottom: -4px;
         }
 
         [class*='-button'] {
@@ -73,6 +84,23 @@
           color: $brand;
 
           cursor: pointer;
+
+          &.cancel-button {
+            @extend %button-secondary;
+            height: auto;
+            padding: 0 12px;
+            line-height: 30px;
+            border-radius: 3px;
+            margin-right: 8px;
+          }
+
+          &.save-button {
+            @extend %button-primary;
+            height: auto;
+            padding: 0 12px;
+            line-height: 30px;
+            border-radius: 3px;
+          }
 
           &.icon {
             border-radius: 50%;
@@ -130,7 +158,7 @@
 
     position: absolute;
     width: 60px;
-    padding: 15px;
+    padding: 16px;
     top: 50%;
     transform: translate(0, -50%);
     border-radius: 50%;
