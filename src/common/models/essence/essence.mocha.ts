@@ -300,16 +300,21 @@ describe('Essence', () => {
     });
 
     describe("#changeSplits", () => {
-      var essence = Essence.fromJS({
-        visualization: null,
-        timezone: 'Etc/UTC',
-        pinnedDimensions: [],
-        selectedMeasures: [],
-        splits: []
-      }, {
-        dataCube: DataCubeMock.twitter(),
-        visualizations: MANIFESTS
+      var essence: Essence = null;
+
+      beforeEach(() => {
+        essence = Essence.fromJS({
+          visualization: null,
+          timezone: 'Etc/UTC',
+          pinnedDimensions: [],
+          selectedMeasures: [],
+          splits: []
+        }, {
+          dataCube: DataCubeMock.twitter(),
+          visualizations: MANIFESTS
+        });
       });
+
 
       var timeSplit = SplitCombine.fromJS({expression: { op: 'ref', name: 'time' }});
       var tweetLengthSplit = SplitCombine.fromJS({expression: { op: 'ref', name: 'tweetLength' }});
@@ -328,37 +333,28 @@ describe('Essence', () => {
         expect(essence.visResolve.state).to.deep.equal("ready");
       });
 
-      it("summoning: user selects bar chart is respected", () => {
-        essence = essence.changeVisualization(BAR_CHART_MANIFEST);
-        expect(essence.visualization.name).to.deep.equal("bar-chart");
-        expect(essence.visResolve.state).to.deep.equal("ready");
-      });
-
-      it("in fair game, adding a string split to time split results in line chart", () => {
-        essence = essence.addSplit(twitterHandleSplit, VisStrategy.FairGame);
-        expect(essence.visualization.name).to.deep.equal("line-chart");
-        expect(essence.visResolve.state).to.deep.equal("ready");
-      });
-
-      it("summoning: user selected bar chart after split on string dimension respects user choice", () => {
-        essence = essence.changeSplits(Splits.EMPTY, VisStrategy.FairGame);
-        essence = essence.addSplit(timeSplit, VisStrategy.FairGame);
-        essence = essence.changeVisualization(BAR_CHART_MANIFEST);
-        expect(essence.visualization.name).to.deep.equal("bar-chart");
-        expect(essence.visResolve.state).to.deep.equal("ready");
-      });
-
-      it("falls back when can't handle splits", () => {
-        essence = essence.changeSplits(Splits.EMPTY, VisStrategy.FairGame);
+      it("fall back with no splits", () => {
         essence = essence.changeVisualization(BAR_CHART_MANIFEST);
         expect(essence.visualization.name).to.deep.equal("bar-chart");
         expect(essence.visResolve.state).to.deep.equal("manual");
       });
 
-      it.skip("summoning: should respect user's previous bar chart choice after adding a string split", () => {
+      it("in fair game, adding a string split to time split results in line chart", () => {
+        essence = essence.addSplit(timeSplit, VisStrategy.FairGame);
+        essence = essence.addSplit(twitterHandleSplit, VisStrategy.FairGame);
+        expect(essence.visualization.name).to.deep.equal("line-chart");
+        expect(essence.visResolve.state).to.deep.equal("ready");
+      });
+
+      it("gives existing vis a bonus", () => {
+        essence = essence.addSplit(timeSplit, VisStrategy.FairGame);
+        essence = essence.changeVisualization(BAR_CHART_MANIFEST);
+        expect(essence.visualization.name).to.deep.equal("bar-chart");
+        expect(essence.visResolve.state).to.deep.equal("ready");
         essence = essence.addSplit(twitterHandleSplit, VisStrategy.UnfairGame);
         expect(essence.visualization.name).to.deep.equal("bar-chart");
         expect(essence.visResolve.state).to.deep.equal("ready");
+
       });
 
       it("falls back when can't handle measures", () => {
