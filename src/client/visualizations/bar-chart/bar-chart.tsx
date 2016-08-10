@@ -265,7 +265,7 @@ export class BarChart extends BaseVisualization<BarChartState> {
 
   getSingleChartStage(): Stage {
     const xScale = this.getPrimaryXScale();
-    const { essence, stage } = this.props;
+    const { essence, stage, isThumbnail } = this.props;
 
     const { stepWidth } = this.getBarDimensions(xScale.rangeBand());
     const xTicks = xScale.domain();
@@ -273,7 +273,8 @@ export class BarChart extends BaseVisualization<BarChartState> {
 
     const measures = essence.getEffectiveMeasures();
     const availableHeight = stage.height - X_AXIS_HEIGHT;
-    const height = Math.max(MIN_CHART_HEIGHT, Math.floor(availableHeight / measures.size));
+    const minHeight = isThumbnail ? 1 : MIN_CHART_HEIGHT;
+    const height = Math.max(minHeight, Math.floor(availableHeight / measures.size));
 
     return new Stage({
       x: 0,
@@ -639,14 +640,17 @@ export class BarChart extends BaseVisualization<BarChartState> {
     chartStage: Stage,
     getX: any
   ): {yAxis: JSX.Element, chart: JSX.Element, highlight: JSX.Element} {
+    const { isThumbnail } = this.props;
     var mySplitDataset = dataset.data[0][SPLIT] as Dataset;
+
+    var measureLabel = !isThumbnail ? <VisMeasureLabel measure={measure} datum={dataset.data[0]}/> : null;
 
     // Invalid data, early return
     if (!this.hasValidYExtent(measure, mySplitDataset.data)) {
       return {
         chart: <div className="measure-bar-chart" key={measure.name} style={{width: chartStage.width}}>
           <svg style={chartStage.getWidthHeight(0, CHART_BOTTOM_PADDING)} viewBox={chartStage.getViewBox(0, CHART_BOTTOM_PADDING)}/>
-          <VisMeasureLabel measure={measure} datum={dataset.data[0]}/>
+          {measureLabel}
         </div>,
         yAxis: null,
         highlight: null
@@ -670,7 +674,7 @@ export class BarChart extends BaseVisualization<BarChartState> {
         {yGridLines}
         <g className="bars" transform={chartStage.getTransform()}>{bars}</g>
       </svg>
-      <VisMeasureLabel measure={measure} datum={dataset.data[0]}/>
+      {measureLabel}
     </div>;
 
     return {chart, yAxis, highlight};

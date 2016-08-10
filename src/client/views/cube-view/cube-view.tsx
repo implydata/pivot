@@ -24,20 +24,14 @@ import { Fn } from '../../../common/utils/general/general';
 import { FunctionSlot } from '../../utils/function-slot/function-slot';
 import { DragManager } from '../../utils/drag-manager/drag-manager';
 import { Colors, Clicker, DataCube, Dimension, Essence, Filter, Stage, Measure,
-  SplitCombine, Splits, VisStrategy, VisualizationProps, User, Customization, Manifest, ViewSupervisor } from '../../../common/models/index';
+  SplitCombine, Splits, VisStrategy, VisualizationProps, User,
+  Customization, Manifest, ViewSupervisor, Device, DeviceSize } from '../../../common/models/index';
 import { MANIFESTS } from '../../../common/manifests/index';
 
-import { CubeHeaderBar } from '../../components/cube-header-bar/cube-header-bar';
-import { SupervisedCubeHeaderBar } from '../../components/supervised-cube-header-bar/supervised-cube-header-bar';
-import { DimensionMeasurePanel } from '../../components/dimension-measure-panel/dimension-measure-panel';
-import { FilterTile } from '../../components/filter-tile/filter-tile';
-import { SplitTile } from '../../components/split-tile/split-tile';
-import { VisSelector } from '../../components/vis-selector/vis-selector';
-import { ManualFallback } from '../../components/manual-fallback/manual-fallback';
-import { DropIndicator } from '../../components/drop-indicator/drop-indicator';
-import { PinboardPanel } from '../../components/pinboard-panel/pinboard-panel';
-import { RawDataModal } from '../../components/raw-data-modal/raw-data-modal';
-import { ResizeHandle } from '../../components/resize-handle/resize-handle';
+import { CubeHeaderBar, SupervisedCubeHeaderBar, DimensionMeasurePanel,
+  FilterTile, SplitTile, VisSelector, ManualFallback, DropIndicator,
+  PinboardPanel, RawDataModal, ResizeHandle,
+  GlobalEventListener } from '../../components/index';
 
 import { getVisualizationComponent } from '../../visualizations/index';
 import * as localStorage from '../../utils/local-storage/local-storage';
@@ -69,7 +63,7 @@ export interface CubeViewState {
   showRawDataModal?: boolean;
   RawDataModalAsync?: typeof RawDataModal;
   layout?: CubeViewLayout;
-  deviceSize?: string;
+  deviceSize?: DeviceSize;
   updatingMaxTime?: boolean;
 }
 
@@ -81,7 +75,6 @@ export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
     maxFilters: 20,
     maxSplits: 3
   };
-
 
   public mounted: boolean;
   private clicker: Clicker;
@@ -168,8 +161,6 @@ export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
       }
     };
     this.clicker = clicker;
-    this.globalResizeListener = this.globalResizeListener.bind(this);
-    this.globalKeyDownListener = this.globalKeyDownListener.bind(this);
   }
 
   refreshMaxTime() {
@@ -200,8 +191,6 @@ export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
 
     this.mounted = true;
     DragManager.init();
-    window.addEventListener('resize', this.globalResizeListener);
-    window.addEventListener('keydown', this.globalKeyDownListener);
     this.globalResizeListener();
 
     if (transitionFnSlot) {
@@ -247,23 +236,18 @@ export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
     const { transitionFnSlot } = this.props;
 
     this.mounted = false;
-    window.removeEventListener('resize', this.globalResizeListener);
-    window.removeEventListener('keydown', this.globalKeyDownListener);
     if (transitionFnSlot) transitionFnSlot.clear();
   }
 
   getEssenceFromDataCube(dataCube: DataCube): Essence {
     const essence = Essence.fromDataCube(dataCube, { dataCube: dataCube, visualizations: MANIFESTS });
-    return essence.multiMeasureMode !== Boolean(localStorage.get('is-multi-measure')) ? essence.toggleMultiMeasureMode() : essence;
+    var isMulti = !!localStorage.get('is-multi-measure');
+    return essence.multiMeasureMode !== isMulti ? essence.toggleMultiMeasureMode() : essence;
   }
 
   getEssenceFromHash(dataCube: DataCube, hash: string): Essence {
     if (!dataCube || !hash) return null;
     return Essence.fromHash(hash, { dataCube: dataCube, visualizations: MANIFESTS });
-  }
-
-  globalKeyDownListener(e: KeyboardEvent) {
-    // Shortcuts will go here one day
   }
 
   globalResizeListener() {
@@ -272,12 +256,8 @@ export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
     var visualizationDOM = ReactDOM.findDOMNode(visualization);
     if (!containerDOM || !visualizationDOM) return;
 
-    let deviceSize = 'large';
-    if (window.innerWidth <= 1250) deviceSize = 'medium';
-    if (window.innerWidth <= 1080) deviceSize = 'small';
-
     this.setState({
-      deviceSize,
+      deviceSize: Device.getSize(),
       menuStage: Stage.fromClientRect(containerDOM.getBoundingClientRect()),
       visualizationStage: Stage.fromClientRect(visualizationDOM.getBoundingClientRect())
     });
@@ -394,6 +374,7 @@ export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
         clicker,
         essence,
         stage: visualizationStage,
+        deviceSize,
         openRawDataModal: this.openRawDataModal.bind(this),
         registerDownloadableDataset: (dataset: Dataset) => { this.downloadableDataset = dataset; }
       };
@@ -449,6 +430,9 @@ export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
     }
 
     return <div className='cube-view'>
+      <GlobalEventListener
+        resize={this.globalResizeListener.bind(this)}
+      />
       {headerBar}
       <div className="container" ref='container'>
         <DimensionMeasurePanel

@@ -21,7 +21,7 @@ import * as ReactDOM from 'react-dom';
 
 import { SvgIcon, GlobalEventListener } from '../../../components/index';
 
-import { Collection, CollectionItem, VisualizationProps, Stage, Essence } from '../../../../common/models/index';
+import { Collection, CollectionItem, VisualizationProps, Stage, Essence, Device, DeviceSize } from '../../../../common/models/index';
 
 import { getVisualizationComponent } from '../../../visualizations/index';
 
@@ -29,8 +29,6 @@ export interface CollectionItemCardProps extends React.Props<any> {
   item: CollectionItem;
   onExpand?: (item: CollectionItem) => void;
 }
-
-export type DeviceSize = 'small' | 'medium' | 'large';
 
 export interface CollectionItemCardState {
   visualizationStage?: Stage;
@@ -54,12 +52,8 @@ export class CollectionItemCard extends React.Component<CollectionItemCardProps,
 
     if (!visualizationDOM) return;
 
-    let deviceSize: DeviceSize = 'large';
-    if (window.innerWidth <= 1250) deviceSize = 'medium';
-    if (window.innerWidth <= 1080) deviceSize = 'small';
-
     this.setState({
-      deviceSize,
+      deviceSize: Device.getSize(),
       visualizationStage: Stage.fromClientRect(visualizationDOM.getBoundingClientRect())
     });
   }
@@ -74,7 +68,7 @@ export class CollectionItemCard extends React.Component<CollectionItemCardProps,
 
   render() {
     const { item } = this.props;
-    const { visualizationStage } = this.state;
+    const { visualizationStage, deviceSize } = this.state;
 
     if (!item) return null;
 
@@ -91,10 +85,15 @@ export class CollectionItemCard extends React.Component<CollectionItemCardProps,
       var visProps: VisualizationProps = {
         clicker: {},
         essence,
-        stage: visualizationStage
+        stage: visualizationStage,
+        deviceSize,
+        isThumbnail: true
       };
 
-      visElement = React.createElement(getVisualizationComponent(essence.visualization), visProps);
+      visElement = React.createElement(
+        getVisualizationComponent(essence.visualization),
+        visProps
+      );
     }
 
     return <div className="collection-item-card">

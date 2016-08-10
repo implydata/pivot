@@ -349,7 +349,22 @@ export class Scroller extends React.Component<ScrollerProps, ScrollerState> {
     let blockHorizontalScroll = bodyWidth <= viewportWidth;
     let blockVerticalScroll = bodyHeight <= viewportHeight;
 
-    return <div className="scroller" ref="Scroller">
+    const eventContainerClasses = classNames(
+      'event-container',
+      {
+        'no-x-scroll': blockHorizontalScroll,
+        'no-y-scroll': blockVerticalScroll
+      }
+    );
+
+    const scrollerClasses = classNames(
+      'scroller',
+      {
+        'has-top-shadow': this.shouldHaveShadow('top')
+      }
+    );
+
+    return <div className={scrollerClasses} ref="Scroller">
 
       <div className="body" style={this.getBodyStyle()}>{body}</div>
 
@@ -371,7 +386,7 @@ export class Scroller extends React.Component<ScrollerProps, ScrollerState> {
       { overlay ? <div className="overlay">{overlay}</div> : null }
 
       <div
-        className={classNames('event-container', {'no-x-scroll': blockHorizontalScroll, 'no-y-scroll': blockVerticalScroll})}
+        className={eventContainerClasses}
         ref="eventContainer"
         onScroll={this.onScroll.bind(this)}
         onClick={this.onClick.bind(this)}

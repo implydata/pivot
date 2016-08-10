@@ -273,7 +273,7 @@ export class Router extends React.Component<RouterProps, RouterState> {
   hasSingleChild(route: JSX.Element): boolean {
     if (!route) return false;
 
-    return !((route.propsArray.isArray.children));
+    return !(Array.isArray(route.props.children));
   }
 
   isRoute(candidate: JSX.Element): boolean {

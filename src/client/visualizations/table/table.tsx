@@ -33,6 +33,7 @@ import { BaseVisualization, BaseVisualizationState } from '../base-visualization
 
 const HEADER_HEIGHT = 38;
 const SEGMENT_WIDTH = 300;
+const THUMBNAIL_SEGMENT_WIDTH = 150;
 const INDENT_WIDTH = 25;
 const MEASURE_WIDTH = 130;
 const ROW_HEIGHT = 30;
@@ -91,6 +92,12 @@ export class Table extends BaseVisualization<TableState> {
     return s;
   }
 
+  getSegmentWidth(): number {
+    const { isThumbnail } = this.props;
+
+    return isThumbnail ? THUMBNAIL_SEGMENT_WIDTH : SEGMENT_WIDTH;
+  }
+
   calculateMousePosition(x: number, y: number): PositionHover {
     var { essence } = this.props;
     var { flatData } = this.state;
@@ -99,9 +106,9 @@ export class Table extends BaseVisualization<TableState> {
     x -= SPACE_LEFT;
 
     if (y <= HEADER_HEIGHT) {
-      if (x <= SEGMENT_WIDTH) return { what: 'corner' };
+      if (x <= this.getSegmentWidth()) return { what: 'corner' };
 
-      x = x - SEGMENT_WIDTH;
+      x = x - this.getSegmentWidth();
       var measureWidth = this.getIdealMeasureWidth(this.props.essence);
       var measureIndex = Math.floor(x / measureWidth);
       var measure = essence.getEffectiveMeasures().get(measureIndex);
@@ -232,7 +239,7 @@ export class Table extends BaseVisualization<TableState> {
   }
 
   getIdealMeasureWidth(essence: Essence): number {
-    var availableWidth = this.props.stage.width - SPACE_LEFT - SEGMENT_WIDTH;
+    var availableWidth = this.props.stage.width - SPACE_LEFT - this.getSegmentWidth();
     var columnsCount = essence.getEffectiveMeasures().size;
 
     return columnsCount * MEASURE_WIDTH >= availableWidth ? MEASURE_WIDTH : availableWidth / columnsCount;
@@ -327,7 +334,7 @@ export class Table extends BaseVisualization<TableState> {
   }
 
   renderInternals() {
-    var { clicker, essence, stage, openRawDataModal } = this.props;
+    var { clicker, essence, stage, openRawDataModal, isThumbnail } = this.props;
     var { flatData, scrollTop, hoverMeasure, hoverRow } = this.state;
     var { splits, dataCube } = essence;
 
@@ -370,7 +377,7 @@ export class Table extends BaseVisualization<TableState> {
         var segmentValue = dimension ? d[dimension.name] : '';
         var segmentName = nest ? formatSegment(segmentValue) : 'Total';
         var left = Math.max(0, nest - 1) * INDENT_WIDTH;
-        var segmentStyle = { left: left, width: SEGMENT_WIDTH - left, top: rowY };
+        var segmentStyle = { left: left, width: this.getSegmentWidth() - left, top: rowY };
         var hoverClass = d === hoverRow ? 'hover' : null;
 
         var selected = false;
@@ -441,7 +448,7 @@ export class Table extends BaseVisualization<TableState> {
       top: HEADER_HEIGHT,
       right: 0,
       bottom: 0,
-      left: SEGMENT_WIDTH
+      left: this.getSegmentWidth()
     };
 
     return <div className="internals table-inner">

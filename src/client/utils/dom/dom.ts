@@ -16,6 +16,7 @@
 
 import * as d3 from 'd3';
 import { hasOwnProperty } from '../../../common/utils/general/general';
+import { DeviceSize } from '../../../common/models/index';
 
 const DRAG_GHOST_OFFSET_X = -12;
 const DRAG_GHOST_OFFSET_Y = -12;

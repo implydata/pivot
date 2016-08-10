@@ -23,7 +23,8 @@ import * as d3 from 'd3';
 import { Duration } from 'chronoshift';
 import { r, $, ply, Expression, Dataset, Datum, TimeRange, TimeRangeJS, TimeBucketAction, SortAction,
   PlywoodRange, NumberRangeJS, NumberRange, Range, NumberBucketAction } from 'plywood';
-import { Essence, Splits, Colors, FilterClause, Dimension, Stage, Filter, Measure, DataCube, VisualizationProps, DatasetLoad } from '../../../common/models/index';
+import { Essence, Splits, Colors, FilterClause, Dimension, Stage,
+  Filter, Measure, DataCube, VisualizationProps, DatasetLoad } from '../../../common/models/index';
 import { LINE_CHART_MANIFEST } from '../../../common/manifests/line-chart/line-chart';
 import { DisplayYear } from '../../../common/utils/time/time';
 import { formatValue } from '../../../common/utils/formatter/formatter';
@@ -305,7 +306,15 @@ export class LineChart extends BaseVisualization<LineChartState> {
     return null;
   }
 
-  renderChartBubble(dataset: Dataset, measure: Measure, chartIndex: number, containerStage: Stage, chartStage: Stage, extentY: number[], scaleY: any): JSX.Element {
+  renderChartBubble(
+    dataset: Dataset,
+    measure: Measure,
+    chartIndex: number,
+    containerStage: Stage,
+    chartStage: Stage,
+    extentY: number[],
+    scaleY: any
+  ): JSX.Element {
     const { clicker, essence, openRawDataModal } = this.props;
     const { colors, timezone } = essence;
 
@@ -412,7 +421,8 @@ export class LineChart extends BaseVisualization<LineChartState> {
   }
 
   renderChart(dataset: Dataset, measure: Measure, chartIndex: number, containerStage: Stage, chartStage: Stage): JSX.Element {
-    const { essence } = this.props;
+    const { essence, isThumbnail } = this.props;
+
     const { hoverRange, hoverMeasure, dragRange, scaleX, xTicks, continuousDimension } = this.state;
     const { splits, colors } = essence;
     var splitLength = splits.length();
@@ -536,7 +546,7 @@ export class LineChart extends BaseVisualization<LineChartState> {
           y2={chartStage.height - 0.5}
         />
       </svg>
-      <VisMeasureLabel measure={measure} datum={myDatum}/>
+      { !isThumbnail ? <VisMeasureLabel measure={measure} datum={myDatum}/> : null }
       {this.renderHighlighter()}
       {bubble}
     </div>;

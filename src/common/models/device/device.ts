@@ -14,22 +14,13 @@
  * limitations under the License.
  */
 
-import { Dataset } from 'plywood';
-import { Fn } from '../../utils/general/general';
-import { Clicker, Stage, Essence, DeviceSize } from '../index';
+export type DeviceSize = 'small' | 'medium' | 'large';
 
-export interface VisualizationProps {
-  clicker: Clicker;
-  essence: Essence;
-  stage: Stage;
-  openRawDataModal?: Fn;
-  registerDownloadableDataset?: (dataset: Dataset) => void;
-  deviceSize?: DeviceSize;
-  isThumbnail?: boolean;
-}
+export class Device {
+  static getSize(): DeviceSize {
+    if (window.innerWidth <= 1080) return 'small';
+    if (window.innerWidth <= 1250) return 'medium';
 
-export interface DatasetLoad {
-  loading?: boolean;
-  dataset?: Dataset;
-  error?: any;
+    return 'large';
+  }
 }
