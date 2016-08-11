@@ -15,7 +15,7 @@
  */
 
 import * as Q from 'q';
-import { External, Dataset, basicExecutorFactory, helper } from 'plywood';
+import { External, Dataset, basicExecutorFactory, find } from 'plywood';
 import { pluralIfNeeded } from '../../../common/utils/general/general';
 import { AppSettings, Cluster, DataCube } from '../../../common/models/index';
 import { Logger } from '../logger/logger';
@@ -77,7 +77,7 @@ export class SettingsManager {
   }
 
   private getClusterManagerFor(clusterName: string): ClusterManager {
-    return helper.find(this.clusterManagers, (clusterManager) => clusterManager.cluster.name === clusterName);
+    return find(this.clusterManagers, (clusterManager) => clusterManager.cluster.name === clusterName);
   }
 
   private addClusterManager(cluster: Cluster, dataCubes: DataCube[]): Q.Promise<any> {
@@ -115,7 +115,7 @@ export class SettingsManager {
   }
 
   private getFileManagerFor(uri: string): FileManager {
-    return helper.find(this.fileManagers, (fileManager) => fileManager.uri === uri);
+    return find(this.fileManagers, (fileManager) => fileManager.uri === uri);
   }
 
   private addFileManager(dataCube: DataCube): Q.Promise<any> {

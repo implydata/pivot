@@ -34,5 +34,5 @@ const VIS_COMPONENTS: Array<typeof BaseVisualization> = [
 
 export function getVisualizationComponent(manifest: Manifest): typeof BaseVisualization {
   var manifestName = manifest.name;
-  return helper.find(VIS_COMPONENTS, (v) => (v as any).id === manifestName);
+  return find(VIS_COMPONENTS, (v) => (v as any).id === manifestName);
 }

@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -eu
 
 if [ `git symbolic-ref --short HEAD` != "master" ]
 then
