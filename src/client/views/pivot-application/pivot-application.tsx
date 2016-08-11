@@ -325,7 +325,12 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
 
     const onSave = (_collection: Collection, collectionItem: CollectionItem) => {
       closeModal();
-      this.collectionViewDelegate.addItem(_collection, collectionItem);
+      this.collectionViewDelegate.addItem(_collection, collectionItem).then(url => {
+        Notifier.success('Item added', '', 3, {
+          label: 'View',
+          callback: () => window.location.hash = url
+        });
+      });
     };
 
     return <AddCollectionItemModal

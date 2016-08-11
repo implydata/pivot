@@ -89,14 +89,14 @@ export class NotificationCard extends React.Component<NotificationCardProps, Not
 
     if (!model) return null;
 
-    const { title, message, priority, undoCallback } = model;
+    const { title, message, priority, action } = model;
 
     if (appearing || disappearing) top = -100;
 
-    var height = 30 + [message, undoCallback].filter(Boolean).length * 30;
+    var height = 30 + [message, action].filter(Boolean).length * 30;
 
     var onClick = () => {
-      undoCallback && undoCallback();
+      action && action.callback();
       this.disappear();
     };
 
@@ -107,7 +107,7 @@ export class NotificationCard extends React.Component<NotificationCardProps, Not
      >
       <div className="title">{title}</div>
       <div className="message">{message}</div>
-      { undoCallback ? <div className="undo"><span>{STRINGS.undo}</span></div> : null }
+      { action ? <div className="undo"><span>{action.label}</span></div> : null }
     </div>;
   }
 }

@@ -129,18 +129,15 @@ export class AddCollectionItemModal extends React.Component<AddCollectionItemMod
 
     const setCollection = (c: Collection) => {
       let { errors, canSave } = this.updateErrors('collection', true, undefined);
-      let myCollectionItem = collectionItem;
-
-      if (!this.isItemNameUnique(c, collectionItem.name)) {
-        let newName = generateUniqueName('i', this.isItemNameUnique.bind(this, c));
-        myCollectionItem = myCollectionItem.change('name', newName);
-      }
 
       this.setState({
         collection: c,
         errors,
         canSave,
-        collectionItem: myCollectionItem
+        collectionItem: collectionItem.change(
+          'name',
+          generateUniqueName('i', this.isItemNameUnique.bind(this, c))
+        )
       });
     };
 
@@ -184,13 +181,12 @@ export class AddCollectionItemModal extends React.Component<AddCollectionItemMod
     const onCollectionChange = (newCollection: Collection) => {
       let myCollectionItem = collectionItem;
 
-      if (!this.isItemNameUnique(newCollection, collectionItem.name)) {
-        let newName = generateUniqueName('i', this.isItemNameUnique.bind(this, newCollection));
-        myCollectionItem = myCollectionItem.change('name', newName);
-      }
       this.setState({
         collection: newCollection,
-        collectionItem: myCollectionItem
+        collectionItem: collectionItem.change(
+          'name',
+          generateUniqueName('i', this.isItemNameUnique.bind(this, newCollection))
+        )
       });
     };
 
@@ -218,7 +214,7 @@ export class AddCollectionItemModal extends React.Component<AddCollectionItemMod
 
   render(): JSX.Element {
     const { canSave, errors, collectionItem } = this.state;
-    const { collections } = this.props;
+    const { collections, onCancel } = this.props;
 
     if (!collectionItem) return null;
 
@@ -228,7 +224,7 @@ export class AddCollectionItemModal extends React.Component<AddCollectionItemMod
     return <Modal
       className="add-collection-item-modal"
       title={collectionItem.title}
-      onClose={this.props.onCancel}
+      onClose={onCancel}
       onEnter={this.save.bind(this)}
     >
       <form className="general vertical">
@@ -249,7 +245,7 @@ export class AddCollectionItemModal extends React.Component<AddCollectionItemMod
           type="primary"
           onClick={this.save.bind(this)}
         />
-        <Button className="cancel" title="Cancel" type="secondary" onClick={this.props.onCancel}/>
+        <Button className="cancel" title="Cancel" type="secondary" onClick={onCancel}/>
       </div>
     </Modal>;
   }

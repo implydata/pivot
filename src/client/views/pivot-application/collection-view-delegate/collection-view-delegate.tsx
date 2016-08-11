@@ -80,13 +80,14 @@ export class CollectionViewDelegate {
 
     this.save(newSettings, () => {
       window.location.hash = collectionURL;
-      Notifier.success('Item removed', undefined, 3, undo);
+      Notifier.success('Item removed', undefined, 3, {label: STRINGS.undo, callback: undo});
     });
   }
 
-  addItem(collection: Collection, collectionItem: CollectionItem, index?: number) {
+  addItem(collection: Collection, collectionItem: CollectionItem, index?: number): Q.Promise<string> {
+    var deferred = Q.defer<string>();
+
     const appSettings = this.getSettings();
-    const collectionURL = `#collection/${collection.name}`;
 
     var newItems = collection.items;
 
@@ -98,19 +99,24 @@ export class CollectionViewDelegate {
 
     this.save(
       appSettings.addOrUpdateCollection(collection.change('items', newItems)),
-      () => window.location.hash = collectionURL
+      () => deferred.resolve(`#collection/${collection.name}/${collectionItem.name}`)
     );
+
+    return deferred.promise;
   }
 
   createItem(collection: Collection, dataCube: DataCube) {
     const appSettings = this.getSettings();
     const collectionURL = `#collection/${collection.name}`;
 
-    var onCancel = () => window.location.hash = collectionURL;
+    var onCancel = () => {
+      this.setState({cubeViewSupervisor: undefined});
+      window.location.hash = collectionURL;
+    };
 
     var onSave = (_collection: Collection, collectionItem: CollectionItem) => {
       this.setState({cubeViewSupervisor: undefined});
-      this.addItem(_collection, collectionItem);
+      this.addItem(_collection, collectionItem).then(url => window.location.hash = url);
     };
 
     var getConfirmationModal = (newEssence: Essence) => {

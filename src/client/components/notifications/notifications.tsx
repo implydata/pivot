@@ -24,13 +24,18 @@ import { Fn } from '../../../common/utils/general/general';
 import { BodyPortal } from '../body-portal/body-portal';
 import { NotificationCard } from './notification-card';
 
+export interface NotificationAction {
+  label: string;
+  callback: () => void;
+}
+
 export interface Notification {
   title: string;
   priority: string;
   message: string;
   id?: number;
   duration?: number; // seconds
-  undoCallback?: Fn;
+  action?: NotificationAction;
 }
 
 export class Notifier {
@@ -53,8 +58,8 @@ export class Notifier {
     Notifier.create({title, message, priority: 'failure'});
   }
 
-  public static success(title: string, message?: string, duration?: number, undoCallback?: Fn) {
-    Notifier.create({title, message, priority: 'success', duration, undoCallback});
+  public static success(title: string, message?: string, duration?: number, action?: NotificationAction) {
+    Notifier.create({title, message, priority: 'success', duration, action});
   }
 
   public static subscribe(callback: (notifications: Notification[]) => void) {
