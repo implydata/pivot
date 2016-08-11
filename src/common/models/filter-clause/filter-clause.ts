@@ -118,23 +118,24 @@ export class FilterClause implements Instance<FilterClauseValue, FilterClauseJS>
   static fromJS(parameters: FilterClauseJS): FilterClause {
     const { selection, action } = parameters;
     var value: FilterClauseValue = {
+      action,
       expression: Expression.fromJS(parameters.expression),
       selection: (typeof selection !== "string") ? Expression.fromJS(selection as ExpressionJS) : selection as string,
-      exclude: Boolean(parameters.exclude),
-      action
+      exclude: Boolean(parameters.exclude)
     };
     return new FilterClause(value);
   }
 
 
+  public action: SupportedAction;
   public expression: Expression;
   public selection: FilterSelection;
   public exclude: boolean;
   public relative: boolean;
-  public action: SupportedAction;
 
   constructor(parameters: FilterClauseValue) {
     const { expression, selection, exclude, action } = parameters;
+    if (action) this.action = action;
     this.expression = expression;
     if (isRelative(selection as Expression)) {
       this.relative = true;
@@ -147,15 +148,14 @@ export class FilterClause implements Instance<FilterClauseValue, FilterClauseJS>
     }
     this.selection = selection;
     this.exclude = exclude || false;
-    if (action) this.action = action;
   }
 
   public valueOf(): FilterClauseValue {
     return {
+      action: this.action,
       expression: this.expression,
       selection: this.selection,
-      exclude: this.exclude,
-      action: this.action
+      exclude: this.exclude
     };
   }
 
@@ -180,10 +180,10 @@ export class FilterClause implements Instance<FilterClauseValue, FilterClauseJS>
 
   public equals(other: FilterClause): boolean {
     return FilterClause.isFilterClause(other) &&
+      this.action === other.action &&
       this.expression.equals(other.expression) &&
       selectionsEqual(this.selection, other.selection) &&
-      this.exclude === other.exclude &&
-      this.action === other.action;
+      this.exclude === other.exclude;
   }
 
   public toExpression(): ChainExpression {
