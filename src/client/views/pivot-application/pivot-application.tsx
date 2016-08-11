@@ -25,7 +25,7 @@ import { DataCube, AppSettings, User, Collection, CollectionItem, Essence, ViewS
 import { STRINGS } from '../../config/constants';
 
 import { createFunctionSlot, FunctionSlot } from '../../utils/function-slot/function-slot';
-import { AboutModal, SideDrawer, Notifications, Notifier } from '../../components/index';
+import { AboutModal, SideDrawer, Notifications, Notifier, AddCollectionItemModal } from '../../components/index';
 
 import { HomeView } from '../home-view/home-view';
 import { LinkView } from '../link-view/link-view';
@@ -54,6 +54,8 @@ export interface PivotApplicationState {
   viewType?: ViewType;
   viewHash?: string;
   showAboutModal?: boolean;
+  showAddCollectionModal?: boolean;
+  essenceToAddToACollection?: Essence;
   cubeViewSupervisor?: ViewSupervisor;
 }
 
@@ -123,10 +125,6 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
       selectedItem,
       appSettings
     });
-  }
-
-  componentDidUpdate() {
-    // this.collectionViewDelegate.update(this.state, this.props, this.setState.bind(this));
   }
 
   viewTypeNeedsAnItem(viewType: ViewType): boolean {
@@ -302,6 +300,43 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
     });
   }
 
+  addEssenceToCollection(essence: Essence) {
+    this.setState({
+      essenceToAddToACollection: essence,
+      showAddCollectionModal: true
+    });
+  }
+
+  renderAddCollectionModal() {
+    const { appSettings, selectedItem, showAddCollectionModal, essenceToAddToACollection } = this.state;
+
+    if (!showAddCollectionModal) return null;
+
+    if (!DataCube.isDataCube(selectedItem)) {
+      throw new Error(`Can't call this method without a valid dataCube. It's
+        probably called from the wrong view.`);
+    }
+
+    const closeModal = () => {
+      this.setState({
+        showAddCollectionModal: false
+      });
+    };
+
+    const onSave = (_collection: Collection, collectionItem: CollectionItem) => {
+      closeModal();
+      this.collectionViewDelegate.addItem(_collection, collectionItem);
+    };
+
+    return <AddCollectionItemModal
+      collections={appSettings.collections}
+      essence={essenceToAddToACollection}
+      dataCube={selectedItem as DataCube}
+      onSave={onSave}
+      onCancel={closeModal}
+    />;
+  }
+
   renderAboutModal() {
     const { version } = this.props;
     const { AboutModalAsync, showAboutModal } = this.state;
@@ -389,6 +424,7 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
           customization={customization}
           transitionFnSlot={this.sideBarHrefFn}
           supervisor={cubeViewSupervisor}
+          addEssenceToCollection={this.addEssenceToCollection.bind(this)}
         />;
         break;
 
@@ -435,6 +471,7 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
       {view}
       {sideDrawerTransition}
       {this.renderAboutModal()}
+      {this.renderAddCollectionModal()}
       {this.renderNotifications()}
     </main>;
   }

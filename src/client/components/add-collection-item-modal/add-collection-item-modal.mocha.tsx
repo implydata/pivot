@@ -4,7 +4,7 @@ import * as React from 'react';
 import * as TestUtils from 'react-addons-test-utils';
 import { $, Expression } from 'plywood';
 
-import { findDOMNode } from '../../../utils/test-utils/index';
+import { findDOMNode } from '../../utils/test-utils/index';
 
 import { AddCollectionItemModal } from './add-collection-item-modal';
 

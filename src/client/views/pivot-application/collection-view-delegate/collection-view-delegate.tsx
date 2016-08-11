@@ -22,8 +22,7 @@ import { PivotApplication, PivotApplicationProps, PivotApplicationState } from '
 
 import { Collection, CollectionItem, DataCube, Essence, AppSettings } from '../../../../common/models/index';
 import { STRINGS } from '../../../config/constants';
-import { Notifier } from '../../../components/index';
-import { AddCollectionItemModal } from '../../collection-view/add-collection-item-modal/add-collection-item-modal';
+import { Notifier, AddCollectionItemModal } from '../../../components/index';
 
 export class CollectionViewDelegate {
 
@@ -65,8 +64,12 @@ export class CollectionViewDelegate {
     //   ).done();
   }
 
+  private getSettings(): AppSettings {
+    return this.app.state.appSettings;
+  }
+
   deleteItem(collection: Collection, collectionItem: CollectionItem) {
-    const appSettings: AppSettings = this.app.props.appSettings;
+    const appSettings = this.getSettings();
     const collectionURL = `#collection/${collection.name}`;
     const oldIndex = collection.items.indexOf(collectionItem);
 
@@ -81,8 +84,8 @@ export class CollectionViewDelegate {
     });
   }
 
-  private addItem(collection: Collection, collectionItem: CollectionItem, index?: number) {
-    const appSettings: AppSettings = this.app.props.appSettings;
+  addItem(collection: Collection, collectionItem: CollectionItem, index?: number) {
+    const appSettings = this.getSettings();
     const collectionURL = `#collection/${collection.name}`;
 
     var newItems = collection.items;
@@ -100,12 +103,15 @@ export class CollectionViewDelegate {
   }
 
   createItem(collection: Collection, dataCube: DataCube) {
-    const appSettings: AppSettings = this.app.props.appSettings;
+    const appSettings = this.getSettings();
     const collectionURL = `#collection/${collection.name}`;
 
     var onCancel = () => window.location.hash = collectionURL;
 
-    var onSave = (collectionItem: CollectionItem) => this.addItem(collection, collectionItem);
+    var onSave = (_collection: Collection, collectionItem: CollectionItem) => {
+      this.setState({cubeViewSupervisor: undefined});
+      this.addItem(_collection, collectionItem);
+    };
 
     var getConfirmationModal = (newEssence: Essence) => {
       return <AddCollectionItemModal
@@ -127,13 +133,13 @@ export class CollectionViewDelegate {
   }
 
   updateItem(collection: Collection, item: CollectionItem) {
-    const appSettings: AppSettings = this.app.props.appSettings;
+    const appSettings = this.getSettings();
 
     this.save(appSettings.addOrUpdateCollection(collection.updateItem(item)));
   }
 
   editItem(collection: Collection, item: CollectionItem) {
-    const appSettings: AppSettings = this.app.props.appSettings;
+    const appSettings = this.getSettings();
     const collectionURL = `#collection/${collection.name}/${item.name}`;
 
     var onCancel = () => window.location.hash = collectionURL;

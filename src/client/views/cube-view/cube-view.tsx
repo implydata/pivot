@@ -53,6 +53,7 @@ export interface CubeViewProps extends React.Props<any> {
   customization?: Customization;
   transitionFnSlot?: FunctionSlot<string>;
   supervisor?: ViewSupervisor;
+  addEssenceToCollection?: (essence: Essence) => void;
 }
 
 export interface CubeViewState {
@@ -195,6 +196,9 @@ export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
 
     if (transitionFnSlot) {
       transitionFnSlot.fill((oldDataCube: DataCube, newDataCube: DataCube) => {
+        if (!DataCube.isDataCube(oldDataCube)) return null;
+        if (!DataCube.isDataCube(newDataCube)) return null;
+
         if (newDataCube === oldDataCube || !newDataCube.sameGroup(oldDataCube)) return null;
         const { essence } = this.state;
         if (!essence) return null;
@@ -358,6 +362,10 @@ export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
     this.globalResizeListener();
   }
 
+  onAddEssenceToCollection() {
+    this.props.addEssenceToCollection(this.state.essence);
+  }
+
   render() {
     var clicker = this.clicker;
 
@@ -417,6 +425,7 @@ export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
       changeTimezone={this.changeTimezone.bind(this)}
       timezone={essence.timezone}
       updatingMaxTime={updatingMaxTime}
+      addEssenceToCollection={this.onAddEssenceToCollection.bind(this)}
     />;
 
     if (supervisor) {

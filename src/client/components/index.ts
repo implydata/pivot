@@ -15,6 +15,7 @@
  */
 
 export * from './about-modal/about-modal';
+export * from './add-collection-item-modal/add-collection-item-modal';
 export * from './auto-refresh-menu/auto-refresh-menu';
 export * from './body-portal/body-portal';
 export * from './bubble-menu/bubble-menu';
