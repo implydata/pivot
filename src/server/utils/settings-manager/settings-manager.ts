@@ -283,7 +283,7 @@ export class SettingsManager {
   }
 
   onExternalChange(cluster: Cluster, dataCubeName: string, changedExternal: External): Q.Promise<any> {
-    if (!changedExternal.attributes || !changedExternal.requester) return;
+    if (!changedExternal.attributes || !changedExternal.requester) return Q(null);
     const { logger, verbose } = this;
 
     logger.log(`Got queryable external dataset update for ${dataCubeName} in cluster ${cluster.name}`);

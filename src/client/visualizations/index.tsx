@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { helper } from 'plywood';
+import { find } from 'plywood';
 import { Manifest } from '../../common/models/manifest/manifest';
 import { BaseVisualization } from './base-visualization/base-visualization';
 
