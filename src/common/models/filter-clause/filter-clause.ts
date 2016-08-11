@@ -18,21 +18,22 @@ import { Class, Instance, isInstanceOf } from 'immutable-class';
 import { Timezone, Duration, minute, day } from 'chronoshift';
 import { $, r, Expression, ExpressionJS, LiteralExpression, RefExpression, Set, SetJS,
   ChainExpression, NotAction, OverlapAction, InAction, Range, TimeRange, Datum, NumberRange, MatchAction } from 'plywood';
+import { ContainsAction } from "plywood";
 
 // Basically these represent
 // expression.in(selection) .not()?
 export type FilterSelection = Expression | string;
-export type SupportedActions = 'overlap' | 'contains' | 'match';
+export type SupportedAction = 'overlap' | 'contains' | 'match';
 
 export interface FilterClauseValue {
-  action?: SupportedActions;
+  action?: SupportedAction;
   expression: Expression;
   selection?: FilterSelection;
   exclude?: boolean;
 }
 
 export interface FilterClauseJS {
-  action?: SupportedActions;
+  action?: SupportedAction;
   expression: ExpressionJS;
   selection?: ExpressionJS | string;
   exclude?: boolean;
@@ -90,10 +91,12 @@ export class FilterClause implements Instance<FilterClauseValue, FilterClauseJS>
     }
     var lastAction = ex.lastAction();
     var dimExpression = ex.popAction();
-    if (lastAction instanceof InAction || lastAction instanceof OverlapAction) {
+    if (lastAction instanceof InAction || lastAction instanceof OverlapAction || lastAction instanceof ContainsAction) {
       var selection = lastAction.expression;
+      var action = lastAction.action as SupportedAction;
 
       return new FilterClause({
+        action,
         expression: dimExpression,
         selection,
         exclude
@@ -109,6 +112,7 @@ export class FilterClause implements Instance<FilterClauseValue, FilterClauseJS>
         exclude
       });
     }
+
     throw new Error(`invalid expression ${ex.toString()}`);
   }
 
@@ -128,7 +132,7 @@ export class FilterClause implements Instance<FilterClauseValue, FilterClauseJS>
   public selection: FilterSelection;
   public exclude: boolean;
   public relative: boolean;
-  public action: SupportedActions;
+  public action: SupportedAction;
 
   constructor(parameters: FilterClauseValue) {
     const { expression, selection, exclude, action } = parameters;
@@ -137,15 +141,14 @@ export class FilterClause implements Instance<FilterClauseValue, FilterClauseJS>
       this.relative = true;
     } else if (isLiteral(selection as Expression)) {
       this.relative = false;
-    } else if (typeof selection !== "string") {
-      throw new Error(`invalid expression ${selection}`);
+    } else if (action === 'match' && typeof selection !== 'string') {
+      throw new Error(`invalid match selection: ${selection}`);
+    } else if (action === 'contains' && !(selection instanceof Expression)) {
+      throw new Error(`invalid contains expression: ${selection}`);
     }
     this.selection = selection;
     this.exclude = exclude || false;
-    if (action) {
-      if (action === 'match' && typeof selection !== 'string') throw new Error("can only match with string");
-      this.action = action;
-    }
+    if (action) this.action = action;
   }
 
   public valueOf(): FilterClauseValue {
@@ -191,6 +194,8 @@ export class FilterClause implements Instance<FilterClauseValue, FilterClauseJS>
       var selectionType = (selection as Expression).type;
       if (selectionType === 'TIME_RANGE' || selectionType === 'SET/TIME_RANGE' || selectionType === 'NUMBER_RANGE' || selectionType === 'SET/NUMBER_RANGE') {
         ex = expression.in(selection);
+      } else if (action === 'contains') {
+        ex = expression.contains(selection);
       } else {
         ex = expression.overlap(selection);
       }
@@ -207,12 +212,10 @@ export class FilterClause implements Instance<FilterClauseValue, FilterClauseJS>
     if (this.relative) return null;
     if (selection instanceof Expression) {
       var v = (selection as Expression).getLiteralValue();
-      return (TimeRange.isTimeRange(v) || NumberRange.isNumberRange(v)) ? Set.fromJS([v]) : v;
+      return Set.isSet(v) ? v : Set.fromJS([v]);
     } else {
       return Set.fromJS([selection]);
     }
-
-
   }
 
   public getExtent(): Range<any> {
