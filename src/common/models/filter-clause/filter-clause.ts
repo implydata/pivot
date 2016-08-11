@@ -17,8 +17,7 @@
 import { Class, Instance, isInstanceOf } from 'immutable-class';
 import { Timezone, Duration, minute, day } from 'chronoshift';
 import { $, r, Expression, ExpressionJS, LiteralExpression, RefExpression, Set, SetJS,
-  ChainExpression, NotAction, OverlapAction, InAction, Range, TimeRange, Datum, NumberRange, MatchAction } from 'plywood';
-import { ContainsAction } from "plywood";
+  ChainExpression, NotAction, OverlapAction, InAction, Range, TimeRange, Datum, NumberRange, MatchAction, ContainsAction } from 'plywood';
 
 // Basically these represent
 // expression.in(selection) .not()?
@@ -153,10 +152,10 @@ export class FilterClause implements Instance<FilterClauseValue, FilterClauseJS>
 
   public valueOf(): FilterClauseValue {
     return {
-      action: this.action,
       expression: this.expression,
       selection: this.selection,
-      exclude: this.exclude
+      exclude: this.exclude,
+      action: this.action
     };
   }
 
