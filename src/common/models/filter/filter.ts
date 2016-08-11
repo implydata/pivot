@@ -20,7 +20,7 @@ import { Timezone, Duration } from 'chronoshift';
 import { $, r, Expression, LiteralExpression, ExpressionJS, InAction, Set, Range, TimeRange } from 'plywood';
 import { immutableListsEqual } from '../../utils/general/general';
 import { Dimension } from '../dimension/dimension';
-import { FilterClause, FilterClauseJS } from '../filter-clause/filter-clause';
+import { FilterClause, FilterClauseJS, FilterSelection } from '../filter-clause/filter-clause';
 
 function withholdClause(clauses: List<FilterClause>, clause: FilterClause, allowIndex: number): List<FilterClause> {
   return <List<FilterClause>>clauses.filter((c, i) => {
@@ -217,7 +217,7 @@ export class Filter implements Instance<FilterValue, FilterJS> {
     return this.filteredOnValue(attribute, value) ? this.removeValue(attribute, value) : this.addValue(attribute, value);
   }
 
-  public getSelection(attribute: Expression): Expression {
+  public getSelection(attribute: Expression): FilterSelection {
     var clauses = this.clauses;
     var index = this.indexOfClause(attribute);
     if (index === -1) return null;

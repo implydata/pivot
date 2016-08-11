@@ -122,6 +122,51 @@ describe('mkurl router', () => {
       }, testComplete);
   });
 
+  it('gets a url filtered on match back', (testComplete) => {
+    supertest(app)
+      .post('/')
+      .set('Content-Type', "application/json")
+      .send({
+        domain: 'http://localhost:9090',
+        dataCube: 'wiki',
+        essence: {
+          visualization: 'table',
+          timezone: 'Etc/UTC',
+          filter: $('page').match('^.*Bot.*$'),
+          pinnedDimensions: [],
+          singleMeasure: 'count',
+          selectedMeasures: ["count", "added"],
+          splits: [
+            {
+              "expression": {
+                "op": "ref",
+                "name": "page"
+              },
+              "sortAction": {
+                "action": "sort",
+                "expression": {
+                  "op": "ref",
+                  "name": "count"
+                },
+                "direction": "descending"
+              },
+              "limitAction": {
+                "action": "limit",
+                "limit": 50
+              }
+            }
+          ]
+        }
+      })
+      .expect('Content-Type', "application/json; charset=utf-8")
+      .expect(200)
+      .expect({
+        url: "http://localhost:9090#wiki/table/2/EQUQLgxg9AqgKgYWAGgN7APYAdgC5gQAWAhgJYB2KwApgB5YBO1Azs6RpbutnsEwGZVyxA" +
+        "LbVeWYgHNxAX2TBiEMO07olKjrxHFIhKkxn1eAPQB0AKgBCGMJYAkwWfIDa6OoxZstXTDnwCQqLi+JIyTgrMGAxgAILKqnjqCT7AUTFUHkysib4" +
+        "8AdSCCsJivBAYAK7kYBHAACakTCmc9SwQ1OQN5FK1ADakIqRxzUmKI/j9gzUKk0N4AKwADM4AusjkFb29CuVV0y4EldVUxHV11HXAay5rG1tAA="
+      }, testComplete);
+  });
+
   it('gets a url with split on time back', (testComplete) => {
     supertest(app)
       .post('/')

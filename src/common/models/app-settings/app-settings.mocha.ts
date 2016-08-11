@@ -142,6 +142,10 @@ describe('AppSettings', () => {
                 "type": "STRING"
               },
               {
+                "name": "page",
+                "type": "STRING"
+              },
+              {
                 "makerAction": {
                   "action": "count"
                 },
@@ -177,6 +181,12 @@ describe('AppSettings', () => {
                 "kind": "string",
                 "name": "articleName",
                 "title": "Article Name"
+              },
+              {
+                "formula": "$page",
+                "kind": "string",
+                "name": "page",
+                "title": "Page"
               }
             ],
             "measures": [

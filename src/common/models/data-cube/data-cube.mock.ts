@@ -36,6 +36,7 @@ export class DataCubeMock {
       attributes: [
         { name: 'time', type: 'TIME' },
         { name: 'articleName', type: 'STRING' },
+        { name: 'page', type: 'STRING' },
         { name: 'count', type: 'NUMBER', unsplitable: true, makerAction: { action: 'count' } }
       ],
       dimensions: [
@@ -50,6 +51,12 @@ export class DataCubeMock {
           name: 'articleName',
           title: 'Article Name',
           formula: '$articleName'
+        },
+        {
+          kind: 'string',
+          name: 'page',
+          title: 'Page',
+          formula: '$page'
         }
       ],
       measures: [
