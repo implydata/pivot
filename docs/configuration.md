@@ -434,11 +434,38 @@ Then in the measures simply reference `addedMod1337` like so:
 ```yaml
       - name: addedMod
         title: Added Mod 1337
-        formula: $main.custom('addedMod1337')
+        formula: $main.customAggregate('addedMod1337')
 ```
 
 This functionality can be used to access any custom aggregations that might be loaded via extensions.
 
+#### Custom transformations
+
+Similarly, within the dimensions if you could define your own custom transformation.
+The transformation could be any supported [Druid extraction function](http://druid.io/docs/latest/querying/dimensionspecs.html).
+
+For example Plywood currently does not support the decoding of URI strings.
+
+To use that in Pivot define:
+
+```yaml
+    options:
+      customTransforms:
+        decodeURI:
+          extractionFn:
+            type: javascript
+            function: function(x) { return decodeURIComponent(x) }
+```
+
+Then in the dimensions simply reference `decodeURI` like so:
+
+```yaml
+      - name: decodedURI
+        title: Decoded URI
+        formula: $main.customTransform('decodeURI')
+```
+
+This functionality can be used to access any custom aggregations that might be loaded via extensions.
 
 #### Switching metric columns
 
