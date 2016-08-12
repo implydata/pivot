@@ -52,7 +52,6 @@ export interface StringFilterMenuState {
   promotedValues?: Set; // initial selected values
   colors?: Colors;
   filterMode?: FilterMode;
-  invalidRegex?: boolean;
 }
 
 export class StringFilterMenu extends React.Component<StringFilterMenuProps, StringFilterMenuState> {
@@ -193,7 +192,7 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
 
   constructFilter(): Filter {
     var { essence, dimension, changePosition } = this.props;
-    var { selectedValues, filterMode, searchText, error } = this.state;
+    var { selectedValues, filterMode, searchText } = this.state;
     var { filter } = essence;
     var { expression } = dimension;
 
@@ -393,7 +392,7 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
       noResultsMsg = <div className="message">{'No results for "' + searchText + '"'}</div>;
     }
 
-    return <div className={classNames('menu-table', hasMore ? 'has-more' : 'no-more')}>
+    return <div className={classNames('menu-table no-select', hasMore ? 'has-more' : 'no-more')}>
       {this.renderMenuSearch()}
       <div className="rows">
         {(noResultsMsg || !searchText) ? null : <div className="matching-values">Matching Values</div>}
