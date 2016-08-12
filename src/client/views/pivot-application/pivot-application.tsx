@@ -219,7 +219,7 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
     var parts = this.parseHash(hash);
     var itemName = parts[viewType === COLLECTION ? 1 : 0];
 
-    return helper.findByName(items, itemName);
+    return findByName(items, itemName);
   }
 
   getViewHashFromHash(hash: string): string {
@@ -413,6 +413,7 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
           onNavClick={this.sideDrawerOpen.bind(this, true)}
           onOpenAbout={this.openAboutModal.bind(this)}
           customization={customization}
+          collectionsDelegate={this.collectionViewDelegate}
         />;
         break;
 
@@ -440,7 +441,6 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
           dataCubes={dataCubes}
           onNavClick={this.sideDrawerOpen.bind(this, true)}
           customization={customization}
-
           delegate={this.collectionViewDelegate}
         />;
         break;

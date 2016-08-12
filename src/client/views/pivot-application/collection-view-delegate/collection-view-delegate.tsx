@@ -68,6 +68,19 @@ export class CollectionViewDelegate {
     return this.app.state.appSettings;
   }
 
+  addCollection(collection: Collection): Q.Promise<string> {
+    var deferred = Q.defer<string>();
+
+    const appSettings = this.getSettings();
+
+    this.save(
+      appSettings.addOrUpdateCollection(collection),
+      () => deferred.resolve(`#collection/${collection.name}`)
+    );
+
+    return deferred.promise;
+  }
+
   deleteItem(collection: Collection, collectionItem: CollectionItem) {
     const appSettings = this.getSettings();
     const collectionURL = `#collection/${collection.name}`;

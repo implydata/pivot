@@ -17,6 +17,8 @@
 @import '../../imports';
 
 .home-view {
+  @import '../../utils/styles/grid';
+
   .home-header-bar {
     @include pin-top($header-height);
   }
@@ -31,11 +33,34 @@
       margin-bottom: 20px;
       padding: 0 12%;
 
-      > .title {
+      .section-title {
         text-transform: uppercase;
         color: $brand;
         margin-bottom: 10px;
         font-size: 15px;
+      }
+
+      .actions {
+
+        > * {
+          cursor: pointer;
+
+          .svg-icon {
+            height: 20px;
+            padding: 1px 0 0 1px;
+            border-radius: 50%;
+
+            path {
+              fill: $brand;
+            }
+          }
+
+          &:hover {
+            .svg-icon {
+              background-color: $hover;
+            }
+          }
+        }
       }
 
       .items-container {
@@ -49,6 +74,8 @@
           &.empty {
             height: 0;
             opacity: 0;
+            margin: 0;
+            padding: 0;
           }
         }
       }

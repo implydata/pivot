@@ -238,7 +238,7 @@ export class AddCollectionItemModal extends React.Component<AddCollectionItemMod
 
       </form>
 
-      <div className="button-group">
+      <div className="button-bar">
         <Button
           className={classNames("save", {disabled: !canSave})}
           title="Add to collection"

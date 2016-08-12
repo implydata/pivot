@@ -196,7 +196,7 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
 
   public addOrUpdateCollection(collection: Collection): AppSettings {
     var value = this.valueOf();
-    value.collections = helper.overrideByName(value.collections, collection);
+    value.collections = overrideByName(value.collections, collection);
     return new AppSettings(value);
   }
 

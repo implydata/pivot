@@ -64,11 +64,12 @@ export class CollectionHeaderBar extends React.Component<CollectionHeaderBarProp
   }
 
   renderUserMenu() {
-    const { user } = this.props;
+    const { user, customization } = this.props;
     const { userMenuOpenOn } = this.state;
     if (!userMenuOpenOn) return null;
 
     return <UserMenu
+      customization={customization}
       openOn={userMenuOpenOn}
       onClose={this.onUserMenuClose.bind(this)}
       user={user}

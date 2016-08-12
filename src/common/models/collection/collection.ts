@@ -15,7 +15,7 @@
  */
 
 import { Class, Instance, isInstanceOf, immutableArraysEqual } from 'immutable-class';
-import { helper } from 'plywood';
+import { findByName } from 'plywood';
 
 import { Manifest } from '../manifest/manifest';
 import { CollectionItem, CollectionItemJS, CollectionItemContext } from '../collection-item/collection-item';
@@ -112,7 +112,7 @@ export class Collection implements Instance<CollectionValue, CollectionJS> {
   }
 
   public findByName(name: string): CollectionItem {
-    return helper.findByName(this.items, name);
+    return findByName(this.items, name);
   }
 
   public deleteItem(item: CollectionItem): Collection {
