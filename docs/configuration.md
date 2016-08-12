@@ -361,7 +361,7 @@ To use that in Pivot define:
         stringFun:
           extractionFn:
             type: javascript
-            function: function(x) { return decodeURIComponent(x).repeat(2).trim().charCodeAt(0) }
+            function: function(x) { return decodeURIComponent(x).trim().charCodeAt(0) }
 ```
 
 Then in the dimensions simply reference `stringFun` like so:
