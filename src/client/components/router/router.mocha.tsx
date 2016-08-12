@@ -100,7 +100,7 @@ describe('Router', () => {
       children = [
         <Route fragment=":itemId" alwaysShowOrphans={true}>
           <div className="pouet-class">baz</div> // Should alway be visible
-          <Route fragment=":action"><Fake/></Route>
+          <Route transmit={['itemId']} fragment=":action"><Fake/></Route>
         </Route>
       ];
 

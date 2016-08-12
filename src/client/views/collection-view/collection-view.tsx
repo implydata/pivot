@@ -87,7 +87,7 @@ export class CollectionView extends React.Component<CollectionViewProps, Collect
           <Route fragment=":collectionId" alwaysShowOrphans={true}>
             <CollectionOverview collections={collections}/>
 
-            <Route fragment=":itemId">
+            <Route fragment=":itemId" transmit={['collectionId']}>
               <CollectionItemLightbox
                 collections={collections}
                 onChange={delegate.updateItem}
