@@ -346,6 +346,32 @@ Let's say that you are responsible for all accounts in the United States as well
 
 Now my account would represent a custom filter boolean diemension.
 
+#### Custom transformations
+
+If no existing plywood function meets your needs, you could also define your own custom transformation.
+The transformation could be any supported [Druid extraction function](http://druid.io/docs/latest/querying/dimensionspecs.html).
+
+For example you could apply any number of javascript functions to a string.
+
+To use that in Pivot define:
+
+```yaml
+    options:
+      customTransforms:
+        decodeURI:
+          extractionFn:
+            type: javascript
+            function: function(x) { return decodeURIComponent(x).repeat(2).trim().charCodeAt(0) }
+```
+
+Then in the dimensions simply reference `decodeURI` like so:
+
+```yaml
+      - name: decodedURI
+        title: Decoded URI
+        formula: $main.customTransform('decodeURI')
+```
+
 ### Measures
 
 In this section you can define the measures that users can *aggregate* on (*apply*) on in the UI.
@@ -435,34 +461,6 @@ Then in the measures simply reference `addedMod1337` like so:
       - name: addedMod
         title: Added Mod 1337
         formula: $main.customAggregate('addedMod1337')
-```
-
-This functionality can be used to access any custom aggregations that might be loaded via extensions.
-
-#### Custom transformations
-
-Similarly, within the dimensions if you could define your own custom transformation.
-The transformation could be any supported [Druid extraction function](http://druid.io/docs/latest/querying/dimensionspecs.html).
-
-For example Plywood currently does not support the decoding of URI strings.
-
-To use that in Pivot define:
-
-```yaml
-    options:
-      customTransforms:
-        decodeURI:
-          extractionFn:
-            type: javascript
-            function: function(x) { return decodeURIComponent(x) }
-```
-
-Then in the dimensions simply reference `decodeURI` like so:
-
-```yaml
-      - name: decodedURI
-        title: Decoded URI
-        formula: $main.customTransform('decodeURI')
 ```
 
 This functionality can be used to access any custom aggregations that might be loaded via extensions.
