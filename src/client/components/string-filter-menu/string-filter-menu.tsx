@@ -81,7 +81,7 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
   }
 
   fetchData(essence: Essence, dimension: Dimension): void {
-    var { searchText } = this.state;
+    var { searchText, filterMode } = this.state;
     var { dataCube } = essence;
     var nativeCount = dataCube.getMeasure('count');
     var measureExpression = nativeCount ? nativeCount.expression : $('main').count();
@@ -89,7 +89,11 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
     var filterExpression = essence.getEffectiveFilter(null, dimension).toExpression();
 
     if (searchText) {
-      filterExpression = filterExpression.and(dimension.expression.contains(r(searchText), 'ignoreCase'));
+      if (filterMode === Filter.MATCH) {
+        filterExpression = filterExpression.and(dimension.expression.match(searchText));
+      } else {
+        filterExpression = filterExpression.and(dimension.expression.contains(r(searchText), 'ignoreCase'));
+      }
     }
 
     var query = $('main')
@@ -274,9 +278,11 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
 
     var rows: Array<JSX.Element> = [];
     var hasMore = false;
+    var isStrictCompare = filterMode === Filter.INCLUDED || filterMode === Filter.EXCLUDED;
+    var isRegex = filterMode === Filter.MATCH;
     if (dataset) {
       hasMore = dataset.data.length > TOP_N;
-      var promotedElements = promotedValues ? promotedValues.elements : [];
+      var promotedElements = (promotedValues && isStrictCompare) ? promotedValues.elements : [];
       var rowData = dataset.data.slice(0, TOP_N).filter((d) => {
         return promotedElements.indexOf(d[dimension.name]) === -1;
       });
@@ -285,15 +291,24 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
       if (searchText) {
         var searchTextLower = searchText.toLowerCase();
         rowStrings = rowStrings.filter((d) => {
+          if (filterMode === Filter.MATCH) {
+            try {
+              // todo escape backslash
+              var escaped = searchText.replace(/\\/g, '\\\\');
+              return new RegExp(searchText, 'g').test(d);
+            } catch (e) {
+              console.log(e);
+            }
+          }
           return String(d).toLowerCase().indexOf(searchTextLower) !== -1;
         });
       }
 
       var checkboxType = filterMode === Filter.EXCLUDED ? 'cross' : 'check';
-
       rows = rowStrings.map((segmentValue) => {
           var segmentValueStr = String(segmentValue);
           var selected = selectedValues && selectedValues.contains(segmentValue);
+          var highlightText = isRegex ? segmentValueStr.match(searchText).join("") : searchText;
 
           return <div
             className={classNames('row', { 'selected': selected })}
@@ -303,7 +318,7 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
           >
             <div className="row-wrapper">
               <Checkbox type={checkboxType as CheckboxType} selected={selected}/>
-              <HighlightString className="label" text={segmentValueStr} highlightText={searchText}/>
+              <HighlightString className="label" text={segmentValueStr} highlightText={highlightText}/>
             </div>
           </div>;
       });
