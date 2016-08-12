@@ -117,11 +117,6 @@ export class CollectionHeaderBar extends React.Component<CollectionHeaderBarProp
     </BubbleMenu>;
   }
 
-  onShareClick() {
-    // Debug
-    console.log(JSON.stringify(this.props.collections.map(c => c.toJS()), null, 2));
-  }
-
   render() {
     var { user, onNavClick, customization, title } = this.props;
 
@@ -149,9 +144,6 @@ export class CollectionHeaderBar extends React.Component<CollectionHeaderBarProp
       <div className="right-bar">
         <div className="icon-button add" onClick={this.onAddClick.bind(this)}>
           <SvgIcon svg={require('../../icons/full-add-framed.svg')}/>
-        </div>
-        <div className="icon-button hiluk" onClick={this.onShareClick.bind(this)}>
-          <SvgIcon svg={require('../../icons/full-hiluk.svg')}/>
         </div>
         {userButton}
       </div>

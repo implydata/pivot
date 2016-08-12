@@ -36,6 +36,7 @@ import { VERSION, AUTH, SERVER_SETTINGS, SETTINGS_MANAGER } from './config';
 import * as plywoodRoutes from './routes/plywood/plywood';
 import * as plyqlRoutes from './routes/plyql/plyql';
 import * as pivotRoutes from './routes/pivot/pivot';
+import * as collectionsRoutes from './routes/collections/collections';
 import * as settingsRoutes from './routes/settings/settings';
 import * as mkurlRoutes from './routes/mkurl/mkurl';
 import * as healthRoutes from './routes/health/health';
@@ -158,10 +159,11 @@ addRoutes('/plywood', plywoodRoutes);
 addRoutes('/plyql', plyqlRoutes);
 addRoutes('/mkurl', mkurlRoutes);
 addRoutes('/error', errorRoutes);
-
+addRoutes('/collections', collectionsRoutes);
 if (hasSettings) {
   addGuardedRoutes('/settings', 'settings', settingsRoutes);
 }
+
 
 // View routes
 if (SERVER_SETTINGS.getIframe() === 'deny') {
