@@ -71,6 +71,15 @@ export class CollectionView extends React.Component<CollectionViewProps, Collect
     const { user, collections, customization, onNavClick, delegate, dataCubes } = this.props;
     const { collection } = this.state;
 
+    const pump = (key: string, value: string): {key: string, value: any} => {
+      if (key !== 'collectionId') return {key, value};
+
+      return {
+        key: 'collection',
+        value: collections.filter(c => c.name === value)[0]
+      };
+    };
+
     return <div className="collection-view">
       <CollectionHeaderBar
         user={user}
@@ -87,9 +96,8 @@ export class CollectionView extends React.Component<CollectionViewProps, Collect
           <Route fragment=":collectionId" alwaysShowOrphans={true}>
             <CollectionOverview collections={collections}/>
 
-            <Route fragment=":itemId" transmit={['collectionId']}>
+            <Route fragment=":itemId" transmit={['collectionId']} inflate={pump}>
               <CollectionItemLightbox
-                collections={collections}
                 onChange={delegate.updateItem}
                 onEdit={delegate.editItem}
                 onDelete={delegate.deleteItem}

@@ -30,8 +30,7 @@ import { COLLECTION_ITEM as LABELS } from '../../../../common/models/labels';
 import { getVisualizationComponent } from '../../../visualizations/index';
 
 export interface CollectionItemLightboxProps extends React.Props<any> {
-  collections: Collection[];
-  collectionId?: string;
+  collection?: Collection;
   itemId?: string;
   onEdit?: (collection: Collection, collectionItem: CollectionItem) => void;
   onDelete?: (collection: Collection, collectionItem: CollectionItem) => void;
@@ -39,7 +38,6 @@ export interface CollectionItemLightboxProps extends React.Props<any> {
 }
 
 export interface CollectionItemLightboxState {
-  collection?: Collection;
   item?: CollectionItem;
   visualizationStage?: Stage;
   editMenuOpen?: boolean;
@@ -56,19 +54,14 @@ export class CollectionItemLightbox extends React.Component<CollectionItemLightb
   }
 
   componentWillReceiveProps(nextProps: CollectionItemLightboxProps) {
-    const { collections, collectionId, itemId } = nextProps;
+    const { collection, itemId } = nextProps;
 
-    if (collections && collectionId && itemId) {
-      let collection = collections.filter(({name}) => name === collectionId)[0];
+    if (collection) {
+      let item = collection.items.filter(({name}) => itemId === name)[0];
 
-      if (collection) {
-        let item = collection.items.filter(({name}) => itemId === name)[0];
-
-        this.setState({
-          collection,
-          item
-        });
-      }
+      this.setState({
+        item
+      });
     }
   }
 
@@ -103,7 +96,7 @@ export class CollectionItemLightbox extends React.Component<CollectionItemLightb
   }
 
   closeModal() {
-    window.location.hash = `#collection/${this.props.collectionId}`;
+    window.location.hash = `#collection/${this.props.collection.name}`;
   }
 
   onEscape() {
@@ -129,8 +122,8 @@ export class CollectionItemLightbox extends React.Component<CollectionItemLightb
   }
 
   renderEditMenu() {
-    const { onEdit } = this.props;
-    const { collection, item } = this.state;
+    const { onEdit, collection } = this.props;
+    const { item } = this.state;
     var onClose = () => this.setState({editMenuOpen: false});
 
     const edit = () => onEdit(collection, item);
@@ -150,8 +143,8 @@ export class CollectionItemLightbox extends React.Component<CollectionItemLightb
   }
 
   renderMoreMenu() {
-    const { onDelete } = this.props;
-    const { collection, item } = this.state;
+    const { onDelete, collection } = this.props;
+    const { item } = this.state;
     var onClose = () => this.setState({moreMenuOpen: false});
 
     const remove = () => onDelete(collection, item);
@@ -188,7 +181,8 @@ export class CollectionItemLightbox extends React.Component<CollectionItemLightb
   }
 
   swipe(direction: number) {
-    const { collection, item } = this.state;
+    const { collection } = this.props;
+    const { item } = this.state;
 
     const items = collection.items;
 
@@ -205,7 +199,8 @@ export class CollectionItemLightbox extends React.Component<CollectionItemLightb
   }
 
   saveEdition() {
-    const { collection, tempItem } = this.state;
+    const { collection } = this.props;
+    const { tempItem } = this.state;
 
     this.setState({
       item: tempItem,

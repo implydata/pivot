@@ -32,6 +32,8 @@ import { Router, Route } from './router';
 interface FakeProps extends React.Props<any> {
   itemId?: string;
   action?: string;
+
+  object?: {label: string};
 }
 
 interface FakeState {}
@@ -42,7 +44,9 @@ class Fake extends React.Component<FakeProps, FakeState> {
   }
 
   render() {
-    let str = `${this.props.action || ''}${this.props.itemId || ''}`;
+    const { itemId, action, object} = this.props;
+
+    let str = `${action || ''}${itemId || ''}${object && object.label || ''}`;
 
     return <div className="fakey-fakey">{str}</div>;
   }
@@ -83,8 +87,9 @@ describe('Router', () => {
       window.location.hash = newHash;
       let spy = sinon.spy();
 
+      // Cloning components so that react doesn't complain about the lack of keys...
       component = ReactDOM.render(<Router rootFragment="root" onURLChange={spy}>
-        {children}
+        {children.map((c, i) => React.cloneElement(c, {key: i})) }
       </Router>, node);
     };
 
@@ -123,7 +128,43 @@ describe('Router', () => {
 
       isActiveRoute('#root/flu/bli');
     });
+  });
 
+  describe('with inflatable variables', () => {
+    beforeEach(() => {
+      node = window.document.createElement('div');
+
+      var pump = (key: string, value: string): {key: string, value: any} => {
+        if (key === 'action') return {key: 'action', value};
+        return {key: 'object', value: {label: value.toUpperCase()}};
+      };
+
+      children = [
+        <Route fragment=":itemId" alwaysShowOrphans={true}>
+          <div className="pouet-class">baz</div> // Should alway be visible
+          <Route transmit={['itemId']} fragment=":action" inflate={pump}><Fake/></Route>
+        </Route>
+      ];
+
+      updateHash('root/bar');
+    });
+
+    it('inflates stuff on the fly', () => {
+      updateHash('#root/flu/bli');
+
+      var domNodes: NodeList = findNodes(component) as any;
+
+      var getChild = (i: number) => domNodes[i] as Element;
+
+      // Orphan that's always visible
+      expect(getChild(0).className, 'should contain class').to.equal('pouet-class');
+
+      // Fakey thing
+      expect(getChild(1).className, 'should contain class').to.equal('fakey-fakey');
+      expect(getChild(1).innerHTML).to.equal('bliFLU');
+
+      isActiveRoute('#root/flu/bli');
+    });
   });
 
 

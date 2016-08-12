@@ -24,10 +24,13 @@ import { replaceHash } from '../../utils/url/url';
 import { extend } from '../../../common/utils/object/object';
 import { SvgIcon } from '../svg-icon/svg-icon';
 
+export type Inflater = (key: string, value: string) => {key: string, value: any};
+
 export interface RouteProps extends React.Props<any> {
   fragment: string;
   alwaysShowOrphans?: boolean;
   transmit?: string[];
+  inflate?: Inflater;
 }
 export interface RouteState {}
 export class Route extends React.Component<RouteProps, RouteState> {}
@@ -305,7 +308,22 @@ export class Router extends React.Component<RouterProps, RouterState> {
     return props;
   }
 
+  inflate(pump: Inflater, properties: any): any {
+    if (!pump) return properties;
+
+    let newProperties: any = {};
+
+    for (let originalKey in properties) {
+      let {key, value} = pump(originalKey, properties[originalKey]);
+      newProperties[key] = value;
+    }
+
+    return newProperties;
+  }
+
   fillProperties(child: JSX.Element, path: QualifiedPath, i = 0): JSX.Element {
+    if (!(child.type instanceof Function)) return child;
+
     var propsToTransmit = this.getPropertiesFromCrumbs(path.crumbs, path.route.props.fragment);
 
     path.parentRoutes.forEach(route => {
@@ -314,7 +332,7 @@ export class Router extends React.Component<RouterProps, RouterState> {
       }
     });
 
-    console.log(JSON.stringify(propsToTransmit, null, 2));
+    propsToTransmit = this.inflate(path.route.props.inflate, propsToTransmit);
 
     return React.cloneElement(child, extend(propsToTransmit, {key: i}));
   }
