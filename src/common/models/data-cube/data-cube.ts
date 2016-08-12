@@ -138,6 +138,7 @@ export interface DataCubeJS {
 export interface DataCubeOptions {
   customAggregations?: CustomDruidAggregations;
   customExtractionFns?: CustomDruidExtractionFns;
+  druidContext?: Lookup<any>;
   priority?: number;
 
   // Deprecated
@@ -592,9 +593,8 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
       externalValue.introspectionStrategy = cluster.getIntrospectionStrategy();
       externalValue.allowSelectQueries = true;
 
-      var externalContext: Lookup<any> = {
-        timeout: cluster.getTimeout()
-      };
+      var externalContext: Lookup<any> = options.druidContext || {};
+      externalContext['timeout'] = cluster.getTimeout();
       if (options.priority) externalContext['priority'] = options.priority;
       externalValue.context = externalContext;
     }
