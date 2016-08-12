@@ -358,18 +358,18 @@ To use that in Pivot define:
 ```yaml
     options:
       customTransforms:
-        decodeURI:
+        stringFun:
           extractionFn:
             type: javascript
             function: function(x) { return decodeURIComponent(x).repeat(2).trim().charCodeAt(0) }
 ```
 
-Then in the dimensions simply reference `decodeURI` like so:
+Then in the dimensions simply reference `stringFun` like so:
 
 ```yaml
-      - name: decodedURI
-        title: Decoded URI
-        formula: $main.customTransform('decodeURI')
+      - name: stringFun
+        title: String Fun
+        formula: $countryURL.customTransform('stringFun')
 ```
 
 ### Measures
