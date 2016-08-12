@@ -52,6 +52,7 @@ export interface StringFilterMenuState {
   promotedValues?: Set; // initial selected values
   colors?: Colors;
   filterMode?: FilterMode;
+  invalidRegex?: boolean;
 }
 
 export class StringFilterMenu extends React.Component<StringFilterMenuProps, StringFilterMenuState> {
@@ -90,7 +91,14 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
 
     if (searchText) {
       if (filterMode === Filter.MATCH) {
-        filterExpression = filterExpression.and(dimension.expression.match(searchText));
+        // check for valid regex
+        try {
+          new RegExp(searchText);
+          filterExpression = filterExpression.and(dimension.expression.match(searchText));
+        } catch (e) {
+          console.log(e);
+        }
+
       } else {
         filterExpression = filterExpression.and(dimension.expression.contains(r(searchText), 'ignoreCase'));
       }
@@ -185,15 +193,25 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
 
   constructFilter(): Filter {
     var { essence, dimension, changePosition } = this.props;
-    var { selectedValues, filterMode } = this.state;
+    var { selectedValues, filterMode, searchText, error } = this.state;
     var { filter } = essence;
+    var { expression } = dimension;
 
-    if (selectedValues.size()) {
-      var clause = new FilterClause({
-        expression: dimension.expression,
+    var clause: FilterClause = null;
+    if (filterMode === Filter.MATCH && searchText) {
+      clause = new FilterClause({
+        expression,
+        selection: searchText,
+        action: 'match'
+      });
+    } else if (selectedValues.size()) {
+      clause = new FilterClause({
+        expression,
         selection: r(selectedValues),
         exclude: filterMode === Filter.EXCLUDED
       });
+    }
+    if (clause) {
       if (changePosition) {
         if (changePosition.isInsert()) {
           return filter.insertByIndex(changePosition.insert, clause);
@@ -272,17 +290,15 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
     this.setState({filterMode});
   }
 
-  renderTable() {
+  renderSelectableRows() {
     var { loading, dataset, error, fetchQueued, searchText, selectedValues, promotedValues, filterMode } = this.state;
     var { dimension } = this.props;
 
     var rows: Array<JSX.Element> = [];
     var hasMore = false;
-    var isStrictCompare = filterMode === Filter.INCLUDED || filterMode === Filter.EXCLUDED;
-    var isRegex = filterMode === Filter.MATCH;
     if (dataset) {
       hasMore = dataset.data.length > TOP_N;
-      var promotedElements = (promotedValues && isStrictCompare) ? promotedValues.elements : [];
+      var promotedElements = promotedValues ? promotedValues.elements : [];
       var rowData = dataset.data.slice(0, TOP_N).filter((d) => {
         return promotedElements.indexOf(d[dimension.name]) === -1;
       });
@@ -291,15 +307,6 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
       if (searchText) {
         var searchTextLower = searchText.toLowerCase();
         rowStrings = rowStrings.filter((d) => {
-          if (filterMode === Filter.MATCH) {
-            try {
-              // todo escape backslash
-              var escaped = searchText.replace(/\\/g, '\\\\');
-              return new RegExp(searchText, 'g').test(d);
-            } catch (e) {
-              console.log(e);
-            }
-          }
           return String(d).toLowerCase().indexOf(searchTextLower) !== -1;
         });
       }
@@ -308,7 +315,6 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
       rows = rowStrings.map((segmentValue) => {
           var segmentValueStr = String(segmentValue);
           var selected = selectedValues && selectedValues.contains(segmentValue);
-          var highlightText = isRegex ? segmentValueStr.match(searchText).join("") : searchText;
 
           return <div
             className={classNames('row', { 'selected': selected })}
@@ -318,7 +324,7 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
           >
             <div className="row-wrapper">
               <Checkbox type={checkboxType as CheckboxType} selected={selected}/>
-              <HighlightString className="label" text={segmentValueStr} highlightText={highlightText}/>
+              <HighlightString className="label" text={segmentValueStr} highlightText={searchText}/>
             </div>
           </div>;
       });
@@ -330,20 +336,7 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
     }
 
     return <div className={classNames('menu-table', hasMore ? 'has-more' : 'no-more')}>
-      <div className="side-by-side">
-        <FilterOptionsDropdown
-          selectedOption={filterMode}
-          onSelectOption={this.onSelectFilterOption.bind(this)}
-        />
-        <div className="search-box">
-          <ClearableInput
-            placeholder="Search"
-            focusOnMount={true}
-            value={searchText}
-            onChange={this.onSearchChange.bind(this)}
-          />
-        </div>
-      </div>
+      {this.renderMenuSearch()}
       <div className="rows">
         {rows}
         {message}
@@ -353,12 +346,90 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
     </div>;
   }
 
-  render() {
+  renderNonSelectableRows() {
+
+    var { loading, dataset, error, fetchQueued, searchText, selectedValues } = this.state;
     var { dimension } = this.props;
+
+    var rows: Array<JSX.Element> = [];
+    var hasMore = false;
+    if (dataset) {
+      hasMore = dataset.data.length > TOP_N;
+      var rowStrings = dataset.data.slice(0, TOP_N).map((d) => d[dimension.name]);
+
+      if (searchText) {
+        rowStrings = rowStrings.filter((d) => {
+          try {
+            var escaped = searchText.replace(/\\[^\\]]/g, '\\\\');
+            return new RegExp(escaped, 'g').test(String(d));
+          } catch (e) {
+            console.log(e);
+            return false;
+          }
+        });
+      }
+
+      rows = rowStrings.map((segmentValue) => {
+        var segmentValueStr = String(segmentValue);
+
+        var matchText = searchText || String(selectedValues.elements[0]);
+        var match = segmentValueStr.match(matchText);
+        var highlightText = match ? match.join("") : "";
+        return <div
+          className="row no-select"
+          key={segmentValueStr}
+          title={segmentValueStr}
+          onClick={this.onValueClick.bind(this, segmentValue)}
+        >
+          <div className="row-wrapper">
+            <HighlightString className="label" text={segmentValueStr} highlightText={highlightText}/>
+          </div>
+        </div>;
+      });
+    }
+
+    var noResultsMsg: JSX.Element = null;
+    if (!loading && dataset && !fetchQueued && searchText && !rows.length) {
+      noResultsMsg = <div className="message">{'No results for "' + searchText + '"'}</div>;
+    }
+
+    return <div className={classNames('menu-table', hasMore ? 'has-more' : 'no-more')}>
+      {this.renderMenuSearch()}
+      <div className="rows">
+        {(noResultsMsg || !searchText) ? null : <div className="matching-values">Matching Values</div>}
+        {rows}
+        {noResultsMsg}
+      </div>
+      {error ? <QueryError error={error}/> : null}
+      {loading ? <Loader/> : null}
+    </div>;
+  }
+
+  renderMenuSearch() {
+    const { filterMode, searchText } = this.state;
+    return <div className="side-by-side">
+      <FilterOptionsDropdown
+        selectedOption={filterMode}
+        onSelectOption={this.onSelectFilterOption.bind(this)}
+      />
+      <div className="search-box">
+        <ClearableInput
+          placeholder={filterMode === Filter.MATCH ? "Pattern" : "Search"}
+          focusOnMount={true}
+          value={searchText}
+          onChange={this.onSearchChange.bind(this)}
+        />
+      </div>
+    </div>;
+  }
+
+  render() {
+    const { dimension } = this.props;
+    const { filterMode } = this.state;
     if (!dimension) return null;
 
     return <div className="string-filter-menu">
-      {this.renderTable()}
+      {filterMode !== Filter.MATCH ? this.renderSelectableRows() : this.renderNonSelectableRows()}
       <div className="button-bar">
         <Button type="primary" title={STRINGS.ok} onClick={this.onOkClick.bind(this)} disabled={!this.actionEnabled()} />
         <Button type="secondary" title={STRINGS.cancel} onClick={this.onCancelClick.bind(this)} />
