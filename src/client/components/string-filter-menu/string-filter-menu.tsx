@@ -395,7 +395,7 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
     return <div className={classNames('menu-table no-select', hasMore ? 'has-more' : 'no-more')}>
       {this.renderMenuSearch()}
       <div className="rows">
-        {(noResultsMsg || !searchText) ? null : <div className="matching-values">Matching Values</div>}
+        {(noResultsMsg || !searchText) ? null : <div className="matching-values-message">Matching Values</div>}
         {rows}
         {noResultsMsg}
       </div>
