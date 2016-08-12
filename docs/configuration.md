@@ -465,6 +465,7 @@ Then in the measures simply reference `addedMod1337` like so:
 
 This functionality can be used to access any custom aggregations that might be loaded via extensions.
 
+
 #### Switching metric columns
 
 If you switch how you ingest you underlying metric and can't (or do not want to) recalculate all of the previous data,
