@@ -15,6 +15,6 @@ fi
 echo "Trying to publish..."
 
 gulp all
-mocha test
+./travis-test
 script/version-bump
 npm publish
