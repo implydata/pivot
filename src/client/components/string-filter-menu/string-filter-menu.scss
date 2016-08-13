@@ -80,12 +80,22 @@ $checkbox-width: 20px;
       &:last-child {
         margin-bottom: 12px;
       }
+
+      &.no-select {
+        pointer-events: none;
+        user-select: none;
+      }
     }
 
     .message {
       padding: 4px 10px;
       color: $text-light;
       font-style: italic;
+    }
+
+    .matching-values-message {
+      padding: 4px 10px;
+      color: $text-light;
     }
 
     .loader,

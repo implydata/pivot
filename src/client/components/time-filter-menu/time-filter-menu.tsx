@@ -99,7 +99,7 @@ export class TimeFilterMenu extends React.Component<TimeFilterMenuProps, TimeFil
     const { timezone } = essence;
 
     var dimensionExpression = dimension.expression;
-    var timeSelection = filter.getSelection(dimensionExpression);
+    var timeSelection = filter.getSelection(dimensionExpression) as Expression;
     var selectedTimeRangeSet = essence.getEffectiveFilter().getLiteralSet(dimensionExpression);
     var selectedTimeRange = (selectedTimeRangeSet && selectedTimeRangeSet.size() === 1) ? selectedTimeRangeSet.elements[0] : null;
     if (selectedTimeRange && !Range.isRange(selectedTimeRange)) selectedTimeRange = makeDateIntoTimeRange(selectedTimeRange, timezone);
