@@ -363,16 +363,7 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
 
       rows = rowStrings.map((segmentValue) => {
         var segmentValueStr = String(segmentValue);
-
-        var matchText = searchText;
-        if (!matchText) {
-          var existingSearch = String(selectedValues.elements[0]);
-          if (canRegex(existingSearch)) matchText = existingSearch;
-          // would be cool for the highlight text to show matches to existing regex search but we don't know if
-          // previous filter mode was regex.. so test it here but will be true for if previous filter mode wasn't regex
-          // but has a regex-able pattern (almost always for string searches)
-        }
-        var match = segmentValueStr.match(matchText);
+        var match = segmentValueStr.match(searchText);
         var highlightText = match ? match.join("") : "";
         return <div
           className="row no-select"
