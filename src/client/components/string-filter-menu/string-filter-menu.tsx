@@ -343,7 +343,7 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
   }
 
   renderNonSelectableRows() {
-    var { loading, dataset, fetchQueued, searchText, selectedValues } = this.state;
+    var { loading, dataset, fetchQueued, searchText } = this.state;
     var { dimension } = this.props;
 
     var rows: Array<JSX.Element> = [];
