@@ -34,6 +34,14 @@ import { FilterOptionsDropdown } from '../filter-options-dropdown/filter-options
 
 const TOP_N = 100;
 
+function canRegex(input: string): boolean {
+  try {
+    new RegExp(input);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
 export interface StringFilterMenuProps extends React.Props<any> {
   clicker: Clicker;
   dimension: Dimension;
@@ -91,13 +99,9 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
     if (searchText) {
       if (filterMode === Filter.MATCH) {
         // check for valid regex
-        try {
-          new RegExp(searchText);
+        if (canRegex(searchText)) {
           filterExpression = filterExpression.and(dimension.expression.match(searchText));
-        } catch (e) {
-          console.log(e);
         }
-
       } else {
         filterExpression = filterExpression.and(dimension.expression.contains(r(searchText), 'ignoreCase'));
       }
@@ -339,7 +343,7 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
   }
 
   renderNonSelectableRows() {
-    var { loading, dataset, error, fetchQueued, searchText, selectedValues } = this.state;
+    var { loading, dataset, fetchQueued, searchText, selectedValues } = this.state;
     var { dimension } = this.props;
 
     var rows: Array<JSX.Element> = [];
@@ -362,15 +366,11 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
 
         var matchText = searchText;
         if (!matchText) {
-          try {
-            var existingSearch = String(selectedValues.elements[0]);
-            // would be cool for the highlight text to show matches to existing regex search but we don't know if
-            // previous filter mode was regex.. so test it here?
-            new RegExp(existingSearch);
-            matchText = existingSearch;
-          } catch (e) {
-
-          }
+          var existingSearch = String(selectedValues.elements[0]);
+          if (canRegex(existingSearch)) matchText = existingSearch;
+          // would be cool for the highlight text to show matches to existing regex search but we don't know if
+          // previous filter mode was regex.. so test it here but will be true for if previous filter mode wasn't regex
+          // but has a regex-able pattern (almost always for string searches)
         }
         var match = segmentValueStr.match(matchText);
         var highlightText = match ? match.join("") : "";
