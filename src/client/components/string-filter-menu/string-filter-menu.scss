@@ -83,6 +83,7 @@ $checkbox-width: 20px;
 
       &.no-select {
         pointer-events: none;
+        user-select: none;
       }
     }
 

@@ -290,13 +290,11 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
   }
 
   renderSelectableRows() {
-    var { loading, dataset, error, fetchQueued, searchText, selectedValues, promotedValues, filterMode } = this.state;
+    var { loading, dataset, fetchQueued, searchText, selectedValues, promotedValues, filterMode } = this.state;
     var { dimension } = this.props;
 
     var rows: Array<JSX.Element> = [];
-    var hasMore = false;
     if (dataset) {
-      hasMore = dataset.data.length > TOP_N;
       var promotedElements = promotedValues ? promotedValues.elements : [];
       var rowData = dataset.data.slice(0, TOP_N).filter((d) => {
         return promotedElements.indexOf(d[dimension.name]) === -1;
@@ -334,26 +332,18 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
       message = <div className="message">{'No results for "' + searchText + '"'}</div>;
     }
 
-    return <div className={classNames('menu-table', hasMore ? 'has-more' : 'no-more')}>
-      {this.renderMenuSearch()}
-      <div className="rows">
+    return <div className="rows">
         {rows}
         {message}
-      </div>
-      {error ? <QueryError error={error}/> : null}
-      {loading ? <Loader/> : null}
-    </div>;
+      </div>;
   }
 
   renderNonSelectableRows() {
-
     var { loading, dataset, error, fetchQueued, searchText, selectedValues } = this.state;
     var { dimension } = this.props;
 
     var rows: Array<JSX.Element> = [];
-    var hasMore = false;
     if (dataset) {
-      hasMore = dataset.data.length > TOP_N;
       var rowStrings = dataset.data.slice(0, TOP_N).map((d) => d[dimension.name]);
 
       if (searchText) {
@@ -362,7 +352,6 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
             var escaped = searchText.replace(/\\[^\\]]/g, '\\\\');
             return new RegExp(escaped, 'g').test(String(d));
           } catch (e) {
-            console.log(e);
             return false;
           }
         });
@@ -371,7 +360,18 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
       rows = rowStrings.map((segmentValue) => {
         var segmentValueStr = String(segmentValue);
 
-        var matchText = searchText || String(selectedValues.elements[0]);
+        var matchText = searchText;
+        if (!matchText) {
+          try {
+            var existingSearch = String(selectedValues.elements[0]);
+            // would be cool for the highlight text to show matches to existing regex search but we don't know if
+            // previous filter mode was regex.. so test it here?
+            new RegExp(existingSearch);
+            matchText = existingSearch;
+          } catch (e) {
+
+          }
+        }
         var match = segmentValueStr.match(matchText);
         var highlightText = match ? match.join("") : "";
         return <div
@@ -392,16 +392,11 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
       noResultsMsg = <div className="message">{'No results for "' + searchText + '"'}</div>;
     }
 
-    return <div className={classNames('menu-table no-select', hasMore ? 'has-more' : 'no-more')}>
-      {this.renderMenuSearch()}
-      <div className="rows">
-        {(noResultsMsg || !searchText) ? null : <div className="matching-values-message">Matching Values</div>}
+    return <div className="rows">
+        {(rows.length === 0 || !searchText) ? null : <div className="matching-values-message">Matching Values</div>}
         {rows}
         {noResultsMsg}
-      </div>
-      {error ? <QueryError error={error}/> : null}
-      {loading ? <Loader/> : null}
-    </div>;
+      </div>;
   }
 
   renderMenuSearch() {
@@ -424,11 +419,17 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
 
   render() {
     const { dimension } = this.props;
-    const { filterMode } = this.state;
+    const { filterMode, dataset, loading, error } = this.state;
     if (!dimension) return null;
 
-    return <div className="string-filter-menu">
-      {filterMode !== Filter.MATCH ? this.renderSelectableRows() : this.renderNonSelectableRows()}
+    var hasMore = dataset && dataset.data.length > TOP_N;
+    return <div className={classNames("string-filter-menu", filterMode)}>
+      <div className={classNames('menu-table', hasMore ? 'has-more' : 'no-more')}>
+        {this.renderMenuSearch()}
+        {filterMode !== Filter.MATCH ? this.renderSelectableRows() : this.renderNonSelectableRows()}
+        {error ? <QueryError error={error}/> : null}
+        {loading ? <Loader/> : null}
+      </div>
       <div className="button-bar">
         <Button type="primary" title={STRINGS.ok} onClick={this.onOkClick.bind(this)} disabled={!this.actionEnabled()} />
         <Button type="secondary" title={STRINGS.cancel} onClick={this.onCancelClick.bind(this)} />
