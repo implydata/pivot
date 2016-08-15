@@ -90,6 +90,51 @@ function getFilterFromDatum(splits: Splits, dataPath: Datum[], dataCube: DataCub
   })));
 }
 
+function padDataset(originalDataset: Dataset, dimension: Dimension, measure: Measure): Dataset {
+  const data = (originalDataset.data[0][SPLIT] as Dataset).data;
+  const dimensionName = dimension.name;
+
+  const firstBucket: PlywoodRange = data[0][dimensionName] as PlywoodRange;
+
+  const start = Number(firstBucket.start);
+  const end = Number(firstBucket.end);
+
+  const size = end - start;
+
+  let i = start;
+  let j = 0;
+
+  var filledData: Datum[] = [];
+  data.forEach((d) => {
+    let segmentValue = d[dimensionName];
+    var segmentStart = (segmentValue as PlywoodRange).start;
+    while (i < segmentStart) {
+      filledData[j] = {};
+      filledData[j][dimensionName] = NumberRange.fromJS({
+        start: i,
+        end: i + size
+      });
+      filledData[j][measure.name] = 0; // todo: what if effective zero is not 0?
+
+      j++;
+      i += size;
+    }
+    filledData[j] = d;
+    i += size;
+    j++;
+  });
+
+  var value = originalDataset.valueOf();
+  (value.data[0][SPLIT] as Dataset).data = filledData;
+  return new Dataset(value);
+}
+
+function padDatasetLoad(datasetLoad: DatasetLoad, dimension: Dimension, measure: Measure): DatasetLoad {
+  var originalDataset = datasetLoad.dataset;
+  var newDataset = originalDataset ? padDataset(originalDataset, dimension, measure) : null;
+  return extend(datasetLoad, { dataset: newDataset });
+}
+
 export class BarChart extends BaseVisualization<BarChartState> {
   public static id = BAR_CHART_MANIFEST.name;
 
@@ -689,6 +734,7 @@ export class BarChart extends BaseVisualization<BarChartState> {
 
     const dimension = split.getDimension(essence.dataCube.dimensions);
     const dimensionKind = dimension.kind;
+    const measure = essence.getEffectiveMeasures().toArray()[0];
 
     this.coordinatesCache = [];
 
@@ -697,8 +743,7 @@ export class BarChart extends BaseVisualization<BarChartState> {
 
     if (datasetLoad) {
       if (dimensionKind === 'number') {
-        var filledData = this.fillNumericDataset(datasetLoad.dataset, dimension);
-        datasetLoad = extend(datasetLoad, {dataset: filledData});
+        datasetLoad = padDatasetLoad(datasetLoad, dimension, measure);
       }
       // Always keep the old dataset while loading (for now)
       if (datasetLoad.loading) datasetLoad.dataset = existingDatasetLoad.dataset;
@@ -707,8 +752,7 @@ export class BarChart extends BaseVisualization<BarChartState> {
     } else {
       var stateDatasetLoad = this.state.datasetLoad;
       if (dimensionKind === 'number') {
-        var filledData = this.fillNumericDataset(stateDatasetLoad.dataset, dimension);
-        datasetLoad = extend(stateDatasetLoad, { dataset: filledData });
+        datasetLoad = padDatasetLoad(stateDatasetLoad, dimension, measure);
       } else {
         datasetLoad = stateDatasetLoad;
       }
@@ -820,51 +864,6 @@ export class BarChart extends BaseVisualization<BarChartState> {
     );
 
     return this.coordinatesCache[chartIndex];
-  }
-
-  fillNumericDataset(originalDataset: Dataset, dimension: Dimension): Dataset {
-    if (!originalDataset) return null;
-
-    const { essence } = this.props;
-
-    const measure = essence.getEffectiveMeasures().toArray()[0];
-
-    const firstSplit = originalDataset.data[0][SPLIT] as Dataset;
-    const data = firstSplit.data;
-
-    const firstBucket: PlywoodRange = data[0][dimension.name] as PlywoodRange;
-
-    const start = Number(firstBucket.start);
-    const end = Number(firstBucket.end);
-
-    const size = end - start;
-
-    let i = start;
-    let j = 0;
-
-    var filledData: Datum[] = [];
-    data.forEach((d) => {
-      let segmentValue = d[dimension.name];
-      var segmentStart = (segmentValue as PlywoodRange).start;
-      while (i < segmentStart) {
-        filledData[j] = {};
-        filledData[j][dimension.name] = NumberRange.fromJS({
-          start: i,
-          end: i + size
-        });
-        filledData[j][measure.name] = 0; // todo: what if effective zero is not 0?
-
-        j++;
-        i += size;
-      }
-      filledData[j] = d;
-      i += size;
-      j++;
-    });
-
-    var value = originalDataset.valueOf();
-    (value.data[0][SPLIT] as Dataset).data = filledData;
-    return new Dataset(value);
   }
 
   getSubCoordinates(
