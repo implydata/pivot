@@ -70,13 +70,17 @@ export class FilterMenu extends React.Component<FilterMenuProps, FilterMenuState
         onClose={onClose}
       />;
     } else {
-      menuSize = Stage.fromSize(250, 410);
-      menuCont = <StringFilterMenu
+      return <StringFilterMenu
         clicker={clicker}
         dimension={dimension}
         essence={essence}
         changePosition={changePosition}
         onClose={onClose}
+        direction={direction}
+        containerStage={containerStage}
+        stage={menuSize}
+        openOn={openOn}
+        inside={inside}
       />;
     }
 
