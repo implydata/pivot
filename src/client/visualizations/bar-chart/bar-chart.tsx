@@ -734,7 +734,7 @@ export class BarChart extends BaseVisualization<BarChartState> {
 
     const dimension = split.getDimension(essence.dataCube.dimensions);
     const dimensionKind = dimension.kind;
-    const measure = essence.getEffectiveMeasures().toArray()[0];
+    const measure = essence.getEffectiveMeasures().first();
 
     this.coordinatesCache = [];
 
