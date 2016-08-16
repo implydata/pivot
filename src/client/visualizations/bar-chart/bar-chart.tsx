@@ -132,7 +132,8 @@ function padDataset(originalDataset: Dataset, dimension: Dimension, measure: Mea
 function padDatasetLoad(datasetLoad: DatasetLoad, dimension: Dimension, measure: Measure): DatasetLoad {
   var originalDataset = datasetLoad.dataset;
   var newDataset = originalDataset ? padDataset(originalDataset, dimension, measure) : null;
-  return extend(datasetLoad, { dataset: newDataset });
+  datasetLoad.dataset = newDataset;
+  return datasetLoad;
 }
 
 export class BarChart extends BaseVisualization<BarChartState> {
