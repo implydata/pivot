@@ -23,7 +23,6 @@ import { CollectionItemCard } from '../collection-item-card/collection-item-card
 
 import { setDragGhost, classNames, getYFromEvent, getXFromEvent } from '../../../utils/dom/dom';
 
-
 export interface CollectionOverviewProps extends React.Props<any> {
   collection: Collection;
   collectionId?: string;

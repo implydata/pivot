@@ -58,6 +58,7 @@ export const STRINGS: any = {
   deleteCollection: 'Delete this collection',
   dimensions: 'Dimensions',
   download: 'Download',
+  dragToReorder: 'Drag tiles to reorder',
   duplicateCollectionItem: 'Duplicate this view',
   editCollection: 'Edit collection',
   editThisCube: 'Edit this cube',

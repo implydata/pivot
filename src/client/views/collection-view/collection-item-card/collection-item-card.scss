@@ -32,6 +32,10 @@
     }
   }
 
+  &.dragged {
+    opacity: 0.4;
+  }
+
   &.drop-before::after {
     content: '';
     position: absolute;

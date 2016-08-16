@@ -162,5 +162,8 @@ export class Collection implements Instance<CollectionValue, CollectionJS> {
     return this.change('items', items);
   }
 
+  public changeTitle(title: string): Collection {
+    return this.change('title', title);
+  }
 }
 check = Collection;

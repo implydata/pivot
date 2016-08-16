@@ -36,6 +36,7 @@ export interface CollectionHeaderBarProps extends React.Props<any> {
   onDeleteCollection?: () => void;
 
   editionMode?: boolean;
+  onCollectionTitleChange?: (newTitle: string) => void;
   onSave?: () => void;
   onCancel?: () => void;
 }
@@ -184,14 +185,17 @@ export class CollectionHeaderBar extends React.Component<CollectionHeaderBarProp
   }
 
   renderEditableBar() {
-    var { customization, title, onSave, onCancel } = this.props;
+    var { customization, title, onSave, onCancel, onCollectionTitleChange } = this.props;
+
+    const onTitleChange = (e: any) => {
+      onCollectionTitleChange(e.target.value);
+    };
 
     return <header className="collection-header-bar" style={this.getHeaderStyle(customization)}>
       <div className="left-bar">
-        <div className="menu-icon">
-          <SvgIcon svg={require('../../icons/menu.svg')}/>
+        <div className="title">
+          <input value={title} onChange={onTitleChange}/>
         </div>
-        <div className="title">{title}</div>
       </div>
       <div className="right-bar">
         <div className="button-group">
@@ -203,7 +207,7 @@ export class CollectionHeaderBar extends React.Component<CollectionHeaderBarProp
   }
 
   render() {
-    var { user, onNavClick, customization, title, editionMode, onEditCollection } = this.props;
+    var { user, onNavClick, customization, title, editionMode, onEditCollection, onAddItem } = this.props;
 
     if (editionMode) return this.renderEditableBar();
 
@@ -222,12 +226,18 @@ export class CollectionHeaderBar extends React.Component<CollectionHeaderBarProp
         <div className="title">{title}</div>
       </div>
       <div className="right-bar">
-        <div className="icon-button add" onClick={this.onAddClick.bind(this)}>
-          <SvgIcon svg={require('../../icons/full-add-framed.svg')}/>
-        </div>
-        <div className="icon-button edit" onClick={onEditCollection}>
-          <SvgIcon svg={require('../../icons/full-edit.svg')}/>
-        </div>
+        { onAddItem ?
+          <div className="icon-button add" onClick={this.onAddClick.bind(this)}>
+            <SvgIcon svg={require('../../icons/full-add-framed.svg')}/>
+          </div>
+        : null }
+
+        { onEditCollection ?
+          <div className="icon-button edit" onClick={onEditCollection}>
+            <SvgIcon svg={require('../../icons/full-edit.svg')}/>
+          </div>
+        : null }
+
         <div className="icon-button settings" onClick={this.onSettingsClick.bind(this)}>
           <SvgIcon svg={require('../../icons/full-settings.svg')}/>
         </div>
