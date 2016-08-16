@@ -19,10 +19,13 @@ require('./string-filter-menu.css');
 import * as React from 'react';
 import { Fn } from '../../../common/utils/general/general';
 import { Stage, Clicker, Essence, Filter, FilterMode, Dimension, DragPosition } from '../../../common/models/index';
+import { STRINGS } from "../../config/constants";
 
 import { BubbleMenu } from "../bubble-menu/bubble-menu";
 import { PreviewStringFilterMenu } from '../preview-string-filter-menu/preview-string-filter-menu';
 import { SelectableStringFilterMenu  } from '../selectable-string-filter-menu/selectable-string-filter-menu';
+import { ClearableInput } from "../clearable-input/clearable-input";
+import { FilterOptionsDropdown, FilterOption } from "../filter-options-dropdown/filter-options-dropdown";
 
 export interface StringFilterMenuProps extends React.Props<any> {
   clicker: Clicker;
@@ -40,6 +43,7 @@ export interface StringFilterMenuProps extends React.Props<any> {
 
 export interface StringFilterMenuState {
   filterMode?: FilterMode;
+  searchText?: string;
 }
 
 export class StringFilterMenu extends React.Component<StringFilterMenuProps, StringFilterMenuState> {
@@ -48,7 +52,8 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
   constructor() {
     super();
     this.state = {
-      filterMode: null
+      filterMode: null,
+      searchText: null
     };
   }
 
@@ -62,9 +67,64 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
     this.setState({filterMode});
   }
 
+  updateSearchText(searchText: string) {
+    this.setState({searchText});
+  }
+
+  getFilterOptions() {
+    const { dimension } = this.props;
+    const dimensionKind = dimension.kind;
+
+    var filterOptions: FilterOption[] = [
+      {
+        label: STRINGS.include,
+        value: Filter.INCLUDED,
+        svg: require('../../icons/filter-include.svg'),
+        checkType: 'check'
+      },
+      {
+        label: STRINGS.exclude,
+        value: Filter.EXCLUDED,
+        svg: require('../../icons/filter-exclude.svg'),
+        checkType: 'cross'
+      }
+    ];
+
+    if (dimensionKind !== 'boolean') filterOptions.push({
+      label: STRINGS.match,
+      value: Filter.MATCH,
+      svg: require('../../icons/filter-regex.svg'),
+      checkType: 'check'
+    });
+
+    return filterOptions;
+  }
+
+  renderMenuControls() {
+    const { filterMode, searchText } = this.state;
+
+    return <div className="string-filter-menu-controls">
+      <div className="side-by-side">
+        <FilterOptionsDropdown
+          selectedOption={filterMode}
+          onSelectOption={this.onSelectFilterOption.bind(this)}
+          filterOptions={this.getFilterOptions()}
+        />
+        <div className="search-box">
+          <ClearableInput
+            placeholder="Search"
+            focusOnMount={true}
+            value={searchText}
+            onChange={this.updateSearchText.bind(this)}
+          />
+        </div>
+      </div>
+    </div>;
+  }
+
   render() {
     const { dimension, clicker, essence, changePosition, onClose, direction, containerStage, openOn, inside } = this.props;
-    const { filterMode } = this.state;
+    const { filterMode, searchText } = this.state;
     if (!dimension) return null;
     var menuSize: Stage = null;
     var menuCont: JSX.Element = null;
@@ -72,30 +132,33 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
     if (filterMode === Filter.MATCH) {
       menuSize = Stage.fromSize(350, 410);
       menuCont = <PreviewStringFilterMenu
-        dimension={dimension}
-        clicker={clicker}
-        essence={essence}
-        changePosition={changePosition}
-        onClose={onClose}
-        onSelectFilterOption={this.onSelectFilterOption.bind(this)}
-        filterMode={filterMode}
-
-      />;
+          dimension={dimension}
+          clicker={clicker}
+          essence={essence}
+          changePosition={changePosition}
+          onClose={onClose}
+          searchText={searchText}
+          onSelectFilterOption={this.onSelectFilterOption.bind(this)}
+          updateSearchText={this.updateSearchText.bind(this)}
+          filterMode={filterMode}
+        />;
     } else {
       menuSize = Stage.fromSize(250, 410);
       menuCont = <SelectableStringFilterMenu
-        dimension={dimension}
-        clicker={clicker}
-        essence={essence}
-        changePosition={changePosition}
-        onClose={onClose}
-        onSelectFilterOption={this.onSelectFilterOption.bind(this)}
-        filterMode={filterMode}
-      />;
+          dimension={dimension}
+          clicker={clicker}
+          essence={essence}
+          changePosition={changePosition}
+          onClose={onClose}
+          searchText={searchText}
+          onSelectFilterOption={this.onSelectFilterOption.bind(this)}
+          updateSearchText={this.updateSearchText.bind(this)}
+          filterMode={filterMode}
+        />;
     }
 
     return <BubbleMenu
-      className="filter-menu"
+      className="string-filter-menu"
       direction={direction}
       containerStage={containerStage}
       stage={menuSize}
@@ -103,6 +166,7 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
       onClose={onClose}
       inside={inside}
     >
+      {this.renderMenuControls()}
       {menuCont}
     </BubbleMenu>;
   }

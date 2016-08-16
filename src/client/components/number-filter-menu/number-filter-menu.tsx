@@ -26,7 +26,7 @@ import { enterKey } from '../../utils/dom/dom';
 
 import { Button } from '../button/button';
 import { NumberRangePicker, ANY_VALUE } from '../number-range-picker/number-range-picker';
-import { FilterOptionsDropdown } from '../filter-options-dropdown/filter-options-dropdown';
+import { FilterOptionsDropdown, FilterOption } from '../filter-options-dropdown/filter-options-dropdown';
 
 function numberOrAnyToString(start: number): string {
   if (start === ANY_VALUE) return STRINGS.any;
@@ -37,6 +37,21 @@ function stringToNumberOrAny(startInput: string): number {
   var parse = parseFloat(startInput);
   return isNaN(parse) ? ANY_VALUE : parse;
 }
+
+const filterOptions: FilterOption[] = [
+  {
+    label: STRINGS.include,
+    value: Filter.INCLUDED,
+    svg: require('../../icons/filter-include.svg'),
+    checkType: 'check'
+  },
+  {
+    label: STRINGS.exclude,
+    value: Filter.EXCLUDED,
+    svg: require('../../icons/filter-exclude.svg'),
+    checkType: 'cross'
+  }
+];
 
 export interface NumberFilterMenuProps extends React.Props<any> {
   clicker: Clicker;
@@ -200,6 +215,7 @@ export class NumberFilterMenu extends React.Component<NumberFilterMenuProps, Num
           <FilterOptionsDropdown
             selectedOption={filterMode}
             onSelectOption={this.onSelectFilterOption.bind(this)}
+            filterOptions={filterOptions}
           />
         </div>
         <div className="group">

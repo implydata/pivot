@@ -30,7 +30,9 @@ describe.skip('SelectableStringFilterMenu', () => {
     var renderedComponent = TestUtils.renderIntoDocument(
       <PreviewStringFilterMenu
         filterMode={Filter.MATCH}
-        onSelectFilterOption={(option: string) => {}}
+        searchText=""
+        onSelectFilterOption={(s: string) => {}}
+        updateSearchText={(s: string) => {}}
         clicker={null}
         dimension={null}
         essence={null}
