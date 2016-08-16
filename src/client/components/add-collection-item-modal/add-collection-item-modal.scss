@@ -28,8 +28,13 @@
     cursor: pointer;
     color: $brand;
 
-    &:hover {
+    &:not(.disabled):hover {
       text-decoration: underline;
+    }
+
+    &.disabled {
+      color: $text-light;
+      cursor: initial;
     }
   }
 }

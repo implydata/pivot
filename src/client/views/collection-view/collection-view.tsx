@@ -42,6 +42,7 @@ export interface CollectionViewProps extends React.Props<any> {
   customization?: Customization;
   delegate?: {
     updateCollection: (collection: Collection) => Q.Promise<any>;
+    deleteCollection: (collection: Collection) => Q.Promise<any>;
     updateItem: (collection: Collection, collectionItem: CollectionItem) => void;
     editItem: (collection: Collection, collectionItem: CollectionItem) => void;
     createItem: (collection: Collection, dataCube: DataCube) => void;
@@ -140,6 +141,8 @@ export class CollectionView extends React.Component<CollectionViewProps, Collect
 
     const currentCollection = tempCollection || collection;
 
+    const removeCollection = () => delegate.deleteCollection(collection);
+
     return <div className="collection-view">
       <CollectionHeaderBar
         user={user}
@@ -150,6 +153,7 @@ export class CollectionView extends React.Component<CollectionViewProps, Collect
         collections={collections}
         onAddItem={delegate ? delegate.createItem.bind(this, collection) : null}
         onEditCollection={delegate ? this.editCollection.bind(this) : null}
+        onDeleteCollection={delegate ? removeCollection : null}
 
         editionMode={editingOverview}
         onSave={this.saveEdition.bind(this)}

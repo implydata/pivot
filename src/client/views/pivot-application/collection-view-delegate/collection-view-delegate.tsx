@@ -50,7 +50,7 @@ export class CollectionViewDelegate {
       url: 'collections',
       data: {
         version,
-        collections: appSettings.toJS().collections
+        collections: appSettings.toJS().collections || []
       }
     })
       .then(Qajax.filterSuccess)
@@ -149,6 +149,23 @@ export class CollectionViewDelegate {
     const appSettings = this.getSettings();
 
     return this.save(appSettings.addOrUpdateCollection(collection));
+  }
+
+  deleteCollection(collection: Collection): Q.Promise<any> {
+    const appSettings = this.getSettings();
+
+    const oldIndex = appSettings.collections.indexOf(collection);
+
+    const undo = () => {
+      this.setState({
+        appSettings: appSettings.addCollectionAt(collection, oldIndex)
+      });
+    };
+
+    return this.save(appSettings.deleteCollection(collection)).then( () => {
+      window.location.hash = `#/home`;
+      Notifier.success('Collection removed', undefined, 3, {label: STRINGS.undo, callback: undo});
+    });
   }
 
   updateItem(collection: Collection, item: CollectionItem): Q.Promise<any> {
