@@ -33,7 +33,7 @@ describe('error route', () => {
 
   before(() => {
     originalConsoleError = console.error;
-    console.error = function(t) {
+    console.error = function(t: string) {
       consoleError += t;
     };
   });

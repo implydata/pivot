@@ -3,8 +3,6 @@
 // Definitions by: Alex Varju <https://github.com/varju/>
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
 
-/// <reference path='../node/node.d.ts' />
-
 declare module "superagent" {
   import stream = require('stream');
 
