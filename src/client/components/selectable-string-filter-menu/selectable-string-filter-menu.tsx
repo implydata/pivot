@@ -16,18 +16,17 @@
 
 require('./selectable-string-filter-menu.css');
 
-import * as React from 'react';
-import { $, ply, r, Expression, Executor, Dataset, SortAction, Set, Datum } from 'plywood';
-import { Fn } from '../../../common/utils/general/general';
-import { STRINGS, SEARCH_WAIT } from '../../config/constants';
-import { Stage, Clicker, Essence, DataCube, Filter, FilterClause, FilterMode, Dimension, Colors, DragPosition } from '../../../common/models/index';
-import { collect } from '../../../common/utils/general/general';
-import { enterKey, classNames } from '../../utils/dom/dom';
-import { Checkbox, CheckboxType } from '../checkbox/checkbox';
-import { Loader } from '../loader/loader';
-import { QueryError } from '../query-error/query-error';
-import { HighlightString } from '../highlight-string/highlight-string';
-import { Button } from '../button/button';
+import * as React from "react";
+import { $, r, Dataset, SortAction, Set } from "plywood";
+import { Fn, collect } from "../../../common/utils/general/general";
+import { STRINGS, SEARCH_WAIT } from "../../config/constants";
+import { Clicker, Essence, Filter, FilterClause, FilterMode, Dimension, Colors } from "../../../common/models/index";
+import { enterKey, classNames } from "../../utils/dom/dom";
+import { Checkbox, CheckboxType } from "../checkbox/checkbox";
+import { Loader } from "../loader/loader";
+import { QueryError } from "../query-error/query-error";
+import { HighlightString } from "../highlight-string/highlight-string";
+import { Button } from "../button/button";
 import { GlobalEventListener } from "../global-event-listener/global-event-listener";
 
 const TOP_N = 100;
@@ -36,12 +35,11 @@ export interface SelectableStringFilterMenuProps extends React.Props<any> {
   clicker: Clicker;
   dimension: Dimension;
   essence: Essence;
-  changePosition: DragPosition;
   onClose: Fn;
-  onSelectFilterOption: (option: FilterMode) => void;
   filterMode?: FilterMode;
   searchText: string;
   updateSearchText: (t: string) => void;
+  onClauseChange: (clause: FilterClause) => Filter;
 }
 
 export interface SelectableStringFilterMenuState {
@@ -121,7 +119,7 @@ export class SelectableStringFilterMenu extends React.Component<SelectableString
   }
 
   componentWillMount() {
-    var { essence, dimension, onSelectFilterOption, searchText } = this.props;
+    var { essence, dimension, searchText } = this.props;
     var { filter, colors } = essence;
 
     var myColors = (colors && colors.dimension === dimension.name ? colors : null);
@@ -135,10 +133,6 @@ export class SelectableStringFilterMenu extends React.Component<SelectableString
     });
 
     this.fetchData(essence, dimension, searchText);
-
-    if (colors) {
-      onSelectFilterOption(Filter.INCLUDED);
-    }
   }
 
   componentDidMount() {
@@ -149,19 +143,9 @@ export class SelectableStringFilterMenu extends React.Component<SelectableString
     this.mounted = false;
   }
 
-  // This is never called : either the component is open and nothing else can update its props,
-  // or it's closed and doesn't exist.
   componentWillReceiveProps(nextProps: SelectableStringFilterMenuProps) {
-    var { essence, dimension, searchText } = this.props;
+    var { searchText } = this.props;
     const { fetchQueued, loading, dataset } = this.state;
-    var nextEssence = nextProps.essence;
-    var nextDimension = nextProps.dimension;
-    if (
-      essence.differentDataCube(nextEssence) ||
-      essence.differentEffectiveFilter(nextEssence, null, nextDimension) || !dimension.equals(nextDimension)
-    ) {
-      this.fetchData(nextEssence, nextDimension, searchText);
-    }
     // If the user is just typing in more and there are already < TOP_N results then there is nothing to do
     if (nextProps.searchText && nextProps.searchText.indexOf(searchText) !== -1 && !fetchQueued && !loading && dataset && dataset.data.length < TOP_N) {
       return;
@@ -180,9 +164,8 @@ export class SelectableStringFilterMenu extends React.Component<SelectableString
   }
 
   constructFilter(): Filter {
-    var { essence, dimension, changePosition, filterMode } = this.props;
+    var { dimension, filterMode, onClauseChange } = this.props;
     var { selectedValues } = this.state;
-    var { filter } = essence;
     var { expression } = dimension;
 
     var clause: FilterClause = null;
@@ -193,19 +176,7 @@ export class SelectableStringFilterMenu extends React.Component<SelectableString
         exclude: filterMode === Filter.EXCLUDED
       });
     }
-    if (clause) {
-      if (changePosition) {
-        if (changePosition.isInsert()) {
-          return filter.insertByIndex(changePosition.insert, clause);
-        } else {
-          return filter.replaceByIndex(changePosition.replace, clause);
-        }
-      } else {
-        return filter.setClause(clause);
-      }
-    } else {
-      return filter.remove(dimension.expression);
-    }
+    return onClauseChange(clause);
   }
 
   onValueClick(value: any, e: MouseEvent) {

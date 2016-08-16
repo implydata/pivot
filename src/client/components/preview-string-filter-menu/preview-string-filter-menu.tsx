@@ -16,17 +16,16 @@
 
 require('./preview-string-filter-menu.css');
 
-import * as React from 'react';
-import { $, ply, r, Expression, Executor, Dataset, SortAction, Set, Datum } from 'plywood';
-import { Fn } from '../../../common/utils/general/general';
-import { STRINGS, MAX_SEARCH_LENGTH, SEARCH_WAIT } from '../../config/constants';
-import { Stage, Clicker, Essence, DataCube, Filter, FilterClause, FilterMode, Dimension, Measure, Colors, DragPosition } from '../../../common/models/index';
-import { collect } from '../../../common/utils/general/general';
-import { enterKey, classNames } from '../../utils/dom/dom';
-import { Loader } from '../loader/loader';
-import { QueryError } from '../query-error/query-error';
-import { HighlightString } from '../highlight-string/highlight-string';
-import { Button } from '../button/button';
+import * as React from "react";
+import { $, Dataset, SortAction } from "plywood";
+import { Fn, collect } from "../../../common/utils/general/general";
+import { STRINGS, SEARCH_WAIT } from "../../config/constants";
+import { Clicker, Essence, Filter, FilterClause, FilterMode, Dimension, Colors } from "../../../common/models/index";
+import { enterKey, classNames } from "../../utils/dom/dom";
+import { Loader } from "../loader/loader";
+import { QueryError } from "../query-error/query-error";
+import { HighlightString } from "../highlight-string/highlight-string";
+import { Button } from "../button/button";
 import { GlobalEventListener } from "../global-event-listener/global-event-listener";
 
 const TOP_N = 100;
@@ -43,12 +42,11 @@ export interface PreviewStringFilterMenuProps extends React.Props<any> {
   clicker: Clicker;
   dimension: Dimension;
   essence: Essence;
-  changePosition: DragPosition;
   onClose: Fn;
-  onSelectFilterOption: (option: FilterMode) => void;
   filterMode: FilterMode;
   searchText: string;
   updateSearchText: (t: string) => void;
+  onClauseChange: (clause: FilterClause) => Filter;
 }
 
 export interface PreviewStringFilterMenuState {
@@ -87,7 +85,6 @@ export class PreviewStringFilterMenu extends React.Component<PreviewStringFilter
     var filterExpression = essence.getEffectiveFilter(null, dimension).toExpression();
 
     if (searchText) {
-      // check for valid regex
       if (canRegex(searchText)) {
         filterExpression = filterExpression.and(dimension.expression.match(searchText));
       }
@@ -139,16 +136,8 @@ export class PreviewStringFilterMenu extends React.Component<PreviewStringFilter
   }
 
   componentWillReceiveProps(nextProps: PreviewStringFilterMenuProps) {
-    var { essence, dimension, searchText } = this.props;
+    var { searchText } = this.props;
     const { fetchQueued, loading, dataset } = this.state;
-    var nextEssence = nextProps.essence;
-    var nextDimension = nextProps.dimension;
-    if (
-      essence.differentDataCube(nextEssence) ||
-      essence.differentEffectiveFilter(nextEssence, null, nextDimension) || !dimension.equals(nextDimension)
-    ) {
-      this.fetchData(nextEssence, nextDimension, searchText);
-    }
     // If the user is just typing in more and there are already < TOP_N results then there is nothing to do
     if (nextProps.searchText.indexOf(searchText) !== -1 && !fetchQueued && !loading && dataset && dataset.data.length < TOP_N) {
       return;
@@ -167,8 +156,7 @@ export class PreviewStringFilterMenu extends React.Component<PreviewStringFilter
   }
 
   constructFilter(): Filter {
-    var { essence, dimension, changePosition, filterMode, searchText } = this.props;
-    var { filter } = essence;
+    var { dimension, filterMode, onClauseChange, searchText } = this.props;
     var { expression } = dimension;
 
     var clause: FilterClause = null;
@@ -180,19 +168,7 @@ export class PreviewStringFilterMenu extends React.Component<PreviewStringFilter
       });
     }
 
-    if (clause) {
-      if (changePosition) {
-        if (changePosition.isInsert()) {
-          return filter.insertByIndex(changePosition.insert, clause);
-        } else {
-          return filter.replaceByIndex(changePosition.replace, clause);
-        }
-      } else {
-        return filter.setClause(clause);
-      }
-    } else {
-      return filter.remove(dimension.expression);
-    }
+    return onClauseChange(clause);
   }
 
   onOkClick() {

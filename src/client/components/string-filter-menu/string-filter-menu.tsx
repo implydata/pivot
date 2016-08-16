@@ -18,7 +18,7 @@ require('./string-filter-menu.css');
 
 import * as React from 'react';
 import { Fn } from '../../../common/utils/general/general';
-import { Stage, Clicker, Essence, Filter, FilterMode, Dimension, DragPosition } from '../../../common/models/index';
+import { Stage, Clicker, Essence, Filter, FilterMode, Dimension, DragPosition, FilterClause } from '../../../common/models/index';
 import { STRINGS } from "../../config/constants";
 
 import { BubbleMenu } from "../bubble-menu/bubble-menu";
@@ -59,8 +59,14 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
 
   componentWillMount() {
     var { essence, dimension } = this.props;
+    var { colors } = essence;
+
     var filterMode = essence.filter.getModeForDimension(dimension);
-    if (filterMode && !this.state.filterMode) this.setState({filterMode});
+    if (filterMode && !this.state.filterMode) {
+      this.setState({filterMode});
+    } else if (colors) {
+      this.setState({filterMode: Filter.INCLUDED});
+    }
   }
 
   onSelectFilterOption(filterMode: FilterMode) {
@@ -69,6 +75,22 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
 
   updateSearchText(searchText: string) {
     this.setState({searchText});
+  }
+
+  onClauseChange(clause: FilterClause): Filter {
+    const { essence, dimension, changePosition } = this.props;
+    var { filter } = essence;
+
+    if (!clause) return filter.remove(dimension.expression);
+    if (changePosition) {
+      if (changePosition.isInsert()) {
+        return filter.insertByIndex(changePosition.insert, clause);
+      } else {
+        return filter.replaceByIndex(changePosition.replace, clause);
+      }
+    } else {
+      return filter.setClause(clause);
+    }
   }
 
   getFilterOptions() {
@@ -123,7 +145,7 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
   }
 
   render() {
-    const { dimension, clicker, essence, changePosition, onClose, direction, containerStage, openOn, inside } = this.props;
+    const { dimension, clicker, essence, onClose, direction, containerStage, openOn, inside } = this.props;
     const { filterMode, searchText } = this.state;
     if (!dimension) return null;
     var menuSize: Stage = null;
@@ -135,12 +157,11 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
           dimension={dimension}
           clicker={clicker}
           essence={essence}
-          changePosition={changePosition}
           onClose={onClose}
           searchText={searchText}
-          onSelectFilterOption={this.onSelectFilterOption.bind(this)}
           updateSearchText={this.updateSearchText.bind(this)}
           filterMode={filterMode}
+          onClauseChange={this.onClauseChange.bind(this)}
         />;
     } else {
       menuSize = Stage.fromSize(250, 410);
@@ -148,13 +169,12 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
           dimension={dimension}
           clicker={clicker}
           essence={essence}
-          changePosition={changePosition}
           onClose={onClose}
           searchText={searchText}
-          onSelectFilterOption={this.onSelectFilterOption.bind(this)}
           updateSearchText={this.updateSearchText.bind(this)}
           filterMode={filterMode}
-        />;
+          onClauseChange={this.onClauseChange.bind(this)}
+      />;
     }
 
     return <BubbleMenu

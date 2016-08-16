@@ -31,12 +31,11 @@ describe.skip('SelectableStringFilterMenu', () => {
       <SelectableStringFilterMenu
         filterMode={Filter.MATCH}
         searchText=""
-        onSelectFilterOption={(s: string) => {}}
         updateSearchText={(s: string) => {}}
+        onClauseChange={null}
         clicker={null}
         dimension={null}
         essence={null}
-        changePosition={null}
         onClose={null}
       />
     );
