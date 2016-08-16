@@ -38,7 +38,6 @@ export interface SelectableStringFilterMenuProps extends React.Props<any> {
   onClose: Fn;
   filterMode?: FilterMode;
   searchText: string;
-  updateSearchText: (t: string) => void;
   onClauseChange: (clause: FilterClause) => Filter;
 }
 
@@ -124,8 +123,10 @@ export class SelectableStringFilterMenu extends React.Component<SelectableString
 
     var myColors = (colors && colors.dimension === dimension.name ? colors : null);
 
+    var existingMode = filter.getModeForDimension(dimension);
+
     var valueSet = filter.getLiteralSet(dimension.expression);
-    var selectedValues = valueSet || (myColors ? myColors.toSet() : null) || Set.EMPTY;
+    var selectedValues = (existingMode !== 'match' && valueSet) || (myColors ? myColors.toSet() : null) || Set.EMPTY; // don't want regex to show up as a promoted value
     this.setState({
       selectedValues: selectedValues,
       promotedValues: selectedValues,

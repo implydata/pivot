@@ -45,7 +45,6 @@ export interface PreviewStringFilterMenuProps extends React.Props<any> {
   onClose: Fn;
   filterMode: FilterMode;
   searchText: string;
-  updateSearchText: (t: string) => void;
   onClauseChange: (clause: FilterClause) => Filter;
 }
 

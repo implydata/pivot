@@ -31,7 +31,6 @@ describe.skip('SelectableStringFilterMenu', () => {
       <SelectableStringFilterMenu
         filterMode={Filter.MATCH}
         searchText=""
-        updateSearchText={(s: string) => {}}
         onClauseChange={null}
         clicker={null}
         dimension={null}

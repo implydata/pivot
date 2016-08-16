@@ -159,7 +159,6 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
           essence={essence}
           onClose={onClose}
           searchText={searchText}
-          updateSearchText={this.updateSearchText.bind(this)}
           filterMode={filterMode}
           onClauseChange={this.onClauseChange.bind(this)}
         />;
@@ -171,7 +170,6 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
           essence={essence}
           onClose={onClose}
           searchText={searchText}
-          updateSearchText={this.updateSearchText.bind(this)}
           filterMode={filterMode}
           onClauseChange={this.onClauseChange.bind(this)}
       />;
