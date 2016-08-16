@@ -50,7 +50,8 @@
     "qajax": "1.3.0",
     "react": "15.3.0",
     "react-addons-css-transition-group": "15.3.0",
-    "react-dom": "15.3.0"
+    "react-dom": "15.3.0",
+    "request": "2.74.0"
   },
   "devDependencies": {
     "@types/chai": "3.4.30",
