@@ -41,7 +41,7 @@ function dateToFileString(date: Date): string {
     .replace('.000', '');
 }
 
-export type FilterMode = 'exclude' | 'include' | 'match' | 'contains' | 'overlap'; // include is actually overlap
+export type FilterMode = 'exclude' | 'include' | 'match' | 'contains';
 export type FilterValue = List<FilterClause>;
 export type FilterJS = ExpressionJS | string;
 

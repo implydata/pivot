@@ -114,7 +114,7 @@ export function getFormattedClause(dimension: Dimension, clause: FilterClause, t
   function getClauseLabel() {
     var dimTitle = dimension.title;
     if (dimKind === 'time' && !verbose) return '';
-    var delimiter = [Filter.MATCH, Filter.CONTAINS].indexOf(clause.action) !== -1 ? ' ~' : ":";
+    var delimiter = ["match", "contains"].indexOf(clause.action) !== -1 ? ' ~' : ":";
 
     if (clauseSet && clauseSet.elements.length > 1 && !verbose) return `${dimTitle}`;
     return `${dimTitle}${delimiter}`;
