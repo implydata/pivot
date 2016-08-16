@@ -73,7 +73,7 @@ export class SettingsManager {
     this.makeMaxTimeCheckTimer();
   }
 
-  public isWritable(): boolean {
+  public isStateful(): boolean {
     return Boolean(this.settingsStore.writeSettings);
   }
 

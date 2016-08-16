@@ -68,9 +68,9 @@ export class SettingsStore {
     return settingsStore;
   }
 
-  static fromReadOnlyFile(filepath: string): SettingsStore {
+  static fromReadOnlyFile(filepath: string, format: Format): SettingsStore {
     var settingsStore = new SettingsStore();
-    settingsStore.readSettings = readSettingsFactory(filepath, 'yaml', true);
+    settingsStore.readSettings = readSettingsFactory(filepath, format, true);
     return settingsStore;
   }
 

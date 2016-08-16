@@ -265,13 +265,18 @@ if (serverSettingsFilePath) {
   if (settingsLocation) {
     switch (settingsLocation.getLocation()) {
       case 'file':
-        settingsStore = SettingsStore.fromWritableFile(path.resolve(anchorPath, settingsLocation.uri), settingsLocation.getFormat());
+        var settingsFilePath = path.resolve(anchorPath, settingsLocation.uri);
+        if (settingsLocation.getReadOnly()) {
+          settingsStore = SettingsStore.fromReadOnlyFile(settingsFilePath, settingsLocation.getFormat());
+        } else {
+          settingsStore = SettingsStore.fromWritableFile(settingsFilePath, settingsLocation.getFormat());
+        }
         break;
 
       case 'mysql':
-        // ToDo: make this not incomplete.
-        settingsStore = SettingsStore.fromStateStore(require('../../../pivot-mysql-state-store/index.js').stateStoreFactory());
-        break;
+        throw new Error('todo'); // ToDo: make this not incomplete.
+        //settingsStore = SettingsStore.fromStateStore(require('../../../pivot-mysql-state-store/index.js').stateStoreFactory());
+        //break;
 
       case 'postgres':
         throw new Error('todo');
@@ -281,7 +286,7 @@ if (serverSettingsFilePath) {
     }
 
   } else {
-    settingsStore = SettingsStore.fromReadOnlyFile(serverSettingsFilePath);
+    settingsStore = SettingsStore.fromReadOnlyFile(serverSettingsFilePath, 'yaml');
   }
 } else {
   var initAppSettings = AppSettings.BLANK;

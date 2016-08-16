@@ -134,13 +134,17 @@ app.use((req: PivotRequest, res: Response, next: Function) => {
   next();
 });
 
-var hasSettings = SETTINGS_MANAGER.isWritable();
+var stateful = SETTINGS_MANAGER.isStateful();
+app.use((req: PivotRequest, res: Response, next: Function) => {
+  req.stateful = stateful;
+  next();
+});
 
 if (AUTH) {
   app.use(AUTH);
 } else {
   app.use((req: PivotRequest, res: Response, next: Function) => {
-    if (hasSettings) {
+    if (req.stateful) {
       req.user = {
         id: 'admin',
         email: 'admin@admin.com',
@@ -159,8 +163,8 @@ addRoutes('/plywood', plywoodRoutes);
 addRoutes('/plyql', plyqlRoutes);
 addRoutes('/mkurl', mkurlRoutes);
 addRoutes('/error', errorRoutes);
-addRoutes('/collections', collectionsRoutes);
-if (hasSettings) {
+if (stateful) {
+  addRoutes('/collections', collectionsRoutes);
   addGuardedRoutes('/settings', 'settings', settingsRoutes);
 }
 

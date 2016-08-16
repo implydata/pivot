@@ -9,6 +9,7 @@ export interface SettingsLocationValue {
   uri: string;
   table?: string;
   format?: Format;
+  readOnly?: boolean;
 }
 
 export interface SettingsLocationJS {
@@ -16,6 +17,7 @@ export interface SettingsLocationJS {
   uri: string;
   table?: string;
   format?: Format;
+  readOnly?: boolean;
 }
 
 export class SettingsLocation extends BaseImmutable<SettingsLocationValue, SettingsLocationJS> {
@@ -35,13 +37,15 @@ export class SettingsLocation extends BaseImmutable<SettingsLocationValue, Setti
     { name: 'location', possibleValues: SettingsLocation.LOCATION_VALUES },
     { name: 'uri' },
     { name: 'table', defaultValue: null },
-    { name: 'format', defaultValue: SettingsLocation.DEFAULT_FORMAT, possibleValues: SettingsLocation.FORMAT_VALUES }
+    { name: 'format', defaultValue: SettingsLocation.DEFAULT_FORMAT, possibleValues: SettingsLocation.FORMAT_VALUES },
+    { name: 'readOnly', defaultValue: false }
   ];
 
   public location: Location;
   public uri: string;
   public table: string;
   public format: Format;
+  public readOnly: boolean;
 
   constructor(parameters: SettingsLocationValue) {
     super(parameters);
@@ -68,6 +72,8 @@ export class SettingsLocation extends BaseImmutable<SettingsLocationValue, Setti
 
     return SettingsLocation.DEFAULT_FORMAT;
   }
+
+  public getReadOnly: () => boolean;
 
 }
 BaseImmutable.finalize(SettingsLocation);
