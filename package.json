@@ -23,7 +23,6 @@
     "pivot": "bin/pivot"
   },
   "dependencies": {
-    "@types/express": "4.0.30",
     "body-parser": "1.15.2",
     "browser-filesaver": "1.1.1",
     "chronoshift": "0.5.7",
@@ -37,8 +36,8 @@
     "immutable": "3.8.1",
     "immutable-class": "0.6.5",
     "js-yaml": "3.6.1",
-    "lz-string": "1.4.4",
     "logger-tracker": "0.0.20",
+    "lz-string": "1.4.4",
     "node-spawn-server": "1.0.1",
     "nopt": "3.0.6",
     "numeral": "1.5.3",
@@ -54,10 +53,16 @@
     "request": "2.74.0"
   },
   "devDependencies": {
+    "@types/body-parser": "0.0.30",
     "@types/chai": "3.4.30",
+    "@types/compression": "0.0.30",
+    "@types/express": "4.0.30",
+    "@types/express-session": "0.0.29",
     "@types/js-yaml": "3.5.27",
     "@types/q": "0.0.28",
     "@types/qajax": "0.0.27",
+    "@types/superagent": "2.0.31",
+    "@types/supertest": "^1.1.28",
     "chai": "3.5.0",
     "fs-extra": "0.30.0",
     "gulp": "3.9.1",
