@@ -64,6 +64,10 @@ export interface FilterOptionsDropdownState {
 }
 
 export class FilterOptionsDropdown extends React.Component<FilterOptionsDropdownProps, FilterOptionsDropdownState> {
+  static getFilterOptions(...filterTypes: Array<string>) {
+    return FILTER_OPTIONS.filter(option => filterTypes.indexOf(option.value) !== -1);
+  }
+
   constructor() {
     super();
   }

@@ -41,7 +41,7 @@ function dateToFileString(date: Date): string {
     .replace('.000', '');
 }
 
-export type FilterMode = 'exclude' | 'include' | 'match';
+export type FilterMode = 'exclude' | 'include' | 'match' | 'contains' | 'overlap'; // include is actually overlap
 export type FilterValue = List<FilterClause>;
 export type FilterJS = ExpressionJS | string;
 
@@ -52,6 +52,8 @@ export class Filter implements Instance<FilterValue, FilterJS> {
   static EXCLUDED: FilterMode = 'exclude';
   static INCLUDED: FilterMode = 'include';
   static MATCH: FilterMode = 'match';
+  static CONTAINS: FilterMode = 'contains';
+
 
   static isFilter(candidate: any): candidate is Filter {
     return isInstanceOf(candidate, Filter);

@@ -20,7 +20,7 @@ import * as React from "react";
 import { $, Dataset, SortAction } from "plywood";
 import { Fn, collect } from "../../../common/utils/general/general";
 import { STRINGS, SEARCH_WAIT } from "../../config/constants";
-import { Clicker, Essence, Filter, FilterClause, FilterMode, Dimension, Colors } from "../../../common/models/index";
+import { Clicker, Essence, Filter, FilterClause, FilterMode, Dimension } from "../../../common/models/index";
 import { enterKey, classNames } from "../../utils/dom/dom";
 import { Loader } from "../loader/loader";
 import { QueryError } from "../query-error/query-error";
@@ -30,14 +30,6 @@ import { GlobalEventListener } from "../global-event-listener/global-event-liste
 
 const TOP_N = 100;
 
-function canRegex(input: string): boolean {
-  try {
-    new RegExp(input);
-    return true;
-  } catch (e) {
-    return false;
-  }
-}
 export interface PreviewStringFilterMenuProps extends React.Props<any> {
   clicker: Clicker;
   dimension: Dimension;
@@ -51,9 +43,9 @@ export interface PreviewStringFilterMenuProps extends React.Props<any> {
 export interface PreviewStringFilterMenuState {
   loading?: boolean;
   dataset?: Dataset;
-  error?: any;
+  queryError?: any;
   fetchQueued?: boolean;
-  colors?: Colors;
+  regexErrorMessage?: string;
 }
 
 export class PreviewStringFilterMenu extends React.Component<PreviewStringFilterMenuProps, PreviewStringFilterMenuState> {
@@ -65,8 +57,9 @@ export class PreviewStringFilterMenu extends React.Component<PreviewStringFilter
     this.state = {
       loading: false,
       dataset: null,
-      error: null,
-      fetchQueued: false
+      queryError: null,
+      fetchQueued: false,
+      regexErrorMessage: ""
     };
 
     this.collectTriggerSearch = collect(SEARCH_WAIT, () => {
@@ -82,12 +75,6 @@ export class PreviewStringFilterMenu extends React.Component<PreviewStringFilter
     var measureExpression = nativeCount ? nativeCount.expression : $('main').count();
 
     var filterExpression = essence.getEffectiveFilter(null, dimension).toExpression();
-
-    if (searchText) {
-      if (canRegex(searchText)) {
-        filterExpression = filterExpression.and(dimension.expression.match(searchText));
-      }
-    }
 
     var query = $('main')
       .filter(filterExpression)
@@ -107,7 +94,7 @@ export class PreviewStringFilterMenu extends React.Component<PreviewStringFilter
           this.setState({
             loading: false,
             dataset,
-            error: null
+            queryError: null
           });
         },
         (error) => {
@@ -115,7 +102,7 @@ export class PreviewStringFilterMenu extends React.Component<PreviewStringFilter
           this.setState({
             loading: false,
             dataset: null,
-            error
+            queryError: error
           });
         }
       );
@@ -123,6 +110,7 @@ export class PreviewStringFilterMenu extends React.Component<PreviewStringFilter
 
   componentWillMount() {
     var { essence, dimension, searchText } = this.props;
+    if (searchText && !this.checkRegex(searchText)) return;
     this.fetchData(essence, dimension, searchText);
   }
 
@@ -136,9 +124,12 @@ export class PreviewStringFilterMenu extends React.Component<PreviewStringFilter
 
   componentWillReceiveProps(nextProps: PreviewStringFilterMenuProps) {
     var { searchText } = this.props;
+    var incomingSearchText = nextProps.searchText;
     const { fetchQueued, loading, dataset } = this.state;
+    if (incomingSearchText) this.checkRegex(incomingSearchText);
+
     // If the user is just typing in more and there are already < TOP_N results then there is nothing to do
-    if (nextProps.searchText.indexOf(searchText) !== -1 && !fetchQueued && !loading && dataset && dataset.data.length < TOP_N) {
+    if (incomingSearchText.indexOf(searchText) !== -1 && !fetchQueued && !loading && dataset && dataset.data.length < TOP_N) {
       return;
     } else {
       this.setState({
@@ -146,6 +137,17 @@ export class PreviewStringFilterMenu extends React.Component<PreviewStringFilter
       });
       this.collectTriggerSearch();
     }
+  }
+
+  checkRegex(text: string): boolean {
+    try {
+      new RegExp(text);
+      this.setState({ regexErrorMessage: null });
+    } catch (e) {
+      this.setState({ regexErrorMessage: e.message });
+      return false;
+    }
+    return true;
   }
 
   globalKeyDownListener(e: KeyboardEvent) {
@@ -173,8 +175,7 @@ export class PreviewStringFilterMenu extends React.Component<PreviewStringFilter
   onOkClick() {
     if (!this.actionEnabled()) return;
     var { clicker, onClose } = this.props;
-    var { colors } = this.state;
-    clicker.changeFilter(this.constructFilter(), colors);
+    clicker.changeFilter(this.constructFilter());
     onClose();
   }
 
@@ -184,12 +185,14 @@ export class PreviewStringFilterMenu extends React.Component<PreviewStringFilter
   }
 
   actionEnabled() {
+    const { regexErrorMessage } = this.state;
     var { essence } = this.props;
+    if (regexErrorMessage) return false;
     return !essence.filter.equals(this.constructFilter());
   }
 
   renderRows() {
-    var { loading, dataset, fetchQueued  } = this.state;
+    var { loading, dataset, fetchQueued, regexErrorMessage  } = this.state;
     var { dimension, searchText } = this.props;
 
     var rows: Array<JSX.Element> = [];
@@ -223,21 +226,23 @@ export class PreviewStringFilterMenu extends React.Component<PreviewStringFilter
       });
     }
 
-    var noResultsMsg: JSX.Element = null;
-    if (!loading && dataset && !fetchQueued && searchText && !rows.length) {
-      noResultsMsg = <div className="message">{'No results for "' + searchText + '"'}</div>;
+    var grayMessage: JSX.Element = null;
+    if (regexErrorMessage) {
+      grayMessage = <div className="message">{regexErrorMessage}</div>;
+    } else if (!loading && dataset && !fetchQueued && searchText && !rows.length) {
+      grayMessage = <div className="message">{'No results for "' + searchText + '"'}</div>;
     }
 
     return <div className="rows">
         {(rows.length === 0 || !searchText) ? null : <div className="matching-values-message">Matching Values</div>}
         {rows}
-        {noResultsMsg}
+        {grayMessage}
       </div>;
   }
 
   render() {
     const { filterMode } = this.props;
-    const { dataset, loading, error} = this.state;
+    const { dataset, loading, queryError } = this.state;
 
     var hasMore = dataset && dataset.data.length > TOP_N;
     return <div className={classNames("string-filter-menu", filterMode)}>
@@ -246,10 +251,10 @@ export class PreviewStringFilterMenu extends React.Component<PreviewStringFilter
       />
       <div className={classNames('menu-table', hasMore ? 'has-more' : 'no-more')}>
         {this.renderRows()}
-        {error ? <QueryError error={error}/> : null}
+        {queryError ? <QueryError error={queryError}/> : null}
         {loading ? <Loader/> : null}
       </div>
-      <div className="button-bar">
+      <div className="ok-cancel-bar">
         <Button type="primary" title={STRINGS.ok} onClick={this.onOkClick.bind(this)} disabled={!this.actionEnabled()} />
         <Button type="secondary" title={STRINGS.cancel} onClick={this.onCancelClick.bind(this)} />
       </div>

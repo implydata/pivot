@@ -19,7 +19,6 @@ require('./string-filter-menu.css');
 import * as React from 'react';
 import { Fn } from '../../../common/utils/general/general';
 import { Stage, Clicker, Essence, Filter, FilterMode, Dimension, DragPosition, FilterClause } from '../../../common/models/index';
-import { STRINGS } from "../../config/constants";
 
 import { BubbleMenu } from "../bubble-menu/bubble-menu";
 import { PreviewStringFilterMenu } from '../preview-string-filter-menu/preview-string-filter-menu';
@@ -34,11 +33,9 @@ export interface StringFilterMenuProps extends React.Props<any> {
   changePosition: DragPosition;
   onClose: Fn;
 
-  direction?: string;
-  containerStage?: Stage;
-  stage?: Stage;
-  openOn?: Element;
-  inside?: Element;
+  containerStage: Stage;
+  openOn: Element;
+  inside: Element;
 }
 
 export interface StringFilterMenuState {
@@ -77,7 +74,7 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
     this.setState({searchText});
   }
 
-  onClauseChange(clause: FilterClause): Filter {
+  updateFilter(clause: FilterClause): Filter {
     const { essence, dimension, changePosition } = this.props;
     var { filter } = essence;
 
@@ -97,27 +94,8 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
     const { dimension } = this.props;
     const dimensionKind = dimension.kind;
 
-    var filterOptions: FilterOption[] = [
-      {
-        label: STRINGS.include,
-        value: Filter.INCLUDED,
-        svg: require('../../icons/filter-include.svg'),
-        checkType: 'check'
-      },
-      {
-        label: STRINGS.exclude,
-        value: Filter.EXCLUDED,
-        svg: require('../../icons/filter-exclude.svg'),
-        checkType: 'cross'
-      }
-    ];
-
-    if (dimensionKind !== 'boolean') filterOptions.push({
-      label: STRINGS.match,
-      value: Filter.MATCH,
-      svg: require('../../icons/filter-regex.svg'),
-      checkType: 'check'
-    });
+    var filterOptions: FilterOption[] = FilterOptionsDropdown.getFilterOptions(Filter.INCLUDED, Filter.EXCLUDED);
+    if (dimensionKind !== 'boolean') filterOptions = filterOptions.concat(FilterOptionsDropdown.getFilterOptions(Filter.MATCH));
 
     return filterOptions;
   }
@@ -145,9 +123,10 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
   }
 
   render() {
-    const { dimension, clicker, essence, onClose, direction, containerStage, openOn, inside } = this.props;
+    const { dimension, clicker, essence, onClose, containerStage, openOn, inside } = this.props;
     const { filterMode, searchText } = this.state;
     if (!dimension) return null;
+
     var menuSize: Stage = null;
     var menuCont: JSX.Element = null;
 
@@ -160,7 +139,7 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
           onClose={onClose}
           searchText={searchText}
           filterMode={filterMode}
-          onClauseChange={this.onClauseChange.bind(this)}
+          onClauseChange={this.updateFilter.bind(this)}
         />;
     } else {
       menuSize = Stage.fromSize(250, 410);
@@ -171,13 +150,13 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
           onClose={onClose}
           searchText={searchText}
           filterMode={filterMode}
-          onClauseChange={this.onClauseChange.bind(this)}
+          onClauseChange={this.updateFilter.bind(this)}
       />;
     }
 
     return <BubbleMenu
       className="string-filter-menu"
-      direction={direction}
+      direction="down"
       containerStage={containerStage}
       stage={menuSize}
       openOn={openOn}

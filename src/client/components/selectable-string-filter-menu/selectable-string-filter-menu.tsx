@@ -284,7 +284,7 @@ export class SelectableStringFilterMenu extends React.Component<SelectableString
         {error ? <QueryError error={error}/> : null}
         {loading ? <Loader/> : null}
       </div>
-      <div className="button-bar">
+      <div className="ok-cancel-bar">
         <Button type="primary" title={STRINGS.ok} onClick={this.onOkClick.bind(this)} disabled={!this.actionEnabled()} />
         <Button type="secondary" title={STRINGS.cancel} onClick={this.onCancelClick.bind(this)} />
       </div>

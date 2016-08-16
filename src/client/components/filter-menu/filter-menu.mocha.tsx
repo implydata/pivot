@@ -36,7 +36,6 @@ describe('FilterMenu', () => {
         clicker={null}
         containerStage={null}
         dimension={DimensionMock.countryURL()}
-        direction={'down'}
         essence={EssenceMock.wikiTotals()}
         changePosition={null}
         onClose={null}

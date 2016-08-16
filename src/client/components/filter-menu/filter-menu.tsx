@@ -16,20 +16,16 @@
 
 require('./filter-menu.css');
 
-import * as React from 'react';
-import { Fn } from '../../../common/utils/general/general';
-import { Stage, Clicker, Essence, DataCube, Filter, Dimension, DragPosition } from '../../../common/models/index';
-import { BubbleMenu } from '../bubble-menu/bubble-menu';
-
-
-import { StringFilterMenu } from '../string-filter-menu/string-filter-menu';
-import { TimeFilterMenu } from '../time-filter-menu/time-filter-menu';
-import { NumberFilterMenu } from '../number-filter-menu/number-filter-menu';
+import * as React from "react";
+import { Fn } from "../../../common/utils/general/general";
+import { Stage, Clicker, Essence, Dimension, DragPosition } from "../../../common/models/index";
+import { StringFilterMenu } from "../string-filter-menu/string-filter-menu";
+import { TimeFilterMenu } from "../time-filter-menu/time-filter-menu";
+import { NumberFilterMenu } from "../number-filter-menu/number-filter-menu";
 
 export interface FilterMenuProps extends React.Props<any> {
   clicker: Clicker;
   essence: Essence;
-  direction: string;
   containerStage?: Stage;
   openOn: Element;
   dimension: Dimension;
@@ -48,26 +44,27 @@ export class FilterMenu extends React.Component<FilterMenuProps, FilterMenuState
   }
 
   render() {
-    var { clicker, essence, changePosition, direction, containerStage, openOn, dimension, onClose, inside } = this.props;
+    var { clicker, essence, changePosition, containerStage, openOn, dimension, onClose, inside } = this.props;
     if (!dimension) return null;
-
-    var menuSize: Stage = null;
-    var menuCont: JSX.Element = null;
     if (dimension.kind === 'time') {
-      menuSize = Stage.fromSize(250, 274);
-      menuCont = <TimeFilterMenu
+      return <TimeFilterMenu
         clicker={clicker}
         dimension={dimension}
         essence={essence}
         onClose={onClose}
+        containerStage={containerStage}
+        openOn={openOn}
+        inside={inside}
       />;
     } else if (dimension.kind === 'number') {
-      menuSize = Stage.fromSize(250, 274);
-      menuCont = <NumberFilterMenu
+      return <NumberFilterMenu
         clicker={clicker}
         dimension={dimension}
         essence={essence}
         onClose={onClose}
+        containerStage={containerStage}
+        openOn={openOn}
+        inside={inside}
       />;
     } else {
       return <StringFilterMenu
@@ -76,24 +73,10 @@ export class FilterMenu extends React.Component<FilterMenuProps, FilterMenuState
         essence={essence}
         changePosition={changePosition}
         onClose={onClose}
-        direction={direction}
         containerStage={containerStage}
-        stage={menuSize}
         openOn={openOn}
         inside={inside}
       />;
     }
-
-    return <BubbleMenu
-      className="filter-menu"
-      direction={direction}
-      containerStage={containerStage}
-      stage={menuSize}
-      openOn={openOn}
-      onClose={onClose}
-      inside={inside}
-    >
-      {menuCont}
-    </BubbleMenu>;
   }
 }

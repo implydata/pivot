@@ -21,17 +21,24 @@ import * as TestUtils from 'react-addons-test-utils';
 
 import '../../utils/test-utils/index';
 
+import { EssenceMock, DimensionMock, StageMock } from '../../../common/models/mocks';
 import { StringFilterMenu } from './string-filter-menu';
 
-describe.skip('StringFilterMenu', () => {
+describe('StringFilterMenu', () => {
   it('adds the correct class', () => {
+    var div = document.createElement('div');
+    div.setAttribute("id", "Div1");
+
     var renderedComponent = TestUtils.renderIntoDocument(
       <StringFilterMenu
         clicker={null}
-        dimension={null}
-        essence={null}
-        changePosition={null}
+        dimension={DimensionMock.countryURL()}
+        essence={EssenceMock.wikiLineChart()}
         onClose={null}
+        containerStage={StageMock.defaultA()}
+        openOn={div}
+        inside={div}
+        changePosition={null}
       />
     );
 
