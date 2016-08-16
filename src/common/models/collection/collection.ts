@@ -158,5 +158,9 @@ export class Collection implements Instance<CollectionValue, CollectionJS> {
     return this.change('items', newItems);
   }
 
+  public changeItems(items: CollectionItem[]): Collection {
+    return this.change('items', items);
+  }
+
 }
 check = Collection;

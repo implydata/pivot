@@ -19,9 +19,8 @@ require('./collection-header-bar.css');
 import * as React from 'react';
 import { Fn } from '../../../common/utils/general/general';
 import { User, Customization, DataCube, Stage, Collection } from '../../../common/models/index';
-import { SvgIcon } from '../svg-icon/svg-icon';
-import { UserMenu } from '../user-menu/user-menu';
-import { BubbleMenu } from '../bubble-menu/bubble-menu';
+
+import { SvgIcon, UserMenu, BubbleMenu, Button } from '../index';
 
 import { STRINGS } from '../../config/constants';
 
@@ -33,11 +32,18 @@ export interface CollectionHeaderBarProps extends React.Props<any> {
   dataCubes: DataCube[];
   collections: Collection[];
   onAddItem?: (dataCube: DataCube) => void;
+  onEditCollection?: () => void;
+  onDeleteCollection?: () => void;
+
+  editionMode?: boolean;
+  onSave?: () => void;
+  onCancel?: () => void;
 }
 
 export interface CollectionHeaderBarState {
   userMenuOpenOn?: Element;
   addMenuOpenOn?: Element;
+  settingsMenuOpenOn?: Element;
 }
 
 export class CollectionHeaderBar extends React.Component<CollectionHeaderBarProps, CollectionHeaderBarState> {
@@ -45,7 +51,8 @@ export class CollectionHeaderBar extends React.Component<CollectionHeaderBarProp
     super();
     this.state = {
       userMenuOpenOn: null,
-      addMenuOpenOn: null
+      addMenuOpenOn: null,
+      settingsMenuOpenOn: null
     };
   }
 
@@ -90,6 +97,54 @@ export class CollectionHeaderBar extends React.Component<CollectionHeaderBarProp
     });
   }
 
+  onSettingsClick(e: MouseEvent) {
+    const { settingsMenuOpenOn } = this.state;
+    if (settingsMenuOpenOn) return this.onSettingsMenuClose();
+    this.setState({
+      settingsMenuOpenOn: e.target as Element
+    });
+  }
+
+  onSettingsMenuClose() {
+    this.setState({
+      settingsMenuOpenOn: null
+    });
+  }
+
+  goToSettings() {
+    window.location.hash = '#/settings';
+  }
+
+  renderSettingsMenu() {
+    const user = this.props.user as User;
+    const { settingsMenuOpenOn } = this.state;
+    if (!settingsMenuOpenOn) return null;
+
+    var stage = Stage.fromSize(200, 200);
+
+    return <BubbleMenu
+      className="collection-settings-menu"
+      direction="down"
+      stage={stage}
+      openOn={settingsMenuOpenOn}
+      onClose={this.onSettingsMenuClose.bind(this)}
+    >
+      <ul className="bubble-list">
+        <li
+          className="delete"
+          onClick={this.props.onDeleteCollection}
+        >{STRINGS.deleteCollection}</li>
+
+        { user && user.allow['settings'] ? <li
+          className="general-settings"
+          onClick={this.goToSettings.bind(this)}
+        >{STRINGS.generalSettings}</li>
+        : null }
+
+      </ul>
+    </BubbleMenu>;
+  }
+
   renderAddMenu() {
     const { dataCubes } = this.props;
     const { addMenuOpenOn } = this.state;
@@ -117,8 +172,40 @@ export class CollectionHeaderBar extends React.Component<CollectionHeaderBarProp
     </BubbleMenu>;
   }
 
+  getHeaderStyle(customization: Customization): React.CSSProperties {
+    var headerStyle: any = null;
+    if (customization && customization.headerBackground) {
+      headerStyle = {
+        background: customization.headerBackground
+      };
+    }
+
+    return headerStyle;
+  }
+
+  renderEditableBar() {
+    var { customization, title, onSave, onCancel } = this.props;
+
+    return <header className="collection-header-bar" style={this.getHeaderStyle(customization)}>
+      <div className="left-bar">
+        <div className="menu-icon">
+          <SvgIcon svg={require('../../icons/menu.svg')}/>
+        </div>
+        <div className="title">{title}</div>
+      </div>
+      <div className="right-bar">
+        <div className="button-group">
+          <Button className="cancel" title="Cancel" type="secondary" onClick={onCancel}/>
+          <Button className="save" title="Save" type="primary" onClick={onSave}/>
+        </div>
+      </div>
+    </header>;
+  }
+
   render() {
-    var { user, onNavClick, customization, title, onAddItem } = this.props;
+    var { user, onNavClick, customization, title, editionMode, onEditCollection } = this.props;
+
+    if (editionMode) return this.renderEditableBar();
 
     var userButton: JSX.Element = null;
     if (user) {
@@ -127,21 +214,7 @@ export class CollectionHeaderBar extends React.Component<CollectionHeaderBarProp
       </div>;
     }
 
-    var addButton: JSX.Element = null;
-    if (onAddItem) {
-      addButton = <div className="icon-button add" onClick={this.onAddClick.bind(this)}>
-        <SvgIcon svg={require('../../icons/full-add-framed.svg')}/>
-      </div>;
-    }
-
-    var headerStyle: any = null;
-    if (customization && customization.headerBackground) {
-      headerStyle = {
-        background: customization.headerBackground
-      };
-    }
-
-    return <header className="collection-header-bar" style={headerStyle}>
+    return <header className="collection-header-bar" style={this.getHeaderStyle(customization)}>
       <div className="left-bar" onClick={onNavClick}>
         <div className="menu-icon">
           <SvgIcon svg={require('../../icons/menu.svg')}/>
@@ -149,11 +222,20 @@ export class CollectionHeaderBar extends React.Component<CollectionHeaderBarProp
         <div className="title">{title}</div>
       </div>
       <div className="right-bar">
-        {addButton}
+        <div className="icon-button add" onClick={this.onAddClick.bind(this)}>
+          <SvgIcon svg={require('../../icons/full-add-framed.svg')}/>
+        </div>
+        <div className="icon-button edit" onClick={onEditCollection}>
+          <SvgIcon svg={require('../../icons/full-edit.svg')}/>
+        </div>
+        <div className="icon-button settings" onClick={this.onSettingsClick.bind(this)}>
+          <SvgIcon svg={require('../../icons/full-settings.svg')}/>
+        </div>
         {userButton}
       </div>
       {this.renderUserMenu()}
       {this.renderAddMenu()}
+      {this.renderSettingsMenu()}
     </header>;
   }
 }

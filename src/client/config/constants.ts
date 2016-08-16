@@ -55,9 +55,11 @@ export const STRINGS: any = {
   collections: 'Collections',
   dataCubes: 'Data Cubes',
   deleteCollectionItem: 'Delete this view',
+  deleteCollection: 'Delete this collection',
   dimensions: 'Dimensions',
   download: 'Download',
   duplicateCollectionItem: 'Duplicate this view',
+  editCollection: 'Edit collection',
   editThisCube: 'Edit this cube',
   editTitleAndDesc: 'Edit title and description',
   editVisualization: 'Edit visualization',
@@ -106,7 +108,7 @@ export const STRINGS: any = {
   stringSearch: 'String search',
   subsplit: 'Split',
   timezone: 'Timezone',
-  undo: 'Click to undo',
+  undo: 'Click here to undo',
   updateTimezone: 'Update Timezone',
   viewRawData: 'View raw data'
 };

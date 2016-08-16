@@ -14,14 +14,8 @@
  * limitations under the License.
  */
 
-@import '../../imports';
-
-.supervised-cube-header-bar {
-  @extend %header-bar;
-
-  .left-bar .title {
-    cursor: default;
-    font-size: 14px;
-    margin-top: 14px;
-  }
+export function move(array: any[], oldIndex: number, newIndex: number) {
+  array.splice(newIndex, 0, array.splice(oldIndex, 1)[0]);
 }
+
+
