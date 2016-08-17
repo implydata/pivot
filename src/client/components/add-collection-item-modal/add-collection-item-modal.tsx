@@ -7,7 +7,9 @@ import { Collection, Essence, CollectionItem, DataCube, SortOn } from '../../../
 import { classNames } from '../../utils/dom/dom';
 import { generateUniqueName } from '../../../common/utils/string/string';
 
-import { FormLabel, Button, ImmutableInput, Modal, Dropdown } from '../index';
+import { FormLabel, Button, ImmutableInput, Modal, Dropdown, Checkbox } from '../index';
+
+import { STRINGS } from '../../config/constants';
 
 import { COLLECTION_ITEM as LABELS } from '../../../common/models/labels';
 
@@ -33,6 +35,7 @@ export interface AddCollectionItemModalState {
   errors?: any;
   canSave?: boolean;
   collectionMode?: CollectionMode;
+  convertToFixedTime?: boolean;
 }
 
 export class AddCollectionItemModal extends React.Component<AddCollectionItemModalProps, AddCollectionItemModalState> {
@@ -240,14 +243,33 @@ export class AddCollectionItemModal extends React.Component<AddCollectionItemMod
     }
   }
 
+  toggleConvertToFixed() {
+    const { essence } = this.props;
+    var { collectionItem } = this.state;
+    const convertToFixedTime = !this.state.convertToFixedTime;
+
+    if (convertToFixedTime && essence.filter.isRelative()) {
+      collectionItem = collectionItem.changeEssence(essence.convertToSpecificFilter());
+    } else {
+      collectionItem = collectionItem.changeEssence(essence);
+    }
+
+    this.setState({
+      convertToFixedTime,
+      collectionItem
+    });
+  }
+
   render(): JSX.Element {
-    const { canSave, errors, collectionItem, collectionMode } = this.state;
-    const { collections, onCancel } = this.props;
+    const { canSave, errors, collectionItem, collectionMode, convertToFixedTime } = this.state;
+    const { collections, onCancel, essence } = this.props;
 
     if (!collectionItem) return null;
 
     var makeLabel = FormLabel.simpleGenerator(LABELS, errors, true);
     var makeTextInput = ImmutableInput.simpleGenerator(collectionItem, this.onChange.bind(this));
+
+    const isRelative = essence.filter.isRelative();
 
     return <Modal
       className="add-collection-item-modal"
@@ -256,13 +278,21 @@ export class AddCollectionItemModal extends React.Component<AddCollectionItemMod
       onEnter={this.save.bind(this)}
     >
       <form className="general vertical">
-        {this.renderCollectionPicker()}
+        { this.renderCollectionPicker() }
 
-        {makeLabel('title')}
-        {makeTextInput('title', /^.+$/, collectionMode !== 'adding')}
+        { makeLabel('title') }
+        { makeTextInput('title', /^.+$/, collectionMode !== 'adding') }
 
-        {makeLabel('description')}
-        {makeTextInput('description', /^.*$/)}
+        { makeLabel('description') }
+        { makeTextInput('description', /^.*$/) }
+
+        { isRelative ?
+          <Checkbox
+            selected={convertToFixedTime}
+            onClick={this.toggleConvertToFixed.bind(this)}
+            label={STRINGS.convertToFixedTime}
+          />
+        : null }
 
       </form>
 
