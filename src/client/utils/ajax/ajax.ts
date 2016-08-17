@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
+import * as Q from 'q';
 import * as Qajax from 'qajax';
 import { $, Expression, Executor, Dataset, ChainExpression, SplitAction, Environment } from 'plywood';
+
+Qajax.defaults.timeout = 0; // We'll manage the timeout per request.
 
 function getSplitsDescription(ex: Expression): string {
   var splits: string[] = [];
@@ -38,9 +41,60 @@ function reload() {
   window.location.reload(true);
 }
 
+function update() {
+  console.log('update requested');
+}
+
+function parseOrNull(json: any): any {
+  try {
+    return JSON.parse(json);
+  } catch (e) {
+    return null;
+  }
+}
+
+export interface AjaxOptions {
+  method: 'GET' | 'POST';
+  url: string;
+  data?: any;
+}
+
+export function ajax(options: AjaxOptions): Q.Promise<any> {
+  return Qajax({
+    method: options.method,
+    url: options.url,
+    data: options.data
+  })
+    .timeout(60000)
+    .then(Qajax.filterSuccess)
+    .then(Qajax.toJSON)
+    .then((res) => {
+      if (res && res.action === 'update') update();
+      return res;
+    })
+    .catch((xhr: XMLHttpRequest | Error): Dataset => {
+      if (!xhr) return null; // TS needs this
+      if (xhr instanceof Error) {
+        throw new Error('client timeout');
+      } else {
+        var jsonError = parseOrNull(xhr.responseText);
+        if (jsonError) {
+          if (jsonError.action === 'reload') {
+            reload();
+          } else if (jsonError.action === 'update') {
+            update();
+          }
+          throw new Error(jsonError.message || jsonError.error);
+        } else {
+          throw new Error(xhr.responseText);
+        }
+      }
+    });
+}
+
 export function queryUrlExecutorFactory(name: string, url: string, version: string): Executor {
   return (ex: Expression, env: Environment = {}) => {
-    return Qajax({
+    return ajax({
       method: "POST",
       url: url + '?by=' + getSplitsDescription(ex),
       data: {
@@ -49,19 +103,6 @@ export function queryUrlExecutorFactory(name: string, url: string, version: stri
         expression: ex.toJS(),
         timezone: env ? env.timezone : null
       }
-    })
-      .then(Qajax.filterSuccess)
-      .then(Qajax.toJSON)
-      .then(
-        (res) => {
-          return Dataset.fromJS(res.result);
-        },
-        (xhr: XMLHttpRequest): Dataset => {
-          if (!xhr) return null; // This is only here to stop TS complaining
-          var jsonError = JSON.parse(xhr.responseText);
-          if (jsonError.action === 'reload') reload();
-          throw new Error(jsonError.message || jsonError.error);
-        }
-      );
+    }).then((res) => Dataset.fromJS(res.result));
   };
 }

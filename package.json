@@ -34,7 +34,7 @@
     "fs-promise": "0.5.0",
     "hsts": "1.0.0",
     "immutable": "3.8.1",
-    "immutable-class": "0.6.5",
+    "immutable-class": "0.6.6",
     "js-yaml": "3.6.1",
     "logger-tracker": "0.0.23",
     "lz-string": "1.4.4",
