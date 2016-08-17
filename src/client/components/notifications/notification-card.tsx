@@ -37,7 +37,7 @@ export interface NotificationCardState {
   timerExpired?: boolean;
 }
 
-const DEFAULT_DURATION = 1; // seconds
+const DEFAULT_DURATION = 6; // seconds
 
 export class NotificationCard extends React.Component<NotificationCardProps, NotificationCardState> {
   private timeoutID: number;
