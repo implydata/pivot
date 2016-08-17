@@ -59,50 +59,62 @@ export interface AjaxOptions {
   data?: any;
 }
 
-export function ajax(options: AjaxOptions): Q.Promise<any> {
-  return Qajax({
-    method: options.method,
-    url: options.url,
-    data: options.data
-  })
-    .timeout(60000)
-    .then(Qajax.filterSuccess)
-    .then(Qajax.toJSON)
-    .then((res) => {
-      if (res && res.action === 'update') update();
-      return res;
-    })
-    .catch((xhr: XMLHttpRequest | Error): Dataset => {
-      if (!xhr) return null; // TS needs this
-      if (xhr instanceof Error) {
-        throw new Error('client timeout');
-      } else {
-        var jsonError = parseOrNull(xhr.responseText);
-        if (jsonError) {
-          if (jsonError.action === 'reload') {
-            reload();
-          } else if (jsonError.action === 'update') {
-            update();
-          }
-          throw new Error(jsonError.message || jsonError.error);
-        } else {
-          throw new Error(xhr.responseText);
-        }
-      }
-    });
-}
+export class Ajax {
+  static version: string;
 
-export function queryUrlExecutorFactory(name: string, url: string, version: string): Executor {
-  return (ex: Expression, env: Environment = {}) => {
-    return ajax({
-      method: "POST",
-      url: url + '?by=' + getSplitsDescription(ex),
-      data: {
-        version: version,
-        dataCube: name,
-        expression: ex.toJS(),
-        timezone: env ? env.timezone : null
-      }
-    }).then((res) => Dataset.fromJS(res.result));
-  };
+  static settingsVersionGetter: () => number;
+
+  static query(options: AjaxOptions): Q.Promise<any> {
+    var data = options.data;
+
+    if (data) {
+      if (Ajax.version) data.version = Ajax.version;
+      if (Ajax.settingsVersionGetter) data.settingsVersion = Ajax.settingsVersionGetter();
+    }
+
+    return Qajax({
+      method: options.method,
+      url: options.url,
+      data
+    })
+      .timeout(60000)
+      .then(Qajax.filterSuccess)
+      .then(Qajax.toJSON)
+      .then((res) => {
+        if (res && res.action === 'update') update();
+        return res;
+      })
+      .catch((xhr: XMLHttpRequest | Error): Dataset => {
+        if (!xhr) return null; // TS needs this
+        if (xhr instanceof Error) {
+          throw new Error('client timeout');
+        } else {
+          var jsonError = parseOrNull(xhr.responseText);
+          if (jsonError) {
+            if (jsonError.action === 'reload') {
+              reload();
+            } else if (jsonError.action === 'update') {
+              update();
+            }
+            throw new Error(jsonError.message || jsonError.error);
+          } else {
+            throw new Error(xhr.responseText);
+          }
+        }
+      });
+  }
+
+  static queryUrlExecutorFactory(name: string, url: string): Executor {
+    return (ex: Expression, env: Environment = {}) => {
+      return Ajax.query({
+        method: "POST",
+        url: url + '?by=' + getSplitsDescription(ex),
+        data: {
+          dataCube: name,
+          expression: ex.toJS(),
+          timezone: env ? env.timezone : null
+        }
+      }).then((res) => Dataset.fromJS(res.result));
+    };
+  }
 }
