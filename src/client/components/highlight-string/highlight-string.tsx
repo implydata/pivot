@@ -39,18 +39,19 @@ export class HighlightString extends React.Component<HighlightStringProps, Highl
     if (!highlight) return text;
 
     let startIndex: number = null;
-    let lookingFor: string | string[] = null;
+    let highlightString: string = null;
     if (typeof highlight === "string") {
       var strLower = text.toLowerCase();
       startIndex = strLower.indexOf(highlight.toLowerCase());
-      lookingFor = highlight.toLowerCase();
+      if (startIndex === -1) return text;
+      highlightString = highlight.toLowerCase();
     } else {
       var match = text.match(highlight);
-      lookingFor = match;
+      if (!match) return text;
+      highlightString = match[0];
       startIndex = match.index;
     }
-    if (startIndex === -1) return text;
-    var endIndex = startIndex + lookingFor.length;
+    var endIndex = startIndex + highlightString.length;
 
     return [
       <span className="pre" key="pre">{text.substring(0, startIndex)}</span>,

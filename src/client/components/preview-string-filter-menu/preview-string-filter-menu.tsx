@@ -129,7 +129,7 @@ export class PreviewStringFilterMenu extends React.Component<PreviewStringFilter
     if (incomingSearchText && filterMode === Filter.REGEX) this.checkRegex(incomingSearchText);
 
     // If the user is just typing in more and there are already < TOP_N results then there is nothing to do
-    if (incomingSearchText.indexOf(searchText) !== -1 && !fetchQueued && !loading && dataset && dataset.data.length < TOP_N) {
+    if (incomingSearchText && incomingSearchText.indexOf(searchText) !== -1 && !fetchQueued && !loading && dataset && dataset.data.length < TOP_N) {
       return;
     } else {
       this.setState({
@@ -204,6 +204,8 @@ export class PreviewStringFilterMenu extends React.Component<PreviewStringFilter
     var { dimension, searchText, filterMode } = this.props;
 
     var rows: Array<JSX.Element> = [];
+    var search: string | RegExp = null;
+
     if (dataset) {
       var rowStrings = dataset.data.slice(0, TOP_N).map((d) => d[dimension.name]);
 
@@ -211,12 +213,14 @@ export class PreviewStringFilterMenu extends React.Component<PreviewStringFilter
         rowStrings = rowStrings.filter((d) => {
           if (filterMode === Filter.REGEX) {
             try {
-            var escaped = searchText.replace(/\\[^\\]]/g, '\\\\');
-            return new RegExp(escaped, 'g').test(String(d));
+              var escaped = searchText.replace(/\\[^\\]]/g, '\\\\');
+              search = new RegExp(escaped);
+              return search.test(String(d));
             } catch (e) {
               return false;
             }
           } else if (filterMode === Filter.CONTAINS) {
+            search = searchText;
             return String(d).toLowerCase().indexOf(searchText.toLowerCase()) !== -1;
           }
           return false;
@@ -231,7 +235,7 @@ export class PreviewStringFilterMenu extends React.Component<PreviewStringFilter
           title={segmentValueStr}
         >
           <div className="row-wrapper">
-            <HighlightString className="label" text={segmentValueStr} highlight={filterMode === Filter.REGEX  && searchText ? new RegExp(searchText) : searchText}/>
+            <HighlightString className="label" text={segmentValueStr} highlight={search}/>
           </div>
         </div>;
       });
