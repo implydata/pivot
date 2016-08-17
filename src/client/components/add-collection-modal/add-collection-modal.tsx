@@ -9,6 +9,8 @@ import { generateUniqueName } from '../../../common/utils/string/string';
 
 import { FormLabel, Button, ImmutableInput, Modal, Dropdown } from '../index';
 
+import { STRINGS } from '../../config/constants';
+
 import { COLLECTION as LABELS } from '../../../common/models/labels';
 
 export interface AddCollectionModalProps extends React.Props<any> {
@@ -99,7 +101,7 @@ export class AddCollectionModal extends React.Component<AddCollectionModalProps,
 
     return <Modal
       className="add-collection-modal"
-      title={collection.title}
+      title={STRINGS.addNewCollection}
       onClose={this.props.onCancel}
       onEnter={this.save.bind(this)}
     >

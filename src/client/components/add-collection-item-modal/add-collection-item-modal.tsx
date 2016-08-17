@@ -52,6 +52,10 @@ export class AddCollectionItemModal extends React.Component<AddCollectionItemMod
   getTitleFromEssence(essence: Essence): string {
     var splits = essence.splits;
 
+    if (splits.length() === 0) return essence.selectedMeasures.map(m => {
+      return essence.dataCube.getMeasure(m).title;
+    }).join(', ');
+
     var dimensions: string[] = [];
     var measures: string[] = [];
 
@@ -273,7 +277,7 @@ export class AddCollectionItemModal extends React.Component<AddCollectionItemMod
 
     return <Modal
       className="add-collection-item-modal"
-      title={collectionItem.title}
+      title={STRINGS.addNewTile}
       onClose={onCancel}
       onEnter={this.save.bind(this)}
     >
