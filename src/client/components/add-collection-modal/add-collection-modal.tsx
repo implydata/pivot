@@ -37,7 +37,7 @@ export class AddCollectionModal extends React.Component<AddCollectionModalProps,
     this.setState({
       canSave: true,
       collection: new Collection({
-        name: generateUniqueName('d', this.isNameUnique.bind(this)),
+        name: generateUniqueName('c', this.isNameUnique.bind(this)),
         items: [],
         title: 'New collection'
       })

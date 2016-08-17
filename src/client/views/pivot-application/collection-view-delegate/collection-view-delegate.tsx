@@ -157,9 +157,7 @@ export class CollectionViewDelegate {
     const oldIndex = appSettings.collections.indexOf(collection);
 
     const undo = () => {
-      this.setState({
-        appSettings: appSettings.addCollectionAt(collection, oldIndex)
-      });
+      this.save(this.getSettings().addCollectionAt(collection, oldIndex));
     };
 
     return this.save(appSettings.deleteCollection(collection)).then( () => {
