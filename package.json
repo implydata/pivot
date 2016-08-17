@@ -36,7 +36,7 @@
     "immutable": "3.8.1",
     "immutable-class": "0.6.5",
     "js-yaml": "3.6.1",
-    "logger-tracker": "0.0.22",
+    "logger-tracker": "0.0.23",
     "lz-string": "1.4.4",
     "node-spawn-server": "1.0.1",
     "nopt": "3.0.6",
