@@ -225,22 +225,13 @@ export class PreviewStringFilterMenu extends React.Component<PreviewStringFilter
 
       rows = rowStrings.map((segmentValue) => {
         var segmentValueStr = String(segmentValue);
-
-        var highlightText: string = null;
-        if (filterMode === Filter.REGEX) {
-          var match = segmentValueStr.match(searchText);
-          highlightText = (searchText && match) ? match.join("") : "";
-        } else if (filterMode === Filter.CONTAINS) {
-          highlightText = searchText;
-        }
-
         return <div
           className="row no-select"
           key={segmentValueStr}
           title={segmentValueStr}
         >
           <div className="row-wrapper">
-            <HighlightString className="label" text={segmentValueStr} highlightText={highlightText}/>
+            <HighlightString className="label" text={segmentValueStr} highlight={filterMode === Filter.REGEX  && searchText ? new RegExp(searchText) : searchText}/>
           </div>
         </div>;
       });

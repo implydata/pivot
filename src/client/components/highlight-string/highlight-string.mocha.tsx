@@ -29,7 +29,7 @@ describe('HighlightString', () => {
   it('adds the correct class', () => {
     var renderedComponent = TestUtils.renderIntoDocument(
       <HighlightString
-        highlightText={null}
+        highlight={null}
         text={null}
       />
     );
