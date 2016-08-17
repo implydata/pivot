@@ -17,7 +17,7 @@
 require('./preview-string-filter-menu.css');
 
 import * as React from "react";
-import { $, Dataset, SortAction } from "plywood";
+import { $, Dataset, SortAction, r } from "plywood";
 import { Fn, collect } from "../../../common/utils/general/general";
 import { STRINGS, SEARCH_WAIT } from "../../config/constants";
 import { Clicker, Essence, Filter, FilterClause, FilterMode, Dimension } from "../../../common/models/index";
@@ -161,12 +161,20 @@ export class PreviewStringFilterMenu extends React.Component<PreviewStringFilter
     var { expression } = dimension;
 
     var clause: FilterClause = null;
-    if (filterMode === Filter.MATCH && searchText) {
-      clause = new FilterClause({
-        expression,
-        selection: searchText,
-        action: 'match'
-      });
+    if (searchText) {
+      if (filterMode === Filter.REGEX) {
+        clause = new FilterClause({
+          expression,
+          selection: searchText,
+          action: 'match'
+        });
+      } else if (filterMode === Filter.CONTAINS) {
+        clause = new FilterClause({
+          expression,
+          selection: r(searchText),
+          action: 'contains'
+        });
+      }
     }
 
     return onClauseChange(clause);

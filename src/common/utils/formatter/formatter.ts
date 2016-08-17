@@ -134,7 +134,7 @@ export function getFormattedClause(dimension: Dimension, clause: FilterClause, t
           values = formatValue(setElements[0]);
         }
       }
-      if (clause.action === Filter.MATCH) values = `/${values}/`;
+      if (clause.action === Filter.REGEX) values = `/${values}/`;
       if (clause.action === Filter.CONTAINS) values = `"${values}"`;
 
       break;
