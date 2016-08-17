@@ -109,8 +109,8 @@ export class PreviewStringFilterMenu extends React.Component<PreviewStringFilter
   }
 
   componentWillMount() {
-    var { essence, dimension, searchText } = this.props;
-    if (searchText && !this.checkRegex(searchText)) return;
+    var { essence, dimension, searchText, filterMode } = this.props;
+    if (searchText && filterMode === Filter.REGEX && !this.checkRegex(searchText)) return;
     this.fetchData(essence, dimension, searchText);
   }
 
@@ -123,10 +123,10 @@ export class PreviewStringFilterMenu extends React.Component<PreviewStringFilter
   }
 
   componentWillReceiveProps(nextProps: PreviewStringFilterMenuProps) {
-    var { searchText } = this.props;
+    var { searchText, filterMode } = this.props;
     var incomingSearchText = nextProps.searchText;
     const { fetchQueued, loading, dataset } = this.state;
-    if (incomingSearchText) this.checkRegex(incomingSearchText);
+    if (incomingSearchText && filterMode === Filter.REGEX) this.checkRegex(incomingSearchText);
 
     // If the user is just typing in more and there are already < TOP_N results then there is nothing to do
     if (incomingSearchText.indexOf(searchText) !== -1 && !fetchQueued && !loading && dataset && dataset.data.length < TOP_N) {
@@ -201,7 +201,7 @@ export class PreviewStringFilterMenu extends React.Component<PreviewStringFilter
 
   renderRows() {
     var { loading, dataset, fetchQueued, regexErrorMessage  } = this.state;
-    var { dimension, searchText } = this.props;
+    var { dimension, searchText, filterMode } = this.props;
 
     var rows: Array<JSX.Element> = [];
     if (dataset) {
@@ -209,19 +209,31 @@ export class PreviewStringFilterMenu extends React.Component<PreviewStringFilter
 
       if (searchText) {
         rowStrings = rowStrings.filter((d) => {
-          try {
+          if (filterMode === Filter.REGEX) {
+            try {
             var escaped = searchText.replace(/\\[^\\]]/g, '\\\\');
             return new RegExp(escaped, 'g').test(String(d));
-          } catch (e) {
-            return false;
+            } catch (e) {
+              return false;
+            }
+          } else if (filterMode === Filter.CONTAINS) {
+            return String(d).toLowerCase().indexOf(searchText.toLowerCase()) !== -1;
           }
+          return false;
         });
       }
 
       rows = rowStrings.map((segmentValue) => {
         var segmentValueStr = String(segmentValue);
-        var match = segmentValueStr.match(searchText);
-        var highlightText = (searchText && match) ? match.join("") : "";
+
+        var highlightText: string = null;
+        if (filterMode === Filter.REGEX) {
+          var match = segmentValueStr.match(searchText);
+          highlightText = (searchText && match) ? match.join("") : "";
+        } else if (filterMode === Filter.CONTAINS) {
+          highlightText = searchText;
+        }
+
         return <div
           className="row no-select"
           key={segmentValueStr}

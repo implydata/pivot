@@ -280,10 +280,10 @@ export class Filter implements Instance<FilterValue, FilterJS> {
     var dimensionClauses = this.getClausesForDimension(dimension);
 
     if (dimensionClauses.size > 0) {
-      let isRegex = dimensionClauses.every(clause => clause.action === 'regex');
-      if (isRegex) return 'regex';
-      let isExcluded = dimensionClauses.every(clause => clause.exclude);
-      return isExcluded ? 'exclude' : 'include';
+      if (dimensionClauses.every(clause => clause.action === 'match')) return 'regex';
+      if (dimensionClauses.every(clause => clause.action === 'contains')) return 'contains';
+      if (dimensionClauses.every(clause => clause.exclude)) return 'exclude';
+      return 'include';
     }
 
     return undefined;
