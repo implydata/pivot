@@ -89,7 +89,7 @@ export class Cluster extends BaseImmutable<ClusterValue, ClusterJS> {
   }
 
   static fromJS(parameters: ClusterJS): Cluster {
-    if (!parameters.host) {
+    if (!parameters.host && ((parameters as any).druidHost || (parameters as any).brokerHost)) {
       parameters.host = (parameters as any).druidHost || (parameters as any).brokerHost;
     }
     if (typeof parameters.timeout === 'string') {
