@@ -18,7 +18,7 @@ require('./no-data-cubes-application.css');
 
 import * as React from 'react';
 import { STRINGS } from '../../config/constants';
-import { SvgIcon } from '../svg-icon/svg-icon';
+import { SvgIcon } from '../../components/index';
 
 export interface NoDataCubesApplicationProps extends React.Props<any> {
 }

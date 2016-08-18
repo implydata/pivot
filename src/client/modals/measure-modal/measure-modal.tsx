@@ -17,19 +17,14 @@
 require('./measure-modal.css');
 
 import * as React from 'react';
-import { classNames, enterKey } from '../../../utils/dom/dom';
+import { classNames, enterKey } from '../../utils/dom/dom';
 import { List } from 'immutable';
 
-import { SvgIcon } from '../../../components/svg-icon/svg-icon';
-import { FormLabel } from '../../../components/form-label/form-label';
-import { Button } from '../../../components/button/button';
-import { ImmutableInput } from '../../../components/immutable-input/immutable-input';
-import { ImmutableDropdown } from '../../../components/immutable-dropdown/immutable-dropdown';
-import { Modal } from '../../../components/modal/modal';
+import { SvgIcon, FormLabel, Button, ImmutableInput, Modal, ImmutableDropdown } from '../../components/index';
 
-import { Measure } from '../../../../common/models/index';
+import { Measure } from '../../../common/models/index';
 
-import { MEASURE as LABELS } from '../../../../common/models/labels';
+import { MEASURE as LABELS } from '../../../common/models/labels';
 
 
 export interface MeasureModalProps extends React.Props<any> {

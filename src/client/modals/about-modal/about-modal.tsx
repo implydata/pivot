@@ -19,8 +19,7 @@ require('./about-modal.css');
 import * as React from 'react';
 import { Fn } from '../../../common/utils/general/general';
 import { STRINGS } from '../../config/constants';
-import { Modal } from '../modal/modal';
-import { Button } from '../button/button';
+import { Modal, Button } from '../../components/index';
 
 export interface AboutModalProps extends React.Props<any> {
   version: string;

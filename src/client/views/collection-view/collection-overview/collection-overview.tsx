@@ -18,7 +18,7 @@ require('./collection-overview.css');
 
 import * as React from 'react';
 import { Collection, CollectionTile } from '../../../../common/models/index';
-import { SvgIcon, DOMHighlighter } from '../../../components/index';
+import { SvgIcon } from '../../../components/index';
 
 import { CollectionTileCard } from '../collection-tile-card/collection-tile-card';
 

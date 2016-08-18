@@ -7,7 +7,7 @@ import { Collection, Essence, CollectionTile, DataCube, SortOn } from '../../../
 import { classNames } from '../../utils/dom/dom';
 import { generateUniqueName } from '../../../common/utils/string/string';
 
-import { FormLabel, Button, ImmutableInput, Modal, Dropdown, Checkbox } from '../index';
+import { FormLabel, Button, ImmutableInput, Modal, Dropdown, Checkbox } from '../../components/index';
 
 import { STRINGS } from '../../config/constants';
 

@@ -26,16 +26,9 @@ import { Duration, Timezone } from 'chronoshift';
 
 import { DATA_CUBES_STRATEGIES_LABELS } from '../../../config/constants';
 
-import { SvgIcon } from '../../../components/svg-icon/svg-icon';
-import { FormLabel } from '../../../components/form-label/form-label';
-import { Button } from '../../../components/button/button';
-import { SimpleList } from '../../../components/simple-list/simple-list';
-import { ImmutableInput } from '../../../components/immutable-input/immutable-input';
-import { ImmutableList } from '../../../components/immutable-list/immutable-list';
-import { ImmutableDropdown } from '../../../components/immutable-dropdown/immutable-dropdown';
+import { SvgIcon, FormLabel, Button, SimpleList, ImmutableInput, ImmutableList, ImmutableDropdown } from '../../../components/index';
 
-import { DimensionModal } from '../dimension-modal/dimension-modal';
-import { MeasureModal } from '../measure-modal/measure-modal';
+import { DimensionModal, MeasureModal } from '../../../modals/index';
 
 import { AppSettings, ListItem, Cluster, DataCube, Dimension, DimensionJS, Measure, MeasureJS } from '../../../../common/models/index';
 

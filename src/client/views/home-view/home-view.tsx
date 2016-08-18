@@ -21,7 +21,8 @@ import { Collection, Stage, DataCube, User, Customization } from '../../../commo
 import { STRINGS } from '../../config/constants';
 import { Fn } from '../../../common/utils/general/general';
 
-import { HomeHeaderBar, SvgIcon, AddCollectionModal } from '../../components/index';
+import { AddCollectionModal } from '../../modals/index';
+import { HomeHeaderBar, SvgIcon } from '../../components/index';
 import { ItemCard } from './item-card/item-card';
 
 export interface HomeViewProps extends React.Props<any> {

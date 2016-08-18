@@ -24,7 +24,8 @@ import { Collection, CollectionItem, DataCube, Essence, AppSettings } from '../.
 import { Collection, CollectionTile, DataCube, Essence, AppSettings } from '../../../../common/models/index';
 import { generateUniqueName } from '../../../../common/utils/string/string';
 import { STRINGS } from '../../../config/constants';
-import { Notifier, AddCollectionTileModal } from '../../../components/index';
+import { AddCollectionTileModal } from '../../../modals/index';
+import { Notifier } from '../../../components/index';
 
 
 export class CollectionViewDelegate {

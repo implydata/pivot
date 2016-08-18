@@ -17,20 +17,15 @@
 require('./dimension-modal.css');
 
 import * as React from 'react';
-import { Fn } from '../../../../common/utils/general/general';
-import { classNames, enterKey } from '../../../utils/dom/dom';
+import { Fn } from '../../../common/utils/general/general';
+import { classNames, enterKey } from '../../utils/dom/dom';
 import { List } from 'immutable';
 
-import { SvgIcon } from '../../../components/svg-icon/svg-icon';
-import { FormLabel } from '../../../components/form-label/form-label';
-import { Button } from '../../../components/button/button';
-import { ImmutableInput } from '../../../components/immutable-input/immutable-input';
-import { Modal } from '../../../components/modal/modal';
-import { ImmutableDropdown } from '../../../components/immutable-dropdown/immutable-dropdown';
+import { SvgIcon, FormLabel, Button, ImmutableInput, Modal, ImmutableDropdown } from '../../components/index';
 
-import { Dimension, ListItem, granularityFromJS, granularityToString } from '../../../../common/models/index';
+import { Dimension, ListItem, granularityFromJS, granularityToString } from '../../../common/models/index';
 
-import { DIMENSION as LABELS } from '../../../../common/models/labels';
+import { DIMENSION as LABELS } from '../../../common/models/labels';
 
 
 export interface DimensionModalProps extends React.Props<any> {

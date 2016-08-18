@@ -25,13 +25,14 @@ import { DataCube, AppSettings, User, Collection, CollectionTile, Essence, ViewS
 import { STRINGS } from '../../config/constants';
 
 import { createFunctionSlot, FunctionSlot } from '../../utils/function-slot/function-slot';
-import { AboutModal, SideDrawer, Notifications, Notifier, AddCollectionTileModal } from '../../components/index';
+import { AboutModal, AddCollectionTileModal } from '../../modals/index';
+import { SideDrawer, Notifications, Notifier } from '../../components/index';
 
-import { HomeView } from '../home-view/home-view';
-import { LinkView } from '../link-view/link-view';
-import { CubeView } from '../cube-view/cube-view';
-import { SettingsView } from '../settings-view/settings-view';
-import { CollectionView } from '../collection-view/collection-view';
+import { HomeView } from '../../views/home-view/home-view';
+import { LinkView } from '../../views/link-view/link-view';
+import { CubeView } from '../../views/cube-view/cube-view';
+import { SettingsView } from '../../views/settings-view/settings-view';
+import { CollectionView } from '../../views/collection-view/collection-view';
 import { CollectionViewDelegate } from './collection-view-delegate/collection-view-delegate';
 
 export interface PivotApplicationProps extends React.Props<any> {
@@ -151,9 +152,9 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
       });
     }, 'side-drawer');
 
-    require.ensure(['../../components/about-modal/about-modal'], (require) => {
+    require.ensure(['../../modals/about-modal/about-modal'], (require) => {
       this.setState({
-        AboutModalAsync: require('../../components/about-modal/about-modal').AboutModal
+        AboutModalAsync: require('../../modals/about-modal/about-modal').AboutModal
       });
     }, 'about-modal');
 

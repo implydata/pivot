@@ -7,7 +7,7 @@ import { Collection, Essence, CollectionTile, DataCube } from '../../../common/m
 import { classNames } from '../../utils/dom/dom';
 import { generateUniqueName } from '../../../common/utils/string/string';
 
-import { FormLabel, Button, ImmutableInput, Modal, Dropdown } from '../index';
+import { FormLabel, Button, ImmutableInput, Modal, Dropdown } from '../../components/index';
 
 import { STRINGS } from '../../config/constants';
 

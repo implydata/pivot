@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-@import '../../../imports';
+@import '../../imports';
 
-.dimension-modal {
+.remove-modal {
   form {
     @extend %form;
-    width: 100%;
   }
 }

@@ -29,11 +29,8 @@ import { formatFilterClause } from '../../../common/utils/formatter/formatter';
 import { classNames } from '../../utils/dom/dom';
 import { getVisibleSegments } from '../../utils/sizing/sizing';
 import { STRINGS } from '../../config/constants';
-import { Modal } from '../modal/modal';
-import { Button } from '../button/button';
-import { Scroller, ScrollerLayout } from '../scroller/scroller';
-import { Loader } from '../loader/loader';
-import { QueryError } from '../query-error/query-error';
+
+import {Modal, Button, Scroller, ScrollerLayout, Loader, QueryError} from '../../components/index';
 
 const HEADER_HEIGHT = 30;
 const ROW_HEIGHT = 30;

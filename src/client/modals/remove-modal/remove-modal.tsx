@@ -17,15 +17,11 @@
 require('./remove-modal.css');
 
 import * as React from 'react';
-import { Fn } from '../../../../common/utils/general/general';
-import { classNames, enterKey } from '../../../utils/dom/dom';
+import { Fn } from '../../../common/utils/general/general';
+import { classNames, enterKey } from '../../utils/dom/dom';
 
 
-import { SvgIcon } from '../../../components/svg-icon/svg-icon';
-import { FormLabel } from '../../../components/form-label/form-label';
-import { Button } from '../../../components/button/button';
-import { ImmutableInput } from '../../../components/immutable-input/immutable-input';
-import { Modal } from '../../../components/modal/modal';
+import { SvgIcon, FormLabel, Button, ImmutableInput, Modal, ImmutableDropdown } from '../../components/index';
 
 export interface RemoveModalProps extends React.Props<any> {
   itemTitle?: string;
