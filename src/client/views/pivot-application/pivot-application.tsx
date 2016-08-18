@@ -21,7 +21,7 @@ import * as ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import { findByName } from 'plywood';
 
 import { replaceHash } from '../../utils/url/url';
-import { DataCube, AppSettings, User, Collection, CollectionItem, Essence, ViewSupervisor } from '../../../common/models/index';
+import { DataCube, AppSettings, User, Collection, CollectionTile, Essence, ViewSupervisor } from '../../../common/models/index';
 import { STRINGS } from '../../config/constants';
 
 import { createFunctionSlot, FunctionSlot } from '../../utils/function-slot/function-slot';
@@ -324,9 +324,9 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
       });
     };
 
-    const onSave = (_collection: Collection, collectionItem: CollectionItem) => {
+    const onSave = (_collection: Collection, CollectionTile: CollectionTile) => {
       closeModal();
-      this.collectionViewDelegate.addItem(_collection, collectionItem).then(url => {
+      this.collectionViewDelegate.addItem(_collection, CollectionTile).then(url => {
         Notifier.success('Item added', {
           label: 'View',
           callback: () => window.location.hash = url

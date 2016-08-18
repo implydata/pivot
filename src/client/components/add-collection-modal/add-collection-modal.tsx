@@ -3,7 +3,7 @@ require('./add-collection-modal.css');
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { $, Expression, Executor, Dataset } from 'plywood';
-import { Collection, Essence, CollectionItem, DataCube } from '../../../common/models/index';
+import { Collection, Essence, CollectionTile, DataCube } from '../../../common/models/index';
 import { classNames } from '../../utils/dom/dom';
 import { generateUniqueName } from '../../../common/utils/string/string';
 
@@ -40,7 +40,7 @@ export class AddCollectionModal extends React.Component<AddCollectionModalProps,
       canSave: true,
       collection: new Collection({
         name: generateUniqueName('c', this.isNameUnique.bind(this)),
-        items: [],
+        tiles: [],
         title: 'New collection'
       })
     });

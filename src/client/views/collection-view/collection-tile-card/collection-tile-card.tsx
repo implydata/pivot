@@ -22,15 +22,15 @@ import * as ReactDOM from 'react-dom';
 import { SvgIcon, GlobalEventListener } from '../../../components/index';
 import { classNames } from '../../../utils/dom/dom';
 
-import { Collection, CollectionItem, VisualizationProps, Stage, Essence, Device, DeviceSize } from '../../../../common/models/index';
+import { Collection, CollectionTile, VisualizationProps, Stage, Essence, Device, DeviceSize } from '../../../../common/models/index';
 
 import { getVisualizationComponent } from '../../../visualizations/index';
 
 export interface CollectionTileCardProps extends React.Props<any> {
-  item: CollectionItem;
+  tile: CollectionTile;
   className?: string;
-  onExpand?: (item: CollectionItem) => void;
-  onDelete?: (item: CollectionItem) => void;
+  onExpand?: (tile: CollectionTile) => void;
+  onDelete?: (tile: CollectionTile) => void;
 
   editionMode?: boolean;
   onDragOver?: (e: __React.DragEvent) => void;
@@ -67,28 +67,28 @@ export class CollectionTileCard extends React.Component<CollectionTileCardProps,
   }
 
   expand() {
-    const { onExpand, item } = this.props;
+    const { onExpand, tile } = this.props;
 
     if (!onExpand) return;
 
-    onExpand(item);
+    onExpand(tile);
   }
 
   remove() {
-    const { onDelete, item } = this.props;
+    const { onDelete, tile } = this.props;
 
     if (!onDelete) return;
 
-    onDelete(item);
+    onDelete(tile);
   }
 
   render() {
-    const { item, onDragOver, draggable, onDragStart, editionMode, className } = this.props;
+    const { tile, onDragOver, draggable, onDragStart, editionMode, className } = this.props;
     const { visualizationStage, deviceSize } = this.state;
 
-    if (!item) return null;
+    if (!tile) return null;
 
-    var { essence } = item;
+    var { essence } = tile;
 
     var visElement: JSX.Element = null;
     if (essence.visResolve.isReady() && visualizationStage) {
@@ -129,8 +129,8 @@ export class CollectionTileCard extends React.Component<CollectionTileCardProps,
 
         <div className="headband grid-row" onClick={onExpandClick}>
           <div className="grid-col-80 vertical">
-            <div className="title">{item.title}</div>
-            <div className="description">{item.description}</div>
+            <div className="title">{tile.title}</div>
+            <div className="description">{tile.description}</div>
           </div>
           <div className="grid-col-20 middle right">
           { editionMode ?

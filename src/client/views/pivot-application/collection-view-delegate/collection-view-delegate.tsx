@@ -31,10 +31,10 @@ export class CollectionViewDelegate {
   constructor(app: PivotApplication) {
     this.app = app;
 
-    this.deleteItem = this.deleteItem.bind(this);
-    this.createItem = this.createItem.bind(this);
-    this.updateItem = this.updateItem.bind(this);
-    this.editItem = this.editItem.bind(this);
+    this.deleteTile = this.deleteTile.bind(this);
+    this.createTile = this.createTile.bind(this);
+    this.updateTile = this.updateTile.bind(this);
+    this.editTile = this.editTile.bind(this);
   }
 
   private setState(state: PivotApplicationState, callback?: () => void) {
@@ -72,15 +72,15 @@ export class CollectionViewDelegate {
       .then(() => `#collection/${collection.name}`);
   }
 
-  deleteItem(collection: Collection, collectionItem: CollectionItem) {
+  deleteTile(collection: Collection, tile: CollectionTile) {
     const appSettings = this.getSettings();
     const collectionURL = `#collection/${collection.name}`;
-    const oldIndex = collection.items.indexOf(collectionItem);
+    const oldIndex = collection.tiles.indexOf(tile);
 
-    const newCollection = collection.deleteItem(collectionItem);
+    const newCollection = collection.deleteTile(tile);
     const newSettings = appSettings.addOrUpdateCollection(newCollection);
 
-    const undo = () => this.addItem(newCollection, collectionItem, oldIndex);
+    const undo = () => this.addItem(newCollection, tile, oldIndex);
 
     this.save(newSettings).then( () => {
       window.location.hash = collectionURL;
@@ -88,24 +88,24 @@ export class CollectionViewDelegate {
     });
   }
 
-  addItem(collection: Collection, collectionItem: CollectionItem, index?: number): Q.Promise<string> {
+  addItem(collection: Collection, tile: CollectionTile, index?: number): Q.Promise<string> {
     const appSettings = this.getSettings();
 
-    var newItems = collection.items;
+    var newItems = collection.tiles;
 
     if (index !== undefined) {
-      newItems.splice(index, 0, collectionItem);
+      newItems.splice(index, 0, tile);
     } else {
-      newItems.push(collectionItem);
+      newItems.push(tile);
     }
 
     return this
       .save(appSettings.addOrUpdateCollection(collection.change('items', newItems)))
-      .then(() => `#collection/${collection.name}/${collectionItem.name}`)
+      .then(() => `#collection/${collection.name}/${tile.name}`)
     ;
   }
 
-  createItem(collection: Collection, dataCube: DataCube) {
+  createTile(collection: Collection, dataCube: DataCube) {
     const appSettings = this.getSettings();
     const collectionURL = `#collection/${collection.name}`;
 
@@ -114,9 +114,9 @@ export class CollectionViewDelegate {
       window.location.hash = collectionURL;
     };
 
-    var onSave = (_collection: Collection, collectionItem: CollectionItem) => {
+    var onSave = (_collection: Collection, CollectionTile: CollectionTile) => {
       this.setState({cubeViewSupervisor: undefined});
-      this.addItem(_collection, collectionItem).then(url => window.location.hash = url);
+      this.addItem(_collection, CollectionTile).then(url => window.location.hash = url);
     };
 
     var getConfirmationModal = (newEssence: Essence) => {
@@ -159,30 +159,30 @@ export class CollectionViewDelegate {
     });
   }
 
-  updateItem(collection: Collection, item: CollectionItem): Q.Promise<any> {
+  updateTile(collection: Collection, tile: CollectionTile): Q.Promise<any> {
     const appSettings = this.getSettings();
 
-    return this.save(appSettings.addOrUpdateCollection(collection.updateItem(item)));
+    return this.save(appSettings.addOrUpdateCollection(collection.updateTile(tile)));
   }
 
-  editItem(collection: Collection, item: CollectionItem) {
+  editTile(collection: Collection, tile: CollectionTile) {
     const appSettings = this.getSettings();
-    const collectionURL = `#collection/${collection.name}/${item.name}`;
+    const collectionURL = `#collection/${collection.name}/${tile.name}`;
 
     var onCancel = () => window.location.hash = collectionURL;
 
     var onSave = (newEssence: Essence) => {
-      let newCollection = collection.updateItem(item.changeEssence(newEssence));
+      let newCollection = collection.updateTile(tile.changeEssence(newEssence));
 
       this.save(appSettings.addOrUpdateCollection(newCollection))
         .then(() => window.location.hash = collectionURL);
     };
 
-    const { essence } = item;
+    const { essence } = tile;
 
     this.setState({
       cubeViewSupervisor: {
-        title: STRINGS.editVisualization + ': ' + collection.title + ' / ' + item.title,
+        title: STRINGS.editVisualization + ': ' + collection.title + ' / ' + tile.title,
         cancel: onCancel,
         save: onSave
       }

@@ -21,7 +21,7 @@ import { DataCube } from '../data-cube/data-cube';
 import { Essence, EssenceJS } from '../essence/essence';
 import { Manifest } from '../manifest/manifest';
 
-export interface CollectionItemValue {
+export interface CollectionTileValue {
   name: string;
   title: string;
   description: string;
@@ -30,7 +30,7 @@ export interface CollectionItemValue {
   essence: Essence;
 }
 
-export interface CollectionItemJS {
+export interface CollectionTileJS {
   name: string;
   title?: string;
   description?: string;
@@ -39,20 +39,20 @@ export interface CollectionItemJS {
   essence: EssenceJS;
 }
 
-export interface CollectionItemContext {
+export interface CollectionTileContext {
   dataCubes: DataCube[];
   visualizations?: Manifest[];
 }
 
-var check: Class<CollectionItemValue, CollectionItemJS>;
-export class CollectionItem implements Instance<CollectionItemValue, CollectionItemJS> {
+var check: Class<CollectionTileValue, CollectionTileJS>;
+export class CollectionTile implements Instance<CollectionTileValue, CollectionTileJS> {
 
-  static isCollectionItem(candidate: any): candidate is CollectionItem {
-    return isInstanceOf(candidate, CollectionItem);
+  static isCollectionTile(candidate: any): candidate is CollectionTile {
+    return isInstanceOf(candidate, CollectionTile);
   }
 
-  static fromJS(parameters: CollectionItemJS, context?: CollectionItemContext): CollectionItem {
-    if (!context) throw new Error('CollectionItem must have context');
+  static fromJS(parameters: CollectionTileJS, context?: CollectionTileContext): CollectionTile {
+    if (!context) throw new Error('CollectionTile must have context');
     const { dataCubes, visualizations } = context;
 
     var dataCubeName = parameters.dataCube;
@@ -61,7 +61,7 @@ export class CollectionItem implements Instance<CollectionItemValue, CollectionI
 
     var essence = Essence.fromJS(parameters.essence, { dataCube, visualizations }).updateSplitsWithFilter();
 
-    return new CollectionItem({
+    return new CollectionTile({
       name: parameters.name,
       title: parameters.title,
       description: parameters.description,
@@ -78,7 +78,7 @@ export class CollectionItem implements Instance<CollectionItemValue, CollectionI
   public dataCube: DataCube;
   public essence: Essence;
 
-  constructor(parameters: CollectionItemValue) {
+  constructor(parameters: CollectionTileValue) {
     var name = parameters.name;
     verifyUrlSafeName(name);
     this.name = name;
@@ -89,7 +89,7 @@ export class CollectionItem implements Instance<CollectionItemValue, CollectionI
     this.essence = parameters.essence;
   }
 
-  public valueOf(): CollectionItemValue {
+  public valueOf(): CollectionTileValue {
     return {
       name: this.name,
       title: this.title,
@@ -100,7 +100,7 @@ export class CollectionItem implements Instance<CollectionItemValue, CollectionI
     };
   }
 
-  public toJS(): CollectionItemJS {
+  public toJS(): CollectionTileJS {
     return {
       name: this.name,
       title: this.title,
@@ -111,7 +111,7 @@ export class CollectionItem implements Instance<CollectionItemValue, CollectionI
     };
   }
 
-  public toJSON(): CollectionItemJS {
+  public toJSON(): CollectionTileJS {
     return this.toJS();
   }
 
@@ -119,8 +119,8 @@ export class CollectionItem implements Instance<CollectionItemValue, CollectionI
     return `[LinkItem: ${this.name}]`;
   }
 
-  public equals(other: CollectionItem): boolean {
-    return CollectionItem.isCollectionItem(other) &&
+  public equals(other: CollectionTile): boolean {
+    return CollectionTile.isCollectionTile(other) &&
       this.name === other.name &&
       this.title === other.title &&
       this.description === other.description &&
@@ -129,7 +129,7 @@ export class CollectionItem implements Instance<CollectionItemValue, CollectionI
       this.essence.equals(other.essence);
   }
 
-  public change(propertyName: string, newValue: any): CollectionItem {
+  public change(propertyName: string, newValue: any): CollectionTile {
     var v = this.valueOf();
 
     if (!v.hasOwnProperty(propertyName)) {
@@ -137,7 +137,7 @@ export class CollectionItem implements Instance<CollectionItemValue, CollectionI
     }
 
     (v as any)[propertyName] = newValue;
-    return new CollectionItem(v);
+    return new CollectionTile(v);
   }
 
   public changeEssence(essence: Essence) {
@@ -145,4 +145,4 @@ export class CollectionItem implements Instance<CollectionItemValue, CollectionI
   }
 
 }
-check = CollectionItem;
+check = CollectionTile;

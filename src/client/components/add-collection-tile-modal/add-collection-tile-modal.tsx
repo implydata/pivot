@@ -3,7 +3,7 @@ require('./add-collection-tile-modal.css');
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { $, Expression, Executor, Dataset } from 'plywood';
-import { Collection, Essence, CollectionItem, DataCube, SortOn } from '../../../common/models/index';
+import { Collection, Essence, CollectionTile, DataCube, SortOn } from '../../../common/models/index';
 import { classNames } from '../../utils/dom/dom';
 import { generateUniqueName } from '../../../common/utils/string/string';
 
@@ -26,12 +26,12 @@ export interface AddCollectionTileModalProps extends React.Props<any> {
 
   dataCube: DataCube;
   onCancel?: () => void;
-  onSave?: (collection: Collection, collectionItem: CollectionItem) => void;
+  onSave?: (collection: Collection, tile: CollectionTile) => void;
 }
 
 export interface AddCollectionTileModalState {
   collection?: Collection;
-  collectionItem?: CollectionItem;
+  tile?: CollectionTile;
   errors?: any;
   canSave?: boolean;
   collectionMode?: CollectionMode;
@@ -79,7 +79,7 @@ export class AddCollectionTileModal extends React.Component<AddCollectionTileMod
       collectionMode = collections.length > 0 ? 'picking' : 'adding';
       selectedCollection = collections.length > 0 ? collections[0] : new Collection({
         name: generateUniqueName('c', () => true),
-        items: [],
+        tiles: [],
         title: 'New collection'
       });
     } else {
@@ -90,7 +90,7 @@ export class AddCollectionTileModal extends React.Component<AddCollectionTileMod
       canSave: !!selectedCollection,
       collection: selectedCollection,
       collectionMode,
-      collectionItem: new CollectionItem({
+      tile: new CollectionTile({
         name: generateUniqueName('i', this.isItemNameUnique.bind(this, selectedCollection)),
         title: this.getTitleFromEssence(essence),
         description: '',
@@ -106,18 +106,18 @@ export class AddCollectionTileModal extends React.Component<AddCollectionTileMod
   }
 
   componentWillReceiveProps(nextProps: AddCollectionTileModalProps) {
-    if (!this.state.collectionItem) this.initFromProps(nextProps);
+    if (!this.state.tile) this.initFromProps(nextProps);
   }
 
   save() {
-    const { canSave, collection, collectionItem } = this.state;
-    if (canSave && this.props.onSave) this.props.onSave(collection, collectionItem);
+    const { canSave, collection, tile } = this.state;
+    if (canSave && this.props.onSave) this.props.onSave(collection, tile);
   }
 
   isItemNameUnique(collection: Collection, name: string): boolean {
     if (!collection) return true;
 
-    if (collection.items.filter((item: CollectionItem) => item.name === name).length > 0) {
+    if (collection.tiles.filter(tile => tile.name === name).length > 0) {
       return false;
     }
 
@@ -135,13 +135,13 @@ export class AddCollectionTileModal extends React.Component<AddCollectionTileMod
     return {errors, canSave};
   }
 
-  onChange(newCollectionItem: CollectionItem, isValid: boolean, path: string, error: string) {
+  onChange(newCollectionTile: CollectionTile, isValid: boolean, path: string, error: string) {
     var { errors, canSave } = this.updateErrors(path, isValid, error);
 
     if (isValid) {
       this.setState({
         errors,
-        collectionItem: newCollectionItem,
+        tile: newCollectionTile,
         canSave
       });
     } else {
@@ -153,7 +153,7 @@ export class AddCollectionTileModal extends React.Component<AddCollectionTileMod
   }
 
   renderCollectionDropdown(): JSX.Element {
-    const { collection, collectionItem } = this.state;
+    const { collection, tile } = this.state;
     const { collections } = this.props;
 
     if (!collections || collections.length === 0)  return null;
@@ -167,7 +167,7 @@ export class AddCollectionTileModal extends React.Component<AddCollectionTileMod
         collection: c,
         errors,
         canSave,
-        collectionItem: collectionItem.change(
+        tile: tile.change(
           'name',
           generateUniqueName('i', this.isItemNameUnique.bind(this, c))
         )
@@ -185,7 +185,7 @@ export class AddCollectionTileModal extends React.Component<AddCollectionTileMod
 
   renderCollectionPicker() {
     const { collections } = this.props;
-    const { collectionItem, collection, collectionMode } = this.state;
+    const { tile, collection, collectionMode } = this.state;
 
     const isCollectionNameUnique = (name: string) => {
       return collections.filter(c => c.name === name).length === 0;
@@ -198,7 +198,7 @@ export class AddCollectionTileModal extends React.Component<AddCollectionTileMod
       if (newMode === 'adding') {
         collection = new Collection({
           name: generateUniqueName('c', isCollectionNameUnique),
-          items: [],
+          tiles: [],
           title: 'New collection'
         });
       } else {
@@ -212,11 +212,11 @@ export class AddCollectionTileModal extends React.Component<AddCollectionTileMod
     };
 
     const onCollectionChange = (newCollection: Collection) => {
-      let myCollectionItem = collectionItem;
+      let myCollectionTile = tile;
 
       this.setState({
         collection: newCollection,
-        collectionItem: collectionItem.change(
+        tile: tile.change(
           'name',
           generateUniqueName('i', this.isItemNameUnique.bind(this, newCollection))
         )
@@ -249,29 +249,29 @@ export class AddCollectionTileModal extends React.Component<AddCollectionTileMod
 
   toggleConvertToFixed() {
     const { essence } = this.props;
-    var { collectionItem } = this.state;
+    var { tile } = this.state;
     const convertToFixedTime = !this.state.convertToFixedTime;
 
     if (convertToFixedTime && essence.filter.isRelative()) {
-      collectionItem = collectionItem.changeEssence(essence.convertToSpecificFilter());
+      tile = tile.changeEssence(essence.convertToSpecificFilter());
     } else {
-      collectionItem = collectionItem.changeEssence(essence);
+      tile = tile.changeEssence(essence);
     }
 
     this.setState({
       convertToFixedTime,
-      collectionItem
+      tile
     });
   }
 
   render(): JSX.Element {
-    const { canSave, errors, collectionItem, collectionMode, convertToFixedTime } = this.state;
+    const { canSave, errors, tile, collectionMode, convertToFixedTime } = this.state;
     const { collections, onCancel, essence } = this.props;
 
-    if (!collectionItem) return null;
+    if (!tile) return null;
 
     var makeLabel = FormLabel.simpleGenerator(LABELS, errors, true);
-    var makeTextInput = ImmutableInput.simpleGenerator(collectionItem, this.onChange.bind(this));
+    var makeTextInput = ImmutableInput.simpleGenerator(tile, this.onChange.bind(this));
 
     const isRelative = essence.filter.isRelative();
 

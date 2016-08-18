@@ -74,7 +74,7 @@ export class HomeView extends React.Component< HomeViewProps, HomeViewState> {
     return <ItemCard
       key={item.name}
       title={item.title}
-      count={Collection.isCollection(item) ? item.items.length : undefined}
+      count={Collection.isCollection(item) ? item.tiles.length : undefined}
       description={item.description}
       icon={item instanceof DataCube ? 'full-cube' : 'full-collection'}
       onClick={this.goToItem.bind(this, item)}

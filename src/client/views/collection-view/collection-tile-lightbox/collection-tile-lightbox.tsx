@@ -24,7 +24,7 @@ import { STRINGS } from '../../../config/constants';
 import { isInside, classNames } from '../../../utils/dom/dom';
 
 import { SvgIcon, GlobalEventListener, BodyPortal, GoldenCenter, BubbleMenu, ImmutableInput } from '../../../components/index';
-import { Collection, CollectionItem, VisualizationProps, Stage, Essence } from '../../../../common/models/index';
+import { Collection, CollectionTile, VisualizationProps, Stage, Essence } from '../../../../common/models/index';
 
 import { COLLECTION_ITEM as LABELS } from '../../../../common/models/labels';
 
@@ -32,19 +32,19 @@ import { getVisualizationComponent } from '../../../visualizations/index';
 
 export interface CollectionTileLightboxProps extends React.Props<any> {
   collection?: Collection;
-  itemId?: string;
-  onEdit?: (collection: Collection, collectionItem: CollectionItem) => void;
-  onDelete?: (collection: Collection, collectionItem: CollectionItem) => void;
-  onChange?: (collection: Collection, collectionItem: CollectionItem) => Q.Promise<any>;
+  tileId?: string;
+  onEdit?: (collection: Collection, tile: CollectionTile) => void;
+  onDelete?: (collection: Collection, tile: CollectionTile) => void;
+  onChange?: (collection: Collection, tile: CollectionTile) => Q.Promise<any>;
 }
 
 export interface CollectionTileLightboxState {
-  item?: CollectionItem;
+  tile?: CollectionTile;
   visualizationStage?: Stage;
   editMenuOpen?: boolean;
   moreMenuOpen?: boolean;
   editionMode?: boolean;
-  tempItem?: CollectionItem;
+  tempTile?: CollectionTile;
 }
 
 export class CollectionTileLightbox extends React.Component<CollectionTileLightboxProps, CollectionTileLightboxState> {
@@ -55,13 +55,13 @@ export class CollectionTileLightbox extends React.Component<CollectionTileLightb
   }
 
   componentWillReceiveProps(nextProps: CollectionTileLightboxProps) {
-    const { collection, itemId } = nextProps;
+    const { collection, tileId } = nextProps;
 
     if (collection) {
-      let item = collection.items.filter(({name}) => itemId === name)[0];
+      let tile = collection.tiles.filter(({name}) => tileId === name)[0];
 
       this.setState({
-        item
+        tile
       });
     }
   }
@@ -78,7 +78,7 @@ export class CollectionTileLightbox extends React.Component<CollectionTileLightb
   }
 
   onExplore() {
-    const essence = this.state.item.essence as Essence;
+    const essence = this.state.tile.essence as Essence;
     window.location.hash = '#' + essence.getURL(essence.dataCube.name + '/');
   }
 
@@ -104,7 +104,7 @@ export class CollectionTileLightbox extends React.Component<CollectionTileLightb
     if (this.state.editionMode) {
       this.setState({
         editionMode: false,
-        tempItem: null
+        tempTile: null
       });
       return;
     }
@@ -118,16 +118,16 @@ export class CollectionTileLightbox extends React.Component<CollectionTileLightb
     this.setState({
       editMenuOpen: false,
       editionMode: true,
-      tempItem: new CollectionItem(this.state.item.valueOf())
+      tempTile: new CollectionTile(this.state.tile.valueOf())
     });
   }
 
   renderEditMenu() {
     const { onEdit, collection } = this.props;
-    const { item } = this.state;
+    const { tile } = this.state;
     var onClose = () => this.setState({editMenuOpen: false});
 
-    const edit = () => onEdit(collection, item);
+    const edit = () => onEdit(collection, tile);
 
     return <BubbleMenu
       className="edit-menu"
@@ -145,10 +145,10 @@ export class CollectionTileLightbox extends React.Component<CollectionTileLightb
 
   renderMoreMenu() {
     const { onDelete, collection } = this.props;
-    const { item } = this.state;
+    const { tile } = this.state;
     var onClose = () => this.setState({moreMenuOpen: false});
 
-    const remove = () => onDelete(collection, item);
+    const remove = () => onDelete(collection, tile);
 
     return <BubbleMenu
       className="more-menu"
@@ -158,8 +158,8 @@ export class CollectionTileLightbox extends React.Component<CollectionTileLightb
       onClose={onClose}
     >
       <ul className="bubble-list">
-        <li className="duplicate-item" >{STRINGS.duplicateCollectionTile}</li>
-        <li className="delete-item" onClick={remove}>{STRINGS.deleteCollectionTile}</li>
+        <li className="duplicate-tile" >{STRINGS.duplicateCollectionTile}</li>
+        <li className="delete-tile" onClick={remove}>{STRINGS.deleteCollectionTile}</li>
       </ul>
     </BubbleMenu>;
   }
@@ -183,16 +183,16 @@ export class CollectionTileLightbox extends React.Component<CollectionTileLightb
 
   swipe(direction: number) {
     const { collection } = this.props;
-    const { item } = this.state;
+    const { tile } = this.state;
 
-    const items = collection.items;
+    const tiles = collection.tiles;
 
-    var newIndex = items.indexOf(item) + direction;
+    var newIndex = tiles.indexOf(tile) + direction;
 
-    if (newIndex >= items.length) newIndex = 0;
-    if (newIndex < 0) newIndex = items.length - 1;
+    if (newIndex >= tiles.length) newIndex = 0;
+    if (newIndex < 0) newIndex = tiles.length - 1;
 
-    window.location.hash = `#collection/${collection.name}/${items[newIndex].name}`;
+    window.location.hash = `#collection/${collection.name}/${tiles[newIndex].name}`;
   }
 
   onEnter() {
@@ -201,12 +201,12 @@ export class CollectionTileLightbox extends React.Component<CollectionTileLightb
 
   saveEdition() {
     const { collection } = this.props;
-    const { tempItem } = this.state;
+    const { tempTile } = this.state;
 
-    this.props.onChange(collection, tempItem).then(() => {
+    this.props.onChange(collection, tempTile).then(() => {
       this.setState({
-        item: tempItem,
-        tempItem: null,
+        tile: tempTile,
+        tempTile: null,
         editionMode: false
       });
     });
@@ -214,7 +214,7 @@ export class CollectionTileLightbox extends React.Component<CollectionTileLightb
 
   renderHeadBand(): JSX.Element {
     const { onEdit } = this.props;
-    const { editionMode, tempItem, item, editMenuOpen, moreMenuOpen } = this.state;
+    const { editionMode, tempTile, tile, editMenuOpen, moreMenuOpen } = this.state;
 
     var editButton: JSX.Element = null;
     var moreButton: JSX.Element = null;
@@ -239,8 +239,8 @@ export class CollectionTileLightbox extends React.Component<CollectionTileLightb
     if (!editionMode) {
       return <div className="headband grid-row">
         <div className="grid-col-70 vertical">
-          <div className="title actionable" onClick={this.editTitleAndDesc.bind(this)}>{item.title}</div>
-          <div className="description actionable" onClick={this.editTitleAndDesc.bind(this)}>{item.description}</div>
+          <div className="title actionable" onClick={this.editTitleAndDesc.bind(this)}>{tile.title}</div>
+          <div className="description actionable" onClick={this.editTitleAndDesc.bind(this)}>{tile.description}</div>
         </div>
         <div className="grid-col-30 right middle">
           <div className="explore-button" onClick={this.onExplore.bind(this)}>
@@ -256,16 +256,16 @@ export class CollectionTileLightbox extends React.Component<CollectionTileLightb
       </div>;
     }
 
-    var onChange = (newItem: CollectionItem) => {
-      this.setState({tempItem: newItem});
+    var onChange = (newItem: CollectionTile) => {
+      this.setState({tempTile: newItem});
     };
 
-    var makeTextInput = ImmutableInput.simpleGenerator(tempItem, onChange);
+    var makeTextInput = ImmutableInput.simpleGenerator(tempTile, onChange);
 
     var cancel = () => {
       this.setState({
         editionMode: false,
-        tempItem: null
+        tempTile: null
       });
     };
 
@@ -282,11 +282,11 @@ export class CollectionTileLightbox extends React.Component<CollectionTileLightb
   }
 
   render() {
-    const { item, visualizationStage, editMenuOpen, moreMenuOpen } = this.state;
+    const { tile, visualizationStage, editMenuOpen, moreMenuOpen } = this.state;
 
-    if (!item) return null;
+    if (!tile) return null;
 
-    var { essence } = item;
+    var { essence } = tile;
 
     var visElement: JSX.Element = null;
     if (essence.visResolve.isReady() && visualizationStage) {
