@@ -47,7 +47,7 @@ export class CollectionViewDelegate {
   }
 
   private setState(state: PivotApplicationState, callback?: () => void) {
-    return this.app.setState.bind(this.app)(state, callback);
+    return this.app.setState.call(this.app, state, callback);
   }
 
   private save(appSettings: AppSettings): Q.Promise<any> {

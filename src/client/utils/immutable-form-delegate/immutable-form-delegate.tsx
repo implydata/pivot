@@ -15,8 +15,6 @@
  */
 
 import * as React from 'react';
-import * as Qajax from 'qajax';
-import * as Q from 'q';
 
 export interface FormItem {
   change: (propName: string, propValue: any) => FormItem;
@@ -49,7 +47,7 @@ export class ImmutableFormDelegate<T> {
   }
 
   private setState(state: ImmutableFormState<T>, callback?: () => void) {
-    return this.form.setState.bind(this.form)(state, callback);
+    return this.form.setState.call(this.form, state, callback);
   }
 
   updateErrors(path: string, isValid: boolean, error: string): {errors: any, canSave: boolean} {
