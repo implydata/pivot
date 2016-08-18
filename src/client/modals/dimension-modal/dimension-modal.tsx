@@ -27,6 +27,8 @@ import { Dimension, ListItem, granularityFromJS, granularityToString } from '../
 
 import { DIMENSION as LABELS } from '../../../common/models/labels';
 
+import { ImmutableFormDelegate, ImmutableFormState } from '../../utils/immutable-form-delegate/immutable-form-delegate';
+
 
 export interface DimensionModalProps extends React.Props<any> {
   dimensions?: List<Dimension>;
@@ -36,13 +38,7 @@ export interface DimensionModalProps extends React.Props<any> {
   isCreating?: boolean;
 }
 
-export interface DimensionModalState {
-  newDimension?: Dimension;
-  canSave?: boolean;
-  errors?: any;
-}
-
-export class DimensionModal extends React.Component<DimensionModalProps, DimensionModalState> {
+export class DimensionModal extends React.Component<DimensionModalProps, ImmutableFormState<Dimension>> {
   static KINDS: ListItem[] = [
     {label: 'Time', value: 'time'},
     {label: 'String', value: 'string'},
@@ -55,18 +51,18 @@ export class DimensionModal extends React.Component<DimensionModalProps, Dimensi
     {label: 'Don’t Bucket', value: Dimension.defaultNoBucket}
   ];
 
+  private delegate: ImmutableFormDelegate<Dimension>;
+
   constructor() {
     super();
-    this.state = {
-      canSave: false,
-      errors: {}
-    };
+
+    this.delegate = new ImmutableFormDelegate(this);
   }
 
   initStateFromProps(props: DimensionModalProps) {
     if (props.dimension) {
       this.setState({
-        newDimension: new Dimension(props.dimension.valueOf()),
+        newInstance: new Dimension(props.dimension.valueOf()),
         canSave: false,
         errors: {}
       });
@@ -81,31 +77,9 @@ export class DimensionModal extends React.Component<DimensionModalProps, Dimensi
     this.initStateFromProps(this.props);
   }
 
-  onChange(newDimension: Dimension, isValid: boolean, path: string, error: string) {
-    var { errors } = this.state;
-
-    errors[path] = isValid ? false : error;
-
-    var canSave = true;
-    for (let key in errors) canSave = canSave && (errors[key] === false);
-
-    if (isValid) {
-      this.setState({
-        newDimension,
-        errors,
-        canSave: canSave && !this.props.dimension.equals(newDimension)
-      });
-    } else {
-      this.setState({
-        errors,
-        canSave: false
-      });
-    }
-  }
-
   save() {
     if (!this.state.canSave) return;
-    this.props.onSave(this.state.newDimension);
+    this.props.onSave(this.state.newInstance);
   }
 
   uniqueName(name: string): boolean {
@@ -120,16 +94,17 @@ export class DimensionModal extends React.Component<DimensionModalProps, Dimensi
 
   render(): JSX.Element {
     const { isCreating, dimension } = this.props;
-    const { newDimension, canSave, errors } = this.state;
+    const { newInstance, canSave, errors } = this.state;
+    const saveButtonDisabled = !canSave || dimension.equals(newInstance);
 
-    if (!newDimension) return null;
+    if (!newInstance) return null;
 
-    const isTime = newDimension.kind === 'time';
-    const isContinuous = newDimension.isContinuous();
+    const isTime = newInstance.kind === 'time';
+    const isContinuous = newInstance.isContinuous();
 
     var makeLabel = FormLabel.simpleGenerator(LABELS, errors, true);
-    var makeTextInput = ImmutableInput.simpleGenerator(newDimension, this.onChange.bind(this));
-    var makeDropDownInput = ImmutableDropdown.simpleGenerator(newDimension, this.onChange.bind(this));
+    var makeTextInput = ImmutableInput.simpleGenerator(newInstance, this.delegate.onChange);
+    var makeDropDownInput = ImmutableDropdown.simpleGenerator(newInstance, this.delegate.onChange);
 
     return <Modal
       className="dimension-modal"
@@ -155,9 +130,9 @@ export class DimensionModal extends React.Component<DimensionModalProps, Dimensi
 
         {isTime ? makeLabel('granularities') : null}
         {isTime ? <ImmutableInput
-          instance={newDimension}
+          instance={newInstance}
           path={'granularities'}
-          onChange={this.onChange.bind(this)}
+          onChange={this.delegate.onChange}
 
           valueToString={(value: any) => value ? value.map(granularityToString).join(', ') : undefined}
           stringToValue={(str: string) => str.split(/\s*,\s*/).map(granularityFromJS)}
@@ -169,7 +144,7 @@ export class DimensionModal extends React.Component<DimensionModalProps, Dimensi
       </form>
 
       <div className="button-bar">
-        <Button className={classNames("save", {disabled: !canSave})} title="OK" type="primary" onClick={this.save.bind(this)}/>
+        <Button className={classNames("save", {disabled: saveButtonDisabled})} title="OK" type="primary" onClick={this.save.bind(this)}/>
         <Button className="cancel" title="Cancel" type="secondary" onClick={this.props.onClose}/>
       </div>
 

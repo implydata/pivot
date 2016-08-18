@@ -26,6 +26,8 @@ import { Measure } from '../../../common/models/index';
 
 import { MEASURE as LABELS } from '../../../common/models/labels';
 
+import { ImmutableFormDelegate, ImmutableFormState } from '../../utils/immutable-form-delegate/immutable-form-delegate';
+
 
 export interface MeasureModalProps extends React.Props<any> {
   measures?: List<Measure>;
@@ -35,27 +37,21 @@ export interface MeasureModalProps extends React.Props<any> {
   isCreating?: boolean;
 }
 
-export interface MeasureModalState {
-  newMeasure?: Measure;
-  canSave?: boolean;
-  errors?: any;
-}
 
-export class MeasureModal extends React.Component<MeasureModalProps, MeasureModalState> {
+export class MeasureModal extends React.Component<MeasureModalProps, ImmutableFormState<Measure>> {
   private hasInitialized = false;
+
+  private delegate: ImmutableFormDelegate<Measure>;
 
   constructor() {
     super();
-    this.state = {
-      canSave: false,
-      errors: {}
-    };
+    this.delegate = new ImmutableFormDelegate<Measure>(this);
   }
 
   initStateFromProps(props: MeasureModalProps) {
     if (props.measure) {
       this.setState({
-        newMeasure: new Measure(props.measure.valueOf()),
+        newInstance: new Measure(props.measure.valueOf()),
         canSave: false
       });
     }
@@ -69,31 +65,9 @@ export class MeasureModal extends React.Component<MeasureModalProps, MeasureModa
     this.initStateFromProps(this.props);
   }
 
-  onChange(newMeasure: Measure, isValid: boolean, path: string, error: string) {
-    var { errors } = this.state;
-
-    errors[path] = isValid ? false : error;
-
-    var canSave = true;
-    for (let key in errors) canSave = canSave && (errors[key] === false);
-
-    if (isValid) {
-      this.setState({
-        errors,
-        newMeasure,
-        canSave: canSave && !this.props.measure.equals(newMeasure)
-      });
-    } else {
-      this.setState({
-        errors,
-        canSave: false
-      });
-    }
-  }
-
   save() {
     if (!this.state.canSave) return;
-    this.props.onSave(this.state.newMeasure);
+    this.props.onSave(this.state.newInstance);
   }
 
   uniqueName(name: string): boolean {
@@ -108,13 +82,14 @@ export class MeasureModal extends React.Component<MeasureModalProps, MeasureModa
 
   render(): JSX.Element {
     const { isCreating, measure } = this.props;
-    const { newMeasure, canSave, errors } = this.state;
+    const { newInstance, canSave, errors } = this.state;
+    const saveButtonDisabled = !canSave || measure.equals(newInstance);
 
-    if (!newMeasure) return null;
+    if (!newInstance) return null;
 
     var makeLabel = FormLabel.simpleGenerator(LABELS, errors, true);
-    var makeTextInput = ImmutableInput.simpleGenerator(newMeasure, this.onChange.bind(this));
-    var makeDropDownInput = ImmutableDropdown.simpleGenerator(newMeasure, this.onChange.bind(this));
+    var makeTextInput = ImmutableInput.simpleGenerator(newInstance, this.delegate.onChange);
+    var makeDropDownInput = ImmutableDropdown.simpleGenerator(newInstance, this.delegate.onChange);
 
     return <Modal
       className="dimension-modal"
@@ -138,7 +113,7 @@ export class MeasureModal extends React.Component<MeasureModalProps, MeasureModa
       </form>
 
       <div className="button-bar">
-        <Button className={classNames("save", {disabled: !canSave})} title="OK" type="primary" onClick={this.save.bind(this)}/>
+        <Button className={classNames("save", {disabled: saveButtonDisabled})} title="OK" type="primary" onClick={this.save.bind(this)}/>
         <Button className="cancel" title="Cancel" type="secondary" onClick={this.props.onClose}/>
       </div>
 

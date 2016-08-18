@@ -5,6 +5,7 @@ import * as ReactDOM from 'react-dom';
 import { $, Expression, Executor, Dataset } from 'plywood';
 import { Collection, Essence, CollectionTile, DataCube } from '../../../common/models/index';
 import { classNames } from '../../utils/dom/dom';
+import { ImmutableFormDelegate, ImmutableFormState } from '../../utils/immutable-form-delegate/immutable-form-delegate';
 import { generateUniqueName } from '../../../common/utils/string/string';
 
 import { FormLabel, Button, ImmutableInput, Modal, Dropdown } from '../../components/index';
@@ -19,26 +20,20 @@ export interface AddCollectionModalProps extends React.Props<any> {
   onSave?: (collection: Collection) => void;
 }
 
-export interface AddCollectionModalState {
-  collection?: Collection;
-  errors?: any;
-  canSave?: boolean;
-}
+export class AddCollectionModal extends React.Component<AddCollectionModalProps, ImmutableFormState<Collection>> {
 
-export class AddCollectionModal extends React.Component<AddCollectionModalProps, AddCollectionModalState> {
+  private delegate: ImmutableFormDelegate<Collection>;
 
   constructor() {
     super();
-    this.state = {
-      canSave: false,
-      errors: {}
-    };
+
+    this.delegate = new ImmutableFormDelegate(this);
   }
 
   initFromProps(props: AddCollectionModalProps) {
     this.setState({
       canSave: true,
-      collection: new Collection({
+      newInstance: new Collection({
         name: generateUniqueName('c', this.isNameUnique.bind(this)),
         tiles: [],
         title: 'New collection'
@@ -51,7 +46,7 @@ export class AddCollectionModal extends React.Component<AddCollectionModalProps,
   }
 
   save() {
-    if (this.state.canSave) this.props.onSave(this.state.collection);
+    if (this.state.canSave) this.props.onSave(this.state.newInstance);
   }
 
   isNameUnique(name: string): boolean {
@@ -62,42 +57,14 @@ export class AddCollectionModal extends React.Component<AddCollectionModalProps,
     return true;
   }
 
-  updateErrors(path: string, isValid: boolean, error: string): {errors: any, canSave: boolean} {
-    var { errors } = this.state;
-
-    errors[path] = isValid ? false : error;
-
-    var canSave = true;
-    for (let key in errors) canSave = canSave && (errors[key] === false);
-
-    return {errors, canSave};
-  }
-
-  onChange(newCollection: Collection, isValid: boolean, path: string, error: string) {
-    var { errors, canSave } = this.updateErrors(path, isValid, error);
-
-    if (isValid) {
-      this.setState({
-        errors,
-        collection: newCollection,
-        canSave
-      });
-    } else {
-      this.setState({
-        errors,
-        canSave: false
-      });
-    }
-  }
-
   render(): JSX.Element {
-    const { canSave, errors, collection } = this.state;
+    const { canSave, errors, newInstance } = this.state;
     const { collections } = this.props;
 
-    if (!collection) return null;
+    if (!newInstance) return null;
 
     var makeLabel = FormLabel.simpleGenerator(LABELS, errors, true);
-    var makeTextInput = ImmutableInput.simpleGenerator(collection, this.onChange.bind(this));
+    var makeTextInput = ImmutableInput.simpleGenerator(newInstance, this.delegate.onChange);
 
     return <Modal
       className="add-collection-modal"

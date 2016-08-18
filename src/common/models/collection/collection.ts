@@ -71,6 +71,8 @@ export class Collection implements Instance<CollectionValue, CollectionJS> {
     this.name = parameters.name;
     this.tiles = parameters.tiles;
     this.description = parameters.description;
+
+    this.isNameAvailable = this.isNameAvailable.bind(this);
   }
 
   public valueOf(): CollectionValue {

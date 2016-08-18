@@ -116,7 +116,7 @@ export class CollectionViewDelegate {
 
   duplicateTile(collection: Collection, tile: CollectionTile): Q.Promise<string> {
     var newTile = new CollectionTile(tile.valueOf())
-      .changeName(generateUniqueName('i', collection.isNameAvailable.bind(collection)))
+      .changeName(generateUniqueName('i', collection.isNameAvailable))
       .changeTitle(tile.title + ' (copy)')
       ;
 
