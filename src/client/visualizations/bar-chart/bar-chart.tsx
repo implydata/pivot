@@ -89,9 +89,12 @@ function getFilterFromDatum(splits: Splits, dataPath: Datum[], dataCube: DataCub
   })));
 }
 
-function padData(data: Datum[], dimensionName: string, measures: Measure[]) {
+function padDataset(originalDataset: Dataset, dimension: Dimension, measures: Measure[]): Dataset {
+  const data = (originalDataset.data[0][SPLIT] as Dataset).data;
+  const dimensionName = dimension.name;
+
   const firstBucket: PlywoodRange = data[0][dimensionName] as PlywoodRange;
-  if (!firstBucket) return data;
+  if (!firstBucket) return originalDataset;
   const start = Number(firstBucket.start);
   const end = Number(firstBucket.end);
 
@@ -128,12 +131,7 @@ function padData(data: Datum[], dimensionName: string, measures: Measure[]) {
     i += size;
     j++;
   });
-  return filledData;
-}
 
-function padDataset(originalDataset: Dataset, dimension: Dimension, measures: Measure[]): Dataset {
-  const data = (originalDataset.data[0][SPLIT] as Dataset).data;
-  var filledData = padData(data, dimension.name, measures);
   var value = originalDataset.valueOf();
   (value.data[0][SPLIT] as Dataset).data = filledData;
   return new Dataset(value);
@@ -141,7 +139,8 @@ function padDataset(originalDataset: Dataset, dimension: Dimension, measures: Me
 
 function padDatasetLoad(datasetLoad: DatasetLoad, dimension: Dimension, measures: Measure[]): DatasetLoad {
   var originalDataset = datasetLoad.dataset;
-  datasetLoad.dataset = originalDataset ? padDataset(originalDataset, dimension, measures) : null;
+  var newDataset = originalDataset ? padDataset(originalDataset, dimension, measures) : null;
+  datasetLoad.dataset = newDataset;
   return datasetLoad;
 }
 
