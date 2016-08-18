@@ -21,8 +21,11 @@ import { PivotApplication, PivotApplicationProps, PivotApplicationState } from '
 
 import { Ajax } from '../../../utils/ajax/ajax';
 import { Collection, CollectionItem, DataCube, Essence, AppSettings } from '../../../../common/models/index';
+import { Collection, CollectionTile, DataCube, Essence, AppSettings } from '../../../../common/models/index';
+import { generateUniqueName } from '../../../../common/utils/string/string';
 import { STRINGS } from '../../../config/constants';
 import { Notifier, AddCollectionTileModal } from '../../../components/index';
+
 
 export class CollectionViewDelegate {
 
@@ -31,10 +34,15 @@ export class CollectionViewDelegate {
   constructor(app: PivotApplication) {
     this.app = app;
 
-    this.deleteTile = this.deleteTile.bind(this);
+    this.addCollection = this.addCollection.bind(this);
+    this.addTile = this.addTile.bind(this);
     this.createTile = this.createTile.bind(this);
-    this.updateTile = this.updateTile.bind(this);
+    this.deleteCollection = this.deleteCollection.bind(this);
+    this.deleteTile = this.deleteTile.bind(this);
+    this.duplicateTile = this.duplicateTile.bind(this);
     this.editTile = this.editTile.bind(this);
+    this.updateCollection = this.updateCollection.bind(this);
+    this.updateTile = this.updateTile.bind(this);
   }
 
   private setState(state: PivotApplicationState, callback?: () => void) {
@@ -80,29 +88,38 @@ export class CollectionViewDelegate {
     const newCollection = collection.deleteTile(tile);
     const newSettings = appSettings.addOrUpdateCollection(newCollection);
 
-    const undo = () => this.addItem(newCollection, tile, oldIndex);
+    const undo = () => this.addTile(newCollection, tile, oldIndex);
 
     this.save(newSettings).then( () => {
       window.location.hash = collectionURL;
-      Notifier.success('Item removed', {label: STRINGS.undo, callback: undo});
+      Notifier.success('Tile removed', {label: STRINGS.undo, callback: undo});
     });
   }
 
-  addItem(collection: Collection, tile: CollectionTile, index?: number): Q.Promise<string> {
+  addTile(collection: Collection, tile: CollectionTile, index?: number): Q.Promise<string> {
     const appSettings = this.getSettings();
 
-    var newItems = collection.tiles;
+    var newTiles = collection.tiles;
 
     if (index !== undefined) {
-      newItems.splice(index, 0, tile);
+      newTiles.splice(index, 0, tile);
     } else {
-      newItems.push(tile);
+      newTiles.push(tile);
     }
 
     return this
-      .save(appSettings.addOrUpdateCollection(collection.change('items', newItems)))
+      .save(appSettings.addOrUpdateCollection(collection.changeTiles(newTiles)))
       .then(() => `#collection/${collection.name}/${tile.name}`)
     ;
+  }
+
+  duplicateTile(collection: Collection, tile: CollectionTile): Q.Promise<string> {
+    var newTile = new CollectionTile(tile.valueOf())
+      .changeName(generateUniqueName('i', collection.isNameAvailable.bind(collection)))
+      .changeTitle(tile.title + ' (copy)')
+      ;
+
+    return this.addTile(collection, newTile);
   }
 
   createTile(collection: Collection, dataCube: DataCube) {
@@ -116,7 +133,7 @@ export class CollectionViewDelegate {
 
     var onSave = (_collection: Collection, CollectionTile: CollectionTile) => {
       this.setState({cubeViewSupervisor: undefined});
-      this.addItem(_collection, CollectionTile).then(url => window.location.hash = url);
+      this.addTile(_collection, CollectionTile).then(url => window.location.hash = url);
     };
 
     var getConfirmationModal = (newEssence: Essence) => {

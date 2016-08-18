@@ -18,7 +18,7 @@ import { Class, Instance, isInstanceOf, immutableArraysEqual } from 'immutable-c
 import { findByName } from 'plywood';
 
 import { Manifest } from '../manifest/manifest';
-import { CollectionTile, CollectionTileJS, CollectionTileContext } from '../collection-item/collection-item';
+import { CollectionTile, CollectionTileJS, CollectionTileContext } from '../index';
 
 export interface CollectionValue {
   name: string;
@@ -116,6 +116,10 @@ export class Collection implements Instance<CollectionValue, CollectionJS> {
 
   public findByName(name: string): CollectionTile {
     return findByName(this.tiles, name);
+  }
+
+  public isNameAvailable(name: string): boolean {
+    return !this.findByName(name);
   }
 
   public deleteTile(item: CollectionTile): Collection {

@@ -18,8 +18,8 @@ import { expect } from 'chai';
 import { testImmutableClass } from 'immutable-class-tester';
 
 import { $, Expression } from 'plywood';
-import { CollectionTileMock } from './collection-item.mock';
-import { CollectionTile } from './collection-item';
+import { CollectionTileMock } from './collection-tile.mock';
+import { CollectionTile } from './collection-tile';
 
 describe('CollectionTile', () => {
   var context = CollectionTileMock.getContext();

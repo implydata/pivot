@@ -16,7 +16,7 @@
 
 import { $ } from 'plywood';
 import { DataCubeMock } from "../data-cube/data-cube.mock";
-import { CollectionTileMock } from "../collection-item/collection-item.mock";
+import { CollectionTileMock } from "../collection-tile/collection-tile.mock";
 import { Collection, CollectionJS, CollectionContext } from './collection';
 
 export class CollectionMock {

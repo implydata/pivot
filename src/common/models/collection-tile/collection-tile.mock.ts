@@ -18,7 +18,7 @@ import { $ } from 'plywood';
 
 import { MANIFESTS } from "../../manifests/index";
 import { DataCubeMock } from "../data-cube/data-cube.mock";
-import { CollectionTile, CollectionTileJS, CollectionTileContext } from './collection-item';
+import { CollectionTile, CollectionTileJS, CollectionTileContext } from './collection-tile';
 
 export class CollectionTileMock {
   public static testOneJS(): CollectionTileJS {

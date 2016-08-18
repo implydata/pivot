@@ -326,7 +326,7 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
 
     const onSave = (_collection: Collection, CollectionTile: CollectionTile) => {
       closeModal();
-      this.collectionViewDelegate.addItem(_collection, CollectionTile).then(url => {
+      this.collectionViewDelegate.addTile(_collection, CollectionTile).then(url => {
         Notifier.success('Item added', {
           label: 'View',
           callback: () => window.location.hash = url

@@ -144,5 +144,12 @@ export class CollectionTile implements Instance<CollectionTileValue, CollectionT
     return this.change('essence', essence);
   }
 
+  public changeName(name: string): CollectionTile {
+    return this.change('name', name);
+  }
+
+  public changeTitle(title: string): CollectionTile {
+    return this.change('title', title);
+  }
 }
 check = CollectionTile;

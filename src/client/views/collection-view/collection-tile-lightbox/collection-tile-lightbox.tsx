@@ -23,7 +23,7 @@ import * as Q from 'q';
 import { STRINGS } from '../../../config/constants';
 import { isInside, classNames } from '../../../utils/dom/dom';
 
-import { SvgIcon, GlobalEventListener, BodyPortal, GoldenCenter, BubbleMenu, ImmutableInput } from '../../../components/index';
+import { SvgIcon, GlobalEventListener, BodyPortal, GoldenCenter, BubbleMenu, ImmutableInput, Notifier } from '../../../components/index';
 import { Collection, CollectionTile, VisualizationProps, Stage, Essence } from '../../../../common/models/index';
 
 import { COLLECTION_ITEM as LABELS } from '../../../../common/models/labels';
@@ -35,6 +35,7 @@ export interface CollectionTileLightboxProps extends React.Props<any> {
   tileId?: string;
   onEdit?: (collection: Collection, tile: CollectionTile) => void;
   onDelete?: (collection: Collection, tile: CollectionTile) => void;
+  onDuplicate?: (collection: Collection, tile: CollectionTile) => Q.Promise<string>;
   onChange?: (collection: Collection, tile: CollectionTile) => Q.Promise<any>;
 }
 
@@ -144,11 +145,18 @@ export class CollectionTileLightbox extends React.Component<CollectionTileLightb
   }
 
   renderMoreMenu() {
-    const { onDelete, collection } = this.props;
+    const { onDelete, collection, onDuplicate } = this.props;
     const { tile } = this.state;
     var onClose = () => this.setState({moreMenuOpen: false});
 
     const remove = () => onDelete(collection, tile);
+    const duplicate = () => {
+      onDuplicate(collection, tile).then(url => {
+        window.location.hash = url;
+        onClose();
+        Notifier.success('Tile duplicated');
+      });
+    };
 
     return <BubbleMenu
       className="more-menu"
@@ -158,7 +166,7 @@ export class CollectionTileLightbox extends React.Component<CollectionTileLightb
       onClose={onClose}
     >
       <ul className="bubble-list">
-        <li className="duplicate-tile" >{STRINGS.duplicateCollectionTile}</li>
+        <li className="duplicate-tile" onClick={duplicate}>{STRINGS.duplicateCollectionTile}</li>
         <li className="delete-tile" onClick={remove}>{STRINGS.deleteCollectionTile}</li>
       </ul>
     </BubbleMenu>;

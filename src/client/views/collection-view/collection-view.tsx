@@ -45,6 +45,7 @@ export interface CollectionViewProps extends React.Props<any> {
     deleteCollection: (collection: Collection) => Q.Promise<any>;
     updateTile: (collection: Collection, tile: CollectionTile) => Q.Promise<any>;
     editTile: (collection: Collection, tile: CollectionTile) => void;
+    duplicateTile: (collection: Collection, tile: CollectionTile) => Q.Promise<string>;
     createTile: (collection: Collection, dataCube: DataCube) => void;
     deleteTile: (collection: Collection, tile: CollectionTile) => void;
   };
@@ -90,6 +91,15 @@ export class CollectionView extends React.Component<CollectionViewProps, Collect
 
     this.setState({
       tempCollection: tempCollection.changeTiles(tiles)
+    });
+  }
+
+  // For edition mode only, otherwise the delegate should take care of this
+  onTilesDelete(collection: Collection, tile: CollectionTile) {
+    var tempCollection = this.state.tempCollection as Collection;
+
+    this.setState({
+      tempCollection: tempCollection.deleteTile(tile)
     });
   }
 
@@ -168,7 +178,7 @@ export class CollectionView extends React.Component<CollectionViewProps, Collect
               collection={currentCollection}
               editionMode={editingOverview}
               onReorder={this.onTilesReorder.bind(this)}
-              onDelete={delegate ? delegate.deleteTile : null}
+              onDelete={this.onTilesDelete.bind(this)}
             />
 
             <Route fragment=":tileId">
@@ -177,6 +187,7 @@ export class CollectionView extends React.Component<CollectionViewProps, Collect
                 onChange={delegate ? delegate.updateTile : null}
                 onEdit={delegate ? delegate.editTile : null}
                 onDelete={delegate ? delegate.deleteTile : null}
+                onDuplicate={delegate ? delegate.duplicateTile : null}
               />
             </Route>
 
