@@ -70,6 +70,7 @@ function ensureNotNative(name: string): void {
 }
 
 function ensureNotTiny(v: number): void {
+  if (v === 0) return;
   if (v < 1000) {
     throw new Error(`can not be < 1000 (is ${v})`);
   }
