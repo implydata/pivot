@@ -25,7 +25,7 @@ import { DataCube, AppSettings, User, Collection, CollectionItem, Essence, ViewS
 import { STRINGS } from '../../config/constants';
 
 import { createFunctionSlot, FunctionSlot } from '../../utils/function-slot/function-slot';
-import { AboutModal, SideDrawer, Notifications, Notifier, AddCollectionItemModal } from '../../components/index';
+import { AboutModal, SideDrawer, Notifications, Notifier, AddCollectionTileModal } from '../../components/index';
 
 import { HomeView } from '../home-view/home-view';
 import { LinkView } from '../link-view/link-view';
@@ -334,7 +334,7 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
       });
     };
 
-    return <AddCollectionItemModal
+    return <AddCollectionTileModal
       collections={appSettings.collections}
       essence={essenceToAddToACollection}
       dataCube={selectedItem as DataCube}

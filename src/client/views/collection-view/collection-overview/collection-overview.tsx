@@ -20,7 +20,7 @@ import * as React from 'react';
 import { Collection, CollectionItem } from '../../../../common/models/index';
 import { SvgIcon, DOMHighlighter } from '../../../components/index';
 
-import { CollectionItemCard } from '../collection-item-card/collection-item-card';
+import { CollectionTileCard } from '../collection-tile-card/collection-tile-card';
 
 import { setDragGhost, classNames, getYFromEvent, getXFromEvent } from '../../../utils/dom/dom';
 
@@ -131,7 +131,7 @@ export class CollectionOverview extends React.Component<CollectionOverviewProps,
       'drop-after': dropIndex === i && dropAfter
     });
 
-    return <CollectionItemCard
+    return <CollectionTileCard
       className={classes}
       item={item}
       key={item.name}
@@ -167,7 +167,7 @@ export class CollectionOverview extends React.Component<CollectionOverviewProps,
       onDragEnd={this.dragEnd.bind(this)}
     >
      {collection.items.map(this.renderItem, this)}
-     <div className="collection-item-card empty"/>
+     <div className="collection-tile-card empty"/>
     </div>;
   }
 }

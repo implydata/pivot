@@ -22,7 +22,7 @@ import { PivotApplication, PivotApplicationProps, PivotApplicationState } from '
 import { Ajax } from '../../../utils/ajax/ajax';
 import { Collection, CollectionItem, DataCube, Essence, AppSettings } from '../../../../common/models/index';
 import { STRINGS } from '../../../config/constants';
-import { Notifier, AddCollectionItemModal } from '../../../components/index';
+import { Notifier, AddCollectionTileModal } from '../../../components/index';
 
 export class CollectionViewDelegate {
 
@@ -120,7 +120,7 @@ export class CollectionViewDelegate {
     };
 
     var getConfirmationModal = (newEssence: Essence) => {
-      return <AddCollectionItemModal
+      return <AddCollectionTileModal
         collection={collection}
         essence={newEssence}
         dataCube={dataCube}

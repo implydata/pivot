@@ -6,12 +6,12 @@ import { $, Expression } from 'plywood';
 
 import { findDOMNode } from '../../utils/test-utils/index';
 
-import { AddCollectionItemModal } from './add-collection-item-modal';
+import { AddCollectionTileModal } from './add-collection-tile-modal';
 
-describe.skip('AddCollectionItemModal', () => {
+describe.skip('AddCollectionTileModal', () => {
   it('adds the correct class', () => {
     var renderedComponent = TestUtils.renderIntoDocument(
-      <AddCollectionItemModal
+      <AddCollectionTileModal
         essence={null}
         dataCube={null}
         collection={null}
@@ -19,7 +19,7 @@ describe.skip('AddCollectionItemModal', () => {
     );
 
     expect(TestUtils.isCompositeComponent(renderedComponent), 'should be composite').to.equal(true);
-    expect((findDOMNode(renderedComponent) as any).className, 'should contain class').to.contain('add-collection-item-modal');
+    expect((findDOMNode(renderedComponent) as any).className, 'should contain class').to.contain('add-collection-tile-modal');
   });
 
 });

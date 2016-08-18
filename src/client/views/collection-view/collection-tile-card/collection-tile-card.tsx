@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-require('./collection-item-card.css');
+require('./collection-tile-card.css');
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
@@ -26,7 +26,7 @@ import { Collection, CollectionItem, VisualizationProps, Stage, Essence, Device,
 
 import { getVisualizationComponent } from '../../../visualizations/index';
 
-export interface CollectionItemCardProps extends React.Props<any> {
+export interface CollectionTileCardProps extends React.Props<any> {
   item: CollectionItem;
   className?: string;
   onExpand?: (item: CollectionItem) => void;
@@ -38,12 +38,12 @@ export interface CollectionItemCardProps extends React.Props<any> {
   onDragStart?: (e: __React.DragEvent) => void;
 }
 
-export interface CollectionItemCardState {
+export interface CollectionTileCardState {
   visualizationStage?: Stage;
   deviceSize?: DeviceSize;
 }
 
-export class CollectionItemCard extends React.Component<CollectionItemCardProps, CollectionItemCardState> {
+export class CollectionTileCard extends React.Component<CollectionTileCardProps, CollectionTileCardState> {
   constructor() {
     super();
 
@@ -118,7 +118,7 @@ export class CollectionItemCard extends React.Component<CollectionItemCardProps,
     };
 
     return <div
-      className={classNames("collection-item-card", {editing: editionMode}, className)}
+      className={classNames("collection-tile-card", {editing: editionMode}, className)}
       onDragOver={onDragOver}
       draggable={draggable}
       onDragStart={onDragStart}

@@ -16,9 +16,9 @@
 
 @import '../../../imports';
 
-.collection-item-card {
+.collection-tile-card {
 
-  // Importing this here so it only applies to .collection-item-card
+  // Importing this here so it only applies to .collection-tile-card
   // otherwise it pollutes the global CSS
   @import '../../../utils/styles/grid';
 

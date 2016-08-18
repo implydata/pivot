@@ -1,4 +1,4 @@
-require('./add-collection-item-modal.css');
+require('./add-collection-tile-modal.css');
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
@@ -15,7 +15,7 @@ import { COLLECTION_ITEM as LABELS } from '../../../common/models/labels';
 
 export type CollectionMode = 'adding' | 'picking' | 'none';
 
-export interface AddCollectionItemModalProps extends React.Props<any> {
+export interface AddCollectionTileModalProps extends React.Props<any> {
   essence: Essence;
 
   // If collection is populated, onSave is called with it and the new item
@@ -29,7 +29,7 @@ export interface AddCollectionItemModalProps extends React.Props<any> {
   onSave?: (collection: Collection, collectionItem: CollectionItem) => void;
 }
 
-export interface AddCollectionItemModalState {
+export interface AddCollectionTileModalState {
   collection?: Collection;
   collectionItem?: CollectionItem;
   errors?: any;
@@ -38,7 +38,7 @@ export interface AddCollectionItemModalState {
   convertToFixedTime?: boolean;
 }
 
-export class AddCollectionItemModal extends React.Component<AddCollectionItemModalProps, AddCollectionItemModalState> {
+export class AddCollectionTileModal extends React.Component<AddCollectionTileModalProps, AddCollectionTileModalState> {
 
   constructor() {
     super();
@@ -69,7 +69,7 @@ export class AddCollectionItemModal extends React.Component<AddCollectionItemMod
     return `${dimensions.join(', ')} by ${measures.join(', ')}`;
   }
 
-  initFromProps(props: AddCollectionItemModalProps) {
+  initFromProps(props: AddCollectionTileModalProps) {
     const { collection, collections, essence, dataCube } = props;
     var collectionMode: CollectionMode = 'none';
 
@@ -105,7 +105,7 @@ export class AddCollectionItemModal extends React.Component<AddCollectionItemMod
     this.initFromProps(this.props);
   }
 
-  componentWillReceiveProps(nextProps: AddCollectionItemModalProps) {
+  componentWillReceiveProps(nextProps: AddCollectionTileModalProps) {
     if (!this.state.collectionItem) this.initFromProps(nextProps);
   }
 
@@ -276,7 +276,7 @@ export class AddCollectionItemModal extends React.Component<AddCollectionItemMod
     const isRelative = essence.filter.isRelative();
 
     return <Modal
-      className="add-collection-item-modal"
+      className="add-collection-tile-modal"
       title={STRINGS.addNewTile}
       onClose={onCancel}
       onEnter={this.save.bind(this)}

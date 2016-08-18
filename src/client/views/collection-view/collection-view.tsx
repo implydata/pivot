@@ -30,7 +30,7 @@ import { move } from '../../../common/utils/array/array';
 import { CollectionHeaderBar, Router, Route, Notifier } from '../../components/index';
 
 import { CollectionOverview } from './collection-overview/collection-overview';
-import { CollectionItemLightbox } from './collection-item-lightbox/collection-item-lightbox';
+import { CollectionTileLightbox } from './collection-tile-lightbox/collection-tile-lightbox';
 
 
 
@@ -172,7 +172,7 @@ export class CollectionView extends React.Component<CollectionViewProps, Collect
             />
 
             <Route fragment=":itemId">
-              <CollectionItemLightbox
+              <CollectionTileLightbox
                 collection={currentCollection}
                 onChange={delegate ? delegate.updateItem : null}
                 onEdit={delegate ? delegate.editItem : null}

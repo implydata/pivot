@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-require('./collection-item-lightbox.css');
+require('./collection-tile-lightbox.css');
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
@@ -30,7 +30,7 @@ import { COLLECTION_ITEM as LABELS } from '../../../../common/models/labels';
 
 import { getVisualizationComponent } from '../../../visualizations/index';
 
-export interface CollectionItemLightboxProps extends React.Props<any> {
+export interface CollectionTileLightboxProps extends React.Props<any> {
   collection?: Collection;
   itemId?: string;
   onEdit?: (collection: Collection, collectionItem: CollectionItem) => void;
@@ -38,7 +38,7 @@ export interface CollectionItemLightboxProps extends React.Props<any> {
   onChange?: (collection: Collection, collectionItem: CollectionItem) => Q.Promise<any>;
 }
 
-export interface CollectionItemLightboxState {
+export interface CollectionTileLightboxState {
   item?: CollectionItem;
   visualizationStage?: Stage;
   editMenuOpen?: boolean;
@@ -47,14 +47,14 @@ export interface CollectionItemLightboxState {
   tempItem?: CollectionItem;
 }
 
-export class CollectionItemLightbox extends React.Component<CollectionItemLightboxProps, CollectionItemLightboxState> {
+export class CollectionTileLightbox extends React.Component<CollectionTileLightboxProps, CollectionTileLightboxState> {
   constructor() {
     super();
 
     this.state = {};
   }
 
-  componentWillReceiveProps(nextProps: CollectionItemLightboxProps) {
+  componentWillReceiveProps(nextProps: CollectionTileLightboxProps) {
     const { collection, itemId } = nextProps;
 
     if (collection) {
@@ -158,8 +158,8 @@ export class CollectionItemLightbox extends React.Component<CollectionItemLightb
       onClose={onClose}
     >
       <ul className="bubble-list">
-        <li className="duplicate-item" >{STRINGS.duplicateCollectionItem}</li>
-        <li className="delete-item" onClick={remove}>{STRINGS.deleteCollectionItem}</li>
+        <li className="duplicate-item" >{STRINGS.duplicateCollectionTile}</li>
+        <li className="delete-item" onClick={remove}>{STRINGS.deleteCollectionTile}</li>
       </ul>
     </BubbleMenu>;
   }
@@ -300,7 +300,7 @@ export class CollectionItemLightbox extends React.Component<CollectionItemLightb
     }
 
     return <BodyPortal fullSize={true} onMount={this.updateStage.bind(this)}>
-      <div className="collection-item-lightbox">
+      <div className="collection-tile-lightbox">
 
         <GlobalEventListener
           resize={this.updateStage.bind(this)}
