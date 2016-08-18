@@ -20,7 +20,6 @@ import * as Q from 'q';
 import { PivotApplication, PivotApplicationProps, PivotApplicationState } from '../pivot-application.tsx';
 
 import { Ajax } from '../../../utils/ajax/ajax';
-import { Collection, CollectionItem, DataCube, Essence, AppSettings } from '../../../../common/models/index';
 import { Collection, CollectionTile, DataCube, Essence, AppSettings } from '../../../../common/models/index';
 import { generateUniqueName } from '../../../../common/utils/string/string';
 import { STRINGS } from '../../../config/constants';
