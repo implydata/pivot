@@ -41,10 +41,6 @@ function reload() {
   window.location.reload(true);
 }
 
-function update() {
-  console.log('update requested');
-}
-
 function parseOrNull(json: any): any {
   try {
     return JSON.parse(json);
@@ -63,6 +59,7 @@ export class Ajax {
   static version: string;
 
   static settingsVersionGetter: () => number;
+  static onUpdate: () => void;
 
   static query(options: AjaxOptions): Q.Promise<any> {
     var data = options.data;
@@ -81,7 +78,7 @@ export class Ajax {
       .then(Qajax.filterSuccess)
       .then(Qajax.toJSON)
       .then((res) => {
-        if (res && res.action === 'update') update();
+        if (res && res.action === 'update' && Ajax.onUpdate) Ajax.onUpdate();
         return res;
       })
       .catch((xhr: XMLHttpRequest | Error): Dataset => {
@@ -93,8 +90,8 @@ export class Ajax {
           if (jsonError) {
             if (jsonError.action === 'reload') {
               reload();
-            } else if (jsonError.action === 'update') {
-              update();
+            } else if (jsonError.action === 'update' && Ajax.onUpdate) {
+              Ajax.onUpdate();
             }
             throw new Error(jsonError.message || jsonError.error);
           } else {
