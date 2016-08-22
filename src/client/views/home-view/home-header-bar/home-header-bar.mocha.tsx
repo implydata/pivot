@@ -20,7 +20,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import * as TestUtils from 'react-addons-test-utils';
 
-import '../../utils/test-utils/index';
+import '../../../utils/test-utils/index';
 
 import { $, Expression } from 'plywood';
 import { HomeHeaderBar } from './home-header-bar';

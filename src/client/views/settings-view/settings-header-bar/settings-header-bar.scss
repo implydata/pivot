@@ -14,29 +14,8 @@
  * limitations under the License.
  */
 
-@import '../../imports';
+@import '../../../imports';
 
-.collection-header-bar {
+.settings-header-bar {
   @extend %header-bar;
-
-  height: 41px;
-
-  .title > input {
-    color: $white;
-    border: 1px solid rgba($white, 0.5);
-    background: rgba($white, 0.2);
-    border-radius: 2px;
-    margin-top: -8px;
-    padding: 4px 6px;
-    cursor: text;
-    width: 300px;
-    font-size: 15px;
-
-    &::selection {
-      background: darken($brand, 10);
-    }
-  }
-
-  .icon-button.add {
-  }
 }
