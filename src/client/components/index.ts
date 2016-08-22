@@ -47,7 +47,6 @@ export * from './immutable-dropdown/immutable-dropdown';
 export * from './immutable-input/immutable-input';
 export * from './immutable-list/immutable-list';
 export * from './line-chart-axis/line-chart-axis';
-export * from './link-header-bar/link-header-bar';
 export * from './loader/loader';
 export * from './manual-fallback/manual-fallback';
 export * from './measures-tile/measures-tile';
