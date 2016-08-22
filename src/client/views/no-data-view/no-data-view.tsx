@@ -72,6 +72,24 @@ export class NoDataView extends React.Component <NoDataViewProps, NoDataViewStat
     </div>;
   }
 
+  renderTitle(mode: 'no-connected-data' | 'no-cube'): JSX.Element {
+    if (mode === 'no-cube') {
+      return <div className="title">
+        <div className="icon">
+          <SvgIcon svg={require('../../icons/data-cubes.svg')}/>
+        </div>
+        <div className="label">{STRINGS.noQueryableDataCubes}</div>
+      </div>;
+    }
+
+    return <div className="title">
+      <div className="icon">
+        <SvgIcon svg={require('../../icons/data-cubes.svg')}/>
+      </div>
+      <div className="label">{STRINGS.noConnectedData}</div>
+    </div>;
+  }
+
   renderLink(mode: 'no-connected-data' | 'no-cube'): JSX.Element {
     if (mode === 'no-cube') {
       return <div className="action">
@@ -88,7 +106,7 @@ export class NoDataView extends React.Component <NoDataViewProps, NoDataViewStat
     const { user, onNavClick, onOpenAbout, customization } = this.props;
     const { mode } = this.state;
 
-    return <div className="home-view">
+    return <div className="no-data-view">
       <NoDataHeaderBar
         user={user}
         onNavClick={onNavClick}
@@ -100,8 +118,10 @@ export class NoDataView extends React.Component <NoDataViewProps, NoDataViewStat
         </button>
         {this.renderSettingsIcon()}
       </NoDataHeaderBar>
-      <p>{mode === 'no-cube' ? STRINGS.noQueryableDataCubes : STRINGS.noConnectedData}</p>
-      { this.renderLink(mode) }
+      <div className="container">
+        { this.renderTitle(mode) }
+        { this.renderLink(mode) }
+      </div>
     </div>;
   }
 }

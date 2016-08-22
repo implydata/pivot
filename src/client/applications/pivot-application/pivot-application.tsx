@@ -99,7 +99,15 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
     var viewType = this.getViewTypeFromHash(hash);
 
     if (viewType !== SETTINGS && !dataCubes.length) {
-      viewType = NO_DATA;
+      window.location.hash = '';
+
+      this.setState({
+        viewType: NO_DATA,
+        viewHash: '',
+        appSettings
+      });
+
+      return;
     }
 
     var viewHash = this.getViewHashFromHash(hash);
