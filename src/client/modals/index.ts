@@ -21,4 +21,3 @@ export * from './cluster-seed-modal/cluster-seed-modal';
 export * from './dimension-modal/dimension-modal';
 export * from './measure-modal/measure-modal';
 export * from './raw-data-modal/raw-data-modal';
-export * from './remove-modal/remove-modal';

@@ -25,9 +25,11 @@ import { STRINGS } from "../../../config/constants";
 import { AppSettings, Cluster, SupportedType } from '../../../../common/models/index';
 
 import { SimpleTable, SimpleTableColumn, SimpleTableAction } from '../../../components/simple-table/simple-table';
+import { Notifier } from '../../../components/index';
 
 export interface ClustersProps extends React.Props<any> {
   settings?: AppSettings;
+  onSave?: (settings: AppSettings, message?: string) => void;
 }
 
 export interface ClustersState {
@@ -62,6 +64,38 @@ export class Clusters extends React.Component<ClustersProps, ClustersState> {
     </div>;
   }
 
+  removeCluster(cluster: Cluster) {
+    const remove = () => {
+      var settings: AppSettings = this.state.newSettings;
+      var index = settings.clusters.indexOf(cluster);
+
+      if (index < 0) return;
+
+      var newClusters = settings.clusters;
+      newClusters.splice(index, 1);
+
+      this.props.onSave(settings.changeClusters(newClusters), 'Cluster removed');
+      Notifier.removeQuestion();
+    };
+
+    const cancel = () => {
+      Notifier.removeQuestion();
+    };
+
+    Notifier.ask({
+      title: 'Remove this cluster',
+      message: [
+        `Are you sure you would like to delete the cluster "${cluster.title}"?`,
+        'This action is not reversible.'
+      ],
+      choices: [
+        {label: 'Remove', callback: remove, type: 'warn'},
+        {label: 'Cancel', callback: cancel, type: 'secondary'}
+      ],
+      onClose: Notifier.removeQuestion
+    });
+  }
+
   render() {
     const { newSettings } = this.state;
     if (!newSettings) return null;
@@ -75,7 +109,8 @@ export class Clusters extends React.Component<ClustersProps, ClustersState> {
     ];
 
     const actions: SimpleTableAction[] = [
-      {icon: 'full-edit', callback: this.editCluster.bind(this)}
+      {icon: 'full-edit', callback: this.editCluster.bind(this)},
+      {icon: 'full-remove', callback: this.removeCluster.bind(this)}
     ];
 
     return <div className="clusters">

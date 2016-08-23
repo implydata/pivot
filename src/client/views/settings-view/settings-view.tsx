@@ -230,7 +230,7 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
           </Route>
 
           <Route fragment="clusters">
-            <Clusters settings={settings}/>
+            <Clusters settings={settings} onSave={this.onSave.bind(this)}/>
 
             <Route fragment="new-cluster">
               { tempCluster
