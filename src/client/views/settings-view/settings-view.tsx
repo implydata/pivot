@@ -169,6 +169,10 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
     var newSettings = settings.changeClusters(newClusters);
 
     this.onSave(newSettings, 'Cluster created').then(() => {
+      this.setState({
+        tempCluster: null
+      });
+
       window.location.hash = '#settings/clusters';
     });
   }
@@ -235,14 +239,8 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
             <Clusters settings={settings} onSave={this.onSave.bind(this)}/>
 
             <Route fragment="new-cluster">
-              { tempCluster
-                ? null
-                : <ClusterSeedModal
-                    onNext={this.createCluster.bind(this)}
-                    onCancel={this.cancelClusterCreation.bind(this)}
-                    clusters={settings.clusters}
-                  />
-              }
+              { tempCluster ? null : <Clusters settings={settings} onSave={this.onSave.bind(this)}/> }
+
               { tempCluster
                 ? <ClusterEdit
                     isNewCluster={true}
@@ -250,7 +248,11 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
                     onSave={this.addCluster.bind(this)}
                     onCancel={this.cancelClusterCreation.bind(this)}
                   />
-                : null
+                : <ClusterSeedModal
+                    onNext={this.createCluster.bind(this)}
+                    onCancel={this.cancelClusterCreation.bind(this)}
+                    clusters={settings.clusters}
+                  />
               }
             </Route>
 
