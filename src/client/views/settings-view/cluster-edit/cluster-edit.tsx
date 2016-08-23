@@ -96,7 +96,6 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ImmutableForm
     var makeTextInput = ImmutableInput.simpleGenerator(newInstance, this.delegate.onChange);
     var makeDropDownInput = ImmutableDropdown.simpleGenerator(newInstance, this.delegate.onChange);
 
-    var isDruid = newInstance.type === 'druid';
     var needsAuth = ['mysql', 'postgres'].indexOf(newInstance.type) > -1;
 
     return <form className="general vertical">
@@ -114,24 +113,6 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ImmutableForm
 
       {makeLabel('version')}
       {makeTextInput('version')}
-
-      {makeLabel('sourceListScan')}
-      {makeDropDownInput('sourceListScan', [{value: 'disable', label: 'Disable'}, {value: 'auto', label: 'Auto'}])}
-
-      {makeLabel('sourceListRefreshOnLoad')}
-      {makeDropDownInput('sourceListRefreshOnLoad', [{value: true, label: 'Enabled'}, {value: false, label: 'Disabled'}])}
-
-      {makeLabel('sourceListRefreshInterval')}
-      {makeTextInput('sourceListRefreshInterval', NUM_REGEX)}
-
-      {makeLabel('sourceReintrospectOnLoad')}
-      {makeDropDownInput('sourceReintrospectOnLoad', [{value: true, label: 'Enabled'}, {value: false, label: 'Disabled'}])}
-
-      {makeLabel('sourceReintrospectInterval')}
-      {makeTextInput('sourceReintrospectInterval', NUM_REGEX)}
-
-      {isDruid ? makeLabel('introspectionStrategy') : null}
-      {isDruid ? makeTextInput('introspectionStrategy') : null}
 
       {needsAuth ? makeLabel('database') : null}
       {needsAuth ? makeTextInput('database') : null}
