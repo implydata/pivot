@@ -64,6 +64,7 @@ export class ClusterSeedModal extends React.Component<ClusterSeedModalProps, Clu
       onClose={this.props.onCancel}
     >
       <form>
+
         {FormLabel.dumbLabel('type')}
         <TypeDropdown
           items={Cluster.TYPE_VALUES}

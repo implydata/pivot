@@ -71,7 +71,7 @@ export class Clusters extends React.Component<ClustersProps, ClustersState> {
     window.location.hash += `/${cluster.name}`;
   }
 
-  start() {
+  startSeed() {
     this.setState({ showSeedModal: true });
   }
 
@@ -91,7 +91,7 @@ export class Clusters extends React.Component<ClustersProps, ClustersState> {
   renderEmpty(): JSX.Element {
     return <div className="clusters empty">
       <div className="title">{STRINGS.noClusters}</div>
-      <div className="subtitle">Start by <a onClick={this.start.bind(this)}>adding a new cluster</a></div>
+      <div className="subtitle">Start by <a onClick={this.startSeed.bind(this)}>adding a new cluster</a></div>
     </div>;
   }
 
