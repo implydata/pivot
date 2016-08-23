@@ -176,7 +176,9 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
   cancelClusterCreation() {
     this.setState({
       tempCluster: null
-    }, () => window.location.hash = '#settings/clusters');
+    });
+
+    window.location.hash = '#settings/clusters';
   }
 
   updateCluster(newCluster: Cluster) {
