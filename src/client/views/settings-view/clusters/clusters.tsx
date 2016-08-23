@@ -19,53 +19,32 @@ require('./clusters.css');
 import * as React from 'react';
 
 import { Button } from '../../../components/button/button';
-import { ClusterSeedModal } from "../../../modals/cluster-seed-modal/cluster-seed-modal";
+import { ClusterSeedModal } from "../../../modals/index";
 import { STRINGS } from "../../../config/constants";
 
 import { AppSettings, Cluster, SupportedType } from '../../../../common/models/index';
 
 import { SimpleTable, SimpleTableColumn, SimpleTableAction } from '../../../components/simple-table/simple-table';
 
-export type ClusterSeed = {
-  host: string;
-  type: string;
-}
-
 export interface ClustersProps extends React.Props<any> {
   settings?: AppSettings;
-  onSave?: (settings: AppSettings) => void;
 }
 
 export interface ClustersState {
   newSettings?: AppSettings;
-  hasChanged?: boolean;
-  showSeedModal?: boolean;
-  clusterSeed?: ClusterSeed;
 }
 
 export class Clusters extends React.Component<ClustersProps, ClustersState> {
   constructor() {
     super();
 
-    this.state = {
-      hasChanged: false,
-      showSeedModal: false,
-      clusterSeed: null
-    };
-
+    this.state = {};
   }
 
   componentWillReceiveProps(nextProps: ClustersProps) {
     if (nextProps.settings) this.setState({
-      newSettings: nextProps.settings,
-      hasChanged: false
+      newSettings: nextProps.settings
     });
-  }
-
-  save() {
-    if (this.props.onSave) {
-      this.props.onSave(this.state.newSettings);
-    }
   }
 
   editCluster(cluster: Cluster) {
@@ -73,20 +52,7 @@ export class Clusters extends React.Component<ClustersProps, ClustersState> {
   }
 
   startSeed() {
-    this.setState({ showSeedModal: true });
-  }
-
-  cancelSeed() {
-    this.setState({ showSeedModal: false });
-  }
-
-  makeSeed(clusterSeed: {host: string, type: SupportedType}) {
-    console.log('seed ', clusterSeed); // todo: make this work
-    this.setState({ showSeedModal: false, clusterSeed });
-  }
-
-  renderSeedModal(): JSX.Element {
-    return <ClusterSeedModal next={this.makeSeed.bind(this)} onCancel={this.cancelSeed.bind(this)} />;
+    window.location.hash += '/new-cluster';
   }
 
   renderEmpty(): JSX.Element {
@@ -97,12 +63,10 @@ export class Clusters extends React.Component<ClustersProps, ClustersState> {
   }
 
   render() {
-    const { hasChanged, newSettings, showSeedModal } = this.state;
+    const { newSettings } = this.state;
     if (!newSettings) return null;
 
-    if (!newSettings.clusters.length && !showSeedModal) {
-      return this.renderEmpty();
-    }
+    if (!newSettings.clusters.length) return this.renderEmpty();
 
     const columns: SimpleTableColumn[] = [
       {label: 'Name', field: 'name', width: 200, cellIcon: 'full-cluster'},
@@ -117,7 +81,7 @@ export class Clusters extends React.Component<ClustersProps, ClustersState> {
     return <div className="clusters">
       <div className="title-bar">
         <div className="title">Clusters</div>
-        {hasChanged ? <Button className="save" title="Save" type="primary" onClick={this.save.bind(this)}/> : null}
+        <Button className="add" title={STRINGS.connectNewCluster} type="primary" onClick={this.startSeed.bind(this)}/>
       </div>
       <div className="content">
         <SimpleTable
@@ -126,7 +90,6 @@ export class Clusters extends React.Component<ClustersProps, ClustersState> {
           actions={actions}
           onRowClick={this.editCluster.bind(this)}
         ></SimpleTable>
-        {showSeedModal ? this.renderSeedModal() : null}
       </div>
     </div>;
   }
