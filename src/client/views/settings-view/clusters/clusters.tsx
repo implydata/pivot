@@ -49,6 +49,7 @@ export class Clusters extends React.Component<ClustersProps, ClustersState> {
 
     this.state = {
       hasChanged: false,
+      showSeedModal: false,
       clusterSeed: null
     };
 
