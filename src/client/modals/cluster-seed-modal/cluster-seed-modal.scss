@@ -14,26 +14,15 @@
  * limitations under the License.
  */
 
-@import '../../../imports';
+@import '../../imports';
 
-.clusters {
-  height: 100%;
+.cluster-seed-modal {
+  form {
+    @extend %form;
+    width: 100%;
 
-  &.empty {
-    margin-top: 280px;
-    text-align: center;
-    font-size: 16px;
-    color: $text-light;
-
-    .subtitle {
-      font-size: 12px;
-      margin-top: 10px;
-
-      a {
-        color: $brand;
-        border-bottom: 1px dashed;
-      }
-
+    .dropdown {
+      margin-bottom: 20px;
     }
   }
 }
