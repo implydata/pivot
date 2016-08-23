@@ -554,7 +554,7 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
     }
   }
 
-  public toExternal(): External {
+  public toExternal(requester?: Requester.PlywoodRequester<any>): External {
     if (this.clusterName === 'native') throw new Error(`there is no external on a native data cube`);
     const { cluster, options } = this;
     if (!cluster) throw new Error('must have a cluster');
@@ -564,11 +564,16 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
       suppress: true,
       source: this.source,
       version: cluster.version,
+      attributes: this.attributes,
       derivedAttributes: this.derivedAttributes,
       customAggregations: options.customAggregations,
       customTransforms: options.customTransforms,
       filter: this.subsetExpression
     };
+
+    if (requester) {
+      externalValue.requester = requester;
+    }
 
     if (cluster.type === 'druid') {
       externalValue.rollup = this.rollup;
@@ -580,14 +585,6 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
       externalContext['timeout'] = cluster.getTimeout();
       if (options.priority) externalContext['priority'] = options.priority;
       externalValue.context = externalContext;
-    }
-
-    if (this.introspection === 'none') {
-      externalValue.attributes = AttributeInfo.override(this.deduceAttributes(), this.attributeOverrides);
-      externalValue.derivedAttributes = this.derivedAttributes;
-    } else {
-      // ToDo: else if (we know that it will GET introspect) and there are no overrides apply special attributes as overrides
-      externalValue.attributeOverrides = this.attributeOverrides;
     }
 
     return External.fromValue(externalValue);
@@ -778,49 +775,6 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
 
   public rolledUp(): boolean {
     return this.clusterName === 'druid';
-  }
-
-  /**
-   * This function tries to deduce the structure of the dataCube based on the dimensions and measures defined within.
-   * It should only be used when, for some reason, introspection if not available.
-   */
-  public deduceAttributes(): Attributes {
-    const { dimensions, measures, timeAttribute, attributeOverrides } = this;
-    var attributes: Attributes = [];
-
-    if (timeAttribute) {
-      attributes.push(AttributeInfo.fromJS({ name: timeAttribute.name, type: 'TIME' }));
-    }
-
-    dimensions.forEach((dimension) => {
-      var expression = dimension.expression;
-      if (expression.equals(timeAttribute)) return;
-      var references = expression.getFreeReferences();
-      for (var reference of references) {
-        if (findByName(attributes, reference)) continue;
-        attributes.push(AttributeInfo.fromJS({ name: reference, type: 'STRING' }));
-      }
-    });
-
-    measures.forEach((measure) => {
-      var expression = measure.expression;
-      var references = Measure.getAggregateReferences(expression);
-      var countDistinctReferences = Measure.getCountDistinctReferences(expression);
-      for (var reference of references) {
-        if (findByName(attributes, reference)) continue;
-        if (countDistinctReferences.indexOf(reference) !== -1) {
-          attributes.push(AttributeInfo.fromJS({ name: reference, special: 'unique' }));
-        } else {
-          attributes.push(AttributeInfo.fromJS({ name: reference, type: 'NUMBER' }));
-        }
-      }
-    });
-
-    if (attributeOverrides.length) {
-      attributes = AttributeInfo.override(attributes, attributeOverrides);
-    }
-
-    return attributes;
   }
 
   public addAttributes(newAttributes: Attributes): DataCube {

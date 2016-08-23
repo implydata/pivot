@@ -82,26 +82,15 @@ export class SettingsManager {
     return find(this.clusterManagers, (clusterManager) => clusterManager.cluster.name === clusterName);
   }
 
-  private addClusterManager(cluster: Cluster, dataCubes: DataCube[]): Q.Promise<any> {
+  private addClusterManager(cluster: Cluster): Q.Promise<any> {
     const { verbose, logger, anchorPath } = this;
 
-    var initialExternals = dataCubes.map(dataCube => {
-      return {
-        name: dataCube.name,
-        external: dataCube.toExternal(),
-        suppressIntrospection: dataCube.getIntrospection() === 'none'
-      };
-    });
-
     // Make a cluster manager for each cluster and assign the correct initial externals to it.
-    logger.log(`Adding cluster manager for '${cluster.name}' with ${pluralIfNeeded(dataCubes.length, 'dataCube')}`);
+    logger.log(`Adding cluster manager for '${cluster.name}'`);
     var clusterManager = new ClusterManager(cluster, {
       logger,
       verbose,
-      anchorPath,
-      initialExternals,
-      onExternalChange: this.onExternalChange.bind(this, cluster),
-      generateExternalName: this.generateDataCubeName.bind(this)
+      anchorPath
     });
 
     this.clusterManagers.push(clusterManager);
@@ -130,7 +119,7 @@ export class SettingsManager {
       anchorPath,
       uri: dataCube.source,
       subsetExpression: dataCube.subsetExpression,
-      onDatasetChange: this.onDatasetChange.bind(this, dataCube.name)
+      //onDatasetChange: this.onDatasetChange.bind(this, dataCube.name)
     });
 
     this.fileManagers.push(fileManager);
@@ -194,7 +183,7 @@ export class SettingsManager {
         logger.log(`${newCluster.name} UPDATED cluster`);
       },
       onEnter: (newCluster) => {
-        tasks.push(this.addClusterManager(newCluster, newSettings.getDataCubesForCluster(newCluster.name)));
+        tasks.push(this.addClusterManager(newCluster));
       }
     });
 
@@ -206,9 +195,7 @@ export class SettingsManager {
     var oldSettings = this.appSettings;
     var tasks: Q.Promise<any>[] = [];
 
-    var oldNativeDataCubes = oldSettings.getDataCubesForCluster('native');
-    var newNativeDataCubes = newSettings.getDataCubesForCluster('native');
-    updater(oldNativeDataCubes, newNativeDataCubes, {
+    updater(oldSettings.dataCubes, newSettings.dataCubes, {
       onExit: (oldDataCube) => {
         if (oldDataCube.clusterName === 'native') {
           this.removeFileManager(oldDataCube);
@@ -248,10 +235,8 @@ export class SettingsManager {
       } else {
         var clusterManager = this.getClusterManagerFor(dataCube.clusterName);
         if (clusterManager) {
-          var external = clusterManager.getExternalByName(dataCube.name);
-          if (!external) return null;
           return basicExecutorFactory({
-            datasets: { main: external }
+            datasets: { main: dataCube.toExternal(clusterManager.requester) }
           });
         }
 
@@ -263,59 +248,6 @@ export class SettingsManager {
       .then(() => {
         this.appSettings = loadedNewSettings;
       });
-  }
-
-  generateDataCubeName(external: External): string {
-    const { appSettings } = this;
-    var source = String(external.source);
-
-    var candidateName = source;
-    var i = 0;
-    while (appSettings.getDataCube(candidateName)) {
-      i++;
-      candidateName = source + i;
-    }
-    return candidateName;
-  }
-
-  onDatasetChange(dataCubeName: string, changedDataset: Dataset): void {
-    const { logger, verbose } = this;
-
-    logger.log(`Got native dataset update for ${dataCubeName}`);
-
-    var dataCube = this.appSettings.getDataCube(dataCubeName);
-    if (!dataCube) throw new Error(`Unknown dataset ${dataCubeName}`);
-    dataCube = dataCube.updateWithDataset(changedDataset);
-
-    if (dataCube.refreshRule.isQuery()) {
-      this.timeMonitor.addCheck(dataCube.name, () => {
-        return DataCube.queryMaxTime(dataCube);
-      });
-    }
-
-    this.appSettings = this.appSettings.addOrUpdateDataCube(dataCube);
-  }
-
-  onExternalChange(cluster: Cluster, dataCubeName: string, changedExternal: External): Q.Promise<any> {
-    if (!changedExternal.attributes || !changedExternal.requester) return Q(null);
-    const { logger, verbose } = this;
-
-    logger.log(`Got queryable external dataset update for ${dataCubeName} in cluster ${cluster.name}`);
-
-    var dataCube = this.appSettings.getDataCube(dataCubeName);
-    if (!dataCube) {
-      dataCube = DataCube.fromClusterAndExternal(dataCubeName, cluster, changedExternal);
-    }
-    dataCube = dataCube.updateWithExternal(changedExternal);
-
-    if (dataCube.refreshRule.isQuery()) {
-      this.timeMonitor.addCheck(dataCube.name, () => {
-        return DataCube.queryMaxTime(dataCube);
-      });
-    }
-
-    this.appSettings = this.appSettings.addOrUpdateDataCube(dataCube);
-    return Q(null);
   }
 
 }
