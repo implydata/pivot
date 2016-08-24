@@ -19,10 +19,7 @@ require('./data-cube-edit.css');
 import * as React from 'react';
 import { List } from 'immutable';
 import { AttributeInfo } from 'plywood';
-import { Fn } from '../../../../common/utils/general/general';
 import { classNames } from '../../../utils/dom/dom';
-
-import { STRINGS } from '../../../config/constants';
 
 import { generateUniqueName } from '../../../../common/utils/string/string';
 
@@ -51,6 +48,8 @@ export interface DataCubeEditProps extends React.Props<any> {
 
 export interface DataCubeEditState extends ImmutableFormState<DataCube> {
   tab?: any;
+  showDimensionsSuggestion?: boolean;
+  showMeasuresSuggestion?: boolean;
 }
 
 export interface Tab {
@@ -91,7 +90,9 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       newInstance: new DataCube(props.dataCube.valueOf()),
       canSave: true,
       errors: {},
-      tab: props.isNewDataCube ? this.tabs[0] : this.tabs.filter((tab) => tab.value === props.tab)[0]
+      tab: props.isNewDataCube ? this.tabs[0] : this.tabs.filter((tab) => tab.value === props.tab)[0],
+      showDimensionsSuggestion: false,
+      showMeasuresSuggestion: false
     });
   }
 
@@ -243,12 +244,37 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       getModal={getModal}
       getNewItem={getNewItem}
       getRows={getRows}
+      toggleShowSuggestions={this.toggleDimensionsSuggestions.bind(this)}
     />;
   }
 
+  toggleDimensionsSuggestions() {
+    const { showDimensionsSuggestion } = this.state;
+    this.setState({
+      showDimensionsSuggestion: !showDimensionsSuggestion
+    });
+  }
+
+  updateCube(cube: DataCube) {
+    this.setState({
+      newInstance: cube
+    });
+  }
+
   renderDimensionSuggestions() {
-    const { dataCube } = this.state;
-    return <SuggestionModal onAdd={null} onCancel={null} type="dimensions" dataCube={dataCube} />;
+    const { newInstance } = this.state;
+    return <SuggestionModal
+      onAdd={this.updateCube.bind(this)}
+      onClose={this.toggleDimensionsSuggestions.bind(this)}
+      type="dimensions" dataCube={newInstance}
+    />;
+  }
+
+  toggleMeasuresSuggestions() {
+    const { showMeasuresSuggestion } = this.state;
+    this.setState({
+      showMeasuresSuggestion: !showMeasuresSuggestion
+    });
   }
 
   renderMeasures(): JSX.Element {
@@ -294,12 +320,17 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       getModal={getModal}
       getNewItem={getNewItem}
       getRows={getRows}
+      toggleShowSuggestions={this.toggleMeasuresSuggestions.bind(this)}
     />;
   }
 
   renderMeasureSuggestions() {
-    const { dataCube } = this.state;
-    return <SuggestionModal onAdd={null} onCancel={null} type="measures" dataCube={dataCube} />;
+    const { newInstance } = this.state;
+    return <SuggestionModal
+      onAdd={this.updateCube.bind(this)}
+      onClose={this.toggleMeasuresSuggestions.bind(this)}
+      type="measures" dataCube={newInstance}
+    />;
   }
 
   renderButtons(): JSX.Element {
@@ -344,7 +375,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
 
   render() {
     const { dataCube, isNewDataCube } = this.props;
-    const { tab, newInstance } = this.state;
+    const { tab, newInstance, showDimensionsSuggestion, showMeasuresSuggestion } = this.state;
 
     if (!newInstance || !tab || !dataCube) return null;
 
@@ -370,8 +401,8 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
           {tab.render.bind(this)()}
         </div>
       </div>
-      {/*this.renderMeasureSuggestions()*/}
-      {this.renderDimensionSuggestions()}
+      {showDimensionsSuggestion ? this.renderDimensionSuggestions() : null}
+      {showMeasuresSuggestion ? this.renderMeasureSuggestions() : null}
     </div>;
   }
 }

@@ -746,7 +746,7 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
 
   public getSuggestedDimensions(): Dimension[] {
     const { dimensions } = this; // todo: actually implement this
-    return dimensions.toArray().splice(0, 5).map((d) => d.change('title', `${d.title}${new Date().valueOf() / 2}`).change('name', `${d.name}${new Date().valueOf()}`));
+    return dimensions.toArray().splice(0, 5).map((d) => d.change('title', `${d.title}z`).change('name', `${d.name}z`));
   }
 
   public getTimeDimension() {
@@ -767,7 +767,7 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
 
   public getSuggestedMeasures(): Measure[] {
     const { measures } = this; // todo: actually implement this
-    return measures.toArray().splice(0, 5).map((m) => m.change('title', `${m.title}${new Date().valueOf() / 2}`).change('name', `${m.name}${new Date().valueOf()}`));
+    return measures.toArray().splice(0, 5).map((m) => m.change('title', `${m.title}z`).change('name', `${m.name}z`));
   }
 
   public changeDimensions(dimensions: List<Dimension>): DataCube {
