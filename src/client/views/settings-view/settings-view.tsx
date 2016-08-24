@@ -26,6 +26,7 @@ import { STRINGS } from '../../config/constants';
 import { Fn } from '../../../common/utils/general/general';
 import { Ajax } from '../../utils/ajax/ajax';
 import { indexByAttribute } from '../../../common/utils/array/array';
+import { ImmutableUtils } from '../../../common/utils/immutable-utils/immutable-utils';
 
 import { classNames } from '../../utils/dom/dom';
 import { Notifier } from '../../components/notifications/notifications';
@@ -52,8 +53,6 @@ export interface SettingsViewProps extends React.Props<any> {
 }
 
 export interface SettingsViewState {
-  errorText?: string;
-  messageText?: string;
   settings?: AppSettings;
   breadCrumbs?: string[];
 
@@ -67,42 +66,21 @@ const VIEWS = [
 ];
 
 export class SettingsView extends React.Component<SettingsViewProps, SettingsViewState> {
-  public mounted: boolean;
-
   constructor() {
     super();
-    this.state = {
-      errorText: '',
-      messageText: 'Welcome to the world of settings!'
-    };
+    this.state = {};
   }
 
   componentDidMount() {
-    this.mounted = true;
-
     Ajax.query({ method: "GET", url: 'settings' })
       .then(
         (resp) => {
-          if (!this.mounted) return;
           this.setState({
-            errorText: '',
-            messageText: '',
             settings: AppSettings.fromJS(resp.appSettings, { visualizations: MANIFESTS })
           });
         },
-        (xhr: XMLHttpRequest) => {
-          if (!this.mounted) return;
-          var jsonError = JSON.parse(xhr.responseText);
-          this.setState({
-            errorText: `Server error: ${jsonError}`,
-            messageText: ''
-          });
-        }
+        (xhr: XMLHttpRequest) => Notifier.failure('Sorry', `The settings couldn't be loaded`)
       ).done();
-  }
-
-  componentWillUnmount() {
-    this.mounted = false;
   }
 
   onSave(settings: AppSettings, okMessage?: string): Q.Promise<any> {
@@ -115,7 +93,6 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
     })
       .then(
         (status) => {
-          if (!this.mounted) return;
           this.setState({settings});
           Notifier.success(okMessage ? okMessage : 'Settings saved');
 
@@ -125,10 +102,7 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
             }));
           }
         },
-        (xhr: XMLHttpRequest) => {
-          if (!this.mounted) return;
-          Notifier.failure('Woops', 'Something bad happened');
-        }
+        (xhr: XMLHttpRequest) => Notifier.failure('Woops', 'Something bad happened')
       );
   }
 
@@ -155,6 +129,9 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
     this.setState({breadCrumbs});
   }
 
+
+  // -- Cluster creation flow
+
   createCluster(newCluster: Cluster) {
     this.setState({
       tempCluster: newCluster
@@ -162,27 +139,18 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
   }
 
   addCluster(newCluster: Cluster) {
-    const { settings } = this.state;
-
-    var newClusters = settings.clusters;
-    newClusters.push(newCluster);
-    var newSettings = settings.changeClusters(newClusters);
-
-    this.onSave(newSettings, 'Cluster created').then(() => {
-      this.setState({
-        tempCluster: null
-      });
-
-      window.location.hash = '#settings/clusters';
-    });
+    this.onSave(
+      ImmutableUtils.addInArray(this.state.settings, 'clusters', newCluster),
+      'Cluster created'
+    ).then(this.backToClustersView.bind(this));
   }
 
-  cancelClusterCreation() {
+  backToClustersView() {
+    window.location.hash = '#settings/clusters';
+
     this.setState({
       tempCluster: null
     });
-
-    window.location.hash = '#settings/clusters';
   }
 
   updateCluster(newCluster: Cluster) {
@@ -190,16 +158,15 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
 
     const index = indexByAttribute(settings.clusters, 'name', newCluster.name);
 
-    var newClusters = settings.clusters;
-    newClusters[index] = newCluster;
-    var newSettings = settings.changeClusters(newClusters);
-
-    this.onSave(newSettings);
+    this.onSave(ImmutableUtils.addInArray(settings, 'clusters', newCluster, index));
   }
+
+  // !-- Cluster creation flow
+
 
   render() {
     const { user, onNavClick, customization } = this.props;
-    const { errorText, messageText, settings, breadCrumbs, tempCluster } = this.state;
+    const { settings, breadCrumbs, tempCluster } = this.state;
 
     if (!settings) return null;
 
@@ -246,11 +213,11 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
                     isNewCluster={true}
                     cluster={tempCluster}
                     onSave={this.addCluster.bind(this)}
-                    onCancel={this.cancelClusterCreation.bind(this)}
+                    onCancel={this.backToClustersView.bind(this)}
                   />
                 : <ClusterSeedModal
                     onNext={this.createCluster.bind(this)}
-                    onCancel={this.cancelClusterCreation.bind(this)}
+                    onCancel={this.backToClustersView.bind(this)}
                     clusters={settings.clusters}
                   />
               }
