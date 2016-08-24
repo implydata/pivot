@@ -239,7 +239,7 @@ export class SettingsManager {
     var clusterManager = this.getClusterManagerFor(dataCube.clusterName);
     if (clusterManager) {
       var newExecutor = basicExecutorFactory({
-        datasets: { main: dataCube.toExternal(clusterManager.requester) }
+        datasets: { main: dataCube.toExternal(clusterManager.cluster, clusterManager.requester) }
       });
       this.addExecutor(dataCube, newExecutor);
       this.addTimeCheckIfNeeded(dataCube, newExecutor);

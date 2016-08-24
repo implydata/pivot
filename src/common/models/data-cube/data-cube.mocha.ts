@@ -24,15 +24,6 @@ import { DataCube, DataCubeJS } from './data-cube';
 import { DataCubeMock} from './data-cube.mock';
 
 describe('DataCube', () => {
-  var druidCluster = Cluster.fromJS({
-    name: 'druid',
-    type: 'druid'
-  });
-
-  var context = {
-    cluster: druidCluster
-  };
-
   it('is an immutable class', () => {
     testImmutableClass<DataCubeJS>(DataCube, [
       DataCubeMock.TWITTER_JS,
@@ -281,7 +272,7 @@ describe('DataCube', () => {
         }
       };
 
-      var dataCube = DataCube.fromJS(legacyDataCubeJS, context);
+      var dataCube = DataCube.fromJS(legacyDataCubeJS);
 
       expect(dataCube.toJS()).to.deep.equal({
         "attributeOverrides": [

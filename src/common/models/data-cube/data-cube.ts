@@ -18,7 +18,7 @@ import * as Q from 'q';
 import { List, OrderedSet } from 'immutable';
 import { Class, Instance, isInstanceOf, immutableEqual, immutableArraysEqual, immutableLookupsEqual } from 'immutable-class';
 import { Duration, Timezone, second } from 'chronoshift';
-import { $, ply, r, Expression, ExpressionJS, Executor, External, RefExpression, basicExecutorFactory, Dataset,
+import { $, ply, r, Expression, ExpressionJS, External, RefExpression, Dataset,
   Attributes, AttributeInfo, AttributeJSs, SortAction, SimpleFullType, DatasetFullType, PlyTypeSimple,
   CustomDruidAggregations, CustomDruidTransforms, ExternalValue, findByName } from 'plywood';
 import { hasOwnProperty, verifyUrlSafeName, makeUrlSafeName, makeTitle, immutableListsEqual } from '../../utils/general/general';
@@ -100,8 +100,6 @@ export interface DataCubeValue {
   defaultSelectedMeasures?: OrderedSet<string>;
   defaultPinnedDimensions?: OrderedSet<string>;
   refreshRule?: RefreshRule;
-
-  cluster?: Cluster;
 }
 
 export interface DataCubeJS {
@@ -149,10 +147,6 @@ export interface DataCubeOptions {
 
   // Whatever
   [thing: string]: any;
-}
-
-export interface DataCubeContext {
-  cluster?: Cluster;
 }
 
 export interface LongForm {
@@ -239,17 +233,20 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
     return maxTimeDate;
   }
 
-  static fromJS(parameters: DataCubeJS, context: DataCubeContext = {}): DataCube {
-    const { cluster } = context;
-    var clusterName = parameters.clusterName;
+  static fromClusterAndSource(name: string, cluster: Cluster, source: string): DataCube {
+    return DataCube.fromJS({
+      name,
+      clusterName: cluster.name,
+      source,
+      timeAttribute: (cluster && cluster.type === 'druid') ? '__time' : null
+    });
+  }
+
+  static fromJS(parameters: DataCubeJS): DataCube {
+    var clusterName = parameters.clusterName || (parameters as any).engine;
     var introspection = parameters.introspection;
     var defaultSplitsJS = parameters.defaultSplits;
     var attributeOverrideJSs = parameters.attributeOverrides;
-
-    // Back compat.
-    if (!clusterName) {
-      clusterName = (parameters as any).engine;
-    }
 
     var options = parameters.options || {};
     if (options.skipIntrospection) {
@@ -281,9 +278,6 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
     var refreshRule = parameters.refreshRule ? RefreshRule.fromJS(parameters.refreshRule) : null;
 
     var timeAttributeName = parameters.timeAttribute;
-    if (cluster && cluster.type === 'druid' && !timeAttributeName) {
-      timeAttributeName = '__time';
-    }
     var timeAttribute = timeAttributeName ? $(timeAttributeName) : null;
 
     var attributeOverrides = AttributeInfo.fromJSs(attributeOverrideJSs || []);
@@ -342,10 +336,6 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
       defaultPinnedDimensions: parameters.defaultPinnedDimensions ? OrderedSet(parameters.defaultPinnedDimensions) : null,
       refreshRule
     };
-    if (cluster) {
-      if (clusterName !== cluster.name) throw new Error(`Cluster name '${clusterName}' was given but '${cluster.name}' cluster was supplied (must match)`);
-      value.cluster = cluster;
-    }
     return new DataCube(value);
   }
 
@@ -375,8 +365,6 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
   public defaultSelectedMeasures: OrderedSet<string>;
   public defaultPinnedDimensions: OrderedSet<string>;
   public refreshRule: RefreshRule;
-
-  public cluster: Cluster;
 
   constructor(parameters: DataCubeValue) {
     var name = parameters.name;
@@ -408,8 +396,6 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
 
     var refreshRule = parameters.refreshRule || RefreshRule.query();
     this.refreshRule = refreshRule;
-
-    this.cluster = parameters.cluster;
 
     var dimensions = parameters.dimensions;
     var measures = parameters.measures;
@@ -448,7 +434,6 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
       defaultPinnedDimensions: this.defaultPinnedDimensions,
       refreshRule: this.refreshRule
     };
-    if (this.cluster) value.cluster = this.cluster;
     return value;
   }
 
@@ -530,10 +515,9 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
     }
   }
 
-  public toExternal(requester?: Requester.PlywoodRequester<any>): External {
+  public toExternal(cluster: Cluster, requester?: Requester.PlywoodRequester<any>): External {
     if (this.clusterName === 'native') throw new Error(`there is no external on a native data cube`);
-    const { cluster, options } = this;
-    if (!cluster) throw new Error('must have a cluster');
+    const { options } = this;
 
     var externalValue: ExternalValue = {
       engine: cluster.type,
@@ -623,12 +607,6 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
     });
 
     return issues;
-  }
-
-  public updateCluster(cluster: Cluster): DataCube {
-    var value = this.valueOf();
-    value.cluster = cluster;
-    return new DataCube(value);
   }
 
   public toClientDataCube(): DataCube {

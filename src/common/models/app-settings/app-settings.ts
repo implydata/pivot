@@ -71,15 +71,7 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
       clusters = [];
     }
 
-    var dataCubes = (parameters.dataCubes || (parameters as any).dataSources || []).map((dataCubeJS: DataCubeJS) => {
-      var dataCubeClusterName = dataCubeJS.clusterName || (dataCubeJS as any).engine;
-      if (dataCubeClusterName !== 'native') {
-        var cluster = findByName(clusters, dataCubeClusterName);
-        if (!cluster) throw new Error(`Can not find cluster '${dataCubeClusterName}' for data cube '${dataCubeJS.name}'`);
-      }
-
-      return DataCube.fromJS(dataCubeJS, { cluster });
-    });
+    var dataCubes = (parameters.dataCubes || (parameters as any).dataSources || []).map((dataCubeJS: DataCubeJS) => DataCube.fromJS(dataCubeJS));
 
     var collectionContext = { dataCubes, visualizations: context.visualizations };
     var makeCollection = (js: CollectionJS) => {

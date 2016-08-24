@@ -132,10 +132,10 @@ export class DataCubeMock {
   }
 
   static wiki() {
-    return DataCube.fromJS(DataCubeMock.WIKI_JS, {});
+    return DataCube.fromJS(DataCubeMock.WIKI_JS);
   }
 
   static twitter() {
-    return DataCube.fromJS(DataCubeMock.TWITTER_JS, {});
+    return DataCube.fromJS(DataCubeMock.TWITTER_JS);
   }
 }
