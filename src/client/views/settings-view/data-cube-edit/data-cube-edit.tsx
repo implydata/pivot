@@ -100,7 +100,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
     } else {
       var hash = window.location.hash.split('/');
       hash.splice(-1);
-      window.location.hash = hash.join('/') + '/' + tab;
+      window.location.hash = hash.join('/') + '/' + tab.value;
     }
   }
 
