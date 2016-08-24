@@ -70,6 +70,7 @@ export class SuggestionModal extends React.Component<SuggestionModalProps, Sugge
   }
 
   onAdd() {
+    this.applySuggestions();
     console.log(this.state.newInstance);
   }
 
@@ -85,7 +86,6 @@ export class SuggestionModal extends React.Component<SuggestionModalProps, Sugge
     this.setState({
       suggestions: newStateSuggestions
     });
-    this.applySuggestions();
   }
 
   applySuggestions() {
@@ -94,7 +94,6 @@ export class SuggestionModal extends React.Component<SuggestionModalProps, Sugge
 
     var oldValues: Option[] = (newInstance as any)[type].toArray();
     var newValues = suggestions.filter(s => s.selected).map(s => s.option).concat(oldValues);
-
     this.delegate.onChange(
       ImmutableUtils.setProperty(newInstance, type, List(newValues)),
       true,
@@ -137,7 +136,7 @@ export class SuggestionModal extends React.Component<SuggestionModalProps, Sugge
         {this.renderSuggestions()}
       </form>
       <div className="button-bar">
-        <Button type="primary" title={`${STRINGS.add} ${length} ${type}`} onClick={this.onAdd.bind(this)}/>
+        <Button type="primary" title={`${STRINGS.add} ${length} ${type}`} disabled={length === 0} onClick={this.onAdd.bind(this)}/>
         <Button className="cancel" title="Cancel" type="secondary" onClick={onCancel}/>
       </div>
 
