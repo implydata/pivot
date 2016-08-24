@@ -22,3 +22,4 @@ export * from './data-cube-seed-modal/data-cube-seed-modal';
 export * from './dimension-modal/dimension-modal';
 export * from './measure-modal/measure-modal';
 export * from './raw-data-modal/raw-data-modal';
+export * from './suggestion-modal/suggestion-modal';
