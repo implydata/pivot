@@ -187,7 +187,7 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
 
   getTitle(): string {
     const { isNewCluster } = this.props;
-    const { newInstance, showCreateCubesModal } = this.state;
+    const { newInstance } = this.state;
 
     const lastBit = newInstance.title ? `: ${newInstance.title}` : '';
 
@@ -196,7 +196,7 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
 
   render() {
     const { isNewCluster } = this.props;
-    const { newInstance } = this.state;
+    const { newInstance, showCreateCubesModal } = this.state;
 
     if (!newInstance) return null;
 
