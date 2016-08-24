@@ -34,7 +34,7 @@ export interface ImmutableListProps<T> extends React.Props<any> {
   getNewItem: () => T;
   getModal: (item: T) => JSX.Element;
   getRows: (items: List<T>) => SimpleRow[];
-  toggleShowSuggestions?: Fn;
+  toggleSuggestions?: Fn;
 }
 
 export interface ImmutableListState<T> {
@@ -130,18 +130,17 @@ export class ImmutableList<T> extends React.Component<ImmutableListProps<T>, Imm
   }
 
   render() {
-    const { items, getRows, label, toggleShowSuggestions } = this.props;
+    const { items, getRows, label, toggleSuggestions } = this.props;
     const { editedIndex, pendingAddItem } = this.state;
 
     if (!items) return null;
-    let actions = [<button key='add' onClick={this.addItem.bind(this)}>Add item</button>];
-    if (toggleShowSuggestions) {
-      actions = [<button key='suggestions' onClick={toggleShowSuggestions.bind(this)}>Suggestions</button>].concat(actions);
-    }
     return <div className="immutable-list">
       <div className="list-title">
         <div className="label">{label}</div>
-        <div className="actions">{actions}</div>
+        <div className="actions">
+          { toggleSuggestions ? <button key='suggestions' onClick={toggleSuggestions}>Suggestions</button> : null }
+          <button key='add' onClick={this.addItem.bind(this)}>Add item</button>
+        </div>
       </div>
       <SimpleList
         rows={getRows(items)}

@@ -243,7 +243,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       getModal={getModal}
       getNewItem={getNewItem}
       getRows={getRows}
-      toggleShowSuggestions={this.toggleDimensionsSuggestions.bind(this)}
+      toggleSuggestions={this.toggleDimensionsSuggestions.bind(this)}
     />;
   }
 
@@ -267,9 +267,9 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
     return <SuggestionModal
       onAdd={this.addToCube.bind(this, 'dimensions')}
       onClose={this.toggleDimensionsSuggestions.bind(this)}
-      getLabel={(d) => `${d.title} (${d.formula})`}
+      getLabel={(d: Dimension) => `${d.title} (${d.formula})`}
       getOptions={newInstance.getSuggestedDimensions.bind(newInstance)}
-      title={STRINGS.dimension}
+      title={`${STRINGS.dimension} ${STRINGS.suggestion}`}
     />;
   }
 
@@ -323,7 +323,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       getModal={getModal}
       getNewItem={getNewItem}
       getRows={getRows}
-      toggleShowSuggestions={this.toggleMeasuresSuggestions.bind(this)}
+      toggleSuggestions={this.toggleMeasuresSuggestions.bind(this)}
     />;
   }
 
@@ -332,9 +332,9 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
     return <SuggestionModal
       onAdd={this.addToCube.bind(this, 'measures')}
       onClose={this.toggleMeasuresSuggestions.bind(this)}
-      getLabel={(m) => `${m.title} (${m.formula})`}
+      getLabel={(m: Measure) => `${m.title} (${m.formula})`}
       getOptions={newInstance.getSuggestedMeasures.bind(newInstance)}
-      title={STRINGS.measure}
+      title={`${STRINGS.measure} ${STRINGS.suggestion}`}
     />;
   }
 

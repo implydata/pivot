@@ -19,19 +19,15 @@ import * as React from 'react';
 import { Button, Modal } from '../../components/index';
 import { List } from 'immutable';
 import { STRINGS } from "../../config/constants";
-import { Dimension } from "../../../common/models/dimension/dimension";
+import { Dimension, Measure, DataCube } from "../../../common/models/index";
+import { pluralIfNeeded } from "../../../common/utils/general/general";
 
-import { Measure } from "../../../common/models/measure/measure";
 import { Checkbox } from "../../components/checkbox/checkbox";
 
+const BRAND_BLUE = "hsl(200, 80%, 51%)";
+const GRAY = "#cccccc";
 
-function toPluralizedLower(title: string, count: number) {
-  var lower = title.toLowerCase();
-  if (count <= 1) return lower;
-  return `${lower}s`;
-}
-
-export type Option = Dimension | Measure;
+export type Option = Dimension | Measure | DataCube;
 export interface Suggestion {
   option: Option;
   selected: boolean;
@@ -44,6 +40,8 @@ export interface SuggestionModalProps extends React.Props<any> {
   getLabel: (o: Option) => string;
   getOptions: () => Option[];
   title: string;
+  okLabel?: (c: number) => string;
+  cancelLabel?: string;
 }
 
 export interface SuggestionModalState {
@@ -110,7 +108,7 @@ export class SuggestionModal extends React.Component<SuggestionModalProps, Sugge
         onClick={this.toggleSuggestion.bind(this, s)}
       >
         <Checkbox
-          color={selected ? "hsl(200, 80%, 51%)" : "#cccccc"}
+          color={selected ? BRAND_BLUE : GRAY}
           label={label}
           selected={selected}
         />
@@ -119,21 +117,21 @@ export class SuggestionModal extends React.Component<SuggestionModalProps, Sugge
   }
 
   render() {
-    const { onClose, title } = this.props;
+    const { onClose, title, okLabel, cancelLabel } = this.props;
     const { suggestions } = this.state;
 
     const length = List(suggestions).filter((s) => s.selected).size;
     return <Modal
       className="suggestion-modal"
-      title={`${title} ${STRINGS.suggestions}`}
+      title={`${title}`}
       onClose={onClose}
     >
       <form>
         {this.renderSuggestions()}
       </form>
       <div className="button-bar">
-        <Button type="primary" title={`${STRINGS.add} ${length} ${toPluralizedLower(title, length)}`} disabled={length === 0} onClick={this.onAdd.bind(this)}/>
-        <Button className="cancel" title="Cancel" type="secondary" onClick={onClose}/>
+        <Button type="primary" title={okLabel ? okLabel(length) : `${STRINGS.add} ${pluralIfNeeded(length, title)}`} disabled={length === 0} onClick={this.onAdd.bind(this)}/>
+        <Button className="cancel" title={cancelLabel || STRINGS.cancel} type="secondary" onClick={onClose}/>
       </div>
     </Modal>;
   }
