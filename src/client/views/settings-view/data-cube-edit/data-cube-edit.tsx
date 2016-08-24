@@ -28,14 +28,12 @@ import { Duration, Timezone } from 'chronoshift';
 import { DATA_CUBES_STRATEGIES_LABELS, STRINGS } from '../../../config/constants';
 
 import { SvgIcon, FormLabel, Button, SimpleList, ImmutableInput, ImmutableList, ImmutableDropdown } from '../../../components/index';
-import { DimensionModal, MeasureModal } from '../../../modals/index';
+import { DimensionModal, MeasureModal, SuggestionModal } from '../../../modals/index';
 import { AppSettings, ListItem, Cluster, DataCube, Dimension, DimensionJS, Measure, MeasureJS } from '../../../../common/models/index';
 
 import { DATA_CUBE as LABELS } from '../../../../common/models/labels';
 
 import { ImmutableFormDelegate, ImmutableFormState } from '../../../utils/immutable-form-delegate/immutable-form-delegate';
-
-import { SuggestionModal } from "../../../modals/suggestion-modal/suggestion-modal";
 
 export interface DataCubeEditProps extends React.Props<any> {
   isNewDataCube?: boolean;
