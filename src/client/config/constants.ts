@@ -45,7 +45,7 @@ export const STRINGS: any = {
   addNewCollection: 'Add new collection',
   addNewTile: 'Add new tile',
   addToCollection: 'Add to collection',
-  addVisualization: 'Add visualization',
+  addVisualization: 'Add tile',
   any: 'any',
   autoFillDimensionsAndMeasures: 'Auto-fill dimensions and measures',
   autoUpdate: 'Auto update',
