@@ -22,11 +22,12 @@ $checkbox-width: 20px;
 
   form {
     background: $background-lightest;
+    padding: 10px 0;
   }
 
   .row {
     padding-left: $padding-compact;
-    height: $measure-height;
+    height: 27px;
     cursor: pointer;
     white-space: nowrap;
 
@@ -50,7 +51,7 @@ $checkbox-width: 20px;
   }
 
   .button-bar {
-    margin-top: 25px;
+    margin-top: 20px;
 
     button {
       min-width: 70px;

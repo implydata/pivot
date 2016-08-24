@@ -114,7 +114,6 @@ export class SuggestionModal extends React.Component<SuggestionModalProps, Sugge
           color={selected ? "hsl(200, 80%, 51%)" : "#cccccc"}
           label={option.title}
           selected={selected}
-          onClick={this.toggleSuggestion.bind(this, s)}
         />
         </div>;
     }));
