@@ -25,7 +25,7 @@ import { Measure } from "../../../common/models/measure/measure";
 import { Checkbox } from "../../components/checkbox/checkbox";
 
 
-function pluralize(title: string, count: number) {
+function toPluralizedLower(title: string, count: number) {
   var lower = title.toLowerCase();
   if (count <= 1) return lower;
   return `${lower}s`;
@@ -79,7 +79,8 @@ export class SuggestionModal extends React.Component<SuggestionModalProps, Sugge
 
   onAdd() {
     const { onAdd, onClose } = this.props;
-    onAdd(this.applySuggestions());
+    const { suggestions } = this.state;
+    onAdd(suggestions.filter(s => s.selected).map(s => s.option));
     onClose();
   }
 
@@ -95,11 +96,6 @@ export class SuggestionModal extends React.Component<SuggestionModalProps, Sugge
     this.setState({
       suggestions: newStateSuggestions
     });
-  }
-
-  applySuggestions(): Option[] {
-    const { suggestions } = this.state;
-    return suggestions.filter(s => s.selected).map(s => s.option);
   }
 
   renderSuggestions() {
@@ -136,7 +132,7 @@ export class SuggestionModal extends React.Component<SuggestionModalProps, Sugge
         {this.renderSuggestions()}
       </form>
       <div className="button-bar">
-        <Button type="primary" title={`${STRINGS.add} ${length} ${pluralize(title, length)}`} disabled={length === 0} onClick={this.onAdd.bind(this)}/>
+        <Button type="primary" title={`${STRINGS.add} ${length} ${toPluralizedLower(title, length)}`} disabled={length === 0} onClick={this.onAdd.bind(this)}/>
         <Button className="cancel" title="Cancel" type="secondary" onClick={onClose}/>
       </div>
     </Modal>;
