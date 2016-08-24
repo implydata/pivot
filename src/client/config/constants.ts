@@ -53,7 +53,7 @@ export const STRINGS: any = {
   close: 'Close',
   collections: 'Collections',
   configureCluster: 'configure cluster',
-  configureDataCube: 'configure dataCube',
+  configureDataCube: 'configure data cube',
   connectNewCluster: 'Connect new cluster',
   contains: 'Contains',
   convertToFixedTime: 'Convert to fixed time',

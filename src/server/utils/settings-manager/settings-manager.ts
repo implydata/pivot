@@ -42,6 +42,15 @@ export interface FullSettings {
   executors: Lookup<Executor>;
 }
 
+export interface ClusterSource {
+  cluster: string;
+  source: string;
+}
+
+function flatten<T>(as: T[][]): T[] {
+  return Array.prototype.concat.apply([], as);
+}
+
 export class SettingsManager {
   public logger: Logger;
   public verbose: boolean;
@@ -295,6 +304,19 @@ export class SettingsManager {
       .then(() => {
         this.reviseSettings(newSettings);
       });
+  }
+
+  getAllClusterSources(): Q.Promise<ClusterSource> {
+    var clusterSources = this.clusterManagers.map((clusterManager) => {
+      var clusterName = clusterManager.cluster.name;
+      return clusterManager.getSources().then((sources) => {
+        return sources.map((source): ClusterSource => {
+          return { cluster: clusterName, source };
+        });
+      });
+    });
+
+    return (Q.all(clusterSources) as any).then((things: ClusterSource[][]) => flatten(things));
   }
 
 }

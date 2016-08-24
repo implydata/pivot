@@ -17,11 +17,15 @@
 require('./data-cube-seed-modal.css');
 
 import * as React from 'react';
+import { findByName } from 'plywood';
 import { DataCube, Cluster } from "../../../common/models/index";
 
-import { FormLabel, Button, Modal, ImmutableInput, ImmutableDropdown, Checkbox } from '../../components/index';
+import { FormLabel, Button, Modal, ImmutableInput, Dropdown, Checkbox } from '../../components/index';
 import { STRINGS } from "../../config/constants";
+import { Ajax } from '../../utils/ajax/ajax';
+import { Notifier } from '../../components/notifications/notifications';
 import { DATA_CUBE as LABELS } from '../../../common/models/labels';
+import { makeTitle } from "../../../common/utils/general/general";
 import { generateUniqueName } from '../../../common/utils/string/string';
 import { indexByAttribute } from '../../../common/utils/array/array';
 
@@ -34,31 +38,33 @@ export interface DataCubeSeedModalProps extends React.Props<any> {
   clusters: Cluster[];
 }
 
+export interface ClusterSource {
+  cluster: Cluster;
+  source: string;
+}
+
 export interface DataCubeSeedModalState extends ImmutableFormState<DataCube> {
   autoFill?: boolean;
+  clusterSources?: ClusterSource[];
+  clusterSource?: ClusterSource;
 }
 
 export class DataCubeSeedModal extends React.Component<DataCubeSeedModalProps, DataCubeSeedModalState> {
+  private mounted = false;
   private delegate: ImmutableFormDelegate<DataCube>;
 
   constructor() {
     super();
     this.delegate = new ImmutableFormDelegate<DataCube>(this);
+    this.state = {
+      clusterSources: [],
+      clusterSource: null
+    };
   }
 
   initFromProps(props: DataCubeSeedModalProps) {
-    const { dataCubes, clusters } = props;
-
-    if (!dataCubes) return;
-
-    var clusterName = clusters.length ? clusters[0].name : 'native';
-
     this.setState({
-      newInstance: new DataCube({
-        name: generateUniqueName('dc', name => indexByAttribute(dataCubes, 'name', name) === -1),
-        clusterName,
-        source: ''
-      })
+      newInstance: null
     });
   }
 
@@ -67,8 +73,38 @@ export class DataCubeSeedModal extends React.Component<DataCubeSeedModalProps, D
   }
 
   componentDidMount() {
+    this.mounted = true;
     this.initFromProps(this.props);
+
+    Ajax.query({ method: "GET", url: 'settings/cluster-sources' })
+      .then(
+        (resp) => {
+          if (!this.mounted) return;
+          const { clusters } = this.props;
+
+          var clusterSources = resp.clusterSources.map((cs: { cluster: string, source: string }): ClusterSource => {
+            return {
+              cluster: findByName(clusters, cs.cluster),
+              source: cs.source
+            };
+          });
+
+          this.setState({
+            clusterSources,
+            clusterSource: clusterSources[0] || null
+          });
+        },
+        (e: Error) => {
+          if (!this.mounted) return;
+          Notifier.failure('Sorry', `There was a problem loading sources ${e.message}`);
+        }
+      ).done();
   }
+
+  componentWillUnmount() {
+    this.mounted = false;
+  }
+
 
   onNext() {
     this.props.onNext(this.state.newInstance, this.state.autoFill);
@@ -80,17 +116,32 @@ export class DataCubeSeedModal extends React.Component<DataCubeSeedModalProps, D
     });
   }
 
+  onClusterSourceChange(selectedClusterSource: ClusterSource): void {
+    const { dataCubes, clusters } = this.props;
+    if (!dataCubes || !clusters) return;
+
+    var cubeName = generateUniqueName('dc', name => indexByAttribute(dataCubes, 'name', name) === -1);
+
+    this.setState({
+      clusterSource: selectedClusterSource,
+      newInstance: DataCube.fromClusterAndSource(
+        cubeName,
+        makeTitle(selectedClusterSource.source),
+        selectedClusterSource.cluster,
+        selectedClusterSource.source
+      )
+    });
+  }
+
   render(): JSX.Element {
     const { onNext, onCancel } = this.props;
-    const { newInstance, errors, autoFill } = this.state;
+    const { newInstance, errors, autoFill, clusterSources, clusterSource } = this.state;
 
-    if (!newInstance) return null;
-
+    // ToDo: How label works?
     var makeLabel = FormLabel.simpleGenerator(LABELS, errors, true);
-    var makeTextInput = ImmutableInput.simpleGenerator(newInstance, this.delegate.onChange);
-    var makeDropDownInput = ImmutableDropdown.simpleGenerator(newInstance, this.delegate.onChange);
+    // {makeLabel('source')}
 
-    // TODO : find out what sources are available for the dropdown
+    let ClusterSourceDropdown = Dropdown.specialize<ClusterSource>();
 
     return <Modal
       className="data-cube-seed-modal"
@@ -98,8 +149,14 @@ export class DataCubeSeedModal extends React.Component<DataCubeSeedModalProps, D
       onClose={this.props.onCancel}
     >
       <form>
-        {makeLabel('source')}
-        {makeDropDownInput('source', [])}
+
+        <ClusterSourceDropdown
+          items={clusterSources}
+          selectedItem={clusterSource}
+          renderItem={(cs: ClusterSource) => cs ? `${cs.cluster.title}: ${cs.source}` : ''}
+          keyItem={(cs: ClusterSource) => cs ? `${cs.cluster.name}_${cs.source}` : ''}
+          onSelect={this.onClusterSourceChange.bind(this)}
+        />
 
         <Checkbox
           selected={autoFill}

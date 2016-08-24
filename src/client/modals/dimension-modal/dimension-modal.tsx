@@ -92,7 +92,7 @@ export class DimensionModal extends React.Component<DimensionModalProps, Immutab
 
     var makeLabel = FormLabel.simpleGenerator(LABELS, errors, true);
     var makeTextInput = ImmutableInput.simpleGenerator(newInstance, this.delegate.onChange);
-    var makeDropDownInput = ImmutableDropdown.simpleGenerator(newInstance, this.delegate.onChange);
+    var makeDropdownInput = ImmutableDropdown.simpleGenerator(newInstance, this.delegate.onChange);
 
     return <Modal
       className="dimension-modal"
@@ -105,7 +105,7 @@ export class DimensionModal extends React.Component<DimensionModalProps, Immutab
         {makeTextInput('title', /^.+$/, true)}
 
         {makeLabel('kind')}
-        {makeDropDownInput('kind', DimensionModal.KINDS)}
+        {makeDropdownInput('kind', DimensionModal.KINDS)}
 
         {makeLabel('formula')}
         {makeTextInput('formula')}
@@ -124,7 +124,7 @@ export class DimensionModal extends React.Component<DimensionModalProps, Immutab
         /> : null}
 
         {isContinuous ? makeLabel('bucketingStrategy') : null}
-        {isContinuous ? makeDropDownInput('bucketingStrategy', DimensionModal.BUCKETING_STRATEGIES) : null}
+        {isContinuous ? makeDropdownInput('bucketingStrategy', DimensionModal.BUCKETING_STRATEGIES) : null}
 
       </form>
 

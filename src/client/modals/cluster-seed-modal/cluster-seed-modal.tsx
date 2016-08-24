@@ -74,7 +74,7 @@ export class ClusterSeedModal extends React.Component<ClusterSeedModalProps, Imm
 
     var makeLabel = FormLabel.simpleGenerator(LABELS, errors, true);
     var makeTextInput = ImmutableInput.simpleGenerator(newInstance, this.delegate.onChange);
-    var makeDropDownInput = ImmutableDropdown.simpleGenerator(newInstance, this.delegate.onChange);
+    var makeDropdownInput = ImmutableDropdown.simpleGenerator(newInstance, this.delegate.onChange);
 
     return <Modal
       className="cluster-seed-modal"
@@ -83,7 +83,7 @@ export class ClusterSeedModal extends React.Component<ClusterSeedModalProps, Imm
     >
       <form>
         {makeLabel('type')}
-        {makeDropDownInput('type', Cluster.TYPE_VALUES.map(type => {return {value: type, label: type}; }))}
+        {makeDropdownInput('type', Cluster.TYPE_VALUES.map(type => {return {value: type, label: type}; }))}
 
         {makeLabel('host')}
         {makeTextInput('host', /^.+$/)}

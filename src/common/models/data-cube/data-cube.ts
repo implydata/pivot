@@ -233,9 +233,10 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
     return maxTimeDate;
   }
 
-  static fromClusterAndSource(name: string, cluster: Cluster, source: string): DataCube {
+  static fromClusterAndSource(name: string, title: string, cluster: Cluster, source: string): DataCube {
     return DataCube.fromJS({
       name,
+      title,
       clusterName: cluster.name,
       source,
       timeAttribute: (cluster && cluster.type === 'druid') ? '__time' : null

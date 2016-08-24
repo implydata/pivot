@@ -1,4 +1,6 @@
 #!/bin/bash -eu
 
+#exit 0;
+
 ./node_modules/.bin/tsc
 gulp client:bundle > /dev/null

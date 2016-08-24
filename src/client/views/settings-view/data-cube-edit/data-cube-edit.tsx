@@ -154,7 +154,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
 
     var makeLabel = FormLabel.simpleGenerator(LABELS, errors);
     var makeTextInput = ImmutableInput.simpleGenerator(newInstance, this.delegate.onChange);
-    var makeDropDownInput = ImmutableDropdown.simpleGenerator(newInstance, this.delegate.onChange);
+    var makeDropdownInput = ImmutableDropdown.simpleGenerator(newInstance, this.delegate.onChange);
 
     var possibleClusters = [
       { value: 'native', label: 'Load a file and serve it natively' }
@@ -170,7 +170,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       {makeTextInput('description')}
 
       {makeLabel('clusterName')}
-      {makeDropDownInput('clusterName', possibleClusters)}
+      {makeDropdownInput('clusterName', possibleClusters)}
 
       {makeLabel('source')}
       {makeTextInput('source')}

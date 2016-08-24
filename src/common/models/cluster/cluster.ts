@@ -156,6 +156,7 @@ export class Cluster extends BaseImmutable<ClusterValue, ClusterJS> {
 
   constructor(parameters: ClusterValue) {
     super(parameters);
+    if (!this.title) this.title = this.name;
 
     switch (this.type) {
       case 'druid':

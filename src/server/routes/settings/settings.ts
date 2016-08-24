@@ -44,6 +44,26 @@ router.get('/', (req: PivotRequest, res: Response) => {
 
 });
 
+router.get('/cluster-sources', (req: PivotRequest, res: Response) => {
+  SETTINGS_MANAGER.getAllClusterSources()
+    .then(
+      (clusterSources) => {
+        res.send({ clusterSources: clusterSources });
+      },
+      (e: Error) => {
+        console.log('error:', e.message);
+        if (e.hasOwnProperty('stack')) {
+          console.log((<any>e).stack);
+        }
+        res.status(500).send({
+          error: 'could not compute',
+          message: e.message
+        });
+      }
+    )
+    .done();
+});
+
 router.post('/', (req: PivotRequest, res: Response) => {
   var { appSettings } = req.body;
 

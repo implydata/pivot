@@ -122,7 +122,7 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
 
     var makeLabel = FormLabel.simpleGenerator(LABELS, errors);
     var makeTextInput = ImmutableInput.simpleGenerator(newInstance, this.delegate.onChange);
-    var makeDropDownInput = ImmutableDropdown.simpleGenerator(newInstance, this.delegate.onChange);
+    var makeDropdownInput = ImmutableDropdown.simpleGenerator(newInstance, this.delegate.onChange);
 
     var needsAuth = ['mysql', 'postgres'].indexOf(newInstance.type) > -1;
 
@@ -134,7 +134,7 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
       {makeTextInput('host', IP_REGEX)}
 
       {makeLabel('type')}
-      {makeDropDownInput('type', Cluster.TYPE_VALUES.map(type => {return {value: type, label: type}; }))}
+      {makeDropdownInput('type', Cluster.TYPE_VALUES.map(type => {return {value: type, label: type}; }))}
 
       {makeLabel('timeout')}
       {makeTextInput('timeout', NUM_REGEX)}

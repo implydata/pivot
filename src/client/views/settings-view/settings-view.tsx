@@ -67,21 +67,33 @@ const VIEWS = [
 ];
 
 export class SettingsView extends React.Component<SettingsViewProps, SettingsViewState> {
+  private mounted = false;
+
   constructor() {
     super();
     this.state = {};
   }
 
   componentDidMount() {
+    this.mounted = true;
+
     Ajax.query({ method: "GET", url: 'settings' })
       .then(
         (resp) => {
+          if (!this.mounted) return;
           this.setState({
             settings: AppSettings.fromJS(resp.appSettings, { visualizations: MANIFESTS })
           });
         },
-        (xhr: XMLHttpRequest) => Notifier.failure('Sorry', `The settings couldn't be loaded`)
+        (e: Error) => {
+          if (!this.mounted) return;
+          Notifier.failure('Sorry', `The settings couldn't be loaded ${e.message}`);
+        }
       ).done();
+  }
+
+  componentWillUnmount() {
+    this.mounted = false;
   }
 
   onSave(settings: AppSettings, okMessage?: string): Q.Promise<any> {

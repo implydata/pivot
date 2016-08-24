@@ -196,4 +196,8 @@ export class ClusterManager {
     return process;
   }
 
+  public getSources(): Q.Promise<string[]> {
+    return (External.getConstructorFor(this.cluster.type) as any).getSourceList(this.requester);
+  }
+
 }
