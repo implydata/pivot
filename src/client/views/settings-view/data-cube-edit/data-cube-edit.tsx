@@ -28,7 +28,7 @@ import { generateUniqueName } from '../../../../common/utils/string/string';
 
 import { Duration, Timezone } from 'chronoshift';
 
-import { DATA_CUBES_STRATEGIES_LABELS } from '../../../config/constants';
+import { DATA_CUBES_STRATEGIES_LABELS, STRINGS } from '../../../config/constants';
 
 import { SvgIcon, FormLabel, Button, SimpleList, ImmutableInput, ImmutableList, ImmutableDropdown } from '../../../components/index';
 import { DimensionModal, MeasureModal } from '../../../modals/index';
@@ -38,6 +38,7 @@ import { DATA_CUBE as LABELS } from '../../../../common/models/labels';
 
 import { ImmutableFormDelegate, ImmutableFormState } from '../../../utils/immutable-form-delegate/immutable-form-delegate';
 
+import { SuggestionModal } from "../../../modals/suggestion-modal/suggestion-modal";
 
 export interface DataCubeEditProps extends React.Props<any> {
   isNewDataCube?: boolean;
@@ -245,6 +246,11 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
     />;
   }
 
+  renderDimesionSuggestions() {
+    const { dataCube } = this.state;
+    return <SuggestionModal onAdd={null} onCancel={null} type="dimensions" dataCube={dataCube} />;
+  }
+
   renderMeasures(): JSX.Element {
     var { newInstance } = this.state;
 
@@ -289,6 +295,11 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       getNewItem={getNewItem}
       getRows={getRows}
     />;
+  }
+
+  renderMeasureSuggestions() {
+    const { dataCube } = this.state;
+    return <SuggestionModal onAdd={null} onCancel={null} type="measures" dataCube={dataCube} />;
   }
 
   renderButtons(): JSX.Element {
@@ -359,7 +370,8 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
           {tab.render.bind(this)()}
         </div>
       </div>
-
+      {this.renderMeasureSuggestions()}
+      {/*this.renderDimensionSuggestions()*/}
     </div>;
   }
 }
