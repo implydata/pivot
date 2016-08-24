@@ -264,7 +264,8 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
     return <SuggestionModal
       onAdd={this.updateCube.bind(this)}
       onClose={this.toggleDimensionsSuggestions.bind(this)}
-      type="dimensions" dataCube={newInstance}
+      property="dimensions"
+      dataCube={newInstance}
     />;
   }
 
@@ -327,7 +328,8 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
     return <SuggestionModal
       onAdd={this.updateCube.bind(this)}
       onClose={this.toggleMeasuresSuggestions.bind(this)}
-      type="measures" dataCube={newInstance}
+      property="measures"
+      dataCube={newInstance}
     />;
   }
 
