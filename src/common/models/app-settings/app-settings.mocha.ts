@@ -116,7 +116,7 @@ describe('AppSettings', () => {
     });
 
     it("converts to client settings", () => {
-      const settings = AppSettingsMock.wikiOnlyWithExecutor();
+      const settings = AppSettingsMock.wikiOnly();
 
       expect(settings.toClientSettings().toJS()).to.deep.equal({
         "clusters": [

@@ -29,6 +29,7 @@ import { Clicker, Essence, Timekeeper, VisStrategy, Dimension, SortOn, SplitComb
   granularityToString, getDefaultGranularityForKind, getGranularities } from '../../../common/models/index';
 
 import { setDragGhost, classNames } from '../../utils/dom/dom';
+import { QueryRunner } from '../../utils/query-runner/query-runner';
 import { DragManager } from '../../utils/drag-manager/drag-manager';
 import { STRINGS, getLocale } from '../../config/constants';
 import { PIN_TITLE_HEIGHT, PIN_ITEM_HEIGHT, PIN_PADDING_BOTTOM, MAX_SEARCH_LENGTH, SEARCH_WAIT } from '../../config/constants';
@@ -156,7 +157,7 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
       loading: true,
       fetchQueued: false
     });
-    dataCube.executor(query, { timezone: essence.timezone })
+    QueryRunner.fetch(dataCube, query, essence.timezone)
       .then(
         (dataset: Dataset) => {
           if (!this.mounted) return;

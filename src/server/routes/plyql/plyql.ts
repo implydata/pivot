@@ -79,16 +79,24 @@ router.post('/', (req: PivotRequest, res: Response) => {
     return null;
   });
 
-  req.getSettings(dataCube)
-    .then((appSettings) => {
+  req.getFullSettings(dataCube)
+    .then((fullSettings) => {
+      const { appSettings, executors } = fullSettings;
+
       var myDataCube = appSettings.getDataCube(dataCube);
 
       if (!myDataCube) {
         res.status(400).send({ error: 'unknown data cube' });
-        return;
+        return null;
       }
 
-      myDataCube.executor(parsedQuery).then(
+      var myExecutor = executors[myDataCube.name];
+      if (!myExecutor) {
+        res.status(400).send({ error: 'unqueryable data cube' });
+        return null;
+      }
+
+      return myExecutor(parsedQuery).then(
         (data: Dataset) => {
           res.type(outputType);
           res.send(outputFn(Dataset.fromJS(data.toJS())));

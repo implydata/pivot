@@ -34,8 +34,9 @@ router.post('/', (req: PivotRequest, res: Response) => {
     return;
   }
 
-  SETTINGS_MANAGER.getSettings()
-    .then((appSettings) => {
+  req.getFullSettings()
+    .then((fullSettings) => {
+      var { appSettings } = fullSettings;
       var collectionContext = {
         dataCubes: appSettings.dataCubes,
         visualizations: MANIFESTS

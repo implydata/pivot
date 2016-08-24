@@ -98,9 +98,7 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
           Notifier.success(okMessage ? okMessage : 'Settings saved');
 
           if (onSettingsChange) {
-            onSettingsChange(settings.toClientSettings().attachExecutors((dataCube: DataCube) => {
-              return Ajax.queryUrlExecutorFactory(dataCube.name, 'plywood');
-            }));
+            onSettingsChange(settings.toClientSettings());
           }
         },
         (xhr: XMLHttpRequest) => Notifier.failure('Woops', 'Something bad happened')

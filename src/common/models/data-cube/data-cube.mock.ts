@@ -14,15 +14,7 @@
  * limitations under the License.
  */
 
-import { $, Executor, Dataset, basicExecutorFactory } from 'plywood';
 import { DataCube, DataCubeJS } from './data-cube';
-
-var executor = basicExecutorFactory({
-  datasets: {
-    wiki: Dataset.fromJS([]),
-    twitter: Dataset.fromJS([])
-  }
-});
 
 export class DataCubeMock {
   public static get WIKI_JS(): DataCubeJS {
@@ -140,10 +132,10 @@ export class DataCubeMock {
   }
 
   static wiki() {
-    return DataCube.fromJS(DataCubeMock.WIKI_JS, { executor });
+    return DataCube.fromJS(DataCubeMock.WIKI_JS, {});
   }
 
   static twitter() {
-    return DataCube.fromJS(DataCubeMock.TWITTER_JS, { executor });
+    return DataCube.fromJS(DataCubeMock.TWITTER_JS, {});
   }
 }

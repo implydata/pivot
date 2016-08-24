@@ -24,10 +24,10 @@ import { SETTINGS_MANAGER } from '../../config';
 var router = Router();
 
 router.get('/', (req: PivotRequest, res: Response) => {
-  SETTINGS_MANAGER.getSettings()
+  SETTINGS_MANAGER.getFullSettings()
     .then(
-      (appSettings) => {
-        res.send({ appSettings });
+      (fullSettings) => {
+        res.send({ appSettings: fullSettings.appSettings });
       },
       (e: Error) => {
         console.log('error:', e.message);

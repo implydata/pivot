@@ -19,12 +19,14 @@ require('./number-range-picker.css');
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
+import { Timezone } from 'chronoshift';
 import { $, Dataset, ply } from 'plywood';
 
 import { Essence, Timekeeper, Dimension } from '../../../common/models/index';
 import { toSignificantDigits, getNumberOfWholeDigits } from '../../../common/utils/general/general';
 
 import { getXFromEvent, clamp, classNames } from '../../utils/dom/dom';
+import { QueryRunner } from '../../utils/query-runner/query-runner';
 
 import { Loader } from '../loader/loader';
 import { QueryError } from '../query-error/query-error';
@@ -101,7 +103,7 @@ export class NumberRangePicker extends React.Component<NumberRangePickerProps, N
       loading: true
     });
 
-    dataCube.executor(query)
+    QueryRunner.fetch(dataCube, query, Timezone.UTC)
       .then(
         (dataset: Dataset) => {
           if (!this.mounted) return;

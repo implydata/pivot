@@ -15,9 +15,8 @@
  */
 
 import * as Q from 'q';
-import { External, Dataset, basicExecutorFactory, find } from 'plywood';
+import { Executor, basicExecutorFactory, find } from 'plywood';
 import { Logger } from 'logger-tracker';
-import { pluralIfNeeded } from '../../../common/utils/general/general';
 import { TimeMonitor } from "../../../common/utils/time-monitor/time-monitor";
 import { AppSettings, Timekeeper, Cluster, DataCube } from '../../../common/models/index';
 import { SettingsStore } from '../settings-store/settings-store';
@@ -37,6 +36,12 @@ export interface GetSettingsOptions {
   timeout?: number;
 }
 
+export interface FullSettings {
+  appSettings: AppSettings;
+  timekeeper: Timekeeper;
+  executors: Lookup<Executor>;
+}
+
 export class SettingsManager {
   public logger: Logger;
   public verbose: boolean;
@@ -44,6 +49,7 @@ export class SettingsManager {
   public settingsStore: SettingsStore;
   public appSettings: AppSettings;
   public timeMonitor: TimeMonitor;
+  public executors: Lookup<Executor>;
   public fileManagers: FileManager[];
   public clusterManagers: ClusterManager[];
   public currentWork: Q.Promise<any>;
@@ -56,6 +62,7 @@ export class SettingsManager {
     this.anchorPath = options.anchorPath;
 
     this.timeMonitor = new TimeMonitor(logger);
+    this.executors = {};
     this.settingsStore = settingsStore;
     this.fileManagers = [];
     this.clusterManagers = [];
@@ -82,11 +89,51 @@ export class SettingsManager {
     return find(this.clusterManagers, (clusterManager) => clusterManager.cluster.name === clusterName);
   }
 
+  private getFileManagerFor(uri: string): FileManager {
+    return find(this.fileManagers, (fileManager) => fileManager.uri === uri);
+  }
+
+  getFullSettings(opts: GetSettingsOptions = {}): Q.Promise<FullSettings> {
+    var currentWork = this.currentWork;
+
+    // Refresh all clusters
+    var currentWork = currentWork.then(() => {
+      // ToDo: utilize dataCubeOfInterest
+      return Q.all(this.clusterManagers.map(clusterManager => clusterManager.refresh())) as any;
+    });
+
+    var timeout = opts.timeout || this.initialLoadTimeout;
+    if (timeout !== 0) {
+      currentWork = currentWork.timeout(timeout)
+        .catch(e => {
+          this.logger.error(`Settings load timeout hit, continuing`);
+        });
+    }
+
+    return currentWork.then(() => {
+      return {
+        appSettings: this.appSettings,
+        timekeeper: this.timeMonitor.timekeeper,
+        executors: this.executors
+      };
+    });
+  }
+
+  reviseSettings(newSettings: AppSettings): Q.Promise<any> {
+    var tasks = [
+      this.reviseClusters(newSettings),
+      this.reviseDataCubes(newSettings)
+    ];
+    this.appSettings = newSettings;
+
+    return Q.all(tasks);
+  }
+
+  // === Clusters ==============================
+
   private addClusterManager(cluster: Cluster): Q.Promise<any> {
     const { verbose, logger, anchorPath } = this;
 
-    // Make a cluster manager for each cluster and assign the correct initial externals to it.
-    logger.log(`Adding cluster manager for '${cluster.name}'`);
     var clusterManager = new ClusterManager(cluster, {
       logger,
       verbose,
@@ -105,70 +152,6 @@ export class SettingsManager {
     });
   }
 
-  private getFileManagerFor(uri: string): FileManager {
-    return find(this.fileManagers, (fileManager) => fileManager.uri === uri);
-  }
-
-  private addFileManager(dataCube: DataCube): Q.Promise<any> {
-    if (dataCube.clusterName !== 'native') throw new Error(`data cube '${dataCube.name}' must be native to have a file manager`);
-    const { verbose, logger, anchorPath } = this;
-
-    var fileManager = new FileManager({
-      logger,
-      verbose,
-      anchorPath,
-      uri: dataCube.source,
-      subsetExpression: dataCube.subsetExpression,
-      //onDatasetChange: this.onDatasetChange.bind(this, dataCube.name)
-    });
-
-    this.fileManagers.push(fileManager);
-    return fileManager.init();
-  }
-
-  private removeFileManager(dataCube: DataCube): void {
-    if (dataCube.clusterName !== 'native') throw new Error(`data cube '${dataCube.name}' must be native to have a file manager`);
-
-    this.fileManagers = this.fileManagers.filter((fileManager) => {
-      if (fileManager.uri !== dataCube.source) return true;
-      fileManager.destroy();
-      return false;
-    });
-  }
-
-  getTimekeeper(): Timekeeper {
-    return this.timeMonitor.timekeeper;
-  }
-
-  getSettings(opts: GetSettingsOptions = {}): Q.Promise<AppSettings> {
-    var currentWork = this.currentWork;
-
-    // Refresh all clusters
-    var currentWork = currentWork.then(() => {
-      // ToDo: utilize dataCubeOfInterest
-      return Q.all(this.clusterManagers.map(clusterManager => clusterManager.refresh())) as any;
-    });
-
-    var timeout = opts.timeout || this.initialLoadTimeout;
-    if (timeout !== 0) {
-      currentWork = currentWork.timeout(timeout)
-        .catch(e => {
-          this.logger.error(`Settings load timeout hit, continuing`);
-        });
-    }
-
-    return currentWork.then(() => this.appSettings);
-  }
-
-  reviseSettings(newSettings: AppSettings): Q.Promise<any> {
-    var tasks = [
-      this.reviseClusters(newSettings),
-      this.reviseDataCubes(newSettings)
-    ];
-    this.appSettings = newSettings;
-
-    return Q.all(tasks);
-  }
 
   reviseClusters(newSettings: AppSettings): Q.Promise<any> {
     const { verbose, logger } = this;
@@ -177,17 +160,95 @@ export class SettingsManager {
 
     updater(oldSettings.clusters, newSettings.clusters, {
       onExit: (oldCluster) => {
+        logger.log(`Removing cluster manager for '${oldCluster.name}'`);
         this.removeClusterManager(oldCluster);
       },
-      onUpdate: (newCluster) => {
-        logger.log(`${newCluster.name} UPDATED cluster`);
+      onUpdate: (newCluster, oldCluster) => {
+        logger.log(`Updating cluster manager for '${newCluster.name}'`);
+        this.removeClusterManager(oldCluster);
+        tasks.push(this.addClusterManager(newCluster));
       },
       onEnter: (newCluster) => {
+        logger.log(`Adding cluster manager for '${newCluster.name}'`);
         tasks.push(this.addClusterManager(newCluster));
       }
     });
 
     return Q.all(tasks);
+  }
+
+  // === Cubes ==============================
+
+  private addExecutor(dataCube: DataCube, executor: Executor): void {
+    this.executors[dataCube.name] = executor;
+  }
+
+  private removeExecutor(dataCube: DataCube): void {
+    delete this.executors[dataCube.name];
+  }
+
+  private addTimeCheckIfNeeded(dataCube: DataCube, executor: Executor): void {
+    if (!dataCube.refreshRule.isQuery()) return;
+
+    var maxTimeQuery = dataCube.getMaxTimeQuery();
+    this.timeMonitor.addCheck(dataCube.name, () => {
+      return executor(maxTimeQuery).then(DataCube.processMaxTimeQuery);
+    });
+  }
+
+  private removeTimeCheck(dataCube: DataCube): void {
+    this.timeMonitor.removeCheck(dataCube.name);
+  }
+
+  private addNativeCube(dataCube: DataCube): Q.Promise<any> {
+    if (dataCube.clusterName !== 'native') throw new Error(`data cube '${dataCube.name}' must be native to have a file manager`);
+    const { verbose, logger, anchorPath } = this;
+
+    var fileManager = new FileManager({
+      logger,
+      verbose,
+      anchorPath,
+      uri: dataCube.source,
+      subsetExpression: dataCube.subsetExpression
+
+    });
+
+    this.fileManagers.push(fileManager);
+    return fileManager.init().then((dataset) => {
+      var newExecutor = basicExecutorFactory({
+        datasets: { main: dataset }
+      });
+      this.addExecutor(dataCube, newExecutor);
+      this.addTimeCheckIfNeeded(dataCube, newExecutor);
+    });
+  }
+
+  private removeNativeCube(dataCube: DataCube): void {
+    if (dataCube.clusterName !== 'native') throw new Error(`data cube '${dataCube.name}' must be native to have a file manager`);
+
+    this.fileManagers = this.fileManagers.filter((fileManager) => {
+      if (fileManager.uri !== dataCube.source) return true;
+      fileManager.destroy();
+      return false;
+    });
+    this.removeExecutor(dataCube);
+    this.removeTimeCheck(dataCube);
+  }
+
+  private addClusterCube(dataCube: DataCube): void {
+    var clusterManager = this.getClusterManagerFor(dataCube.clusterName);
+    if (clusterManager) {
+      var newExecutor = basicExecutorFactory({
+        datasets: { main: dataCube.toExternal(clusterManager.requester) }
+      });
+      this.addExecutor(dataCube, newExecutor);
+      this.addTimeCheckIfNeeded(dataCube, newExecutor);
+    }
+  }
+
+  private removeClusterCube(dataCube: DataCube): void {
+    this.removeExecutor(dataCube);
+    this.removeTimeCheck(dataCube);
   }
 
   reviseDataCubes(newSettings: AppSettings): Q.Promise<any> {
@@ -197,20 +258,29 @@ export class SettingsManager {
 
     updater(oldSettings.dataCubes, newSettings.dataCubes, {
       onExit: (oldDataCube) => {
+        logger.log(`Removing cube manager for '${oldDataCube.name}'`);
         if (oldDataCube.clusterName === 'native') {
-          this.removeFileManager(oldDataCube);
+          this.removeNativeCube(oldDataCube);
         } else {
-          throw new Error(`only native data cubes work for now`); // ToDo: fix
+          this.removeClusterCube(oldDataCube);
         }
       },
-      onUpdate: (newDataCube) => {
-        logger.log(`${newDataCube.name} UPDATED datasource`);
+      onUpdate: (newDataCube, oldDataCube) => {
+        logger.log(`Updating cube manager for '${newDataCube.name}'`);
+        if (oldDataCube.clusterName === 'native') {
+          this.removeNativeCube(oldDataCube);
+          tasks.push(this.addNativeCube(newDataCube));
+        } else {
+          this.removeClusterCube(oldDataCube);
+          this.addClusterCube(newDataCube);
+        }
       },
       onEnter: (newDataCube) => {
+        logger.log(`Adding cube manager for '${newDataCube.name}'`);
         if (newDataCube.clusterName === 'native') {
-          tasks.push(this.addFileManager(newDataCube));
+          tasks.push(this.addNativeCube(newDataCube));
         } else {
-          throw new Error(`only native data cube work for now`); // ToDo: fix
+          this.addClusterCube(newDataCube);
         }
       }
     });
@@ -221,32 +291,9 @@ export class SettingsManager {
   updateSettings(newSettings: AppSettings): Q.Promise<any> {
     if (!this.settingsStore.writeSettings) return Q.reject(new Error('must be writable'));
 
-    var loadedNewSettings = newSettings.attachExecutors((dataCube) => {
-      if (dataCube.clusterName === 'native') {
-        var fileManager = this.getFileManagerFor(dataCube.source);
-        if (fileManager) {
-          var dataset = fileManager.dataset;
-          if (!dataset) return null;
-          return basicExecutorFactory({
-            datasets: { main: dataset }
-          });
-        }
-
-      } else {
-        var clusterManager = this.getClusterManagerFor(dataCube.clusterName);
-        if (clusterManager) {
-          return basicExecutorFactory({
-            datasets: { main: dataCube.toExternal(clusterManager.requester) }
-          });
-        }
-
-      }
-      return null;
-    });
-
-    return this.settingsStore.writeSettings(loadedNewSettings)
+    return this.settingsStore.writeSettings(newSettings)
       .then(() => {
-        this.appSettings = loadedNewSettings;
+        this.reviseSettings(newSettings);
       });
   }
 

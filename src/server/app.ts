@@ -116,8 +116,8 @@ app.use((req: PivotRequest, res: Response, next: Function) => {
   req.user = null;
   req.version = VERSION;
   req.stateful = stateful;
-  req.getSettings = (opts: GetSettingsOptions = {}) => {
-    return SETTINGS_MANAGER.getSettings(opts);
+  req.getFullSettings = (opts: GetSettingsOptions = {}) => {
+    return SETTINGS_MANAGER.getFullSettings(opts);
   };
   next();
 });

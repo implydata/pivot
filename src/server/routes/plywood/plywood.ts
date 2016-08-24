@@ -57,8 +57,9 @@ router.post('/', (req: PivotRequest, res: Response) => {
     return;
   }
 
-  req.getSettings(dataCube) // later: , settingsVersion)
-    .then((appSettings) => {
+  req.getFullSettings(dataCube) // later: , settingsVersion)
+    .then((fullSettings) => {
+      const { appSettings, executors } = fullSettings;
       // var settingsBehind = false;
       // if (appSettings.getVersion() < settingsVersion) {
       //   settingsBehind = true;
@@ -70,12 +71,13 @@ router.post('/', (req: PivotRequest, res: Response) => {
         return null;
       }
 
-      if (!myDataCube.executor) {
-        res.status(400).send({ error: 'un queryable data cube' });
+      var myExecutor = executors[myDataCube.name];
+      if (!myExecutor) {
+        res.status(400).send({ error: 'unqueryable data cube' });
         return null;
       }
 
-      return myDataCube.executor(ex, { timezone: queryTimezone }).then(
+      return myExecutor(ex, { timezone: queryTimezone }).then(
         (data: PlywoodValue) => {
           var reply: any = {
             result: Dataset.isDataset(data) ? data.toJS() : data

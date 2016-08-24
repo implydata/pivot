@@ -23,6 +23,7 @@ import { Timezone } from 'chronoshift';
 import { Fn } from '../../../common/utils/general/general';
 import { FunctionSlot } from '../../utils/function-slot/function-slot';
 import { DragManager } from '../../utils/drag-manager/drag-manager';
+import { QueryRunner } from '../../utils/query-runner/query-runner';
 import { Colors, Clicker, Timekeeper, DataCube, Dimension, Essence, Filter, Stage, Measure,
   SplitCombine, Splits, VisStrategy, VisualizationProps, User,
   Customization, Manifest, ViewSupervisor, Device, DeviceSize } from '../../../common/models/index';
@@ -175,7 +176,8 @@ export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
     var { dataCube } = essence;
     this.setState({ updatingMaxTime: true });
 
-    DataCube.queryMaxTime(dataCube)
+    QueryRunner.fetch(dataCube, dataCube.getMaxTimeQuery(), Timezone.UTC)
+      .then(DataCube.processMaxTimeQuery)
       .then((updatedMaxTime) => {
         if (!this.mounted) return;
         this.setState({

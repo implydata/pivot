@@ -32,6 +32,8 @@ import { RefreshRule, RefreshRuleJS } from '../refresh-rule/refresh-rule';
 import { Cluster } from '../cluster/cluster';
 import { Timekeeper } from "../timekeeper/timekeeper";
 
+const MAX_TIME = 'maxTime';
+
 function formatTimeDiff(diff: number): string {
   diff = Math.round(Math.abs(diff) / 1000); // turn to seconds
   if (diff < 60) return 'less than 1 minute';
@@ -100,7 +102,6 @@ export interface DataCubeValue {
   refreshRule?: RefreshRule;
 
   cluster?: Cluster;
-  executor?: Executor;
 }
 
 export interface DataCubeJS {
@@ -152,7 +153,6 @@ export interface DataCubeOptions {
 
 export interface DataCubeContext {
   cluster?: Cluster;
-  executor?: Executor;
 }
 
 export interface LongForm {
@@ -233,33 +233,14 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
     return isInstanceOf(candidate, DataCube);
   }
 
-  static queryMaxTime(dataCube: DataCube): Q.Promise<Date> {
-    if (!dataCube.executor) {
-      return Q.reject<Date>(new Error('dataCube not ready'));
-    }
-
-    var ex = ply().apply('maxTime', $('main').max(dataCube.timeAttribute));
-
-    return dataCube.executor(ex).then((dataset: Dataset) => {
-      var maxTimeDate = <Date>dataset.data[0]['maxTime'];
-      if (isNaN(maxTimeDate as any)) return null;
-      return maxTimeDate;
-    });
-  }
-
-  static fromClusterAndExternal(name: string, cluster: Cluster, external: External): DataCube {
-    var dataCube = DataCube.fromJS({
-      name,
-      clusterName: cluster.name,
-      source: String(external.source),
-      refreshRule: RefreshRule.query().toJS()
-    });
-
-    return dataCube.updateCluster(cluster).updateWithExternal(external);
+  static processMaxTimeQuery(dataset: Dataset): Date {
+    var maxTimeDate = <Date>dataset.data[0][MAX_TIME];
+    if (isNaN(maxTimeDate as any)) return null;
+    return maxTimeDate;
   }
 
   static fromJS(parameters: DataCubeJS, context: DataCubeContext = {}): DataCube {
-    const { cluster, executor } = context;
+    const { cluster } = context;
     var clusterName = parameters.clusterName;
     var introspection = parameters.introspection;
     var defaultSplitsJS = parameters.defaultSplits;
@@ -336,7 +317,6 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
     }
 
     var value: DataCubeValue = {
-      executor: null,
       name: parameters.name,
       title: parameters.title,
       description: parameters.description,
@@ -366,7 +346,6 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
       if (clusterName !== cluster.name) throw new Error(`Cluster name '${clusterName}' was given but '${cluster.name}' cluster was supplied (must match)`);
       value.cluster = cluster;
     }
-    if (executor) value.executor = executor;
     return new DataCube(value);
   }
 
@@ -398,7 +377,6 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
   public refreshRule: RefreshRule;
 
   public cluster: Cluster;
-  public executor: Executor;
 
   constructor(parameters: DataCubeValue) {
     var name = parameters.name;
@@ -432,7 +410,6 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
     this.refreshRule = refreshRule;
 
     this.cluster = parameters.cluster;
-    this.executor = parameters.executor;
 
     var dimensions = parameters.dimensions;
     var measures = parameters.measures;
@@ -472,7 +449,6 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
       refreshRule: this.refreshRule
     };
     if (this.cluster) value.cluster = this.cluster;
-    if (this.executor) value.executor = this.executor;
     return value;
   }
 
@@ -655,32 +631,6 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
     return new DataCube(value);
   }
 
-  public updateWithDataset(dataset: Dataset): DataCube {
-    if (this.clusterName !== 'native') throw new Error('must be native to have a dataset');
-
-    var executor = basicExecutorFactory({
-      datasets: { main: dataset }
-    });
-
-    return this.addAttributes(dataset.attributes).attachExecutor(executor);
-  }
-
-  public updateWithExternal(external: External): DataCube {
-    if (this.clusterName === 'native') throw new Error('can not be native and have an external');
-
-    var executor = basicExecutorFactory({
-      datasets: { main: external }
-    });
-
-    return this.addAttributes(external.attributes).attachExecutor(executor);
-  }
-
-  public attachExecutor(executor: Executor): DataCube {
-    var value = this.valueOf();
-    value.executor = executor;
-    return new DataCube(value);
-  }
-
   public toClientDataCube(): DataCube {
     var value = this.valueOf();
 
@@ -698,8 +648,8 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
     return new DataCube(value);
   }
 
-  public isQueryable(): boolean {
-    return Boolean(this.executor);
+  public getMaxTimeQuery(): Expression {
+    return ply().apply(MAX_TIME, $('main').max(this.timeAttribute));
   }
 
   public getMaxTime(timekeeper: Timekeeper): Date {

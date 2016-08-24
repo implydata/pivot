@@ -44,7 +44,6 @@ export interface AppSettingsJS {
 
 export interface AppSettingsContext {
   visualizations: Manifest[];
-  executorFactory?: (dataCube: DataCube) => Executor;
 }
 
 var check: Class<AppSettingsValue, AppSettingsJS>;
@@ -72,7 +71,6 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
       clusters = [];
     }
 
-    var executorFactory = context.executorFactory;
     var dataCubes = (parameters.dataCubes || (parameters as any).dataSources || []).map((dataCubeJS: DataCubeJS) => {
       var dataCubeClusterName = dataCubeJS.clusterName || (dataCubeJS as any).engine;
       if (dataCubeClusterName !== 'native') {
@@ -80,12 +78,7 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
         if (!cluster) throw new Error(`Can not find cluster '${dataCubeClusterName}' for data cube '${dataCubeJS.name}'`);
       }
 
-      var dataCubeObject = DataCube.fromJS(dataCubeJS, { cluster });
-      if (executorFactory) {
-        var executor = executorFactory(dataCubeObject);
-        if (executor) dataCubeObject = dataCubeObject.attachExecutor(executor);
-      }
-      return dataCubeObject;
+      return DataCube.fromJS(dataCubeJS, { cluster });
     });
 
     var collectionContext = { dataCubes, visualizations: context.visualizations };
@@ -179,13 +172,8 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
 
   public toClientSettings(): AppSettings {
     var value = this.valueOf();
-
     value.clusters = value.clusters.map((c) => c.toClientCluster());
-
-    value.dataCubes = value.dataCubes
-      .filter((ds) => ds.isQueryable())
-      .map((ds) => ds.toClientDataCube());
-
+    value.dataCubes = value.dataCubes.map((ds) => ds.toClientDataCube());
     return new AppSettings(value);
   }
 
@@ -253,17 +241,7 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
     return new AppSettings(value);
   }
 
-  public attachExecutors(executorFactory: (dataCube: DataCube) => Executor): AppSettings {
-    var value = this.valueOf();
-    value.dataCubes = value.dataCubes.map((ds) => {
-      var executor = executorFactory(ds);
-      if (executor) ds = ds.attachExecutor(executor);
-      return ds;
-    });
-    return new AppSettings(value);
-  }
-
-  public getSuggestedCubes(): DataCube[] {
+  public getSuggestedCubes(): DataCube[] { // ToDo: temp, delete this
     return this.dataCubes;
   }
 

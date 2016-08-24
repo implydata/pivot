@@ -335,10 +335,10 @@ export const SETTINGS_MANAGER = new SettingsManager(settingsStore, {
 if (PRINT_CONFIG) {
   var withComments = Boolean(parsedArgs['with-comments']);
 
-  SETTINGS_MANAGER.getSettings({
+  SETTINGS_MANAGER.getFullSettings({
     timeout: 10000
-  }).then(appSettings => {
-    console.log(appSettingsToYAML(appSettings, withComments, {
+  }).then(fullSettings => {
+    console.log(appSettingsToYAML(fullSettings.appSettings, withComments, {
       header: true,
       version: VERSION,
       verbose: VERBOSE,

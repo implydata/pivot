@@ -375,17 +375,17 @@ export class AppSettingsMock {
     return AppSettings.fromJS(AppSettingsMock.wikiOnlyJS(), AppSettingsMock.getContext());
   }
 
-  static wikiOnlyWithExecutor() {
-    return AppSettingsMock.wikiOnly().attachExecutors(() => {
-      return basicExecutorFactory({
+  static wikiTwitter() {
+    return AppSettings.fromJS(AppSettingsMock.wikiTwitterJS(), AppSettingsMock.getContext());
+  }
+
+  static executorsWiki(): Lookup<Executor> {
+    return {
+      wiki: basicExecutorFactory({
         datasets: {
           main: Dataset.fromJS(SMALL_WIKI_DATA)
         }
-      });
-    });
-  }
-
-  static wikiTwitter() {
-    return AppSettings.fromJS(AppSettingsMock.wikiTwitterJS(), AppSettingsMock.getContext());
+      })
+    };
   }
 }
