@@ -104,10 +104,8 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
   }
 
   renderCreateCubesModal(): JSX.Element {
-    const { showCreateCubesModal } = this.state;
     const { getSuggestedCubes, addCubes } = this.props;
 
-    if (!showCreateCubesModal) return null;
     return <SuggestionModal
       onAdd={addCubes.bind(this)}
       onClose={this.toggleCreateCubesModal.bind(this)}
@@ -189,7 +187,7 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
 
   getTitle(): string {
     const { isNewCluster } = this.props;
-    const { newInstance } = this.state;
+    const { newInstance, showCreateCubesModal } = this.state;
 
     const lastBit = newInstance.title ? `: ${newInstance.title}` : '';
 
@@ -219,7 +217,7 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
       <div className="content">
         {this.renderGeneral()}
       </div>
-      {this.renderCreateCubesModal()}
+      {showCreateCubesModal ? this.renderCreateCubesModal() : null}
 
     </div>;
   }
