@@ -21,22 +21,29 @@ import { List } from 'immutable';
 import { STRINGS } from "../../config/constants";
 import { Dimension } from "../../../common/models/dimension/dimension";
 
-import { DataCube } from "../../../common/models/data-cube/data-cube";
 import { Measure } from "../../../common/models/measure/measure";
 import { Checkbox } from "../../components/checkbox/checkbox";
-import { ImmutableUtils } from "../../../common/utils/immutable-utils/immutable-utils";
+
+
+function pluralize(title: string, count: number) {
+  var lower = title.toLowerCase();
+  if (count <= 1) return lower;
+  return `${lower}s`;
+}
 
 export type Option = Dimension | Measure;
 export interface Suggestion {
   option: Option;
   selected: boolean;
+  label: string;
 }
 
 export interface SuggestionModalProps extends React.Props<any> {
-  onAdd: (newDataCube: DataCube) => void;
+  onAdd: (suggestions: Option[]) => void;
   onClose: () => void;
-  dataCube: DataCube;
-  property: 'dimensions' | 'measures';
+  getLabel: (o: Option) => string;
+  getOptions: () => Option[];
+  title: string;
 }
 
 export interface SuggestionModalState {
@@ -52,22 +59,21 @@ export class SuggestionModal extends React.Component<SuggestionModalProps, Sugge
   }
 
   componentDidMount() {
-    const { dataCube } = this.props;
-    if (dataCube) this.initFromProps(this.props);
+    const { getOptions } = this.props;
+    if (getOptions) this.initFromProps(this.props);
   }
 
   componentWillReceiveProps(nextProps: SuggestionModalProps) {
-    if (nextProps.dataCube) {
+    if (nextProps) {
       this.initFromProps(nextProps);
     }
   }
 
   initFromProps(props: SuggestionModalProps) {
-    const { dataCube, property } = props;
-    var newCube = new DataCube(dataCube.valueOf());
-    const suggestions: Option[] = property === 'dimensions' ? newCube.getSuggestedDimensions() : newCube.getSuggestedMeasures();
+    const { getOptions, getLabel } = props;
+    const suggestions: Option[] = getOptions();
     this.setState({
-      suggestions: suggestions.map((s) => { return { option: s, selected: true}; })
+      suggestions: suggestions.map((s) => { return { option: s, selected: true, label: getLabel(s) }; })
     });
   }
 
@@ -82,8 +88,8 @@ export class SuggestionModal extends React.Component<SuggestionModalProps, Sugge
     const toggleName = toggle.option.name;
 
     var newStateSuggestions = suggestions.map((suggestion) => {
-      let { option, selected } = suggestion;
-      return option.name === toggleName ? { option, selected: !selected } : suggestion;
+      let { option, selected, label } = suggestion;
+      return option.name === toggleName ? { option, selected: !selected, label } : suggestion;
     });
 
     this.setState({
@@ -91,21 +97,17 @@ export class SuggestionModal extends React.Component<SuggestionModalProps, Sugge
     });
   }
 
-  applySuggestions(): DataCube {
-    const { property, dataCube } = this.props;
+  applySuggestions(): Option[] {
     const { suggestions } = this.state;
-
-    var oldValues: Option[] = (dataCube as any)[property].toArray();
-    var newValues = suggestions.filter(s => s.selected).map(s => s.option).concat(oldValues);
-    return ImmutableUtils.setProperty(dataCube, property, List(newValues));
+    return suggestions.filter(s => s.selected).map(s => s.option);
   }
 
   renderSuggestions() {
     const { suggestions } = this.state;
     if (!suggestions) return null;
     return suggestions.map((s => {
-      let { option, selected } = s;
-      let { title, formula, name } = option;
+      let { option, selected, label } = s;
+      let { name } = option;
       return <div
         className="row"
         key={name}
@@ -113,7 +115,7 @@ export class SuggestionModal extends React.Component<SuggestionModalProps, Sugge
       >
         <Checkbox
           color={selected ? "hsl(200, 80%, 51%)" : "#cccccc"}
-          label={`${title}(${formula})`}
+          label={label}
           selected={selected}
         />
         </div>;
@@ -121,23 +123,22 @@ export class SuggestionModal extends React.Component<SuggestionModalProps, Sugge
   }
 
   render() {
-    const { onClose, property } = this.props;
+    const { onClose, title } = this.props;
     const { suggestions } = this.state;
 
     const length = List(suggestions).filter((s) => s.selected).size;
     return <Modal
       className="suggestion-modal"
-      title={`${property === 'dimensions' ? STRINGS.dimension : STRINGS.measure} ${STRINGS.suggestions}`}
+      title={`${title} ${STRINGS.suggestions}`}
       onClose={onClose}
     >
       <form>
         {this.renderSuggestions()}
       </form>
       <div className="button-bar">
-        <Button type="primary" title={`${STRINGS.add} ${length} ${property}`} disabled={length === 0} onClick={this.onAdd.bind(this)}/>
+        <Button type="primary" title={`${STRINGS.add} ${length} ${pluralize(title, length)}`} disabled={length === 0} onClick={this.onAdd.bind(this)}/>
         <Button className="cancel" title="Cancel" type="secondary" onClick={onClose}/>
       </div>
-
     </Modal>;
   }
 }

@@ -22,6 +22,7 @@ import { AttributeInfo } from 'plywood';
 import { classNames } from '../../../utils/dom/dom';
 
 import { generateUniqueName } from '../../../../common/utils/string/string';
+import { ImmutableUtils } from "../../../../common/utils/immutable-utils/immutable-utils";
 
 import { Duration, Timezone } from 'chronoshift';
 
@@ -236,7 +237,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
     const DimensionsList = ImmutableList.specialize<Dimension>();
 
     return <DimensionsList
-      label="Dimensions"
+      label={STRINGS.dimensions}
       items={newInstance.dimensions}
       onChange={onChange.bind(this)}
       getModal={getModal}
@@ -253,19 +254,22 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
     });
   }
 
-  updateCube(cube: DataCube) {
+  addToCube(property: string, additionalValues: (Dimension | Measure)[]) {
+    const { newInstance } = this.state;
+    var newValues = additionalValues.concat((newInstance as any)[property].toArray());
     this.setState({
-      newInstance: cube
+      newInstance: ImmutableUtils.setProperty(newInstance, property, List(newValues))
     });
   }
 
   renderDimensionSuggestions() {
     const { newInstance } = this.state;
     return <SuggestionModal
-      onAdd={this.updateCube.bind(this)}
+      onAdd={this.addToCube.bind(this, 'dimensions')}
       onClose={this.toggleDimensionsSuggestions.bind(this)}
-      property="dimensions"
-      dataCube={newInstance}
+      getLabel={(d) => `${d.title} (${d.formula})`}
+      getOptions={newInstance.getSuggestedDimensions.bind(newInstance)}
+      title={STRINGS.dimension}
     />;
   }
 
@@ -313,7 +317,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
     const MeasuresList = ImmutableList.specialize<Measure>();
 
     return <MeasuresList
-      label="Measures"
+      label={STRINGS.measures}
       items={newInstance.measures}
       onChange={onChange.bind(this)}
       getModal={getModal}
@@ -326,10 +330,11 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
   renderMeasureSuggestions() {
     const { newInstance } = this.state;
     return <SuggestionModal
-      onAdd={this.updateCube.bind(this)}
+      onAdd={this.addToCube.bind(this, 'measures')}
       onClose={this.toggleMeasuresSuggestions.bind(this)}
-      property="measures"
-      dataCube={newInstance}
+      getLabel={(m) => `${m.title} (${m.formula})`}
+      getOptions={newInstance.getSuggestedMeasures.bind(newInstance)}
+      title={STRINGS.measure}
     />;
   }
 
