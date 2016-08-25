@@ -252,7 +252,7 @@ export class CollectionTileLightbox extends React.Component<CollectionTileLightb
       return <div className="headband grid-row">
         <div className="grid-col-70 vertical">
           <div className="title actionable" onClick={this.editTitleAndDesc.bind(this)}>{tile.title}</div>
-          <div className="description actionable" onClick={this.editTitleAndDesc.bind(this)}>{tile.description}</div>
+          <div className="description actionable" onClick={this.editTitleAndDesc.bind(this)}>{tile.description || STRINGS.noDescription}</div>
         </div>
         <div className="grid-col-30 right middle">
           <div className="explore-button" onClick={this.onExplore.bind(this)}>
