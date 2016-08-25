@@ -55,6 +55,22 @@ export const DIMENSION = {
   }
 };
 
+export const ATTRIBUTE = {
+  type: {
+    label: `Type`,
+    description: `The attribute's type`
+  },
+  splittable: {
+    label: `Splittable`,
+    description: `Whether or not the attribute can be split on.`
+  },
+  special: {
+    label: `Special`,
+    description: `Special measures that are not numbers`
+  }
+};
+
+
 export const COLLECTION = {
   name: {
     label: `Name (you won't be able to change this later)`,
