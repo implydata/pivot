@@ -100,7 +100,7 @@ export class CollectionOverview extends React.Component<CollectionOverviewProps,
   getActualDropIndex(originalIndex: number, dropIndex: number, dropAfter: boolean): number {
     dropIndex = dropAfter || dropIndex === 0 ? dropIndex : dropIndex - 1;
 
-    dropIndex = originalIndex > dropIndex ? dropIndex + 1 : dropIndex;
+    dropIndex = dropAfter && originalIndex > dropIndex ? dropIndex + 1 : dropIndex;
 
     return dropIndex;
   }
