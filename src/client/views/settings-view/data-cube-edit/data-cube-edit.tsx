@@ -217,7 +217,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
     const AttributesList = ImmutableList.specialize<AttributeInfo>();
 
     return <AttributesList
-      label="Dimensions"
+      label="Attributes"
       items={List(newInstance.attributes)}
       onChange={onChange.bind(this)}
       getModal={getModal}
