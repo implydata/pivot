@@ -306,6 +306,10 @@ export class SettingsManager {
       });
   }
 
+  // getClusterConnectionInfo(bareCluster: Cluster): Q.Promise<Cluster> {
+  //
+  // }
+
   getAllClusterSources(): Q.Promise<ClusterSource> {
     var clusterSources = this.clusterManagers.map((clusterManager) => {
       var clusterName = clusterManager.cluster.name;

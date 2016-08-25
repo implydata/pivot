@@ -102,7 +102,7 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
 
     var filter = essence.getEffectiveFilter(timekeeper);
     // don't remove filter if time
-    if (unfolded && dimension !== essence.getTimeDimension()) {
+    if (unfolded && dataCube.isMandatoryFilter(dimension.expression)) {
       filter = filter.remove(dimension.expression);
     }
 
@@ -217,8 +217,8 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
     var unfolded = this.updateFoldability(nextEssence, nextDimension, nextColors);
 
     // keep granularity selection if measures change or if autoupdate
-    var currentSelection = essence.getTimeSelection();
-    var nextSelection = nextEssence.getTimeSelection();
+    var currentSelection = essence.getPrimaryTimeSelection();
+    var nextSelection = nextEssence.getPrimaryTimeSelection();
     var differentTimeFilterSelection = currentSelection ? !currentSelection.equals(nextSelection) : Boolean(nextSelection);
     if (differentTimeFilterSelection) {
       // otherwise render will try to format exiting dataset based off of new granularity (before fetchData returns)

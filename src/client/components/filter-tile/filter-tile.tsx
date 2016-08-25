@@ -301,10 +301,10 @@ export class FilterTile extends React.Component<FilterTileProps, FilterTileState
     if (dimension) {
       var dragPosition = this.calculateDragPosition(e);
 
-      var tryingToReplaceTime = false;
+      var tryingToReplaceMandatory = false;
       if (dragPosition.replace !== null) {
         var targetClause = filter.clauses.get(dragPosition.replace);
-        tryingToReplaceTime = targetClause && targetClause.expression.equals(dataCube.timeAttribute);
+        tryingToReplaceMandatory = targetClause && dataCube.isMandatoryFilter(targetClause.expression);
       }
 
       var existingClause = filter.clauseForExpression(dimension.expression);
@@ -333,7 +333,7 @@ export class FilterTile extends React.Component<FilterTileProps, FilterTileState
         }
 
       } else {
-        if (dragPosition && !tryingToReplaceTime) {
+        if (dragPosition && !tryingToReplaceMandatory) {
           this.addDummy(dimension, dragPosition);
         }
 
@@ -434,7 +434,7 @@ export class FilterTile extends React.Component<FilterTileProps, FilterTileState
   renderRemoveButton(itemBlank: ItemBlank) {
     var { essence } = this.props;
     var dataCube = essence.dataCube;
-    if (itemBlank.dimension.expression.equals(dataCube.timeAttribute)) return null;
+    if (dataCube.isMandatoryFilter(itemBlank.dimension.expression)) return null;
     return <div className="remove" onClick={this.removeFilter.bind(this, itemBlank)}>
       <SvgIcon svg={require('../../icons/x.svg')}/>
     </div>;

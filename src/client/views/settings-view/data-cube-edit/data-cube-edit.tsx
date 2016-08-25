@@ -216,6 +216,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
 
     const getModal = (item: AttributeInfo): JSX.Element => <AttributeModal attributeInfo={item} />;
 
+    // v- this is nonsense
     const getNewItem = () => AttributeInfo.fromJS({
       name: generateUniqueName('d', name => !newInstance.dimensions.find(m => m.name === name)),
       type: 'STRING'
@@ -223,7 +224,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
 
     const getRows = (items: List<AttributeInfo>) => items.toArray().map((attribute) => {
       return {
-        title: attribute.name,
+        title: `${attribute.name}${newInstance.getTimeAttribute() === attribute.name ? ' [PT]' : ''}`,
         description: attribute.type,
         icon: `dim-string`
       };

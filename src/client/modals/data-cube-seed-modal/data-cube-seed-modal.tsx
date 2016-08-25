@@ -129,12 +129,11 @@ export class DataCubeSeedModal extends React.Component<DataCubeSeedModalProps, D
     })
       .then(
         (resp) => {
-          newDataCube = newDataCube.changeAttributes(AttributeInfo.fromJSs(resp.attributes));
-
+          var attributes = AttributeInfo.fromJSs(resp.attributes);
           if (autoFill) {
-            newDataCube = newDataCube
-              .appendDimensions(newDataCube.getSuggestedDimensions())
-              .appendMeasures(newDataCube.getSuggestedMeasures());
+            newDataCube = newDataCube.fillAllFromAttributes(attributes);
+          } else {
+            newDataCube = newDataCube.changeAttributes(attributes);
           }
 
           this.props.onNext(newDataCube);

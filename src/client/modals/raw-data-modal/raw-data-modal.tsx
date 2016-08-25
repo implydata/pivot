@@ -154,7 +154,7 @@ export class RawDataModal extends React.Component<RawDataModalProps, RawDataModa
   }
 
   getSortedAttributes(dataCube: DataCube): AttributeInfo[] {
-    const timeAttributeName = dataCube.timeAttribute ? dataCube.timeAttribute.name : null;
+    const timeAttributeName = dataCube.getTimeAttribute();
 
     var attributeRank = (attribute: AttributeInfo) => {
       const name = attribute.name;
@@ -269,7 +269,7 @@ export class RawDataModal extends React.Component<RawDataModalProps, RawDataModa
 
     const title = `${makeTitle(STRINGS.segment)} ${STRINGS.rawData}`;
 
-    const filtersString = essence.getEffectiveFilter(timekeeper).getFileString(dataCube.timeAttribute);
+    const filtersString = essence.getEffectiveFilter(timekeeper).getFileString(dataCube.getPrimaryTimeExpression());
 
     const scrollerLayout: ScrollerLayout = {
       // Inner dimensions

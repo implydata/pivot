@@ -319,7 +319,6 @@ describe('DataCube', () => {
           "priority": 13
         },
         "refreshRule": {
-          "refresh": "PT1M",
           "rule": "query"
         },
         "source": "wiki",
@@ -332,7 +331,7 @@ describe('DataCube', () => {
 
   });
 
-  describe("#addAttributes", () => {
+  describe("#fillAllFromAttributes", () => {
     var dataCubeStub = DataCube.fromJS({
       name: 'wiki',
       title: 'Wiki',
@@ -354,7 +353,7 @@ describe('DataCube', () => {
         { name: 'unique_user', special: 'unique' }
       ]);
 
-      var dataCube1 = dataCubeStub.addAttributes(attributes1);
+      var dataCube1 = dataCubeStub.fillAllFromAttributes(attributes1);
       expect(dataCube1.toJS()).to.deep.equal({
         "name": "wiki",
         "title": "Wiki",
@@ -362,7 +361,6 @@ describe('DataCube', () => {
         "clusterName": "druid",
         "source": "wiki",
         "refreshRule": {
-          "refresh": "PT1M",
           "rule": "fixed"
         },
         introspection: 'autofill-all',
@@ -413,7 +411,7 @@ describe('DataCube', () => {
         { name: 'user', type: 'STRING' }
       ]);
 
-      var dataCube2 = dataCube1.addAttributes(attributes2);
+      var dataCube2 = dataCube1.fillAllFromAttributes(attributes2);
       expect(dataCube2.toJS()).to.deep.equal({
         "name": "wiki",
         "title": "Wiki",
@@ -421,7 +419,6 @@ describe('DataCube', () => {
         "clusterName": "druid",
         "source": "wiki",
         "refreshRule": {
-          "refresh": "PT1M",
           "rule": "fixed"
         },
         introspection: 'autofill-all',
@@ -485,7 +482,7 @@ describe('DataCube', () => {
         { name: 'unique_user:#love$', special: 'unique' }
       ]);
 
-      var dataCube = dataCubeStub.addAttributes(attributes1);
+      var dataCube = dataCubeStub.fillAllFromAttributes(attributes1);
       expect(dataCube.toJS()).to.deep.equal({
         "attributes": [
           {
@@ -542,7 +539,6 @@ describe('DataCube', () => {
         ],
         "name": "wiki",
         "refreshRule": {
-          "refresh": "PT1M",
           "rule": "fixed"
         },
         "source": "wiki",
@@ -584,14 +580,14 @@ describe('DataCube', () => {
         ]
       });
 
-      var dataCube = dataCubeWithDim.addAttributes(attributes1);
+      var dataCube = dataCubeWithDim.fillAllFromAttributes(attributes1);
       expect(dataCube.toJS().measures.map(m => m.name)).to.deep.equal(['deleted']);
     });
 
   });
 
 
-  describe("#addAttributes (new dim)", () => {
+  describe("#fillAllFromAttributes (new dim)", () => {
     var dataCube = DataCube.fromJS({
       name: 'wiki',
       title: 'Wiki',
@@ -616,7 +612,7 @@ describe('DataCube', () => {
         { "name": "page_unique", "special": "unique", "type": "STRING" }
       ];
 
-      var dataCube1 = dataCube.addAttributes(AttributeInfo.fromJSs(columns));
+      var dataCube1 = dataCube.fillAllFromAttributes(AttributeInfo.fromJSs(columns));
 
       expect(dataCube1.toJS().dimensions).to.deep.equal([
         {
@@ -634,7 +630,7 @@ describe('DataCube', () => {
       ]);
 
       columns.push({ "name": "channel", "type": "STRING" });
-      var dataCube2 = dataCube1.addAttributes(AttributeInfo.fromJSs(columns));
+      var dataCube2 = dataCube1.fillAllFromAttributes(AttributeInfo.fromJSs(columns));
 
       expect(dataCube2.toJS().dimensions).to.deep.equal([
         {
