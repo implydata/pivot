@@ -325,7 +325,11 @@ export class SettingsManager {
       var fileManager = this.getFileManagerFor(dataCube.source);
       return Q(fileManager.dataset.attributes);
     } else {
-      return Q([]); // ToDo
+      var clusterManager = this.getClusterManagerFor(clusterName);
+      if (!clusterManager) return Q.reject<Attributes>(new Error(`no cluster manager for ${clusterName}`));
+      return dataCube.toExternal(clusterManager.cluster, clusterManager.requester)
+        .introspect()
+        .then((introspectedExternal) => introspectedExternal.attributes);
     }
   }
 

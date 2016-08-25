@@ -275,10 +275,15 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
 
     const AttributeSuggestionModal = SuggestionModal.specialize<AttributeInfo>();
 
+    function getAttributeLabel(a: AttributeInfo) {
+      var special = a.special ? ` [${a.special}]` : '';
+      return `${a.name} as ${a.type}${special}`;
+    }
+
     return <AttributeSuggestionModal
       onAdd={this.addAttribute.bind(this)}
       onClose={this.closeAttributeSuggestions.bind(this)}
-      getLabel={(m) => `${m.name} (${m.type})`}
+      getLabel={getAttributeLabel}
       options={attributeSuggestions}
       title={`${STRINGS.attribute} ${STRINGS.suggestion}`}
     />;

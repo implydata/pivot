@@ -46,6 +46,9 @@ export class GoldenCenter extends React.Component<GoldenCenterProps, GoldenCente
   componentDidMount() {
     window.addEventListener('resize', this.globalResizeListener);
     this.globalResizeListener();
+
+    // this is a hack to ensure that we size up the component properly after it has determined its size
+    setTimeout(this.globalResizeListener, 100);
   }
 
   componentWillUnmount() {
@@ -65,7 +68,7 @@ export class GoldenCenter extends React.Component<GoldenCenterProps, GoldenCente
     const { topRatio, minPadding } = this.props;
 
     var top = Math.max((myRect.height - childRect.height) * topRatio, minPadding);
-    this.setState({ top });
+    if (top !== this.state.top) this.setState({ top });
   }
 
   render() {

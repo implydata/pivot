@@ -137,10 +137,6 @@ export class DataCubeSeedModal extends React.Component<DataCubeSeedModalProps, D
     const { onNext, onCancel } = this.props;
     const { newInstance, errors, autoFill, clusterSources, clusterSource } = this.state;
 
-    // ToDo: How label works?
-    var makeLabel = FormLabel.simpleGenerator(LABELS, errors, true);
-    // {makeLabel('source')}
-
     let ClusterSourceDropdown = Dropdown.specialize<ClusterSource>();
 
     return <Modal
@@ -149,6 +145,7 @@ export class DataCubeSeedModal extends React.Component<DataCubeSeedModalProps, D
       onClose={this.props.onCancel}
     >
       <form>
+        { FormLabel.dumbLabel('Source') }
 
         <ClusterSourceDropdown
           items={clusterSources}
