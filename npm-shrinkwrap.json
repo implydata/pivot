@@ -287,9 +287,9 @@
       "resolved": "https://registry.npmjs.org/escape-string-regexp/-/escape-string-regexp-1.0.5.tgz"
     },
     "esprima": {
-      "version": "2.7.2",
+      "version": "2.7.3",
       "from": "esprima@>=2.6.0 <3.0.0",
-      "resolved": "https://registry.npmjs.org/esprima/-/esprima-2.7.2.tgz"
+      "resolved": "https://registry.npmjs.org/esprima/-/esprima-2.7.3.tgz"
     },
     "etag": {
       "version": "1.7.0",
@@ -379,9 +379,9 @@
       }
     },
     "glob": {
-      "version": "7.0.5",
+      "version": "7.0.6",
       "from": "glob@^7.0.5",
-      "resolved": "https://registry.npmjs.org/glob/-/glob-7.0.5.tgz"
+      "resolved": "https://registry.npmjs.org/glob/-/glob-7.0.6.tgz"
     },
     "good-listener": {
       "version": "1.1.7",
@@ -746,9 +746,9 @@
       "resolved": "https://registry.npmjs.org/pinkie-promise/-/pinkie-promise-2.0.1.tgz"
     },
     "plywood": {
-      "version": "0.12.3",
-      "from": "plywood@0.12.3",
-      "resolved": "https://registry.npmjs.org/plywood/-/plywood-0.12.3.tgz"
+      "version": "0.12.4",
+      "from": "plywood@0.12.4",
+      "resolved": "https://registry.npmjs.org/plywood/-/plywood-0.12.4.tgz"
     },
     "plywood-druid-requester": {
       "version": "1.5.4",
