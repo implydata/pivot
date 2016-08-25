@@ -106,7 +106,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
 
   initFromProps(props: DataCubeEditProps) {
     this.setState({
-      newInstance: new DataCube(props.dataCube.valueOf()),
+      newInstance: this.state.newInstance || new DataCube(props.dataCube.valueOf()),
       canSave: true,
       errors: {},
       tab: props.isNewDataCube ? this.tabs[0] : this.tabs.filter((tab) => tab.value === props.tab)[0],
@@ -258,7 +258,10 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
     Ajax.query({
       method: "POST",
       url: 'settings/attributes',
-      data: { dataCube: dataCube.name }
+      data: {
+        clusterName: dataCube.clusterName,
+        source: dataCube.source
+      }
     })
       .then(
         (resp) => {
@@ -363,7 +366,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
   addDimensions(extraDimensions: Dimension[]) {
     const { newInstance } = this.state;
     this.setState({
-      newInstance: newInstance.changeDimensions(List(newInstance.dimensions.toArray().concat(extraDimensions)))
+      newInstance: newInstance.appendDimensions(extraDimensions)
     });
   }
 
@@ -433,7 +436,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
   addMeasures(extraMeasures: Measure[]) {
     const { newInstance } = this.state;
     this.setState({
-      newInstance: newInstance.changeMeasures(List(newInstance.measures.toArray().concat(extraMeasures)))
+      newInstance: newInstance.appendMeasures(extraMeasures)
     });
   }
 

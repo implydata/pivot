@@ -17,7 +17,7 @@
 require('./data-cube-seed-modal.css');
 
 import * as React from 'react';
-import { findByName } from 'plywood';
+import { AttributeInfo, findByName } from 'plywood';
 import { DataCube, Cluster } from "../../../common/models/index";
 
 import { FormLabel, Button, Modal, ImmutableInput, Dropdown, Checkbox } from '../../components/index';
@@ -32,7 +32,7 @@ import { indexByAttribute } from '../../../common/utils/array/array';
 import { ImmutableFormDelegate, ImmutableFormState } from '../../utils/immutable-form-delegate/immutable-form-delegate';
 
 export interface DataCubeSeedModalProps extends React.Props<any> {
-  onNext: (newDataCube: DataCube, autoFill: boolean) => void;
+  onNext: (newDataCube: DataCube) => void;
   onCancel: () => void;
   dataCubes: DataCube[];
   clusters: Cluster[];
@@ -57,6 +57,7 @@ export class DataCubeSeedModal extends React.Component<DataCubeSeedModalProps, D
     super();
     this.delegate = new ImmutableFormDelegate<DataCube>(this);
     this.state = {
+      autoFill: true,
       clusterSources: [],
       clusterSource: null
     };
@@ -107,7 +108,40 @@ export class DataCubeSeedModal extends React.Component<DataCubeSeedModalProps, D
 
 
   onNext() {
-    this.props.onNext(this.state.newInstance, this.state.autoFill);
+    const { dataCubes, clusters } = this.props;
+    if (!dataCubes || !clusters) return;
+    var { clusterSource, autoFill } = this.state;
+
+    var newDataCube = DataCube.fromClusterAndSource(
+      generateUniqueName('dc', name => indexByAttribute(dataCubes, 'name', name) === -1),
+      makeTitle(clusterSource.source),
+      clusterSource.cluster,
+      clusterSource.source
+    );
+
+    Ajax.query({
+      method: "POST",
+      url: 'settings/attributes',
+      data: {
+        clusterName: newDataCube.clusterName,
+        source: newDataCube.source
+      }
+    })
+      .then(
+        (resp) => {
+          newDataCube = newDataCube.changeAttributes(AttributeInfo.fromJSs(resp.attributes));
+
+          if (autoFill) {
+            newDataCube = newDataCube
+              .appendDimensions(newDataCube.getSuggestedDimensions())
+              .appendMeasures(newDataCube.getSuggestedMeasures());
+          }
+
+          this.props.onNext(newDataCube);
+        },
+        (xhr: XMLHttpRequest) => Notifier.failure('Woops', 'Something bad happened')
+      )
+      .done();
   }
 
   toggleAutoFill() {
@@ -123,19 +157,13 @@ export class DataCubeSeedModal extends React.Component<DataCubeSeedModalProps, D
     var cubeName = generateUniqueName('dc', name => indexByAttribute(dataCubes, 'name', name) === -1);
 
     this.setState({
-      clusterSource: selectedClusterSource,
-      newInstance: DataCube.fromClusterAndSource(
-        cubeName,
-        makeTitle(selectedClusterSource.source),
-        selectedClusterSource.cluster,
-        selectedClusterSource.source
-      )
+      clusterSource: selectedClusterSource
     });
   }
 
   render(): JSX.Element {
     const { onNext, onCancel } = this.props;
-    const { newInstance, errors, autoFill, clusterSources, clusterSource } = this.state;
+    const { errors, autoFill, clusterSources, clusterSource } = this.state;
 
     let ClusterSourceDropdown = Dropdown.specialize<ClusterSource>();
 

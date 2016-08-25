@@ -319,17 +319,22 @@ export class SettingsManager {
     return (Q.all(clusterSources) as any).then((things: ClusterSource[][]) => flatten(things));
   }
 
-  getAllAttributes(dataCube: DataCube): Q.Promise<Attributes> {
-    var clusterName = dataCube.clusterName;
+  getAllAttributes(clusterName: string, source: string): Q.Promise<Attributes> {
     if (clusterName === 'native') {
-      var fileManager = this.getFileManagerFor(dataCube.source);
-      return Q(fileManager.dataset.attributes);
+      return Q.fcall(() => {
+        var fileManager = this.getFileManagerFor(source);
+        if (!fileManager) throw new Error(`no file manager for ${source}`);
+        return fileManager.dataset.attributes;
+      });
     } else {
-      var clusterManager = this.getClusterManagerFor(clusterName);
-      if (!clusterManager) return Q.reject<Attributes>(new Error(`no cluster manager for ${clusterName}`));
-      return dataCube.toExternal(clusterManager.cluster, clusterManager.requester)
-        .introspect()
-        .then((introspectedExternal) => introspectedExternal.attributes);
+      return Q.fcall(() => {
+        var clusterManager = this.getClusterManagerFor(clusterName);
+        if (!clusterManager) throw new Error(`no cluster manager for ${clusterName}`);
+        return DataCube.fromClusterAndSource('test_cube', 'TC', clusterManager.cluster, source)
+          .toExternal(clusterManager.cluster, clusterManager.requester)
+          .introspect()
+          .then((introspectedExternal) => introspectedExternal.attributes) as any;
+      });
     }
   }
 

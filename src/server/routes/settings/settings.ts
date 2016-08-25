@@ -65,27 +65,23 @@ router.get('/cluster-sources', (req: PivotRequest, res: Response) => {
 });
 
 router.post('/attributes', (req: PivotRequest, res: Response) => {
-  var { dataCube } = req.body;
+  var { clusterName, source } = req.body;
 
-  if (typeof dataCube !== 'string') {
+  if (typeof clusterName !== 'string') {
     res.status(400).send({
-      error: 'must have a dataCube'
+      error: 'must have a clusterName'
     });
     return;
   }
 
-  req.getFullSettings(dataCube)
-    .then((fullSettings) => {
-      const { appSettings } = fullSettings;
+  if (typeof source !== 'string') {
+    res.status(400).send({
+      error: 'must have a source'
+    });
+    return;
+  }
 
-      var myDataCube = appSettings.getDataCube(dataCube);
-      if (!myDataCube) {
-        res.status(400).send({ error: 'unknown data cube' });
-        return null;
-      }
-
-      return SETTINGS_MANAGER.getAllAttributes(myDataCube);
-    })
+  SETTINGS_MANAGER.getAllAttributes(clusterName, source)
     .then(
       (attributes) => {
         res.send({ attributes: attributes });

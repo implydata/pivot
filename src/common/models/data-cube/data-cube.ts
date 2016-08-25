@@ -366,14 +366,6 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
     var dimensions = List((parameters.dimensions || []).map((d) => Dimension.fromJS(d)));
     var measures = List((parameters.measures || []).map((m) => Measure.fromJS(m)));
 
-    if (timeAttribute && !Dimension.getDimensionByExpression(dimensions, timeAttribute)) {
-      dimensions = dimensions.unshift(new Dimension({
-        name: timeAttributeName,
-        kind: 'time',
-        formula: timeAttribute.toString()
-      }));
-    }
-
     var subsetFormula = parameters.subsetFormula || (parameters as any).subsetFilter;
 
     var longForm = parameters.longForm;
@@ -888,6 +880,14 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
 
   public changeMeasures(measures: List<Measure>) {
     return this.change('measures', measures);
+  }
+
+  public appendMeasures(measures: Measure[]) {
+    return this.changeMeasures(List(this.measures.toArray().concat(measures)));
+  }
+
+  public appendDimensions(dimensions: Dimension[]) {
+    return this.changeDimensions(List(this.dimensions.toArray().concat(dimensions)));
   }
 
   public getDefaultSortAction(): SortAction {
