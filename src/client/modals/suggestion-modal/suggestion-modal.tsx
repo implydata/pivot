@@ -86,11 +86,34 @@ export class SuggestionModal<T> extends React.Component<SuggestionModalProps<T>,
     });
   }
 
+  changeSelection(suggestion: Suggestion<T>, value: boolean): Suggestion<T> { // member function because of T
+    const { option, label } = suggestion;
+    return {
+      option, label, selected: value
+    };
+  }
+
   onAdd() {
     const { onAdd, onClose } = this.props;
     const { suggestions } = this.state;
     onAdd(suggestions.filter(s => s.selected).map(s => s.option));
     onClose();
+  }
+
+  selectAll() {
+    const { suggestions } = this.state;
+    const allSelected = suggestions.map((s) => this.changeSelection(s, true));
+    this.setState({
+      suggestions: allSelected
+    });
+  }
+
+  selectNone() {
+    const { suggestions } = this.state;
+    const noneSelected = suggestions.map((s) => this.changeSelection(s, false));
+    this.setState({
+      suggestions: noneSelected
+    });
   }
 
   toggleSuggestion(toggle: Suggestion<T>) {
@@ -129,9 +152,27 @@ export class SuggestionModal<T> extends React.Component<SuggestionModalProps<T>,
     }));
   }
 
+  renderEmpty() {
+    const { onClose, title } = this.props;
+
+    return <Modal
+      className="suggestion-modal"
+      title={`${title}`}
+      onClose={onClose}
+    >
+      <div className="background">
+        <div className="message">{STRINGS.thereAreNoSuggestionsAtTheMoment}</div>
+      </div>
+      <div className="button-bar">
+        <Button className="cancel" title={STRINGS.close} type="primary" onClick={onClose}/>
+      </div>
+    </Modal>;
+  }
+
   render() {
     const { onClose, title, okLabel, cancelLabel } = this.props;
     const { suggestions } = this.state;
+    if (!suggestions || suggestions.length === 0) return this.renderEmpty();
 
     const length = List(suggestions).filter((s) => s.selected).size;
     return <Modal
@@ -139,6 +180,10 @@ export class SuggestionModal<T> extends React.Component<SuggestionModalProps<T>,
       title={`${title}`}
       onClose={onClose}
     >
+      <div className="actions">
+        <button key='all' onClick={this.selectAll.bind(this)}>Select all</button>
+        <button key='none' onClick={this.selectNone.bind(this)}>Select none</button>
+      </div>
       <div className="background">
         {this.renderSuggestions()}
       </div>

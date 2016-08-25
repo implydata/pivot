@@ -49,9 +49,7 @@ export interface DataCubeEditProps extends React.Props<any> {
 export interface DataCubeEditState extends ImmutableFormState<DataCube> {
   tab?: any;
   attributeSuggestions?: Attributes;
-  showAttributesSuggestion?: boolean;
-  showDimensionsSuggestion?: boolean;
-  showMeasuresSuggestion?: boolean;
+  modals?: Modal[];
 }
 
 export interface Tab {
@@ -60,7 +58,25 @@ export interface Tab {
   render: () => JSX.Element;
 }
 
+export interface Modal {
+  name: string;
+  render: () => JSX.Element;
+  active?: boolean;
+}
 
+function open(m: Modal) {
+  const { name, render } = m;
+  return {
+    name, render, active: true
+  };
+}
+
+function close(m: Modal) {
+  const { name, render } = m;
+  return {
+    name, render
+  };
+}
 export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEditState> {
   private tabs: Tab[] = [
     { label: 'General', value: 'general', render: this.renderGeneral },
@@ -96,9 +112,11 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       tab: props.isNewDataCube ? this.tabs[0] : this.tabs.filter((tab) => tab.value === props.tab)[0],
 
       attributeSuggestions: null,
-      showAttributesSuggestion: false,
-      showDimensionsSuggestion: false,
-      showMeasuresSuggestion: false
+      modals: [
+        {name: 'dimensions', render: this.renderDimensionSuggestions},
+        {name: 'measures', render: this.renderMeasureSuggestions},
+        {name: 'attributes', render: this.renderAttributeSuggestions}
+      ]
     });
   }
 
@@ -237,7 +255,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
 
   openAttributeSuggestions() {
     const { dataCube } = this.props;
-
+    this.openModal('attributes');
     Ajax.query({
       method: "POST",
       url: 'settings/attributes',
@@ -246,7 +264,6 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       .then(
         (resp) => {
           this.setState({
-            showAttributesSuggestion: true,
             attributeSuggestions: dataCube.filterAttributes(AttributeInfo.fromJSs(resp.attributes))
           });
         },
@@ -257,9 +274,9 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
 
   closeAttributeSuggestions() {
     this.setState({
-      showAttributesSuggestion: false,
       attributeSuggestions: null
     });
+    this.closeModal('attributes');
   }
 
   addAttribute(extraAttributes: Attributes) {
@@ -270,8 +287,8 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
   }
 
   renderAttributeSuggestions() {
-    const { showAttributesSuggestion, attributeSuggestions } = this.state;
-    if (!showAttributesSuggestion || !attributeSuggestions) return null;
+    const { attributeSuggestions } = this.state;
+    if (!attributeSuggestions) return null;
 
     const AttributeSuggestionModal = SuggestionModal.specialize<AttributeInfo>();
 
@@ -285,10 +302,25 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       onClose={this.closeAttributeSuggestions.bind(this)}
       getLabel={getAttributeLabel}
       options={attributeSuggestions}
-      title={`${STRINGS.attribute} ${STRINGS.suggestion}`}
+      title={`${STRINGS.attribute} ${STRINGS.suggestion}s`}
     />;
   }
 
+  openModal(name: string) {
+    const { modals } = this.state;
+    var newModals = modals.map(m => (m.name === name) ? open(m) : m);
+    this.setState({
+      modals: newModals
+    });
+  }
+
+  closeModal(name: string) {
+    const { modals } = this.state;
+    var newModals = modals.map(m => (m.name === name) ? close(m) : m);
+    this.setState({
+      modals: newModals
+    });
+  }
   // ---------------------------------------------------
 
   renderDimensions(): JSX.Element {
@@ -325,15 +357,8 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       getModal={getModal}
       getNewItem={getNewItem}
       getRows={getRows}
-      toggleSuggestions={this.toggleDimensionsSuggestions.bind(this)}
+      toggleSuggestions={this.openModal.bind(this, 'dimensions')}
     />;
-  }
-
-  toggleDimensionsSuggestions() {
-    const { showDimensionsSuggestion } = this.state;
-    this.setState({
-      showDimensionsSuggestion: !showDimensionsSuggestion
-    });
   }
 
   addDimensions(extraDimensions: Dimension[]) {
@@ -344,17 +369,16 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
   }
 
   renderDimensionSuggestions() {
-    const { showDimensionsSuggestion, newInstance } = this.state;
-    if (!showDimensionsSuggestion) return null;
+    const { newInstance } = this.state;
 
     const DimensionSuggestionModal = SuggestionModal.specialize<Dimension>();
 
     return <DimensionSuggestionModal
       onAdd={this.addDimensions.bind(this)}
-      onClose={this.toggleDimensionsSuggestions.bind(this)}
+      onClose={this.closeModal.bind(this, 'dimensions')}
       getLabel={(d) => `${d.title} (${d.formula})`}
       options={newInstance.getSuggestedDimensions()}
-      title={`${STRINGS.dimension} ${STRINGS.suggestion}`}
+      title={`${STRINGS.dimension} ${STRINGS.suggestion}s`}
     />;
   }
 
@@ -403,15 +427,8 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       getModal={getModal}
       getNewItem={getNewItem}
       getRows={getRows}
-      toggleSuggestions={this.toggleMeasuresSuggestions.bind(this)}
+      toggleSuggestions={this.openModal.bind(this, 'measures')}
     />;
-  }
-
-  toggleMeasuresSuggestions() {
-    const { showMeasuresSuggestion } = this.state;
-    this.setState({
-      showMeasuresSuggestion: !showMeasuresSuggestion
-    });
   }
 
   addMeasures(extraMeasures: Measure[]) {
@@ -422,17 +439,16 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
   }
 
   renderMeasureSuggestions() {
-    const { showMeasuresSuggestion, newInstance } = this.state;
-    if (!showMeasuresSuggestion) return null;
+    const { newInstance } = this.state;
 
     const MeasureSuggestionModal = SuggestionModal.specialize<Measure>();
 
     return <MeasureSuggestionModal
       onAdd={this.addMeasures.bind(this)}
-      onClose={this.toggleMeasuresSuggestions.bind(this)}
+      onClose={this.closeModal.bind(this, 'measures')}
       getLabel={(m) => `${m.title} (${m.formula})`}
       options={newInstance.getSuggestedMeasures()}
-      title={`${STRINGS.measure} ${STRINGS.suggestion}`}
+      title={`${STRINGS.measure} ${STRINGS.suggestion}s`}
     />;
   }
 
@@ -501,9 +517,10 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
 
   render() {
     const { dataCube, isNewDataCube } = this.props;
-    const { tab, newInstance } = this.state;
+    const { tab, newInstance, modals } = this.state;
 
     if (!newInstance || !tab || !dataCube) return null;
+    var modal = modals.filter((m) => m.active)[0];
 
     return <div className="data-cube-edit">
       <div className="title-bar">
@@ -527,9 +544,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
           {tab.render.bind(this)()}
         </div>
       </div>
-      {this.renderAttributeSuggestions()}
-      {this.renderDimensionSuggestions()}
-      {this.renderMeasureSuggestions()}
+      { modal ? modal.render.bind(this)() : null }
     </div>;
   }
 }
