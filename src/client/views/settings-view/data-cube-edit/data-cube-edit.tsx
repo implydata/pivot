@@ -23,6 +23,7 @@ import { classNames } from '../../../utils/dom/dom';
 import { Ajax } from '../../../utils/ajax/ajax';
 
 import { generateUniqueName } from '../../../../common/utils/string/string';
+import { pluralIfNeeded } from "../../../../common/utils/general/general";
 import { Notifier } from '../../../components/notifications/notifications';
 
 import { Duration, Timezone } from 'chronoshift';
@@ -30,7 +31,7 @@ import { Duration, Timezone } from 'chronoshift';
 import { DATA_CUBES_STRATEGIES_LABELS, STRINGS } from '../../../config/constants';
 
 import { SvgIcon, FormLabel, Button, SimpleList, ImmutableInput, ImmutableList, ImmutableDropdown } from '../../../components/index';
-import { DimensionModal, MeasureModal, SuggestionModal } from '../../../modals/index';
+import { DimensionModal, MeasureModal, SuggestionModal, AttributeModal } from '../../../modals/index';
 import { AppSettings, ListItem, Cluster, DataCube, Dimension, DimensionJS, Measure, MeasureJS } from '../../../../common/models/index';
 
 import { DATA_CUBE as LABELS } from '../../../../common/models/labels';
@@ -60,7 +61,7 @@ export interface Tab {
 
 export interface Modal {
   name: string;
-  render: () => JSX.Element;
+  render: (arg?: any) => JSX.Element;
   active?: boolean;
 }
 
@@ -252,6 +253,22 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
     />;
   }
 
+  openModal(name: string) {
+    const { modals } = this.state;
+    var newModals = modals.map(m => (m.name === name) ? open(m) : m);
+    this.setState({
+      modals: newModals
+    });
+  }
+
+  closeModal(name: string) {
+    const { modals } = this.state;
+    var newModals = modals.map(m => (m.name === name) ? close(m) : m);
+    this.setState({
+      modals: newModals
+    });
+  }
+
   openAttributeSuggestions() {
     const { dataCube } = this.props;
     this.openModal('attributes');
@@ -305,24 +322,10 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       getLabel={getAttributeLabel}
       options={attributeSuggestions}
       title={`${STRINGS.attribute} ${STRINGS.suggestion}s`}
+      okLabel={(n) => `${STRINGS.add} ${pluralIfNeeded(n, 'attribute')}`}
     />;
   }
 
-  openModal(name: string) {
-    const { modals } = this.state;
-    var newModals = modals.map(m => (m.name === name) ? open(m) : m);
-    this.setState({
-      modals: newModals
-    });
-  }
-
-  closeModal(name: string) {
-    const { modals } = this.state;
-    var newModals = modals.map(m => (m.name === name) ? close(m) : m);
-    this.setState({
-      modals: newModals
-    });
-  }
   // ---------------------------------------------------
 
   renderDimensions(): JSX.Element {
@@ -381,6 +384,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       getLabel={(d) => `${d.title} (${d.formula})`}
       options={newInstance.getSuggestedDimensions()}
       title={`${STRINGS.dimension} ${STRINGS.suggestion}s`}
+      okLabel={(n) => `${STRINGS.add} ${pluralIfNeeded(n, 'dimension')}`}
     />;
   }
 
@@ -451,6 +455,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       getLabel={(m) => `${m.title} (${m.formula})`}
       options={newInstance.getSuggestedMeasures()}
       title={`${STRINGS.measure} ${STRINGS.suggestion}s`}
+      okLabel={(n) => `${STRINGS.add} ${pluralIfNeeded(n, 'measure')}`}
     />;
   }
 
