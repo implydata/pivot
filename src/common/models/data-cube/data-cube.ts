@@ -746,8 +746,7 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
   }
 
   public getSuggestedDimensions(): Dimension[] {
-    const { dimensions } = this; // todo: actually implement this
-    return dimensions.toArray().splice(0, 5).map((d) => d.change('title', `${d.title}z`).change('name', `${d.name}z`));
+    return this.filterDimensions(DataCube.suggestDimensions(this.attributes));
   }
 
   public getTimeDimension() {
@@ -767,14 +766,31 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
   }
 
   public getSuggestedMeasures(): Measure[] {
-    const { measures } = this; // todo: actually implement this
-    return measures.toArray().splice(0, 5).map((m) => m.change('title', `${m.title}z`).change('name', `${m.name}z`));
+    return this.filterMeasures(DataCube.suggestMeasures(this.attributes));
+  }
+
+  public filterMeasures(measuresToFilter: Measure[]): Measure[] {
+    return measuresToFilter.filter(measure => {
+      if (this.getMeasure(measure.name)) return false;
+      if (this.getDimension(measure.name)) return false;
+      if (this.getMeasureByExpression(measure.expression)) return false;
+      return true;
+    });
   }
 
   public changeDimensions(dimensions: List<Dimension>): DataCube {
     var value = this.valueOf();
     value.dimensions = dimensions;
     return new DataCube(value);
+  }
+
+  public filterDimensions(dimensionsToFilter: Dimension[]): Dimension[] {
+    return dimensionsToFilter.filter(dimension => {
+      if (this.getDimension(dimension.name)) return false;
+      if (this.getMeasure(dimension.name)) return false;
+      if (this.getDimensionByExpression(dimension.expression)) return false;
+      return true;
+    });
   }
 
   public rolledUp(): boolean {
@@ -785,6 +801,13 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
     var value = this.valueOf();
     value.attributes = attributes;
     return new DataCube(value);
+  }
+
+  public filterAttributes(attributesToFilter: Attributes): Attributes {
+    const { attributes } = this;
+    return attributesToFilter.filter(attribute => {
+      return !findByName(attributes, attribute.name);
+    });
   }
 
   public addAttributes(attributes: Attributes): DataCube { // Temp

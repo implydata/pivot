@@ -247,7 +247,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
         (resp) => {
           this.setState({
             showAttributesSuggestion: true,
-            attributeSuggestions: AttributeInfo.fromJSs(resp.attributes)
+            attributeSuggestions: dataCube.filterAttributes(AttributeInfo.fromJSs(resp.attributes))
           });
         },
         (xhr: XMLHttpRequest) => Notifier.failure('Woops', 'Something bad happened')

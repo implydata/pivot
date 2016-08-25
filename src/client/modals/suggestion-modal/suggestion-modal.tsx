@@ -139,9 +139,9 @@ export class SuggestionModal<T> extends React.Component<SuggestionModalProps<T>,
       title={`${title}`}
       onClose={onClose}
     >
-      <form>
+      <div className="background">
         {this.renderSuggestions()}
-      </form>
+      </div>
       <div className="button-bar">
         <Button type="primary" title={okLabel ? okLabel(length) : `${STRINGS.add} ${pluralIfNeeded(length, title)}`} disabled={length === 0} onClick={this.onAdd.bind(this)}/>
         <Button className="cancel" title={cancelLabel || STRINGS.cancel} type="secondary" onClick={onClose}/>
