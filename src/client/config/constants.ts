@@ -110,6 +110,7 @@ export const STRINGS: any = {
   noDescription: 'No description',
   noFilter: 'No filter',
   noQueryableDataCubes: 'There are no queryable data cubes configured',
+  noTilesInThisCollection: 'There are no tiles in this collection',
   ok: 'OK',
   openIn: 'Open in',
   pin: 'Pin',

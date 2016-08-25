@@ -22,6 +22,8 @@ import { SvgIcon } from '../../../components/index';
 
 import { CollectionTileCard } from '../collection-tile-card/collection-tile-card';
 
+import { STRINGS } from '../../../config/constants';
+
 import { setDragGhost, classNames, getYFromEvent, getXFromEvent } from '../../../utils/dom/dom';
 
 export interface CollectionOverviewProps extends React.Props<any> {
@@ -152,7 +154,7 @@ export class CollectionOverview extends React.Component<CollectionOverviewProps,
     >
     <div className="container">
       <SvgIcon svg={require(`../../../icons/full-collection.svg`)}/>
-      <div className="placeholder">There are no views in this collection</div>
+      <div className="placeholder">{STRINGS.noTilesInThisCollection}</div>
     </div>
     </div>;
   }
