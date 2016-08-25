@@ -91,7 +91,7 @@ export class ItemCard extends React.Component< ItemCardProps, ItemCardState> {
 
     return <div className="item-card" onClick={this.onClick.bind(this)}>
       <div className="inner-container">
-        <SvgIcon svg={require(`../../../icons/${icon}.svg`)}/>
+        <SvgIcon className="view-icon" svg={require(`../../../icons/${icon}.svg`)}/>
         <div className="text">
           <div className="title">{title} {count !== undefined ? <span className="count">{count}</span> : null}</div>
           <div className="description">{description || STRINGS.noDescription}</div>
@@ -102,7 +102,7 @@ export class ItemCard extends React.Component< ItemCardProps, ItemCardState> {
               onClick={this.onMoreIconClick.bind(this)}
               ref="more-button"
             >
-              <SvgIcon svg={require(`../../../icons/full-more.svg`)}/>
+              <SvgIcon svg={require(`../../../icons/caret.svg`)}/>
             </div>
           : null
         }
