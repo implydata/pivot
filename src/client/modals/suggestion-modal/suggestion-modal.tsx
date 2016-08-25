@@ -24,31 +24,43 @@ import { pluralIfNeeded } from "../../../common/utils/general/general";
 
 import { Checkbox } from "../../components/checkbox/checkbox";
 
-const BRAND_BLUE = "hsl(200, 80%, 51%)";
-const GRAY = "#cccccc";
+const SELECTED = "hsl(200, 80%, 51%)";
+const UNSELECTED = "#cccccc";
 
-export type Option = Dimension | Measure | DataCube;
-export interface Suggestion {
-  option: Option;
+function defaultGetKey(thing: any): string {
+  return thing.name;
+}
+
+export interface Suggestion<T> {
+  option: T;
   selected: boolean;
   label: string;
 }
 
-export interface SuggestionModalProps extends React.Props<any> {
-  onAdd: (suggestions: Option[]) => void;
+export interface SuggestionModalProps<T> extends React.Props<any> {
+  onAdd: (suggestions: T[]) => void;
   onClose: () => void;
-  getLabel: (o: Option) => string;
-  getOptions: () => Option[];
+  getLabel: (o: T) => string;
+  getKey?: (o: T) => string;
+  options: T[];
   title: string;
   okLabel?: (c: number) => string;
   cancelLabel?: string;
 }
 
-export interface SuggestionModalState {
-  suggestions: Suggestion[];
+export interface SuggestionModalState<T> {
+  suggestions: Suggestion<T>[];
 }
 
-export class SuggestionModal extends React.Component<SuggestionModalProps, SuggestionModalState> {
+export class SuggestionModal<T> extends React.Component<SuggestionModalProps<T>, SuggestionModalState<T>> {
+  static defaultProps = {
+    getKey: defaultGetKey
+  };
+
+  static specialize<U>() {
+    return SuggestionModal as { new (): SuggestionModal<U>; };
+  }
+
   constructor() {
     super();
     this.state = {
@@ -57,21 +69,20 @@ export class SuggestionModal extends React.Component<SuggestionModalProps, Sugge
   }
 
   componentDidMount() {
-    const { getOptions } = this.props;
-    if (getOptions) this.initFromProps(this.props);
+    const { options } = this.props;
+    if (options) this.initFromProps(this.props);
   }
 
-  componentWillReceiveProps(nextProps: SuggestionModalProps) {
+  componentWillReceiveProps(nextProps: SuggestionModalProps<T>) {
     if (nextProps) {
       this.initFromProps(nextProps);
     }
   }
 
-  initFromProps(props: SuggestionModalProps) {
-    const { getOptions, getLabel } = props;
-    const suggestions: Option[] = getOptions();
+  initFromProps(props: SuggestionModalProps<T>) {
+    const { options, getLabel } = props;
     this.setState({
-      suggestions: suggestions.map((s) => { return { option: s, selected: true, label: getLabel(s) }; })
+      suggestions: options.map((s) => { return { option: s, selected: true, label: getLabel(s) }; })
     });
   }
 
@@ -82,13 +93,14 @@ export class SuggestionModal extends React.Component<SuggestionModalProps, Sugge
     onClose();
   }
 
-  toggleSuggestion(toggle: Suggestion) {
+  toggleSuggestion(toggle: Suggestion<T>) {
+    const { getKey } = this.props;
     const { suggestions } = this.state;
-    const toggleName = toggle.option.name;
+    const toggleKey = getKey(toggle.option);
 
     var newStateSuggestions = suggestions.map((suggestion) => {
       let { option, selected, label } = suggestion;
-      return option.name === toggleName ? { option, selected: !selected, label } : suggestion;
+      return getKey(option) === toggleKey ? { option, selected: !selected, label } : suggestion;
     });
 
     this.setState({
@@ -97,18 +109,19 @@ export class SuggestionModal extends React.Component<SuggestionModalProps, Sugge
   }
 
   renderSuggestions() {
+    const { getKey } = this.props;
     const { suggestions } = this.state;
     if (!suggestions) return null;
+
     return suggestions.map((s => {
       let { option, selected, label } = s;
-      let { name } = option;
       return <div
         className="row"
-        key={name}
+        key={getKey(option)}
         onClick={this.toggleSuggestion.bind(this, s)}
       >
         <Checkbox
-          color={selected ? BRAND_BLUE : GRAY}
+          color={selected ? SELECTED : UNSELECTED}
           label={label}
           selected={selected}
         />

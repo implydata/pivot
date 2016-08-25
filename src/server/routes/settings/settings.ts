@@ -64,6 +64,46 @@ router.get('/cluster-sources', (req: PivotRequest, res: Response) => {
     .done();
 });
 
+router.post('/attributes', (req: PivotRequest, res: Response) => {
+  var { dataCube } = req.body;
+
+  if (typeof dataCube !== 'string') {
+    res.status(400).send({
+      error: 'must have a dataCube'
+    });
+    return;
+  }
+
+  req.getFullSettings(dataCube)
+    .then((fullSettings) => {
+      const { appSettings } = fullSettings;
+
+      var myDataCube = appSettings.getDataCube(dataCube);
+      if (!myDataCube) {
+        res.status(400).send({ error: 'unknown data cube' });
+        return null;
+      }
+
+      return SETTINGS_MANAGER.getAllAttributes(myDataCube);
+    })
+    .then(
+      (attributes) => {
+        res.send({ attributes: attributes });
+      },
+      (e: Error) => {
+        console.log('error:', e.message);
+        if (e.hasOwnProperty('stack')) {
+          console.log((<any>e).stack);
+        }
+        res.status(500).send({
+          error: 'could not compute',
+          message: e.message
+        });
+      }
+    )
+    .done();
+});
+
 router.post('/', (req: PivotRequest, res: Response) => {
   var { appSettings } = req.body;
 

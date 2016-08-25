@@ -20,9 +20,10 @@ import * as React from 'react';
 import { List } from 'immutable';
 import { AttributeInfo, Attributes } from 'plywood';
 import { classNames } from '../../../utils/dom/dom';
+import { Ajax } from '../../../utils/ajax/ajax';
 
 import { generateUniqueName } from '../../../../common/utils/string/string';
-import { ImmutableUtils } from "../../../../common/utils/immutable-utils/immutable-utils";
+import { Notifier } from '../../../components/notifications/notifications';
 
 import { Duration, Timezone } from 'chronoshift';
 
@@ -47,6 +48,8 @@ export interface DataCubeEditProps extends React.Props<any> {
 
 export interface DataCubeEditState extends ImmutableFormState<DataCube> {
   tab?: any;
+  attributeSuggestions?: Attributes;
+  showAttributesSuggestion?: boolean;
   showDimensionsSuggestion?: boolean;
   showMeasuresSuggestion?: boolean;
 }
@@ -91,6 +94,9 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       canSave: true,
       errors: {},
       tab: props.isNewDataCube ? this.tabs[0] : this.tabs.filter((tab) => tab.value === props.tab)[0],
+
+      attributeSuggestions: null,
+      showAttributesSuggestion: false,
       showDimensionsSuggestion: false,
       showMeasuresSuggestion: false
     });
@@ -189,6 +195,8 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
     </form>;
   }
 
+  // ---------------------------------------------------
+
   renderData(): JSX.Element {
     const { newInstance } = this.state;
 
@@ -223,8 +231,60 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       getModal={getModal}
       getNewItem={getNewItem}
       getRows={getRows}
+      toggleSuggestions={this.openAttributeSuggestions.bind(this)}
     />;
   }
+
+  openAttributeSuggestions() {
+    const { dataCube } = this.props;
+
+    Ajax.query({
+      method: "POST",
+      url: 'settings/attributes',
+      data: { dataCube: dataCube.name }
+    })
+      .then(
+        (resp) => {
+          this.setState({
+            showAttributesSuggestion: true,
+            attributeSuggestions: AttributeInfo.fromJSs(resp.attributes)
+          });
+        },
+        (xhr: XMLHttpRequest) => Notifier.failure('Woops', 'Something bad happened')
+      )
+      .done();
+  }
+
+  closeAttributeSuggestions() {
+    this.setState({
+      showAttributesSuggestion: false,
+      attributeSuggestions: null
+    });
+  }
+
+  addAttribute(extraAttributes: Attributes) {
+    const { newInstance } = this.state;
+    this.setState({
+      newInstance: newInstance.changeAttributes(newInstance.attributes.concat(extraAttributes))
+    });
+  }
+
+  renderAttributeSuggestions() {
+    const { showAttributesSuggestion, attributeSuggestions } = this.state;
+    if (!showAttributesSuggestion || !attributeSuggestions) return null;
+
+    const AttributeSuggestionModal = SuggestionModal.specialize<AttributeInfo>();
+
+    return <AttributeSuggestionModal
+      onAdd={this.addAttribute.bind(this)}
+      onClose={this.closeAttributeSuggestions.bind(this)}
+      getLabel={(m) => `${m.name} (${m.type})`}
+      options={attributeSuggestions}
+      title={`${STRINGS.attribute} ${STRINGS.suggestion}`}
+    />;
+  }
+
+  // ---------------------------------------------------
 
   renderDimensions(): JSX.Element {
     const { newInstance } = this.state;
@@ -271,31 +331,29 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
     });
   }
 
-  addToCube(property: string, additionalValues: (Dimension | Measure)[]) {
+  addDimensions(extraDimensions: Dimension[]) {
     const { newInstance } = this.state;
-    var newValues = additionalValues.concat((newInstance as any)[property].toArray());
     this.setState({
-      newInstance: ImmutableUtils.setProperty(newInstance, property, List(newValues))
+      newInstance: newInstance.changeDimensions(List(newInstance.dimensions.toArray().concat(extraDimensions)))
     });
   }
 
   renderDimensionSuggestions() {
-    const { newInstance } = this.state;
-    return <SuggestionModal
-      onAdd={this.addToCube.bind(this, 'dimensions')}
+    const { showDimensionsSuggestion, newInstance } = this.state;
+    if (!showDimensionsSuggestion) return null;
+
+    const DimensionSuggestionModal = SuggestionModal.specialize<Dimension>();
+
+    return <DimensionSuggestionModal
+      onAdd={this.addDimensions.bind(this)}
       onClose={this.toggleDimensionsSuggestions.bind(this)}
-      getLabel={(d: Dimension) => `${d.title} (${d.formula})`}
-      getOptions={newInstance.getSuggestedDimensions.bind(newInstance)}
+      getLabel={(d) => `${d.title} (${d.formula})`}
+      options={newInstance.getSuggestedDimensions()}
       title={`${STRINGS.dimension} ${STRINGS.suggestion}`}
     />;
   }
 
-  toggleMeasuresSuggestions() {
-    const { showMeasuresSuggestion } = this.state;
-    this.setState({
-      showMeasuresSuggestion: !showMeasuresSuggestion
-    });
-  }
+  // ---------------------------------------------------
 
   renderMeasures(): JSX.Element {
     var { newInstance } = this.state;
@@ -344,16 +402,36 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
     />;
   }
 
-  renderMeasureSuggestions() {
+  toggleMeasuresSuggestions() {
+    const { showMeasuresSuggestion } = this.state;
+    this.setState({
+      showMeasuresSuggestion: !showMeasuresSuggestion
+    });
+  }
+
+  addMeasures(extraMeasures: Measure[]) {
     const { newInstance } = this.state;
-    return <SuggestionModal
-      onAdd={this.addToCube.bind(this, 'measures')}
+    this.setState({
+      newInstance: newInstance.changeMeasures(List(newInstance.measures.toArray().concat(extraMeasures)))
+    });
+  }
+
+  renderMeasureSuggestions() {
+    const { showMeasuresSuggestion, newInstance } = this.state;
+    if (!showMeasuresSuggestion) return null;
+
+    const MeasureSuggestionModal = SuggestionModal.specialize<Measure>();
+
+    return <MeasureSuggestionModal
+      onAdd={this.addMeasures.bind(this)}
       onClose={this.toggleMeasuresSuggestions.bind(this)}
-      getLabel={(m: Measure) => `${m.title} (${m.formula})`}
-      getOptions={newInstance.getSuggestedMeasures.bind(newInstance)}
+      getLabel={(m) => `${m.title} (${m.formula})`}
+      options={newInstance.getSuggestedMeasures()}
       title={`${STRINGS.measure} ${STRINGS.suggestion}`}
     />;
   }
+
+  // ---------------------------------------------------
 
   renderOptions(): JSX.Element {
     const { newInstance, errors } = this.state;
@@ -418,7 +496,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
 
   render() {
     const { dataCube, isNewDataCube } = this.props;
-    const { tab, newInstance, showDimensionsSuggestion, showMeasuresSuggestion } = this.state;
+    const { tab, newInstance } = this.state;
 
     if (!newInstance || !tab || !dataCube) return null;
 
@@ -444,8 +522,9 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
           {tab.render.bind(this)()}
         </div>
       </div>
-      {showDimensionsSuggestion ? this.renderDimensionSuggestions() : null}
-      {showMeasuresSuggestion ? this.renderMeasureSuggestions() : null}
+      {this.renderAttributeSuggestions()}
+      {this.renderDimensionSuggestions()}
+      {this.renderMeasureSuggestions()}
     </div>;
   }
 }

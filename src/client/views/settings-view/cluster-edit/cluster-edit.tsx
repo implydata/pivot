@@ -106,11 +106,13 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
   renderCreateCubesModal(): JSX.Element {
     const { getSuggestedCubes, addCubes } = this.props;
 
-    return <SuggestionModal
+    const CubesSuggestionModal = SuggestionModal.specialize<DataCube>();
+
+    return <CubesSuggestionModal
       onAdd={addCubes.bind(this)}
       onClose={this.toggleCreateCubesModal.bind(this)}
       getLabel={(m) => `${m.title}`}
-      getOptions={getSuggestedCubes}
+      options={getSuggestedCubes()}
       title={STRINGS.createCubesFromCluster}
       cancelLabel={STRINGS.noIllCreateThem}
       okLabel={(n: number) => `${STRINGS.create} ${pluralIfNeeded(n, 'cube')}`}

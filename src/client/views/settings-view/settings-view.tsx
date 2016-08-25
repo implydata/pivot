@@ -113,7 +113,7 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
             onSettingsChange(settings.toClientSettings());
           }
         },
-        (xhr: XMLHttpRequest) => Notifier.failure('Woops', 'Something bad happened')
+        (e: Error) => Notifier.failure('Woops', 'Something bad happened')
       );
   }
 

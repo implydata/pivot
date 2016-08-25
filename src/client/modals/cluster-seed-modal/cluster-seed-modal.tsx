@@ -49,6 +49,7 @@ export class ClusterSeedModal extends React.Component<ClusterSeedModalProps, Imm
     this.setState({
       newInstance: new Cluster({
         name: generateUniqueName('cl', name => indexByAttribute(clusters, 'name', name) === -1),
+        title: 'Some Cluster',
         type: 'druid'
       })
     });
