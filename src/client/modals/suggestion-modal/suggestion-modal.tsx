@@ -86,7 +86,7 @@ export class SuggestionModal<T> extends React.Component<SuggestionModalProps<T>,
     });
   }
 
-  changeSelection(suggestion: Suggestion<T>, value: boolean): Suggestion<T> { // member function because of T
+  changeSelection(suggestion: Suggestion<T>, value: boolean): Suggestion<T> {
     const { option, label } = suggestion;
     return {
       option, label, selected: value

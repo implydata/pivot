@@ -110,12 +110,11 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       canSave: true,
       errors: {},
       tab: props.isNewDataCube ? this.tabs[0] : this.tabs.filter((tab) => tab.value === props.tab)[0],
-
       attributeSuggestions: null,
       modals: [
-        {name: 'dimensions', render: this.renderDimensionSuggestions},
-        {name: 'measures', render: this.renderMeasureSuggestions},
-        {name: 'attributes', render: this.renderAttributeSuggestions}
+        { name: 'dimensions', render: this.renderDimensionSuggestions },
+        { name: 'measures', render: this.renderMeasureSuggestions },
+        { name: 'attributes', render: this.renderAttributeSuggestions }
       ]
     });
   }
