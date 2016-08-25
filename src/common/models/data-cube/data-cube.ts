@@ -233,6 +233,81 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
     return maxTimeDate;
   }
 
+  static suggestDimensions(attributes: Attributes): Dimension[] {
+    var dimensions: Dimension[] = [];
+
+    for (var attribute of attributes) {
+      var { name, type, special } = attribute;
+      var urlSafeName = makeUrlSafeName(name);
+
+      switch (type) {
+        case 'TIME':
+          // Add to the start
+          dimensions.unshift(new Dimension({
+            name: urlSafeName,
+            kind: 'time',
+            formula: $(name).toString()
+          }));
+          break;
+
+        case 'STRING':
+          if (special !== 'unique' && special !== 'theta') {
+            dimensions.push(new Dimension({
+              name: urlSafeName,
+              formula: $(name).toString()
+            }));
+          }
+          break;
+
+        case 'SET/STRING':
+          dimensions.push(new Dimension({
+            name: urlSafeName,
+            formula: $(name).toString()
+          }));
+          break;
+
+        case 'BOOLEAN':
+          dimensions.push(new Dimension({
+            name: urlSafeName,
+            kind: 'boolean',
+            formula: $(name).toString()
+          }));
+          break;
+      }
+    }
+
+    return dimensions;
+  }
+
+  static suggestMeasures(attributes: Attributes): Measure[] {
+    var measures: Measure[] = [];
+
+    for (var attribute of attributes) {
+      var { name, type, special } = attribute;
+
+      switch (type) {
+        case 'STRING':
+          if (special === 'unique' || special === 'theta') {
+            measures = measures.concat(Measure.measuresFromAttributeInfo(attribute));
+          }
+          break;
+
+        case 'NUMBER':
+          var newMeasures = Measure.measuresFromAttributeInfo(attribute);
+          newMeasures.forEach((newMeasure) => {
+            if (name === 'count') {
+              measures.unshift(newMeasure);
+            } else {
+              measures.push(newMeasure);
+            }
+          });
+          break;
+      }
+    }
+
+    return measures;
+  }
+
   static fromClusterAndSource(name: string, title: string, cluster: Cluster, source: string): DataCube {
     return DataCube.fromJS({
       name,
@@ -706,116 +781,15 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
     return this.clusterName === 'druid';
   }
 
-  public addAttributes(newAttributes: Attributes): DataCube {
-    var { dimensions, measures, attributes } = this;
-    const introspection = this.getIntrospection();
-    if (introspection === 'none') return this;
-
-    var autofillDimensions = introspection === 'autofill-dimensions-only' || introspection === 'autofill-all';
-    var autofillMeasures = introspection === 'autofill-measures-only' || introspection === 'autofill-all';
-
-    var $main = $('main');
-
-    for (var newAttribute of newAttributes) {
-      var { name, type, special } = newAttribute;
-
-      // Already exists as a current attribute
-      if (attributes && findByName(attributes, name)) continue;
-
-      // Already exists as a current dimension or a measure
-      var urlSafeName = makeUrlSafeName(name);
-      if (this.getDimension(urlSafeName) || this.getMeasure(urlSafeName)) continue;
-
-      var expression: Expression;
-      switch (type) {
-        case 'TIME':
-          if (!autofillDimensions) continue;
-          expression = $(name);
-          if (this.getDimensionByExpression(expression)) continue;
-          // Add to the start
-          dimensions = dimensions.unshift(new Dimension({
-            name: urlSafeName,
-            kind: 'time',
-            formula: expression.toString()
-          }));
-          break;
-
-        case 'STRING':
-          if (special === 'unique' || special === 'theta') {
-            if (!autofillMeasures) continue;
-
-            var newMeasures = Measure.measuresFromAttributeInfo(newAttribute);
-            newMeasures.forEach((newMeasure) => {
-              if (this.getMeasureByExpression(newMeasure.expression)) return;
-              measures = measures.push(newMeasure);
-            });
-          } else {
-            if (!autofillDimensions) continue;
-            expression = $(name);
-            if (this.getDimensionByExpression(expression)) continue;
-            dimensions = dimensions.push(new Dimension({
-              name: urlSafeName,
-              formula: expression.toString()
-            }));
-          }
-          break;
-
-        case 'SET/STRING':
-          if (!autofillDimensions) continue;
-          expression = $(name);
-          if (this.getDimensionByExpression(expression)) continue;
-          dimensions = dimensions.push(new Dimension({
-            name: urlSafeName,
-            formula: expression.toString()
-          }));
-          break;
-
-        case 'BOOLEAN':
-          if (!autofillDimensions) continue;
-          expression = $(name);
-          if (this.getDimensionByExpression(expression)) continue;
-          dimensions = dimensions.push(new Dimension({
-            name: urlSafeName,
-            kind: 'boolean',
-            formula: expression.toString()
-          }));
-          break;
-
-        case 'NUMBER':
-          if (!autofillMeasures) continue;
-
-          var newMeasures = Measure.measuresFromAttributeInfo(newAttribute);
-          newMeasures.forEach((newMeasure) => {
-            if (this.getMeasureByExpression(newMeasure.expression)) return;
-            measures = (name === 'count') ? measures.unshift(newMeasure) : measures.push(newMeasure);
-          });
-          break;
-
-        default:
-          throw new Error(`unsupported type ${type}`);
-      }
-    }
-
-    if (!this.rolledUp() && !measures.find(m => m.name === 'count')) {
-      measures = measures.unshift(new Measure({
-        name: 'count',
-        formula: $main.count().toString()
-      }));
-    }
-
+  public changeAttributes(attributes: Attributes): DataCube {
     var value = this.valueOf();
-    value.attributes = attributes ? AttributeInfo.override(attributes, newAttributes) : newAttributes;
-    value.dimensions = dimensions;
-    value.measures = measures;
+    value.attributes = attributes;
+    return new DataCube(value);
+  }
 
-    if (!value.defaultSortMeasure) {
-      value.defaultSortMeasure = measures.size ? measures.first().name : null;
-    }
-
-    if (!value.timeAttribute && dimensions.size && dimensions.first().kind === 'time') {
-      value.timeAttribute = <RefExpression>dimensions.first().expression;
-    }
-
+  public addAttributes(attributes: Attributes): DataCube { // Temp
+    var value = this.valueOf();
+    value.attributes = attributes;
     return new DataCube(value);
   }
 

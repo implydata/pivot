@@ -18,7 +18,7 @@ require('./data-cube-edit.css');
 
 import * as React from 'react';
 import { List } from 'immutable';
-import { AttributeInfo } from 'plywood';
+import { AttributeInfo, Attributes } from 'plywood';
 import { classNames } from '../../../utils/dom/dom';
 
 import { generateUniqueName } from '../../../../common/utils/string/string';
@@ -60,10 +60,11 @@ export interface Tab {
 
 export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEditState> {
   private tabs: Tab[] = [
-    {label: 'General', value: 'general', render: this.renderGeneral},
-    {label: 'Attributes', value: 'attributes', render: this.renderAttributes},
-    {label: 'Dimensions', value: 'dimensions', render: this.renderDimensions},
-    {label: 'Measures', value: 'measures', render: this.renderMeasures}
+    { label: 'General', value: 'general', render: this.renderGeneral },
+    { label: 'Data', value: 'data', render: this.renderData },
+    { label: 'Dimensions', value: 'dimensions', render: this.renderDimensions },
+    { label: 'Measures', value: 'measures', render: this.renderMeasures },
+    { label: 'Options', value: 'options', render: this.renderOptions }
   ];
 
   private delegate: ImmutableFormDelegate<DataCube>;
@@ -188,25 +189,41 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
     </form>;
   }
 
-  renderAttributes(): JSX.Element {
-    const { newInstance, errors } = this.state;
+  renderData(): JSX.Element {
+    const { newInstance } = this.state;
 
-    var makeLabel = FormLabel.simpleGenerator(LABELS, errors);
+    const onChange = (newAttributes: List<AttributeInfo>) => {
+      const newCube = newInstance.changeAttributes(newAttributes.toArray());
+      this.setState({
+        newInstance: newCube
+      });
+    };
 
-    return <form className="general vertical">
+    const getModal = (item: AttributeInfo): JSX.Element => null; //<AttributeModal dimension={item}/>;
 
-      {makeLabel('attributeOverrides')}
-      <ImmutableInput
-        instance={newInstance}
-        path={'attributeOverrides'}
-        onChange={this.delegate.onChange}
+    const getNewItem = () => AttributeInfo.fromJS({
+      name: generateUniqueName('d', name => !newInstance.dimensions.find(m => m.name === name)),
+      type: 'STRING'
+    });
 
-        valueToString={(value: AttributeInfo[]) => value ? JSON.stringify(AttributeInfo.toJSs(value), null, 2) : undefined}
-        stringToValue={(str: string) => str ? AttributeInfo.fromJSs(JSON.parse(str)) : undefined}
-        type="textarea"
-      />
+    const getRows = (items: List<AttributeInfo>) => items.toArray().map((attribute) => {
+      return {
+        title: attribute.name,
+        description: attribute.type,
+        icon: `dim-string`
+      };
+    });
 
-    </form>;
+    const AttributesList = ImmutableList.specialize<AttributeInfo>();
+
+    return <AttributesList
+      label="Dimensions"
+      items={List(newInstance.attributes)}
+      onChange={onChange.bind(this)}
+      getModal={getModal}
+      getNewItem={getNewItem}
+      getRows={getRows}
+    />;
   }
 
   renderDimensions(): JSX.Element {
@@ -336,6 +353,27 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       getOptions={newInstance.getSuggestedMeasures.bind(newInstance)}
       title={`${STRINGS.measure} ${STRINGS.suggestion}`}
     />;
+  }
+
+  renderOptions(): JSX.Element {
+    const { newInstance, errors } = this.state;
+
+    var makeLabel = FormLabel.simpleGenerator(LABELS, errors);
+
+    return <form className="general vertical">
+
+      {makeLabel('options')}
+      <ImmutableInput
+        instance={newInstance}
+        path={'options'}
+        onChange={this.delegate.onChange}
+
+        valueToString={(value: AttributeInfo[]) => value ? JSON.stringify(value, null, 2) : undefined}
+        stringToValue={(str: string) => str ? JSON.parse(str) : undefined}
+        type="textarea"
+      />
+
+    </form>;
   }
 
   renderButtons(): JSX.Element {

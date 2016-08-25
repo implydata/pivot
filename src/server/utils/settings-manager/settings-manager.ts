@@ -15,7 +15,7 @@
  */
 
 import * as Q from 'q';
-import { Executor, basicExecutorFactory, find } from 'plywood';
+import { Executor, basicExecutorFactory, find, Attributes } from 'plywood';
 import { Logger } from 'logger-tracker';
 import { TimeMonitor } from "../../../common/utils/time-monitor/time-monitor";
 import { AppSettings, Timekeeper, Cluster, DataCube } from '../../../common/models/index';
@@ -317,6 +317,16 @@ export class SettingsManager {
     });
 
     return (Q.all(clusterSources) as any).then((things: ClusterSource[][]) => flatten(things));
+  }
+
+  getAllAttributes(dataCube: DataCube): Q.Promise<Attributes> {
+    var clusterName = dataCube.clusterName;
+    if (clusterName === 'native') {
+      var fileManager = this.getFileManagerFor(dataCube.source);
+      return Q(fileManager.dataset.attributes);
+    } else {
+      return Q([]); // ToDo
+    }
   }
 
 }
