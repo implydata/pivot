@@ -87,16 +87,6 @@ export class CollectionOverview extends React.Component<CollectionOverviewProps,
       newDropIndex = -1;
     }
 
-    // Tile right after but in its first horizontal half
-    if (newDropIndex === sourceIndex + 1 && !shouldDropAfter) {
-      newDropIndex = -1;
-    }
-
-    // Tile right before but in its last horizontal half
-    if (newDropIndex === sourceIndex - 1 && shouldDropAfter) {
-      newDropIndex = -1;
-    }
-
     if (newDropIndex !== dropIndex || shouldDropAfter !== dropAfter) {
       this.setState({
         dropIndex: newDropIndex,
@@ -105,13 +95,23 @@ export class CollectionOverview extends React.Component<CollectionOverviewProps,
     }
   }
 
+  getActualDropIndex(originalIndex: number, dropIndex: number, dropAfter: boolean): number {
+    dropIndex = dropAfter || dropIndex === 0 ? dropIndex : dropIndex - 1;
+
+    dropIndex = originalIndex > dropIndex ? dropIndex + 1 : dropIndex;
+
+    return dropIndex;
+  }
+
   dragEnd(e: __React.DragEvent) {
     const { onReorder, collection } = this.props;
     var { draggedTile, dropIndex, dropAfter } = this.state;
 
-    dropIndex = dropAfter || dropIndex === 0 ? dropIndex : dropIndex - 1;
+    const originalIndex = collection.tiles.indexOf(draggedTile);
 
-    if (dropIndex > -1) onReorder(collection.tiles.indexOf(draggedTile), dropIndex);
+    dropIndex = this.getActualDropIndex(originalIndex, dropIndex, dropAfter);
+
+    if (dropIndex > -1) onReorder(originalIndex, dropIndex);
 
     this.setState({
       draggedTile: undefined,
