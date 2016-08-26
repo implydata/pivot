@@ -109,8 +109,8 @@ export class Clusters extends React.Component<ClustersProps, ClustersState> {
     ];
 
     const actions: SimpleTableAction[] = [
-      {icon: 'full-edit', callback: this.editCluster.bind(this)},
-      {icon: 'full-remove', callback: this.removeCluster.bind(this)}
+      {icon: require(`../../../icons/full-edit.svg`), callback: this.editCluster.bind(this)},
+      {icon: require(`../../../icons/full-remove.svg`), callback: this.removeCluster.bind(this)}
     ];
 
     return <div className="clusters">

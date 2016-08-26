@@ -110,8 +110,8 @@ export class DataCubes extends React.Component<DataCubesProps, DataCubesState> {
     ];
 
     const actions: SimpleTableAction[] = [
-      {icon: 'full-edit', callback: this.editCube.bind(this)},
-      {icon: 'full-remove', callback: this.removeCube.bind(this)}
+      {icon: require(`../../../icons/full-edit.svg`), callback: this.editCube.bind(this)},
+      {icon: require(`../../../icons/full-remove.svg`), callback: this.removeCube.bind(this)}
     ];
 
     return <div className="data-cubes">

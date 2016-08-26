@@ -120,7 +120,7 @@ export class SimpleTable extends React.Component<SimpleTableProps, SimpleTableSt
         className='cell action'
         key={`action-${i}`}
         onClick={action.callback.bind(this, row)}
-      ><SvgIcon svg={require(`../../icons/${action.icon}.svg`)}/></div>);
+      ><SvgIcon svg={action.icon}/></div>);
     }
 
     return items;
@@ -240,7 +240,7 @@ export class SimpleTable extends React.Component<SimpleTableProps, SimpleTableSt
           key={`icon-${j}`}
           style={{width: ACTION_WIDTH}}
         >
-          <SvgIcon svg={require(`../../icons/${action.icon}.svg`)}/>
+          <SvgIcon svg={action.icon}/>
         </div>;
       });
 

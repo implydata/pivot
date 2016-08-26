@@ -254,7 +254,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       return {
         title: dimension.title,
         description: dimension.expression.toString(),
-        icon: `dim-${dimension.kind}`
+        icon: require(`../../../icons/dim-${dimension.kind}`)
       };
     });
 
@@ -325,7 +325,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       return {
         title: measure.title,
         description: measure.expression.toString(),
-        icon: `measure`
+        icon: require(`../../icons/measures.svg`)
       };
     });
 

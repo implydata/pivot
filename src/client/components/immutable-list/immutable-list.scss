@@ -23,13 +23,12 @@
   top: 5px;
   bottom: 5px;
   left: 24px;
-  right: 0;
+  width: 400px;
 
   .list-title {
     display: flex;
     height: $list-title-height;
     padding-top: 12px;
-    width: 400px;
     border-bottom: 1px solid $border-super-light;
 
     .label {
@@ -63,7 +62,7 @@
   .empty-container {
     position: absolute;
     top: 50%;
-    left: 10%;
+    left: 50%;
     transform: translate(-50%, -50%);
     text-align: center;
     color: $text-light;
