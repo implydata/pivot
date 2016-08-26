@@ -947,7 +947,7 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
 
   public getDefaultSortAction(): SortAction {
     return new SortAction({
-      expression: $(this.defaultSortMeasure),
+      expression: $(this.getDefaultSortMeasure()),
       direction: SortAction.DESCENDING
     });
   }
