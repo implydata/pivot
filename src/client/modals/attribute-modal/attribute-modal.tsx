@@ -34,6 +34,7 @@ export interface AttributeModalProps extends React.Props<any> {
   attributeInfo: AttributeInfo;
   onSave?: (attribute: AttributeInfo) => void;
   onClose?: () => void;
+  mode?: 'create' | 'edit';
 }
 
 export interface AttributeModalState extends ImmutableFormState<AttributeInfo> {
@@ -50,6 +51,7 @@ export class AttributeModal extends React.Component<AttributeModalProps, Attribu
 
 
   static SPECIAL: ListItem[] = [
+    {label: '', value: undefined},
     {label: 'Unique', value: 'unique'},
     {label: 'Theta', value: 'theta'},
     {label: 'Histogram', value: 'histogram'}
@@ -61,8 +63,6 @@ export class AttributeModal extends React.Component<AttributeModalProps, Attribu
   constructor() {
     super();
     this.delegate = new ImmutableFormDelegate<AttributeInfo>(this);
-    // this.state = {};
-
   }
 
   initFromProps(props: AttributeModalProps) {
@@ -88,14 +88,14 @@ export class AttributeModal extends React.Component<AttributeModalProps, Attribu
     this.props.onSave(this.state.newInstance);
   }
 
-  updateThing() {
+  toggleSplittable() {
     const { newInstance } = this.state;
     let toggled = newInstance.change('unsplitable', !newInstance.unsplitable);
     return this.delegate.onChange(toggled, true, 'unsplitable', undefined);
   }
 
   render() {
-    const { attributeInfo, onClose } = this.props;
+    const { attributeInfo, onClose, mode } = this.props;
     const { newInstance, canSave, errors } = this.state;
     const saveButtonDisabled = !canSave || attributeInfo.equals(newInstance);
     if (!newInstance) return null;
@@ -104,19 +104,36 @@ export class AttributeModal extends React.Component<AttributeModalProps, Attribu
     var makeLabel = FormLabel.simpleGenerator(LABELS, errors, true);
     var makeDropdownInput = ImmutableDropdown.simpleGenerator(newInstance, this.delegate.onChange);
 
+    var title: string = null;
+    var okText: string = null;
+    let nameDiv: JSX.Element = null;
+    if (mode === 'create') {
+      var makeTextInput = ImmutableInput.simpleGenerator(newInstance, this.delegate.onChange);
+      nameDiv = <div>
+        {makeLabel('name')}
+        {makeTextInput('name', /^.+$/, true)}
+      </div>;
+      title = `${STRINGS.add} ${STRINGS.attribute}`;
+      okText = `${STRINGS.add} ${STRINGS.attribute}`;
+    } else {
+      title = attributeInfo.name;
+      okText = `${STRINGS.save}`;
+    }
+
     return <Modal
-      className="cluster-seed-modal"
-      title={attributeInfo.name}
+      className="attribute-modal"
+      title={title}
       onClose={onClose}
     >
       <form>
+        {nameDiv}
         {makeLabel('type')}
         {makeDropdownInput('type', AttributeModal.TYPES)}
         {makeLabel('special')}
         {makeDropdownInput('special', AttributeModal.SPECIAL)}
         <div
           className="row"
-          onClick={this.updateThing.bind(this)}
+          onClick={this.toggleSplittable.bind(this)}
         >
           <Checkbox
             color={unsplitable ? SELECTED : UNSELECTED}
@@ -126,7 +143,7 @@ export class AttributeModal extends React.Component<AttributeModalProps, Attribu
         </div>
       </form>
       <div className="button-bar">
-        <Button type="primary" title={STRINGS.save} onClick={this.save.bind(this)} disabled={saveButtonDisabled} />
+        <Button type="primary" title={okText} onClick={this.save.bind(this)} disabled={saveButtonDisabled} />
         <Button className="cancel" title={STRINGS.cancel} type="secondary" onClick={onClose}/>
       </div>
     </Modal>;

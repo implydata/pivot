@@ -56,6 +56,10 @@ export const DIMENSION = {
 };
 
 export const ATTRIBUTE = {
+  name: {
+    label: `Name`,
+    description: `The attribute's name`
+  },
   type: {
     label: `Type`,
     description: `The attribute's type`

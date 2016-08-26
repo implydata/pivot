@@ -137,6 +137,7 @@ export const STRINGS: any = {
   timezone: 'Timezone',
   thereAreNoSuggestionsAtTheMoment: 'There are no suggestions at the moment',
   undo: 'Click here to undo',
+  unsplitable: 'Un-splittable',
   updateTimezone: 'Update Timezone',
   viewRawData: 'View raw data',
   yes: 'Yes'

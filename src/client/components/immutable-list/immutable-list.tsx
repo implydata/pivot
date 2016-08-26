@@ -126,7 +126,7 @@ export class ImmutableList<T> extends React.Component<ImmutableListProps<T>, Imm
 
     var onClose = () => this.setState({pendingAddItem: null});
 
-    return React.cloneElement(this.props.getModal(item), {onSave, onClose});
+    return React.cloneElement(this.props.getModal(item), {onSave, onClose, mode: 'create'});
   }
 
   render() {
