@@ -243,11 +243,12 @@ describe('DataCube', () => {
         "engine": "druid",
         "source": "wiki",
         "subsetFilter": "$page.in(['en', 'fr'])",
+        "timeAttribute": "time",
         "dimensions": [
           {
             "kind": "time",
-            "name": "__time",
-            "formula": "$__time"
+            "name": "time",
+            "formula": "$time"
           },
           {
             "name": "page"
@@ -267,7 +268,7 @@ describe('DataCube', () => {
               type: 'STRING'
             }
           ],
-          "defaultSplits": "__time",
+          "defaultSplits": "time",
           "priority": 13
         }
       };
@@ -282,11 +283,10 @@ describe('DataCube', () => {
           }
         ],
         "clusterName": "druid",
-        "defaultSortMeasure": "added",
         "defaultSplits": [
           {
             "expression": {
-              "name": "__time",
+              "name": "time",
               "op": "ref"
             }
           }
@@ -295,9 +295,9 @@ describe('DataCube', () => {
         "dimensions": [
           {
             "kind": "time",
-            "name": "__time",
+            "name": "time",
             "title": "Time",
-            "formula": "$__time"
+            "formula": "$time"
           },
           {
             "kind": "string",
@@ -316,14 +316,15 @@ describe('DataCube', () => {
         ],
         "name": "wiki",
         "options": {
-          "priority": 13
+          "priority": 13,
+          "druidTimeAttributeName": "time"
         },
         "refreshRule": {
           "rule": "query"
         },
         "source": "wiki",
         "subsetFormula": "$page.in(['en', 'fr'])",
-        "timeAttribute": "__time",
+        "primaryTimeAttribute": "time",
         "title": "Wiki"
       });
 
@@ -361,13 +362,11 @@ describe('DataCube', () => {
         "clusterName": "druid",
         "source": "wiki",
         "refreshRule": {
-          "rule": "fixed"
+          "rule": "realtime"
         },
         introspection: 'autofill-all',
         "defaultFilter": { "op": "literal", "value": true },
-        "defaultSortMeasure": "added",
         "defaultTimezone": "Etc/UTC",
-        "timeAttribute": '__time',
         "attributes": [
           { name: '__time', type: 'TIME' },
           { name: 'page', type: 'STRING' },
@@ -419,13 +418,11 @@ describe('DataCube', () => {
         "clusterName": "druid",
         "source": "wiki",
         "refreshRule": {
-          "rule": "fixed"
+          "rule": "realtime"
         },
         introspection: 'autofill-all',
         "defaultFilter": { "op": "literal", "value": true },
-        "defaultSortMeasure": "added",
         "defaultTimezone": "Etc/UTC",
-        "timeAttribute": '__time',
         "attributes": [
           { name: '__time', type: 'TIME' },
           { name: 'page', type: 'STRING' },
@@ -508,7 +505,6 @@ describe('DataCube', () => {
           "op": "literal",
           "value": true
         },
-        "defaultSortMeasure": "added_love_",
         "defaultTimezone": "Etc/UTC",
         "dimensions": [
           {
@@ -539,10 +535,9 @@ describe('DataCube', () => {
         ],
         "name": "wiki",
         "refreshRule": {
-          "rule": "fixed"
+          "rule": "realtime"
         },
         "source": "wiki",
-        "timeAttribute": "__time",
         "title": "Wiki",
         "description": ""
       });

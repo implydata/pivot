@@ -70,7 +70,7 @@ export class DataCubeMock {
           formula: '$main.sum($added)'
         }
       ],
-      timeAttribute: 'time',
+      primaryTimeAttribute: 'time',
       defaultTimezone: 'Etc/UTC',
       defaultFilter: { op: 'literal', value: true },
       defaultDuration: 'P3D',
@@ -80,6 +80,9 @@ export class DataCubeMock {
       refreshRule: {
         time: new Date('2016-04-30T12:39:51.350Z'),
         rule: "fixed"
+      },
+      options: {
+        druidTimeAttributeName: 'time'
       }
     };
   }
@@ -119,7 +122,7 @@ export class DataCubeMock {
           formula: '$main.count()'
         }
       ],
-      timeAttribute: 'time',
+      primaryTimeAttribute: 'time',
       defaultTimezone: 'Etc/UTC',
       defaultFilter: { op: 'literal', value: true },
       defaultDuration: 'P3D',
@@ -127,6 +130,9 @@ export class DataCubeMock {
       defaultPinnedDimensions: ['tweet'],
       refreshRule: {
         rule: "realtime"
+      },
+      options: {
+        druidTimeAttributeName: 'time'
       }
     };
   }

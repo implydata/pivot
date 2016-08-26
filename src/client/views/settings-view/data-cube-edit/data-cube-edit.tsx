@@ -224,7 +224,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
 
     const getRows = (items: List<AttributeInfo>) => items.toArray().map((attribute) => {
       return {
-        title: `${attribute.name}${newInstance.getTimeAttribute() === attribute.name ? ' [PT]' : ''}`,
+        title: `${attribute.name}${newInstance.getPrimaryTimeAttribute() === attribute.name ? ' [PT]' : ''}`,
         description: attribute.type,
         icon: `dim-string`
       };

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as Q from 'q';
 import { List, OrderedSet } from 'immutable';
 import { Class, Instance, isInstanceOf, immutableEqual, immutableArraysEqual, immutableLookupsEqual } from 'immutable-class';
 import { Duration, Timezone, second } from 'chronoshift';
@@ -91,7 +90,7 @@ export interface DataCubeValue {
 
   dimensions?: List<Dimension>;
   measures?: List<Measure>;
-  timeAttribute?: string;
+  primaryTimeAttribute?: string;
   defaultTimezone?: Timezone;
   defaultFilter?: Filter;
   defaultSplits?: Splits;
@@ -119,7 +118,7 @@ export interface DataCubeJS {
 
   dimensions?: DimensionJS[];
   measures?: MeasureJS[];
-  timeAttribute?: string;
+  primaryTimeAttribute?: string;
   defaultTimezone?: string;
   defaultFilter?: FilterJS;
   defaultSplits?: SplitsJS;
@@ -137,6 +136,7 @@ export interface DataCubeOptions {
   customTransforms?: CustomDruidTransforms;
   druidContext?: Lookup<any>;
   priority?: number;
+  druidTimeAttributeName?: string;
 
   // Deprecated
   defaultSplits?: SplitsJS;
@@ -314,7 +314,7 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
       title,
       clusterName: cluster.name,
       source,
-      timeAttribute: (cluster && cluster.type === 'druid') ? '__time' : null
+      primaryTimeAttribute: (cluster && cluster.type === 'druid') ? '__time' : null
     });
   }
 
@@ -323,6 +323,7 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
     var introspection = parameters.introspection;
     var defaultSplitsJS = parameters.defaultSplits;
     var attributeOverrideJSs = parameters.attributeOverrides;
+    var primaryTimeAttribute = parameters.primaryTimeAttribute;
 
     var options = parameters.options || {};
     if (options.skipIntrospection) {
@@ -345,6 +346,10 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
       if (!defaultSplitsJS) defaultSplitsJS = options.defaultSplits;
       delete options.defaultSplits;
     }
+    if (!primaryTimeAttribute && (parameters as any).timeAttribute) {
+      primaryTimeAttribute = (parameters as any).timeAttribute;
+      options.druidTimeAttributeName = primaryTimeAttribute;
+    }
     // End Back compat.
 
     if (introspection && DataCube.INTROSPECTION_VALUES.indexOf(introspection) === -1) {
@@ -352,8 +357,6 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
     }
 
     var refreshRule = parameters.refreshRule ? RefreshRule.fromJS(parameters.refreshRule) : null;
-
-    var timeAttribute = parameters.timeAttribute || null;
 
     var attributeOverrides = AttributeInfo.fromJSs(attributeOverrideJSs || []);
     var attributes = AttributeInfo.fromJSs(parameters.attributes || []);
@@ -393,12 +396,12 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
       derivedAttributes,
       dimensions,
       measures,
-      timeAttribute,
+      primaryTimeAttribute,
       defaultTimezone: parameters.defaultTimezone ? Timezone.fromJS(parameters.defaultTimezone) : null,
       defaultFilter: parameters.defaultFilter ? Filter.fromJS(parameters.defaultFilter) : null,
       defaultSplits: defaultSplitsJS ? Splits.fromJS(defaultSplitsJS, { dimensions }) : null,
       defaultDuration: parameters.defaultDuration ? Duration.fromJS(parameters.defaultDuration) : null,
-      defaultSortMeasure: parameters.defaultSortMeasure || (measures.size ? measures.first().name : null),
+      defaultSortMeasure: parameters.defaultSortMeasure,
       defaultSelectedMeasures: parameters.defaultSelectedMeasures ? OrderedSet(parameters.defaultSelectedMeasures) : null,
       defaultPinnedDimensions: parameters.defaultPinnedDimensions ? OrderedSet(parameters.defaultPinnedDimensions) : null,
       refreshRule
@@ -423,7 +426,7 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
   public derivedAttributes: Lookup<Expression>;
   public dimensions: List<Dimension>;
   public measures: List<Measure>;
-  public timeAttribute: string;
+  public primaryTimeAttribute: string;
   public defaultTimezone: Timezone;
   public defaultFilter: Filter;
   public defaultSplits: Splits;
@@ -452,7 +455,7 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
     this.attributes = parameters.attributes || [];
     this.attributeOverrides = parameters.attributeOverrides || [];
     this.derivedAttributes = parameters.derivedAttributes;
-    this.timeAttribute = parameters.timeAttribute;
+    this.primaryTimeAttribute = parameters.primaryTimeAttribute;
     this.defaultTimezone = parameters.defaultTimezone;
     this.defaultFilter = parameters.defaultFilter;
     this.defaultSplits = parameters.defaultSplits;
@@ -491,7 +494,7 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
       derivedAttributes: this.derivedAttributes,
       dimensions: this.dimensions,
       measures: this.measures,
-      timeAttribute: this.timeAttribute,
+      primaryTimeAttribute: this.primaryTimeAttribute,
       defaultTimezone: this.defaultTimezone,
       defaultFilter: this.defaultFilter,
       defaultSplits: this.defaultSplits,
@@ -526,7 +529,7 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
     if (this.defaultSelectedMeasures) js.defaultSelectedMeasures = this.defaultSelectedMeasures.toArray();
     if (this.defaultPinnedDimensions) js.defaultPinnedDimensions = this.defaultPinnedDimensions.toArray();
     if (this.rollup) js.rollup = true;
-    if (this.timeAttribute) js.timeAttribute = this.timeAttribute;
+    if (this.primaryTimeAttribute) js.primaryTimeAttribute = this.primaryTimeAttribute;
     if (this.attributeOverrides.length) js.attributeOverrides = AttributeInfo.toJSs(this.attributeOverrides);
     if (this.attributes.length) js.attributes = AttributeInfo.toJSs(this.attributes);
     if (this.derivedAttributes) js.derivedAttributes = Expression.expressionLookupToJS(this.derivedAttributes);
@@ -559,7 +562,7 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
       immutableLookupsEqual(this.derivedAttributes, other.derivedAttributes) &&
       immutableListsEqual(this.dimensions, other.dimensions) &&
       immutableListsEqual(this.measures, other.measures) &&
-      this.timeAttribute === other.timeAttribute &&
+      this.primaryTimeAttribute === other.primaryTimeAttribute &&
       immutableEqual(this.defaultTimezone, other.defaultTimezone) &&
       immutableEqual(this.defaultFilter, other.defaultFilter) &&
       immutableEqual(this.defaultSplits, other.defaultSplits) &&
@@ -606,6 +609,10 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
       externalValue.rollup = this.rollup;
       externalValue.introspectionStrategy = cluster.getIntrospectionStrategy();
       externalValue.allowSelectQueries = true;
+
+      if (options.druidTimeAttributeName) {
+        externalValue.timeAttribute = options.druidTimeAttributeName;
+      }
 
       var externalContext: Lookup<any> = options.druidContext || {};
       externalContext['timeout'] = cluster.getTimeout();
@@ -693,7 +700,9 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
   }
 
   public getMaxTimeQuery(): Expression {
-    return ply().apply(MAX_TIME, $('main').max(this.timeAttribute));
+    const primaryTimeExpression = this.getPrimaryTimeExpression();
+    if (!primaryTimeExpression) return null;
+    return ply().apply(MAX_TIME, $('main').max(primaryTimeExpression));
   }
 
   public getMaxTime(timekeeper: Timekeeper): Date {
@@ -739,15 +748,15 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
     return this.filterDimensions(DataCube.suggestDimensions(this.attributes));
   }
 
-  public getTimeAttribute(): string {
-    const { timeAttribute } = this;
-    if (timeAttribute === '!none') return null;
-    return timeAttribute || null;
+  public getPrimaryTimeAttribute(): string {
+    const { primaryTimeAttribute } = this;
+    if (primaryTimeAttribute === '!none') return null;
+    return primaryTimeAttribute || null;
   }
 
   public getPrimaryTimeExpression(): Expression {
-    var timeAttribute = this.getTimeAttribute();
-    return timeAttribute ? $(timeAttribute) : null;
+    var primaryTimeAttribute = this.getPrimaryTimeAttribute();
+    return primaryTimeAttribute ? $(primaryTimeAttribute) : null;
   }
 
   public isPrimaryTimeExpression(ex: Expression): boolean {

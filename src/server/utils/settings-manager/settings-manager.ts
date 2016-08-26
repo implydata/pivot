@@ -200,6 +200,7 @@ export class SettingsManager {
     if (!dataCube.refreshRule.isQuery()) return;
 
     var maxTimeQuery = dataCube.getMaxTimeQuery();
+    if (!maxTimeQuery) return;
     this.timeMonitor.addCheck(dataCube.name, () => {
       return executor(maxTimeQuery).then(DataCube.processMaxTimeQuery);
     });

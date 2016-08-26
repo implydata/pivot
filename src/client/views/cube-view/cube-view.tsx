@@ -174,9 +174,12 @@ export class CubeView extends React.Component<CubeViewProps, CubeViewState> {
   refreshMaxTime() {
     var { essence, timekeeper } = this.state;
     var { dataCube } = essence;
-    this.setState({ updatingMaxTime: true });
 
-    QueryRunner.fetch(dataCube, dataCube.getMaxTimeQuery(), Timezone.UTC)
+    var maxTimeQuery = dataCube.getMaxTimeQuery();
+    if (!maxTimeQuery) return;
+
+    this.setState({ updatingMaxTime: true });
+    QueryRunner.fetch(dataCube, maxTimeQuery, Timezone.UTC)
       .then(DataCube.processMaxTimeQuery)
       .then((updatedMaxTime) => {
         if (!this.mounted) return;

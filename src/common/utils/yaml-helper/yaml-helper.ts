@@ -241,15 +241,14 @@ export function dataCubeToYAML(dataCube: DataCube, withComments: boolean): strin
     `source: ${dataCube.source}`
   ];
 
-  var timeAttribute = dataCube.timeAttribute;
-  if (timeAttribute) {
+  var primaryTimeAttribute = dataCube.primaryTimeAttribute;
+  if (primaryTimeAttribute) {
     if (withComments) {
       lines.push(`# The primary time attribute of the data refers to the attribute that must always be filtered on`);
       lines.push(`# This is particularly useful for Druid data cubes as they must always have a time filter.`);
     }
-    lines.push(`timeAttribute: ${timeAttribute}`, '');
+    lines.push(`primaryTimeAttribute: ${primaryTimeAttribute}`, '');
   }
-
 
   var refreshRule = dataCube.refreshRule;
   if (withComments) {
