@@ -67,8 +67,7 @@ export class FileManager {
     this.verbose = Boolean(options.verbose);
   }
 
-  // Do initialization
-  public init(): Q.Promise<Dataset> {
+  public loadDataset(): Q.Promise<Dataset> {
     const { logger, anchorPath, uri } = this;
 
     var filePath = path.resolve(anchorPath, uri);

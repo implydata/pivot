@@ -74,14 +74,6 @@ export class ClusterManager {
     this.updateRequester();
   }
 
-  // Do initialization
-  public init(): Q.Promise<any> {
-    const { cluster, logger } = this;
-
-    return Q(null)
-      .then(() => this.establishInitialConnection());
-  }
-
   public destroy() {
     if (this.initialConnectionTimer) {
       clearTimeout(this.initialConnectionTimer);
@@ -133,7 +125,7 @@ export class ClusterManager {
     });
   }
 
-  private establishInitialConnection(): Q.Promise<any> {
+  public establishInitialConnection(maxRetries = Infinity): Q.Promise<any> {
     const { logger, verbose, cluster } = this;
 
     var deferred: Q.Deferred<any> = Q.defer();
@@ -159,7 +151,11 @@ export class ClusterManager {
             var msSinceLastTry = Date.now() - lastTryAt;
             var msToWait = Math.max(1, CONNECTION_RETRY_TIMEOUT - msSinceLastTry);
             logger.error(`Failed to connect to cluster '${cluster.name}' because: ${e.message} (will retry in ${msToWait}ms)`);
-            this.initialConnectionTimer = setTimeout(attemptConnection, msToWait);
+            if (retryNumber < maxRetries) {
+              this.initialConnectionTimer = setTimeout(attemptConnection, msToWait);
+            } else {
+              deferred.reject(new Error('too many failed attempts'));
+            }
           }
         );
     };

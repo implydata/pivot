@@ -21,6 +21,8 @@ import { SupportedType, Cluster } from "../../../common/models/cluster/cluster";
 
 import { FormLabel, Button, Modal, ImmutableInput, ImmutableDropdown } from '../../components/index';
 import { STRINGS } from "../../config/constants";
+import { Ajax } from '../../utils/ajax/ajax';
+import { Notifier } from '../../components/notifications/notifications';
 import { CLUSTER as LABELS } from '../../../common/models/labels';
 import { generateUniqueName } from '../../../common/utils/string/string';
 import { indexByAttribute } from '../../../common/utils/array/array';
@@ -64,11 +66,25 @@ export class ClusterSeedModal extends React.Component<ClusterSeedModalProps, Imm
   }
 
   onNext() {
-    this.props.onNext(this.state.newInstance);
+    Ajax.query({
+      method: "POST",
+      url: 'settings/cluster-connection',
+      data: {
+        cluster: this.state.newInstance
+      }
+    })
+      .then(
+        (resp) => {
+          var cluster = Cluster.fromJS(resp.cluster);
+          this.props.onNext(cluster);
+        },
+        (xhr: XMLHttpRequest) => Notifier.failure('Woops', 'Something bad happened')
+      )
+      .done();
   }
 
   render(): JSX.Element {
-    const { onNext, onCancel } = this.props;
+    const { onCancel } = this.props;
     const { newInstance, errors } = this.state;
 
     if (!newInstance) return null;

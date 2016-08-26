@@ -15,7 +15,7 @@
  */
 
 import { Router, Request, Response } from 'express';
-import { AppSettings } from '../../../common/models/index';
+import { AppSettings, Cluster } from '../../../common/models/index';
 import { MANIFESTS } from '../../../common/manifests/index';
 
 import { PivotRequest } from '../../utils/index';
@@ -42,6 +42,45 @@ router.get('/', (req: PivotRequest, res: Response) => {
     )
     .done();
 
+});
+
+router.post('/cluster-connection', (req: PivotRequest, res: Response) => {
+  var { cluster } = req.body;
+
+  if (typeof cluster === 'undefined') {
+    res.status(400).send({
+      error: 'must have a cluster'
+    });
+    return;
+  }
+
+  try {
+    var testCluster = Cluster.fromJS(cluster);
+  } catch (e) {
+    res.status(400).send({
+      error: 'invalid cluster',
+      message: e.message
+    });
+    return;
+  }
+
+  SETTINGS_MANAGER.checkClusterConnectionInfo(testCluster)
+    .then(
+      (cluster) => {
+        res.send({ cluster: cluster });
+      },
+      (e: Error) => {
+        console.log('error:', e.message);
+        if (e.hasOwnProperty('stack')) {
+          console.log((<any>e).stack);
+        }
+        res.status(500).send({
+          error: 'could not compute',
+          message: e.message
+        });
+      }
+    )
+    .done();
 });
 
 router.get('/cluster-sources', (req: PivotRequest, res: Response) => {

@@ -153,7 +153,7 @@ export class SuggestionModal<T> extends React.Component<SuggestionModalProps<T>,
   }
 
   renderEmpty() {
-    const { onClose, title } = this.props;
+    const { onClose, title, cancelLabel } = this.props;
 
     return <Modal
       className="suggestion-modal"
@@ -164,7 +164,7 @@ export class SuggestionModal<T> extends React.Component<SuggestionModalProps<T>,
         <div className="message">{STRINGS.thereAreNoSuggestionsAtTheMoment}</div>
       </div>
       <div className="button-bar">
-        <Button className="cancel" title={STRINGS.close} type="primary" onClick={onClose}/>
+        <Button className="cancel" title={cancelLabel || STRINGS.close} type="primary" onClick={onClose}/>
       </div>
     </Modal>;
   }

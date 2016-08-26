@@ -150,7 +150,7 @@ export class SettingsManager {
     });
 
     this.clusterManagers.push(clusterManager);
-    return clusterManager.init();
+    return clusterManager.establishInitialConnection();
   }
 
   private removeClusterManager(cluster: Cluster): void {
@@ -224,7 +224,7 @@ export class SettingsManager {
     });
 
     this.fileManagers.push(fileManager);
-    return fileManager.init().then((dataset) => {
+    return fileManager.loadDataset().then((dataset) => {
       var newExecutor = basicExecutorFactory({
         datasets: { main: dataset }
       });
@@ -307,9 +307,19 @@ export class SettingsManager {
       });
   }
 
-  // getClusterConnectionInfo(bareCluster: Cluster): Q.Promise<Cluster> {
-  //
-  // }
+  checkClusterConnectionInfo(cluster: Cluster): Q.Promise<Cluster> {
+    const { verbose, logger, anchorPath } = this;
+
+    var clusterManager = new ClusterManager(cluster, {
+      logger,
+      verbose,
+      anchorPath
+    });
+
+    return clusterManager.establishInitialConnection().then(() => {
+      return clusterManager.cluster;
+    });
+  }
 
   getAllClusterSources(): Q.Promise<ClusterSource> {
     var clusterSources = this.clusterManagers.map((clusterManager) => {
