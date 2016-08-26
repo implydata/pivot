@@ -83,9 +83,9 @@ export class DataCubeSeedModal extends React.Component<DataCubeSeedModalProps, D
           if (!this.mounted) return;
           const { clusters } = this.props;
 
-          var clusterSources = resp.clusterSources.map((cs: { cluster: string, source: string }): ClusterSource => {
+          var clusterSources = resp.clusterSources.map((cs: { clusterName: string, source: string }): ClusterSource => {
             return {
-              cluster: findByName(clusters, cs.cluster),
+              cluster: findByName(clusters, cs.clusterName),
               source: cs.source
             };
           });

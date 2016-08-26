@@ -324,7 +324,7 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
       return {
         selected: filterMode === value,
         onSelect: this.changeFilterMode.bind(this, value),
-        displayValue: STRINGS[value],
+        displayValue: (STRINGS as any)[value],
         keyString: value
       };
     });

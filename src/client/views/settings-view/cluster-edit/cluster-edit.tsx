@@ -18,7 +18,7 @@ require('./cluster-edit.css');
 
 import * as React from 'react';
 import { List } from 'immutable';
-import { Fn, pluralIfNeeded } from '../../../../common/utils/general/general';
+import { Fn, pluralIfNeeded, makeTitle } from '../../../../common/utils/general/general';
 import { classNames } from '../../../utils/dom/dom';
 import { firstUp, IP_REGEX, NUM_REGEX } from '../../../../common/utils/string/string';
 import { STRINGS } from '../../../config/constants';
@@ -37,11 +37,11 @@ import { CLUSTER as LABELS } from '../../../../common/models/labels';
 
 export interface ClusterEditProps extends React.Props<any> {
   cluster?: Cluster;
-  onSave: (newCluster: Cluster) => void;
+  sources?: string[];
+  onSave: (newCluster: Cluster, dataCubes: DataCube[]) => void;
   isNewCluster?: boolean;
   onCancel?: () => void;
   getSuggestedCubes?: () => DataCube[];
-  addCubes?: (cubes: DataCube[]) => void;
 }
 
 export interface ClusterEditState extends ImmutableFormState<Cluster> {
@@ -87,14 +87,11 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
   }
 
   save() {
-    if (this.props.onSave) this.props.onSave(this.state.newInstance);
+    if (this.props.onSave) this.props.onSave(this.state.newInstance, null);
   }
 
   saveAndAddCubes(dataCubes: DataCube[]) {
-    const { addCubes } = this.props;
-
-    this.save();
-    if (addCubes) addCubes(dataCubes);
+    if (this.props.onSave) this.props.onSave(this.state.newInstance, dataCubes);
   }
 
   goBack() {
@@ -104,24 +101,39 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
   }
 
   openCreateCubesModal() {
-    const { showCreateCubesModal } = this.state;
+    this.setState({
+      showCreateCubesModal: true
+    });
+  }
+
+  closeCreateCubesModal() {
     this.setState({
       showCreateCubesModal: true
     });
   }
 
   renderCreateCubesModal(): JSX.Element {
-    const { getSuggestedCubes, addCubes } = this.props;
+    const { sources } = this.props;
+    const { newInstance } = this.state;
+
+    var sugestedDataCubes: DataCube[] = [];
+    if (sources) {
+      sugestedDataCubes = sources.map((source, i) => {
+        // ToDo: make the name generation here better;
+        return DataCube.fromClusterAndSource(`${newInstance.name}_${i}`, makeTitle(source), newInstance, source);
+      });
+    }
 
     const CubesSuggestionModal = SuggestionModal.specialize<DataCube>();
 
     return <CubesSuggestionModal
       onAdd={this.saveAndAddCubes.bind(this)}
-      onClose={this.save.bind(this)}
+      onNothing={this.save.bind(this)}
+      nothingLabel={STRINGS.noIllCreateThem}
+      onClose={this.closeCreateCubesModal.bind(this)}
       getLabel={(m) => `${m.title}`}
-      options={getSuggestedCubes()}
+      options={sugestedDataCubes}
       title={STRINGS.createCubesFromCluster}
-      cancelLabel={STRINGS.noIllCreateThem}
       okLabel={(n: number) => `${STRINGS.create} ${pluralIfNeeded(n, 'cube')}`}
     />;
   }

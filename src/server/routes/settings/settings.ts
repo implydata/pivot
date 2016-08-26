@@ -66,8 +66,8 @@ router.post('/cluster-connection', (req: PivotRequest, res: Response) => {
 
   SETTINGS_MANAGER.checkClusterConnectionInfo(testCluster)
     .then(
-      (cluster) => {
-        res.send({ cluster: cluster });
+      (clusterAndSources) => {
+        res.send(clusterAndSources);
       },
       (e: Error) => {
         console.log('error:', e.message);

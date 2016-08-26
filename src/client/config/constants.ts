@@ -39,7 +39,8 @@ export const SPLIT = 'SPLIT';
 export const MAX_SEARCH_LENGTH = 300;
 export const SEARCH_WAIT = 900;
 
-export const STRINGS: any = {
+// Do not set an explicit type for STRINGS, let typescript figure it out and type check that we are using string correctly
+export const STRINGS = {
   add: 'Add',
   addFromCube: 'Add from Cube',
   addNewCollection: 'Add new collection',
@@ -68,7 +69,7 @@ export const STRINGS: any = {
   create: 'Create',
   cubes: 'cubes',
   dataCubes: 'Data Cubes',
-  delete: 'Delete',
+  'delete': 'Delete',
   deleteCollection: 'Delete this collection',
   deleteCollectionTile: 'Delete this tile',
   dimensions: 'Dimensions',
@@ -107,10 +108,10 @@ export const STRINGS: any = {
   next: 'Next',
   no: 'No',
   noIllCreateThem: 'No, I\'ll create them myself',
-  noClusters: 'No clusters',
+  noClusters: 'There are no clusters configured',
+  noDataCubes: 'There are no data cubes configured',
   noDescription: 'No description',
   noFilter: 'No filter',
-  noQueryableDataCubes: 'There are no queryable data cubes configured',
   noTilesInThisCollection: 'There are no tiles in this collection',
   ok: 'OK',
   openIn: 'Open in',

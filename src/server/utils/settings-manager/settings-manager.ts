@@ -42,8 +42,13 @@ export interface FullSettings {
   executors: Lookup<Executor>;
 }
 
-export interface ClusterSource {
-  cluster: string;
+export interface ClusterAndSources {
+  cluster: Cluster;
+  sources: string[];
+}
+
+export interface ClusterNameAndSource {
+  clusterName: string;
   source: string;
 }
 
@@ -307,7 +312,7 @@ export class SettingsManager {
       });
   }
 
-  checkClusterConnectionInfo(cluster: Cluster): Q.Promise<Cluster> {
+  checkClusterConnectionInfo(cluster: Cluster): Q.Promise<ClusterAndSources> {
     const { verbose, logger, anchorPath } = this;
 
     var clusterManager = new ClusterManager(cluster, {
@@ -316,22 +321,29 @@ export class SettingsManager {
       anchorPath
     });
 
-    return clusterManager.establishInitialConnection().then(() => {
-      return clusterManager.cluster;
-    });
+    return clusterManager.establishInitialConnection()
+      .then(() => {
+        return clusterManager.getSources();
+      })
+      .then((sources) => {
+        return {
+          cluster: clusterManager.cluster,
+          sources
+        };
+      });
   }
 
-  getAllClusterSources(): Q.Promise<ClusterSource> {
+  getAllClusterSources(): Q.Promise<ClusterNameAndSource> {
     var clusterSources = this.clusterManagers.map((clusterManager) => {
       var clusterName = clusterManager.cluster.name;
       return clusterManager.getSources().then((sources) => {
-        return sources.map((source): ClusterSource => {
-          return { cluster: clusterName, source };
+        return sources.map((source): ClusterNameAndSource => {
+          return { clusterName, source };
         });
       });
     });
 
-    return (Q.all(clusterSources) as any).then((things: ClusterSource[][]) => flatten(things));
+    return (Q.all(clusterSources) as any).then((things: ClusterNameAndSource[][]) => flatten(things));
   }
 
   getAllAttributes(clusterName: string, source: string): Q.Promise<Attributes> {

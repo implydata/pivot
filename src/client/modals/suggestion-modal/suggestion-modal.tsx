@@ -15,11 +15,10 @@
  */
 
 require('./suggestion-modal.css');
+
 import * as React from 'react';
 import { Button, Modal } from '../../components/index';
-import { List } from 'immutable';
 import { STRINGS } from "../../config/constants";
-import { Dimension, Measure, DataCube } from "../../../common/models/index";
 import { pluralIfNeeded } from "../../../common/utils/general/general";
 
 import { Checkbox } from "../../components/checkbox/checkbox";
@@ -39,13 +38,14 @@ export interface Suggestion<T> {
 
 export interface SuggestionModalProps<T> extends React.Props<any> {
   onAdd: (suggestions: T[]) => void;
+  onNothing?: () => void;
   onClose: () => void;
   getLabel: (o: T) => string;
   getKey?: (o: T) => string;
   options: T[];
   title: string;
   okLabel?: (c: number) => string;
-  cancelLabel?: string;
+  nothingLabel?: string;
 }
 
 export interface SuggestionModalState<T> {
@@ -152,8 +152,18 @@ export class SuggestionModal<T> extends React.Component<SuggestionModalProps<T>,
     }));
   }
 
+  renderSecondaryButton() {
+    const { onClose, onNothing, nothingLabel } = this.props;
+
+    if (onNothing && nothingLabel) {
+      return <Button className="cancel" title={nothingLabel} type="secondary" onClick={onNothing}/>;
+    } else {
+      return <Button className="cancel" title={STRINGS.cancel} type="secondary" onClick={onClose}/>;
+    }
+  }
+
   renderEmpty() {
-    const { onClose, title, cancelLabel } = this.props;
+    const { onClose, title } = this.props;
 
     return <Modal
       className="suggestion-modal"
@@ -164,17 +174,17 @@ export class SuggestionModal<T> extends React.Component<SuggestionModalProps<T>,
         <div className="message">{STRINGS.thereAreNoSuggestionsAtTheMoment}</div>
       </div>
       <div className="button-bar">
-        <Button className="cancel" title={cancelLabel || STRINGS.close} type="primary" onClick={onClose}/>
+        {this.renderSecondaryButton()}
       </div>
     </Modal>;
   }
 
   render() {
-    const { onClose, title, okLabel, cancelLabel } = this.props;
+    const { onClose, title, okLabel } = this.props;
     const { suggestions } = this.state;
     if (!suggestions || suggestions.length === 0) return this.renderEmpty();
 
-    const length = List(suggestions).filter((s) => s.selected).size;
+    const length = suggestions.filter((s) => s.selected).length;
     return <Modal
       className="suggestion-modal"
       title={`${title}`}
@@ -189,7 +199,7 @@ export class SuggestionModal<T> extends React.Component<SuggestionModalProps<T>,
       </div>
       <div className="button-bar">
         <Button type="primary" title={okLabel ? okLabel(length) : `${STRINGS.add} ${pluralIfNeeded(length, title)}`} disabled={length === 0} onClick={this.onAdd.bind(this)}/>
-        <Button className="cancel" title={cancelLabel || STRINGS.cancel} type="secondary" onClick={onClose}/>
+        {this.renderSecondaryButton()}
       </div>
     </Modal>;
   }

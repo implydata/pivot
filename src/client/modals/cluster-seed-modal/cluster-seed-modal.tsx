@@ -30,7 +30,7 @@ import { indexByAttribute } from '../../../common/utils/array/array';
 import { ImmutableFormDelegate, ImmutableFormState } from '../../utils/immutable-form-delegate/immutable-form-delegate';
 
 export interface ClusterSeedModalProps extends React.Props<any> {
-  onNext: (newCluster: Cluster) => void;
+  onNext: (newCluster: Cluster, sources: string[]) => void;
   onCancel: () => void;
   clusters: Cluster[];
 }
@@ -76,7 +76,7 @@ export class ClusterSeedModal extends React.Component<ClusterSeedModalProps, Imm
       .then(
         (resp) => {
           var cluster = Cluster.fromJS(resp.cluster);
-          this.props.onNext(cluster);
+          this.props.onNext(cluster, resp.sources);
         },
         (xhr: XMLHttpRequest) => Notifier.failure('Woops', 'Something bad happened')
       )

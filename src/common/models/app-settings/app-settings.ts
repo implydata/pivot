@@ -24,6 +24,16 @@ import { DataCube, DataCubeJS } from  '../data-cube/data-cube';
 import { Collection, CollectionJS, CollectionContext } from '../collection/collection';
 import { Manifest } from '../manifest/manifest';
 
+// ToDo: move this into an appropriate util file
+function checkNamedArrayUnique(as: any[]): void {
+  var seen: Lookup<number> = {};
+  for (var a of as) {
+    var name = a.name;
+    if (seen[name]) throw new Error(`duplicate '${name}'`);
+    seen[name] = 1;
+  }
+}
+
 export interface AppSettingsValue {
   version?: number;
   clusters?: Cluster[];
@@ -116,10 +126,13 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
 
     this.version = version || 0;
     this.clusters = clusters;
+    checkNamedArrayUnique(this.clusters);
     this.customization = customization;
     this.dataCubes = dataCubes;
+    checkNamedArrayUnique(this.dataCubes);
     this.linkViewConfig = linkViewConfig;
     this.collections = collections;
+    checkNamedArrayUnique(this.collections);
   }
 
   public valueOf(): AppSettingsValue {
@@ -233,10 +246,6 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
     return new AppSettings(value);
   }
 
-  public getSuggestedCubes(): DataCube[] { // ToDo: temp, delete this
-    return this.dataCubes;
-  }
-
   changeCustomization(customization: Customization): AppSettings {
     return this.change('customization', customization);
   }
@@ -255,6 +264,10 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
 
   changeDataCubes(dataCubes: DataCube[]): AppSettings {
     return this.change('dataCubes', dataCubes);
+  }
+
+  appendDataCubes(dataCubes: DataCube[]): AppSettings {
+    return this.changeDataCubes(this.dataCubes.concat(dataCubes));
   }
 
   changeCollections(collections: Collection[]): AppSettings {

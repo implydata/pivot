@@ -77,16 +77,22 @@ export class NoDataView extends React.Component <NoDataViewProps, NoDataViewStat
     </div>;
   }
 
-  renderTitle(mode: Mode): JSX.Element {
+  renderTitle(): JSX.Element {
+    const { mode } = this.state;
+
     return <div className="title">
       <div className="icon">
         <SvgIcon svg={require('../../icons/data-cubes.svg')}/>
       </div>
-      <div className="label">{mode === NoDataView.NO_CUBE ? STRINGS.noQueryableDataCubes : STRINGS.noConnectedData}</div>
+      <div className="label">{mode === NoDataView.NO_CUBE ? STRINGS.noDataCubes : STRINGS.noClusters}</div>
     </div>;
   }
 
-  renderLink(mode: Mode): JSX.Element {
+  renderLink(): JSX.Element {
+    const { stateful} = this.props;
+    if (!stateful) return null;
+    const { mode } = this.state;
+
     const link = mode === NoDataView.NO_CUBE
       ? <a href="#settings/data-cubes">cubes settings</a>
       : <a href="#settings/clusters">clusters settings</a>
@@ -96,8 +102,7 @@ export class NoDataView extends React.Component <NoDataViewProps, NoDataViewStat
   }
 
   render() {
-    const { user, onNavClick, onOpenAbout, customization, stateful } = this.props;
-    const { mode } = this.state;
+    const { user, onNavClick, onOpenAbout, customization } = this.props;
 
     return <div className="no-data-view">
       <NoDataHeaderBar
@@ -112,8 +117,8 @@ export class NoDataView extends React.Component <NoDataViewProps, NoDataViewStat
         {this.renderSettingsIcon()}
       </NoDataHeaderBar>
       <div className="container">
-        { this.renderTitle(mode) }
-        { stateful ? this.renderLink(mode) : null }
+        { this.renderTitle() }
+        { this.renderLink() }
       </div>
     </div>;
   }
