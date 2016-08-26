@@ -90,16 +90,23 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
     if (this.props.onSave) this.props.onSave(this.state.newInstance);
   }
 
+  saveAndAddCubes(dataCubes: DataCube[]) {
+    const { addCubes } = this.props;
+
+    this.save();
+    if (addCubes) addCubes(dataCubes);
+  }
+
   goBack() {
     const { cluster } = this.props;
     var hash = window.location.hash;
     window.location.hash = hash.replace(`/${cluster.name}`, '');
   }
 
-  toggleCreateCubesModal() {
+  openCreateCubesModal() {
     const { showCreateCubesModal } = this.state;
     this.setState({
-      showCreateCubesModal: !showCreateCubesModal
+      showCreateCubesModal: true
     });
   }
 
@@ -109,8 +116,8 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
     const CubesSuggestionModal = SuggestionModal.specialize<DataCube>();
 
     return <CubesSuggestionModal
-      onAdd={addCubes.bind(this)}
-      onClose={this.toggleCreateCubesModal.bind(this)}
+      onAdd={this.saveAndAddCubes.bind(this)}
+      onClose={this.save.bind(this)}
       getLabel={(m) => `${m.title}`}
       options={getSuggestedCubes()}
       title={STRINGS.createCubesFromCluster}
@@ -172,7 +179,7 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
       className={classNames("save", {disabled: !canSave || (!isNewCluster && !hasChanged)})}
       title={isNewCluster ? "Connect cluster" : "Save"}
       type="primary"
-      onClick={this.toggleCreateCubesModal.bind(this)}
+      onClick={this.openCreateCubesModal.bind(this)}
     />;
 
     if (!isNewCluster && !hasChanged) {

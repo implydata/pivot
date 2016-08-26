@@ -868,7 +868,7 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
     }
 
     if (this.measures.size > 0) {
-      this.measures.first().name;
+      return this.measures.first().name;
     }
 
     return null;
