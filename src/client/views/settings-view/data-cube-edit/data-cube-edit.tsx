@@ -69,11 +69,11 @@ export interface Modal extends Nameable {
 
 export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEditState> {
   private tabs: Tab[] = [
-    { label: 'General', value: 'general', render: this.renderGeneral, icon: 'full-settings' },
-    { label: 'Data', value: 'data', render: this.renderData, icon: '' },
-    { label: 'Dimensions', value: 'dimensions', render: this.renderDimensions, icon: 'full-cube' },
-    { label: 'Measures', value: 'measures', render: this.renderMeasures, icon: 'measure' },
-    { label: 'Options', value: 'options', render: this.renderOptions, icon: '' }
+    { label: 'General', value: 'general', render: this.renderGeneral, icon: require(`../../../icons/full-settings.svg`) },
+    { label: 'Data', value: 'data', render: this.renderData, icon: require(`../../../icons/data.svg`) },
+    { label: 'Dimensions', value: 'dimensions', render: this.renderDimensions, icon: require(`../../../icons/full-cube.svg`) },
+    { label: 'Measures', value: 'measures', render: this.renderMeasures, icon: require(`../../../icons/measures.svg`) },
+    { label: 'Options', value: 'options', render: this.renderOptions, icon: require(`../../../icons/full-more.svg`) }
   ];
 
   private modals: Modal[] = [
@@ -125,7 +125,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
         className={classNames({active: activeTab.value === tab.value})}
         title={tab.label}
         type="primary"
-        svg={tab.icon ? require(`../../../icons/${tab.icon}.svg`) : null}
+        svg={tab.icon}
         key={tab.value}
         onClick={this.selectTab.bind(this, tab)}
       />;

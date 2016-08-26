@@ -609,6 +609,7 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
       externalValue.rollup = this.rollup;
       externalValue.introspectionStrategy = cluster.getIntrospectionStrategy();
       externalValue.allowSelectQueries = true;
+      externalValue.allowEternity = !this.getPrimaryTimeAttribute();
 
       if (options.druidTimeAttributeName) {
         externalValue.timeAttribute = options.druidTimeAttributeName;

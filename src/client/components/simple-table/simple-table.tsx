@@ -128,7 +128,7 @@ export class SimpleTable extends React.Component<SimpleTableProps, SimpleTableSt
 
   labelizer(column: SimpleTableColumn): (row: any) => any {
     if (typeof column.field === 'string') {
-      return (row: any) => row[column.field as string];
+      return (row: any) => '' + row[column.field as string];
     }
 
     return column.field as (row: any) => any;
@@ -141,7 +141,7 @@ export class SimpleTable extends React.Component<SimpleTableProps, SimpleTableSt
     for (let i = 0; i < columns.length; i++) {
       let col = columns[i];
 
-      let icon = col.cellIcon ? <SvgIcon svg={require(`../../icons/${col.cellIcon}.svg`)}/> : null;
+      let icon = col.cellIcon ? <SvgIcon svg={col.cellIcon}/> : null;
 
       items.push(<div
         className={classNames('cell', {'has-icon': !!col.cellIcon})}

@@ -15,7 +15,8 @@
  */
 
 import * as Q from 'q';
-import { $, Executor, basicExecutorFactory, find, Attributes, Dataset } from 'plywood';
+import { Timezone, day } from 'chronoshift';
+import { $, Executor, basicExecutorFactory, find, Attributes, Dataset, TimeRange } from 'plywood';
 import { Logger } from 'logger-tracker';
 import { TimeMonitor } from "../../../common/utils/time-monitor/time-monitor";
 import { AppSettings, Timekeeper, Cluster, DataCube } from '../../../common/models/index';
@@ -23,6 +24,11 @@ import { SettingsStore } from '../settings-store/settings-store';
 import { FileManager } from '../file-manager/file-manager';
 import { ClusterManager } from '../cluster-manager/cluster-manager';
 import { updater } from '../updater/updater';
+
+const LOTS_OF_TIME = TimeRange.fromJS({
+  start: new Date('1000-01-01Z'),
+  end: new Date('4000-01-01Z')
+});
 
 export interface SettingsManagerOptions {
   logger: Logger;
@@ -376,7 +382,25 @@ export class SettingsManager {
         var clusterManager = this.getClusterManagerFor(clusterName);
         if (!clusterManager) throw new Error(`no cluster manager for ${clusterName}`);
         var context: any = { temp: dataCube.toExternal(clusterManager.cluster, clusterManager.requester) };
-        return $('temp').compute(context) as any;
+
+        var primaryTimeExpression = dataCube.getPrimaryTimeExpression();
+        if (primaryTimeExpression) {
+          return $('temp')
+            .filter(primaryTimeExpression.in(LOTS_OF_TIME))
+            .max(primaryTimeExpression)
+            .compute(context)
+            .then((maxTime: Date) => {
+              maxTime = new Date(maxTime);
+              if (isNaN(maxTime as any)) throw new Error('invalid maxTime');
+              var lastTwoWeeks = TimeRange.fromJS({
+                start: day.move(maxTime, Timezone.UTC, -14),
+                end: maxTime
+              });
+              return $('temp').filter(primaryTimeExpression.in(lastTwoWeeks)).limit(20).compute(context) as any;
+            });
+        } else {
+          return $('temp').limit(20).compute(context) as any;
+        }
       });
     }
   }

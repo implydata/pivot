@@ -81,10 +81,10 @@ export class DataTable extends React.Component<DataTableProps, DataTableState> {
       }
     })
       .then(
-        (dataset: Dataset) => {
+        (resp: any) => {
           if (!this.mounted) return;
           this.setState({
-            dataset,
+            dataset: Dataset.fromJS(resp.dataset),
             loading: false
           });
         },
@@ -159,7 +159,7 @@ export class DataTable extends React.Component<DataTableProps, DataTableState> {
       return {
         label: a.name,
         data: a,
-        field: name,
+        field: a.name,
         width: 170,
         render: this.renderHeader.bind(this, a, isPrimary)
       };
