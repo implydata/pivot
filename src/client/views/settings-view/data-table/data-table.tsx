@@ -67,6 +67,14 @@ export class DataTable extends React.Component<DataTableProps, DataTableState> {
     this.fetchData(this.props.dataCube);
   }
 
+  componentWillReceiveProps(nextProps: DataTableProps) {
+    const { dataCube } = this.props;
+
+    if (!dataCube.equals(nextProps.dataCube)) {
+      this.fetchData(nextProps.dataCube);
+    }
+  }
+
   componentWillUnmount() {
     this.mounted = false;
   }
