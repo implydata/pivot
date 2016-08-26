@@ -53,7 +53,7 @@ export class ClusterSeedModal extends React.Component<ClusterSeedModalProps, Imm
       canSave: false,
       newInstance: new Cluster({
         name: generateUniqueName('cl', name => indexByAttribute(clusters, 'name', name) === -1),
-        title: 'Some Cluster',
+        title: 'temp',
         type: 'druid'
       })
     });
@@ -78,6 +78,7 @@ export class ClusterSeedModal extends React.Component<ClusterSeedModalProps, Imm
       .then(
         (resp) => {
           var cluster = Cluster.fromJS(resp.cluster);
+          cluster = cluster.changeTitle(`My ${cluster.type} cluster`);
           this.props.onNext(cluster, resp.sources);
         },
         (xhr: XMLHttpRequest) => Notifier.failure('Woops', 'Something bad happened')

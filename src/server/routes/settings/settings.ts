@@ -105,14 +105,7 @@ router.get('/cluster-sources', (req: PivotRequest, res: Response) => {
 });
 
 router.post('/attributes', (req: PivotRequest, res: Response) => {
-  var { clusterName, source } = req.body;
-
-  if (typeof clusterName !== 'string') {
-    res.status(400).send({
-      error: 'must have a clusterName'
-    });
-    return;
-  }
+  var { source, cluster, clusterName } = req.body;
 
   if (typeof source !== 'string') {
     res.status(400).send({
@@ -121,7 +114,27 @@ router.post('/attributes', (req: PivotRequest, res: Response) => {
     return;
   }
 
-  SETTINGS_MANAGER.getAllAttributes(clusterName, source)
+  var testCluster: Cluster = null;
+  if (typeof clusterName !== 'string') {
+    if (typeof cluster === 'undefined') {
+      res.status(400).send({
+        error: 'must have a clusterName or cluster'
+      });
+      return;
+    }
+
+    try {
+      testCluster = Cluster.fromJS(cluster);
+    } catch (e) {
+      res.status(400).send({
+        error: 'invalid cluster',
+        message: e.message
+      });
+      return;
+    }
+  }
+
+  SETTINGS_MANAGER.getAllAttributes(source, testCluster || clusterName)
     .then(
       (attributes) => {
         res.send({ attributes: attributes });

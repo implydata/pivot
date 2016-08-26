@@ -165,7 +165,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
     var possibleClusters = [
       { value: 'native', label: 'Load a file and serve it natively' }
     ].concat(clusters.map((cluster) => {
-      return { value: cluster.name, label: cluster.name };
+      return { value: cluster.name, label: cluster.title };
     }));
 
     return <form className="general vertical">

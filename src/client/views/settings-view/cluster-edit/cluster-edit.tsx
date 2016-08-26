@@ -21,10 +21,9 @@ import * as Q from 'q';
 import { AttributeInfo, Attributes } from 'plywood';
 
 import { Ajax } from '../../../utils/ajax/ajax';
-import { List } from 'immutable';
 import { Fn, pluralIfNeeded, makeTitle } from '../../../../common/utils/general/general';
 import { classNames } from '../../../utils/dom/dom';
-import { firstUp, IP_REGEX, NUM_REGEX } from '../../../../common/utils/string/string';
+import { NUM_REGEX } from '../../../../common/utils/string/string';
 import { STRINGS } from '../../../config/constants';
 
 import { FormLabel } from '../../../components/form-label/form-label';
@@ -179,7 +178,7 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
       {makeTextInput('title', /.*/, true)}
 
       {makeLabel('host')}
-      {makeTextInput('host', IP_REGEX)}
+      {makeTextInput('host', /.*/)}
 
       {makeLabel('type')}
       {makeDropdownInput('type', Cluster.TYPE_VALUES.map(type => {return {value: type, label: type}; }))}

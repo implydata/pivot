@@ -175,14 +175,16 @@ export class Cluster extends BaseImmutable<ClusterValue, ClusterJS> {
 
   }
 
+  public getTitle: () => string;
   public getTimeout: () => number;
   public getSourceListScan: () => SourceListScan;
   public getSourceListRefreshInterval: () => number;
   public getSourceReintrospectInterval: () => number;
   public getIntrospectionStrategy: () => string;
-  public changeHost: (newHost: string) => Cluster;
-  public changeTimeout: (newTimeout: string) => Cluster;
-  public changeSourceListRefreshInterval: (newSourceListRefreshInterval: string) => Cluster;
+  public changeTitle: (title: string) => Cluster;
+  public changeHost: (host: string) => Cluster;
+  public changeTimeout: (timeout: string) => Cluster;
+  public changeSourceListRefreshInterval: (sourceListRefreshInterval: string) => Cluster;
 
   public toClientCluster(): Cluster {
     return new Cluster({

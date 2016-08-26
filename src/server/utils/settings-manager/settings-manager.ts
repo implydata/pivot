@@ -352,8 +352,10 @@ export class SettingsManager {
     return (Q.all(clusterSources) as any).then((things: ClusterNameAndSource[][]) => flatten(things));
   }
 
-  getAllAttributes(clusterName: string, source: string): Q.Promise<Attributes> {
-    if (clusterName === 'native') {
+  getAllAttributes(source: string, cluster: string | Cluster): Q.Promise<Attributes> {
+    const { verbose, logger, anchorPath } = this;
+
+    if (cluster === 'native') {
       return Q.fcall(() => {
         var fileManager = this.getFileManagerFor(source);
         if (!fileManager) throw new Error(`no file manager for ${source}`);
@@ -361,13 +363,26 @@ export class SettingsManager {
       });
     } else {
       return Q.fcall(() => {
-        var clusterManager = this.getClusterManagerFor(clusterName);
-        if (!clusterManager) throw new Error(`no cluster manager for ${clusterName}`);
-        return DataCube.fromClusterAndSource('test_cube', 'TC', clusterManager.cluster, source)
-          .toExternal(clusterManager.cluster, clusterManager.requester)
-          .introspect()
-          .then((introspectedExternal) => introspectedExternal.attributes) as any;
-      });
+        if (typeof cluster === 'string') {
+          var clusterManager = this.getClusterManagerFor(cluster);
+          if (!clusterManager) throw new Error(`no cluster manager for ${cluster}`);
+          return clusterManager;
+        } else {
+          var clusterManager = new ClusterManager(cluster, {
+            logger,
+            verbose,
+            anchorPath
+          });
+
+          return clusterManager.establishInitialConnection().then(() => clusterManager);
+        }
+      })
+        .then((clusterManager: ClusterManager) => {
+          return DataCube.fromClusterAndSource('test_cube', 'TC', clusterManager.cluster, source)
+            .toExternal(clusterManager.cluster, clusterManager.requester)
+            .introspect()
+            .then((introspectedExternal) => introspectedExternal.attributes) as any;
+        });
     }
   }
 

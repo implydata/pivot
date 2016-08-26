@@ -19,7 +19,7 @@ require('./settings-view.css');
 import * as React from 'react';
 import * as Q from 'q';
 
-import { $, Expression, Executor, Dataset } from 'plywood';
+import { AttributeInfo } from 'plywood';
 import { DataCube, User, Customization } from '../../../common/models/index';
 import { MANIFESTS } from '../../../common/manifests/index';
 import { STRINGS } from '../../config/constants';
@@ -72,6 +72,21 @@ const VIEWS = [
   {label: 'Clusters', value: PATHS.clusters, svg: require('../../icons/full-cluster.svg')},
   {label: 'Data Cubes', value: PATHS.dataCubes, svg: require('../../icons/full-cube.svg')}
 ];
+
+function autoFillDataCube(dataCube: DataCube, cluster: Cluster): Q.Promise<DataCube> {
+  return Ajax.query({
+    method: "POST",
+    url: 'settings/attributes',
+    data: {
+      cluster: cluster,
+      source: dataCube.source
+    }
+  })
+    .then((resp) => {
+      var attributes = AttributeInfo.fromJSs(resp.attributes);
+      return dataCube.fillAllFromAttributes(attributes);
+    });
+}
 
 export class SettingsView extends React.Component<SettingsViewProps, SettingsViewState> {
   private mounted = false;
@@ -162,11 +177,23 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
     });
   }
 
-  addCluster(newCluster: Cluster): Q.Promise<any> {
-    var settings = ImmutableUtils.addInArray(this.state.settings, 'clusters', newCluster);
-    var message = 'Cluster created';
+  addClusterAndDataCubes(newCluster: Cluster, newDataCubes: DataCube[]) {
+    var { settings } = this.state;
+    settings = ImmutableUtils.addInArray(settings, 'clusters', newCluster);
 
-    return this.onSave(settings, message).then(this.backToClustersView.bind(this));
+    if (newDataCubes && newDataCubes.length) {
+      Q.all(newDataCubes.map((dataCube) => autoFillDataCube(dataCube, newCluster))).then(
+        (filledDataCubes) => {
+          settings = settings.appendDataCubes(filledDataCubes);
+          this.onSave(settings, 'Cluster and data cubes created').then(this.backToClustersView.bind(this));
+        },
+        (e: Error) => {
+          Notifier.failure('Woops', 'Something bad happened');
+        }
+      );
+    } else {
+      this.onSave(settings, 'Cluster created').then(this.backToClustersView.bind(this));
+    }
   }
 
   backToClustersView() {
@@ -302,7 +329,7 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
                     isNewCluster={true}
                     cluster={tempCluster}
                     sources={tempClusterSources}
-                    onSave={this.addCluster.bind(this)}
+                    onSave={this.addClusterAndDataCubes.bind(this)}
                     onAddDataCubes={this.addDataCubes.bind(this)}
                     onCancel={this.backToClustersView.bind(this)}
                   />
