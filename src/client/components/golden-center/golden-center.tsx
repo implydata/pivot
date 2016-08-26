@@ -19,6 +19,8 @@ require('./golden-center.css');
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
+import { GlobalEventListener } from '../global-event-listener/global-event-listener';
+
 export interface GoldenCenterProps extends React.Props<any> {
   topRatio?: number;
   minPadding?: number;
@@ -39,20 +41,14 @@ export class GoldenCenter extends React.Component<GoldenCenterProps, GoldenCente
     this.state = {
       top: 0
     };
-
-    this.globalResizeListener = this.globalResizeListener.bind(this);
   }
 
   componentDidMount() {
-    window.addEventListener('resize', this.globalResizeListener);
     this.globalResizeListener();
-
-    // this is a hack to ensure that we size up the component properly after it has determined its size
-    setTimeout(this.globalResizeListener, 100);
   }
 
-  componentWillUnmount() {
-    window.removeEventListener('resize', this.globalResizeListener);
+  componentDidUpdate() {
+    this.globalResizeListener();
   }
 
   globalResizeListener() {
@@ -80,6 +76,7 @@ export class GoldenCenter extends React.Component<GoldenCenterProps, GoldenCente
       style={{ paddingTop: top, paddingBottom: minPadding }}
     >
       {React.Children.only(children)}
+      <GlobalEventListener resize={this.globalResizeListener.bind(this)}/>
     </div>;
   }
 }
