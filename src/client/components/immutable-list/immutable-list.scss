@@ -59,6 +59,28 @@
       width: 400px;
     }
   }
+
+  .empty-container {
+    position: absolute;
+    top: 50%;
+    left: 10%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: $text-light;
+
+    a {
+      color: $brand;
+      border-bottom: 1px dashed;
+      cursor: pointer;
+    }
+
+    .label {
+      display: inline-block;
+      height: 46px;
+      padding-top: 13px;
+      font-size: 20px;
+    }
+  }
 }
 
 .name-modal {

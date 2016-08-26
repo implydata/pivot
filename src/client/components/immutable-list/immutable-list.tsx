@@ -20,6 +20,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { List } from 'immutable';
 import { Fn } from "../../../common/utils/general/general";
+import { STRINGS } from "../../config/constants";
 
 import { Button } from '../button/button';
 import { Modal } from '../modal/modal';
@@ -129,8 +130,28 @@ export class ImmutableList<T> extends React.Component<ImmutableListProps<T>, Imm
     return React.cloneElement(this.props.getModal(item), {onSave, onClose, mode: 'create'});
   }
 
+  renderEmpty() {
+    const { label, toggleSuggestions } = this.props;
+    return <div className="empty-container">
+        <div className="label"> No {label} </div>
+        { toggleSuggestions ?
+          <div className="actions">{STRINGS.quicklyAddSomeUsing} <a key='suggestions' onClick={toggleSuggestions}>suggestions</a></div>
+          : null }
+    </div>;
+  }
+
+  renderList() {
+    const { items, getRows } = this.props;
+    return <SimpleList
+      rows={getRows(items)}
+      onEdit={this.editItem.bind(this)}
+      onRemove={this.deleteItem.bind(this)}
+      onReorder={this.onReorder.bind(this)}
+    />;
+  }
+
   render() {
-    const { items, getRows, label, toggleSuggestions } = this.props;
+    const { items, label, toggleSuggestions } = this.props;
     const { editedIndex, pendingAddItem } = this.state;
 
     if (!items) return null;
@@ -142,12 +163,7 @@ export class ImmutableList<T> extends React.Component<ImmutableListProps<T>, Imm
           <button key='add' onClick={this.addItem.bind(this)}>Add item</button>
         </div>
       </div>
-      <SimpleList
-        rows={getRows(items)}
-        onEdit={this.editItem.bind(this)}
-        onRemove={this.deleteItem.bind(this)}
-        onReorder={this.onReorder.bind(this)}
-      />
+      {items.size === 0 ? this.renderEmpty() : this.renderList()}
       {editedIndex !== undefined ? this.renderEditModal(editedIndex) : null}
       {pendingAddItem ? this.renderAddModal(pendingAddItem) : null}
     </div>;

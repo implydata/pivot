@@ -88,10 +88,23 @@ export class ClusterSeedModal extends React.Component<ClusterSeedModalProps, Imm
     const { newInstance, errors } = this.state;
 
     if (!newInstance) return null;
+    let clusterType = newInstance.type;
 
     var makeLabel = FormLabel.simpleGenerator(LABELS, errors, true);
     var makeTextInput = ImmutableInput.simpleGenerator(newInstance, this.delegate.onChange);
     var makeDropdownInput = ImmutableDropdown.simpleGenerator(newInstance, this.delegate.onChange);
+
+    var userNamePasswordFields: JSX.Element = null;
+
+    if (clusterType === 'mysql' || clusterType === 'postgres') {
+      userNamePasswordFields = <div>
+        {makeLabel('user')}
+        {makeTextInput('user', /^.+$/)}
+
+        {makeLabel('password')}
+        {makeTextInput('password')}
+      </div>;
+    }
 
     return <Modal
       className="cluster-seed-modal"
@@ -105,6 +118,7 @@ export class ClusterSeedModal extends React.Component<ClusterSeedModalProps, Imm
         {makeLabel('host')}
         {makeTextInput('host', /^.+$/)}
 
+        {userNamePasswordFields}
       </form>
       <div className="button-bar">
         <Button type="primary" title={`${STRINGS.next}: ${STRINGS.configureCluster}`} onClick={this.onNext.bind(this)}/>

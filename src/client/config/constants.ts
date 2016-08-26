@@ -122,6 +122,7 @@ export const STRINGS = {
   pinboardPlaceholder: 'Click or drag dimensions to pin them',
   previous: 'Previous',
   queryError: 'Query error',
+  quicklyAddSomeUsing: 'Quickly add some using',
   rawData: 'Raw Data',
   regex: 'Regex',
   relative: 'Relative',

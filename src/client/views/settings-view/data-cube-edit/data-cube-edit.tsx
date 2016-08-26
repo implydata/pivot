@@ -304,7 +304,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
 
       if (defaultSortMeasure) {
         if (!newMeasures.find((measure) => measure.name === defaultSortMeasure)) {
-          newInstance = newInstance.changeDefaultSortMeasure(newMeasures.get(0).name);
+          newInstance = newInstance.changeDefaultSortMeasure(null);
         }
       }
 
