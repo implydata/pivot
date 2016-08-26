@@ -325,7 +325,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       return {
         title: measure.title,
         description: measure.expression.toString(),
-        icon: require(`../../icons/measures.svg`)
+        icon: require(`../../../icons/measures.svg`)
       };
     });
 
