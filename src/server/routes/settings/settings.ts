@@ -15,7 +15,8 @@
  */
 
 import { Router, Request, Response } from 'express';
-import { AppSettings, Cluster } from '../../../common/models/index';
+import { Dataset } from 'plywood';
+import { AppSettings, Cluster, DataCube } from '../../../common/models/index';
 import { MANIFESTS } from '../../../common/manifests/index';
 
 import { PivotRequest } from '../../utils/index';
@@ -124,6 +125,45 @@ router.post('/attributes', (req: PivotRequest, res: Response) => {
     .then(
       (attributes) => {
         res.send({ attributes: attributes });
+      },
+      (e: Error) => {
+        console.log('error:', e.message);
+        if (e.hasOwnProperty('stack')) {
+          console.log((<any>e).stack);
+        }
+        res.status(500).send({
+          error: 'could not compute',
+          message: e.message
+        });
+      }
+    )
+    .done();
+});
+
+router.post('/preview', (req: PivotRequest, res: Response) => {
+  var { dataCube } = req.body;
+
+  if (typeof dataCube === 'undefined') {
+    res.status(400).send({
+      error: 'must have a dataCube'
+    });
+    return;
+  }
+
+  try {
+    var previewDataCube = DataCube.fromJS(dataCube);
+  } catch (e) {
+    res.status(400).send({
+      error: 'invalid DataCube',
+      message: e.message
+    });
+    return;
+  }
+
+  SETTINGS_MANAGER.preview(previewDataCube)
+    .then(
+      (dataset: Dataset) => {
+        res.send({ dataset });
       },
       (e: Error) => {
         console.log('error:', e.message);

@@ -15,7 +15,7 @@
  */
 
 import * as Q from 'q';
-import { Executor, basicExecutorFactory, find, Attributes } from 'plywood';
+import { $, Executor, basicExecutorFactory, find, Attributes, Dataset } from 'plywood';
 import { Logger } from 'logger-tracker';
 import { TimeMonitor } from "../../../common/utils/time-monitor/time-monitor";
 import { AppSettings, Timekeeper, Cluster, DataCube } from '../../../common/models/index';
@@ -361,6 +361,22 @@ export class SettingsManager {
           .toExternal(clusterManager.cluster, clusterManager.requester)
           .introspect()
           .then((introspectedExternal) => introspectedExternal.attributes) as any;
+      });
+    }
+  }
+
+  preview(dataCube: DataCube): Q.Promise<Dataset> {
+    var clusterName = dataCube.clusterName;
+    if (clusterName === 'native') {
+      return Q.fcall(() => {
+        throw new Error('no support yet');
+      });
+    } else {
+      return Q.fcall(() => {
+        var clusterManager = this.getClusterManagerFor(clusterName);
+        if (!clusterManager) throw new Error(`no cluster manager for ${clusterName}`);
+        var context: any = { temp: dataCube.toExternal(clusterManager.cluster, clusterManager.requester) };
+        return $('temp').compute(context) as any;
       });
     }
   }

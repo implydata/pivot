@@ -19,7 +19,7 @@ require('./data-table.css');
 import { Ajax } from '../../../utils/ajax/ajax';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { AttributeInfo, Attributes, findByName, Nameable } from 'plywood';
+import { AttributeInfo, Attributes, findByName, Dataset } from 'plywood';
 
 import { titleCase } from '../../../../common/utils/string/string';
 import { pluralIfNeeded } from "../../../../common/utils/general/general";
@@ -43,13 +43,59 @@ export interface DataTableState {
 
   showSuggestionsModal?: boolean;
   attributeSuggestions?: Attributes;
+
+  dataset?: Dataset;
+  error?: Error;
+  loading?: boolean;
 }
 
 export class DataTable extends React.Component<DataTableProps, DataTableState> {
+  public mounted: boolean;
+
   constructor() {
     super();
 
-    this.state = {};
+    this.state = {
+      loading: false,
+      dataset: null,
+      error: null
+    };
+  }
+
+  componentDidMount() {
+    this.mounted = true;
+    this.fetchData(this.props.dataCube);
+  }
+
+  componentWillUnmount() {
+    this.mounted = false;
+  }
+
+  fetchData(dataCube: DataCube): void {
+    this.setState({ loading: true });
+    Ajax.query({
+      method: "POST",
+      url: 'settings/preview',
+      data: {
+        dataCube
+      }
+    })
+      .then(
+        (dataset: Dataset) => {
+          if (!this.mounted) return;
+          this.setState({
+            dataset,
+            loading: false
+          });
+        },
+        (error: Error) => {
+          if (!this.mounted) return;
+          this.setState({
+            error,
+            loading: false
+          });
+        }
+      );
   }
 
   renderHeader(attribute: AttributeInfo, isPrimary: boolean, column: SimpleTableColumn, hovered: boolean): JSX.Element {
@@ -149,7 +195,7 @@ export class DataTable extends React.Component<DataTableProps, DataTableState> {
   openSuggestionsModal() {
     this.setState({
       showSuggestionsModal: true
-    }),
+    });
 
     this.fetchSuggestions();
   }
@@ -190,8 +236,7 @@ export class DataTable extends React.Component<DataTableProps, DataTableState> {
   }
 
   render() {
-    // Obviously something more meaningful should be put in this array
-    const rows: any[] = Array.apply(null, Array(10)).map(() => { return {}; });
+    const { dataset } = this.state;
 
     return <div className="data-table">
       <div className="actions">
@@ -200,10 +245,10 @@ export class DataTable extends React.Component<DataTableProps, DataTableState> {
       </div>
       <SimpleTable
         columns={this.getColumns()}
-        rows={rows}
+        rows={dataset ? dataset.data : []}
         headerHeight={83}
         onHeaderClick={this.onHeaderClick.bind(this)}
-      ></SimpleTable>
+      />
       { this.renderEditModal() }
       { this.renderAttributeSuggestions() }
     </div>;
