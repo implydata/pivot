@@ -25,6 +25,10 @@ export function firstUp(str: string): string {
   return str ? str.charAt(0).toUpperCase() + str.slice(1) : undefined;
 }
 
+export function titleCase(str: string): string {
+  return firstUp(str.toLowerCase());
+}
+
 export function pad(n: number, padding = 3): string {
   var str = String(n);
 

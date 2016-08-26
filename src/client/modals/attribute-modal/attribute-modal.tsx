@@ -15,9 +15,9 @@
  */
 
 
-import { STRINGS } from "../../config/constants";
 require('./attribute-modal.css');
 
+import { STRINGS } from "../../config/constants";
 import * as React from 'react';
 import { AttributeInfo } from 'plywood';
 

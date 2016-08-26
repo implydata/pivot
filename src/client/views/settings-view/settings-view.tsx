@@ -61,10 +61,16 @@ export interface SettingsViewState {
   tempDataCube?: DataCube;
 }
 
+const PATHS = {
+  general: 'general',
+  clusters: 'clusters',
+  dataCubes: 'data-cubes'
+};
+
 const VIEWS = [
-  {label: 'General', value: 'general', svg: require('../../icons/full-settings.svg')},
-  {label: 'Clusters', value: 'clusters', svg: require('../../icons/full-cluster.svg')},
-  {label: 'Data Cubes', value: 'data-cubes', svg: require('../../icons/full-cube.svg')}
+  {label: 'General', value: PATHS.general, svg: require('../../icons/full-settings.svg')},
+  {label: 'Clusters', value: PATHS.clusters, svg: require('../../icons/full-cluster.svg')},
+  {label: 'Data Cubes', value: PATHS.dataCubes, svg: require('../../icons/full-cube.svg')}
 ];
 
 export class SettingsView extends React.Component<SettingsViewProps, SettingsViewState> {
@@ -203,7 +209,7 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
   }
 
   backToDataCubesView() {
-    window.location.hash = '#settings/data-cubes';
+    window.location.hash = `#settings/${PATHS.dataCubes}`;
 
     this.setState({
       tempDataCube: null
@@ -228,6 +234,8 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
 
     if (!settings) return null;
 
+    const hasLeftButtons = breadCrumbs && (breadCrumbs.length === 1 || breadCrumbs.indexOf(PATHS.dataCubes) === -1);
+
     const inflateCluster = (key: string, value: string): {key: string, value: any} => {
       if (key !== 'clusterId') return {key, value};
 
@@ -249,26 +257,31 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
       };
     };
 
-    return <div className="settings-view">
+    return <div className='settings-view'>
+
       <SettingsHeaderBar
         user={user}
         onNavClick={onNavClick}
         customization={customization}
         title={STRINGS.settings}
       />
-      <div className="left-panel">
-        {this.renderLeftButtons(breadCrumbs)}
-      </div>
 
-      <div className="main-panel">
+      {hasLeftButtons
+        ? <div className="left-panel">
+            {this.renderLeftButtons(breadCrumbs)}
+          </div>
+        : null
+      }
+
+      <div className={classNames('main-panel', {'full-width': !hasLeftButtons})}>
 
         <Router rootFragment="settings" onURLChange={this.onURLChange.bind(this)}>
 
-          <Route fragment="general">
+          <Route fragment={PATHS.general}>
             <General settings={settings} onSave={this.onSave.bind(this)}/>
           </Route>
 
-          <Route fragment="clusters">
+          <Route fragment={PATHS.clusters}>
             <Clusters settings={settings} onSave={this.onSave.bind(this)}/>
 
             <Route fragment="new-cluster">
@@ -295,7 +308,7 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
             </Route>
           </Route>
 
-          <Route fragment="data-cubes">
+          <Route fragment={PATHS.dataCubes}>
             <DataCubes settings={settings} onSave={this.onSave.bind(this)}/>
 
             <Route fragment="new-data-cube">

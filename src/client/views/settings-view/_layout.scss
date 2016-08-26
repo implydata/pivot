@@ -82,6 +82,10 @@
   @include unpin-top($header-height);
   left: $left-panel-width;
   background-color: $white;
+
+  &.full-width {
+    left: 0;
+  }
 }
 
 .title-bar {

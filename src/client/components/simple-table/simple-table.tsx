@@ -18,19 +18,19 @@ require('./simple-table.css');
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { $, Expression, Executor, Dataset } from 'plywood';
-import { Stage, Clicker, Essence, DataCube, Filter, Dimension, Measure } from '../../../common/models/index';
+import { } from '../../../common/models/index';
 
 import { classNames } from '../../utils/dom/dom';
 
-import { SvgIcon } from '../svg-icon/svg-icon';
-import { Scroller, ScrollerPart } from '../scroller/scroller';
+import { SvgIcon, Scroller, ScrollerPart } from '../index';
 
 export interface SimpleTableColumn {
   label: string;
   field: string | ((row: any) => any);
   width: number;
   cellIcon?: string;
+  render?: (column: SimpleTableColumn, hovered: boolean) => JSX.Element;
+  data?: any;
 }
 
 export interface SimpleTableAction {
@@ -44,12 +44,16 @@ export interface SimpleTableProps extends React.Props<any> {
   rows: any[];
   actions?: SimpleTableAction[];
   onRowClick?: (row: any) => void;
+  onHeaderClick?: (column: SimpleTableColumn) => boolean;
+
+  headerHeight?: number;
 }
 
 export interface SimpleTableState {
   sortColumn?: SimpleTableColumn;
   sortAscending?: boolean;
   hoveredRowIndex?: number;
+  hoveredColumnIndex?: number;
   hoveredActionIndex?: number;
 }
 
@@ -58,6 +62,11 @@ const HEADER_HEIGHT = 26;
 const ACTION_WIDTH = 30;
 
 export class SimpleTable extends React.Component<SimpleTableProps, SimpleTableState> {
+  static defaultProps = {
+    actions: [] as SimpleTableAction[],
+    headerHeight: HEADER_HEIGHT
+  };
+
   constructor() {
     super();
 
@@ -65,10 +74,19 @@ export class SimpleTable extends React.Component<SimpleTableProps, SimpleTableSt
   }
 
   renderHeaders(columns: SimpleTableColumn[], sortColumn: SimpleTableColumn, sortAscending: boolean): JSX.Element {
+    const { hoveredRowIndex, hoveredColumnIndex } = this.state;
+
     var items: JSX.Element[] = [];
 
     for (let i = 0; i < columns.length; i++) {
       let column = columns[i];
+
+      let isHovered = hoveredRowIndex === -1 && i === hoveredColumnIndex;
+
+      if (column.render) {
+        items.push(column.render(column, isHovered));
+        continue;
+      }
 
       let icon: JSX.Element = null;
       if (sortColumn && sortColumn === column) {
@@ -79,7 +97,7 @@ export class SimpleTable extends React.Component<SimpleTableProps, SimpleTableSt
       }
 
       items.push(<div
-        className="header"
+        className={classNames("header", {hover: isHovered})}
         style={{width: column.width}}
         key={`column-${i}`}
       >{column.label}{icon}</div>);
@@ -186,6 +204,8 @@ export class SimpleTable extends React.Component<SimpleTableProps, SimpleTableSt
   getLayout(columns: SimpleTableColumn[], rows: any[], actions: SimpleTableAction[]) {
     const width = columns.reduce((a, b) => a + b.width, 0);
 
+    actions = actions || [];
+
     const directActionsCount = actions.filter((a) => !a.inEllipsis).length;
     const indirectActionsCount = directActionsCount !== actions.length ? 1 : 0;
 
@@ -195,7 +215,7 @@ export class SimpleTable extends React.Component<SimpleTableProps, SimpleTableSt
       bodyHeight: rows.length * ROW_HEIGHT,
 
       // Gutters
-      top: HEADER_HEIGHT,
+      top: this.props.headerHeight,
       right: directActionsCount * 30 + indirectActionsCount * 30,
       bottom: 0,
       left: 0
@@ -240,8 +260,8 @@ export class SimpleTable extends React.Component<SimpleTableProps, SimpleTableSt
     var rowIndex = -1; // -1 means header
 
     // Not in the header
-    if (y > HEADER_HEIGHT) {
-      rowIndex = Math.floor((y - HEADER_HEIGHT) / ROW_HEIGHT);
+    if (y > this.props.headerHeight) {
+      rowIndex = Math.floor((y - this.props.headerHeight) / ROW_HEIGHT);
     }
 
     return rowIndex;
@@ -302,6 +322,11 @@ export class SimpleTable extends React.Component<SimpleTableProps, SimpleTableSt
   }
 
   onHeaderClick(column: SimpleTableColumn) {
+    if (this.props.onHeaderClick) {
+      let shouldSort = this.props.onHeaderClick(column);
+      if (!shouldSort) return;
+    }
+
     this.setState({
       sortColumn: column,
       sortAscending: this.state.sortColumn === column ? !this.state.sortAscending : true
@@ -317,8 +342,10 @@ export class SimpleTable extends React.Component<SimpleTableProps, SimpleTableSt
     const headerWidth = this.getHeaderWidth(columns);
 
     var rowIndex = this.getRowIndex(y);
+    var columnIndex = this.getColumnIndex(x, headerWidth);
 
     this.setState({
+      hoveredColumnIndex: columnIndex,
       hoveredRowIndex: rowIndex > rows.length ? undefined : rowIndex,
       hoveredActionIndex: part === Scroller.RIGHT_GUTTER ? this.getActionIndex(x, headerWidth) : undefined
     });
@@ -327,6 +354,7 @@ export class SimpleTable extends React.Component<SimpleTableProps, SimpleTableSt
   onMouseLeave() {
     this.setState({
       hoveredRowIndex: undefined,
+      hoveredColumnIndex: undefined,
       hoveredActionIndex: undefined
     });
   }

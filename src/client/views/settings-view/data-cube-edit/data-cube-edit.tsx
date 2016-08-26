@@ -30,13 +30,15 @@ import { Duration, Timezone } from 'chronoshift';
 
 import { DATA_CUBES_STRATEGIES_LABELS, STRINGS } from '../../../config/constants';
 
-import { SvgIcon, FormLabel, Button, SimpleList, ImmutableInput, ImmutableList, ImmutableDropdown } from '../../../components/index';
+import { SvgIcon, FormLabel, Button, SimpleTableColumn, SimpleTable, ImmutableInput, ImmutableList, ImmutableDropdown } from '../../../components/index';
 import { DimensionModal, MeasureModal, SuggestionModal, AttributeModal } from '../../../modals/index';
 import { AppSettings, ListItem, Cluster, DataCube, Dimension, DimensionJS, Measure, MeasureJS } from '../../../../common/models/index';
 
 import { DATA_CUBE as LABELS } from '../../../../common/models/labels';
 
 import { ImmutableFormDelegate, ImmutableFormState } from '../../../utils/immutable-form-delegate/immutable-form-delegate';
+
+import { DataTable } from '../data-table/data-table';
 
 export interface DataCubeEditProps extends React.Props<any> {
   isNewDataCube?: boolean;
@@ -49,7 +51,6 @@ export interface DataCubeEditProps extends React.Props<any> {
 
 export interface DataCubeEditState extends ImmutableFormState<DataCube> {
   tab?: any;
-  attributeSuggestions?: Attributes;
   modal?: Modal;
 }
 
@@ -57,6 +58,7 @@ export interface Tab {
   label: string;
   value: string;
   render: () => JSX.Element;
+  icon: string;
 }
 
 export interface Modal extends Nameable {
@@ -67,17 +69,16 @@ export interface Modal extends Nameable {
 
 export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEditState> {
   private tabs: Tab[] = [
-    { label: 'General', value: 'general', render: this.renderGeneral },
-    { label: 'Data', value: 'data', render: this.renderData },
-    { label: 'Dimensions', value: 'dimensions', render: this.renderDimensions },
-    { label: 'Measures', value: 'measures', render: this.renderMeasures },
-    { label: 'Options', value: 'options', render: this.renderOptions }
+    { label: 'General', value: 'general', render: this.renderGeneral, icon: 'full-settings' },
+    { label: 'Data', value: 'data', render: this.renderData, icon: '' },
+    { label: 'Dimensions', value: 'dimensions', render: this.renderDimensions, icon: 'full-cube' },
+    { label: 'Measures', value: 'measures', render: this.renderMeasures, icon: 'measure' },
+    { label: 'Options', value: 'options', render: this.renderOptions, icon: '' }
   ];
 
   private modals: Modal[] = [
     { name: 'dimensions', render: this.renderDimensionSuggestions },
-    { name: 'measures', render: this.renderMeasureSuggestions },
-    { name: 'attributes', render: this.renderAttributeSuggestions }
+    { name: 'measures', render: this.renderMeasureSuggestions }
   ];
 
   private delegate: ImmutableFormDelegate<DataCube>;
@@ -104,7 +105,6 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       canSave: true,
       errors: {},
       tab: props.isNewDataCube ? this.tabs[0] : this.tabs.filter((tab) => tab.value === props.tab)[0],
-      attributeSuggestions: null,
       modal: null
     });
   }
@@ -121,11 +121,14 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
 
   renderTabs(activeTab: Tab): JSX.Element[] {
     return this.tabs.map((tab) => {
-      return <button
+      return <Button
         className={classNames({active: activeTab.value === tab.value})}
+        title={tab.label}
+        type="primary"
+        svg={tab.icon ? require(`../../../icons/${tab.icon}.svg`) : null}
         key={tab.value}
         onClick={this.selectTab.bind(this, tab)}
-      >{tab.label}</button>;
+      />;
     });
   }
 
@@ -207,40 +210,13 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
   renderData(): JSX.Element {
     const { newInstance } = this.state;
 
-    const onChange = (newAttributes: List<AttributeInfo>) => {
-      const newCube = newInstance.changeAttributes(newAttributes.toArray());
+    const onChange = (newDataCube: DataCube) => {
       this.setState({
-        newInstance: newCube
+        newInstance: newDataCube
       });
     };
 
-    const getModal = (item: AttributeInfo): JSX.Element => <AttributeModal attributeInfo={item} />;
-
-    // v- this is nonsense
-    const getNewItem = () => AttributeInfo.fromJS({
-      name: generateUniqueName('d', name => !newInstance.dimensions.find(m => m.name === name)),
-      type: 'STRING'
-    });
-
-    const getRows = (items: List<AttributeInfo>) => items.toArray().map((attribute) => {
-      return {
-        title: `${attribute.name}${newInstance.getPrimaryTimeAttribute() === attribute.name ? ' [PT]' : ''}`,
-        description: attribute.type,
-        icon: `dim-string`
-      };
-    });
-
-    const AttributesList = ImmutableList.specialize<AttributeInfo>();
-
-    return <AttributesList
-      label="Attributes"
-      items={List(newInstance.attributes)}
-      onChange={onChange.bind(this)}
-      getModal={getModal}
-      getNewItem={getNewItem}
-      getRows={getRows}
-      toggleSuggestions={this.openAttributeSuggestions.bind(this)}
-    />;
+    return <DataTable dataCube={newInstance} onChange={onChange}/>;
   }
 
   openModal(name: string) {
@@ -253,63 +229,6 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
     this.setState({
       modal: null
     });
-  }
-
-  openAttributeSuggestions() {
-    const { dataCube } = this.props;
-    this.openModal('attributes');
-    Ajax.query({
-      method: "POST",
-      url: 'settings/attributes',
-      data: {
-        clusterName: dataCube.clusterName,
-        source: dataCube.source
-      }
-    })
-      .then(
-        (resp) => {
-          this.setState({
-            attributeSuggestions: dataCube.filterAttributes(AttributeInfo.fromJSs(resp.attributes))
-          });
-        },
-        (xhr: XMLHttpRequest) => Notifier.failure('Woops', 'Something bad happened')
-      )
-      .done();
-  }
-
-  closeAttributeSuggestions() {
-    this.setState({
-      attributeSuggestions: null
-    });
-    this.closeModal();
-  }
-
-  addAttribute(extraAttributes: Attributes) {
-    const { newInstance } = this.state;
-    this.setState({
-      newInstance: newInstance.changeAttributes(newInstance.attributes.concat(extraAttributes))
-    });
-  }
-
-  renderAttributeSuggestions() {
-    const { attributeSuggestions } = this.state;
-    if (!attributeSuggestions) return null;
-
-    const AttributeSuggestionModal = SuggestionModal.specialize<AttributeInfo>();
-
-    function getAttributeLabel(a: AttributeInfo) {
-      var special = a.special ? ` [${a.special}]` : '';
-      return `${a.name} as ${a.type}${special}`;
-    }
-
-    return <AttributeSuggestionModal
-      onAdd={this.addAttribute.bind(this)}
-      onClose={this.closeAttributeSuggestions.bind(this)}
-      getLabel={getAttributeLabel}
-      options={attributeSuggestions}
-      title={`${STRINGS.attribute} ${STRINGS.suggestion}s`}
-      okLabel={(n) => `${STRINGS.add} ${pluralIfNeeded(n, 'attribute')}`}
-    />;
   }
 
   // ---------------------------------------------------

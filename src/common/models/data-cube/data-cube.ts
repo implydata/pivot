@@ -816,6 +816,19 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
     return new DataCube(value);
   }
 
+  public updateAttribute(attribute: AttributeInfo): DataCube {
+    var attributes = this.attributes.concat();
+
+    for (let i = 0; i < attributes.length; i++) {
+      if (attributes[i].name === attribute.name) {
+        attributes[i] = attribute;
+        break;
+      }
+    }
+
+    return this.changeAttributes(attributes);
+  }
+
   public appendAttributes(attributes: Attributes): DataCube {
     return this.changeAttributes(this.attributes.concat(attributes));
   }

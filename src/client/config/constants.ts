@@ -42,6 +42,7 @@ export const SEARCH_WAIT = 900;
 // Do not set an explicit type for STRINGS, let typescript figure it out and type check that we are using string correctly
 export const STRINGS = {
   add: 'Add',
+  addAttributes: 'Add attributes',
   addFromCube: 'Add from Cube',
   addNewCollection: 'Add new collection',
   addNewTile: 'Add new tile',
@@ -89,6 +90,7 @@ export const STRINGS = {
   explore: 'Explore',
   exportToCSV: 'Export to CSV',
   filter: 'Filter',
+  filters: 'Filters',
   generalSettings: 'General settings',
   goToUrl: 'Go to URL',
   granularity: 'Granularity',
@@ -135,6 +137,7 @@ export const STRINGS = {
   stringSearch: 'String search',
   subsplit: 'Split',
   suggestion: 'suggestion',
+  suggestions: 'suggestions',
   timezone: 'Timezone',
   thereAreNoSuggestionsAtTheMoment: 'There are no suggestions at the moment',
   undo: 'Click here to undo',

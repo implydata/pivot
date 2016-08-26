@@ -33,14 +33,39 @@
 
       padding: 10px 5px;
 
-      button,
-      .button {
-        @extend %button-light;
-
+      button {
+        background-color: transparent;
         display: block;
         width: 100%;
-        padding: 10px 15px;
+        height: 35px;
         text-align: left;
+        color: $text-medium;
+
+        &.icon {
+          padding-left: 38px;
+
+          .svg-icon {
+            position: absolute;
+            top: 8px;
+            left: 12px;
+
+            path {
+              fill: hsla(0, 0%, 75%, 1.00);
+            }
+          }
+        }
+
+        &:hover {
+          background-color: hsla(200, 73%, 93%, 1.00);
+        }
+
+        &:active, &.active {
+          background-color: hsla(200, 73%, 93%, 1.00);
+
+          .svg-icon path {
+            fill: $brand;
+          }
+        }
       }
     }
 
@@ -65,6 +90,13 @@
         }
       }
 
+      .data-table {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        right: 20px;
+        bottom: 20px;
+      }
 
     }
   }
