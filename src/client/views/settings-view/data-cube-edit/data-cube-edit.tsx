@@ -154,17 +154,6 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
     window.location.hash = hash.replace(`/${dataCube.name}/${tab}`, '');
   }
 
-  getIntrospectionStrategies(): ListItem[] {
-    const labels = DATA_CUBES_STRATEGIES_LABELS as any;
-
-    return [{
-      label: `Default (${labels[DataCube.DEFAULT_INTROSPECTION]})`,
-      value: undefined
-    }].concat(DataCube.INTROSPECTION_VALUES.map((value) => {
-      return {value, label: labels[value]};
-    }));
-  }
-
   renderGeneral(): JSX.Element {
     const { clusters } = this.props;
     const { newInstance, errors } = this.state;
@@ -254,7 +243,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       return {
         title: dimension.title,
         description: dimension.expression.toString(),
-        icon: require(`../../../icons/dim-${dimension.kind}`)
+        icon: require(`../../../icons/dim-${dimension.kind}.svg`)
       };
     });
 

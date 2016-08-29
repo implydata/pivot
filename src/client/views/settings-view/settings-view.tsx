@@ -163,7 +163,6 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
   }
 
   addClusterAndDataCubes(newCluster: Cluster, newDataCubes: DataCube[]) {
-    console.log('before:', this.state.settings, newCluster);
     var settings = ImmutableUtils.addInArray(this.state.settings, 'clusters', newCluster);
     var message = 'Cluster created';
     if (newDataCubes && newDataCubes.length) {
