@@ -18,9 +18,7 @@ require('./cluster-edit.css');
 
 import * as React from 'react';
 import * as Q from 'q';
-import { AttributeInfo, Attributes } from 'plywood';
 
-import { Ajax } from '../../../utils/ajax/ajax';
 import { Fn, pluralIfNeeded, makeTitle } from '../../../../common/utils/general/general';
 import { classNames } from '../../../utils/dom/dom';
 import { NUM_REGEX } from '../../../../common/utils/string/string';
@@ -41,8 +39,7 @@ import { CLUSTER as LABELS } from '../../../../common/models/labels';
 export interface ClusterEditProps extends React.Props<any> {
   cluster?: Cluster;
   sources?: string[];
-  onSave: (newCluster: Cluster) => Q.Promise<void>;
-  onAddDataCubes?: (dataCubes: DataCube[]) => Q.Promise<void>;
+  onSave: (newCluster: Cluster, newDataCubes: DataCube[]) => Q.Promise<void>;
   isNewCluster?: boolean;
   onCancel?: () => void;
   getSuggestedCubes?: () => DataCube[];
@@ -91,33 +88,11 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
   }
 
   save() {
-    if (this.props.onSave) this.props.onSave(this.state.newInstance);
+    if (this.props.onSave) this.props.onSave(this.state.newInstance, null);
   }
 
   saveAndAddCubes(dataCubes: DataCube[]) {
-    if (this.props.onSave) {
-      this.props.onSave(this.state.newInstance)
-      .then(() => {
-        Q.all(dataCubes.map(this.fetchSuggestions)).then((attributes: Attributes[]) => {
-          let newDataCubes = dataCubes.map((dc, i) => dc.fillAllFromAttributes(attributes[i]));
-          this.props.onAddDataCubes(newDataCubes);
-        });
-      });
-    }
-  }
-
-  fetchSuggestions(dataCube: DataCube): Q.Promise<Attributes> {
-    return Ajax.query({
-      method: "POST",
-      url: 'settings/attributes',
-      data: {
-        clusterName: dataCube.clusterName,
-        source: dataCube.source
-      }
-    }).then(
-        (resp) => AttributeInfo.fromJSs(resp.attributes)
-      );
-    ;
+    if (this.props.onSave) this.props.onSave(this.state.newInstance, dataCubes);
   }
 
   goBack() {

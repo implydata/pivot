@@ -215,19 +215,6 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
     ).then(this.backToClustersView.bind(this));
   }
 
-  addDataCubes(dataCubes: DataCube[]) {
-    if (!dataCubes || !dataCubes.length) {
-      return;
-    }
-
-    this.onSave(
-      this.state.settings.appendDataCubes(dataCubes),
-      'Data cubes created'
-    )
-      .then(this.backToClustersView.bind(this))
-    ;
-  }
-
   // !-- Cluster creation flow
 
   // -- DataCubes creation flow
@@ -240,7 +227,7 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
   addDataCube(newDataCube: DataCube) {
     this.onSave(
       ImmutableUtils.addInArray(this.state.settings, 'dataCubes', newDataCube),
-      'Cube created'
+      'Data cube created'
     ).then(this.backToDataCubesView.bind(this));
   }
 
@@ -330,7 +317,6 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
                     cluster={tempCluster}
                     sources={tempClusterSources}
                     onSave={this.addClusterAndDataCubes.bind(this)}
-                    onAddDataCubes={this.addDataCubes.bind(this)}
                     onCancel={this.backToClustersView.bind(this)}
                   />
                 : <ClusterSeedModal
