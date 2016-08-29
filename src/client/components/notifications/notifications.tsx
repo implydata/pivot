@@ -49,7 +49,7 @@ export interface Choice {
 
 export interface Question {
   title: string;
-  message: (string | string[]);
+  message: (string | string[] | JSX.Element);
   choices: Choice[];
   onClose?: () => void;
 }
@@ -235,16 +235,22 @@ export class Questions extends React.Component<React.Props<any>, QuestionsState>
 
     if (!question) return null;
 
+    var message: JSX.Element | JSX.Element[];
+
+    if (Array.isArray(question.message)) {
+      message = question.message.map((line, i) => <p key={i}>{line}</p>);
+    } else if (React.isValidElement(question.message)) {
+      message = question.message as JSX.Element;
+    } else {
+      message = <p>{question.message}</p>;
+    }
+
     return <Modal
       className="remove-modal"
       title={question.title}
       onClose={question.onClose}
     >
-      {Array.isArray(question.message)
-        ? question.message.map((line, i) => <p key={i}>{line}</p>)
-        : <p>{question.message}</p>
-      }
-
+      {message}
       <div className="button-bar">
         {question.choices.map(({label, callback, type, className}, i) => {
           return <Button key={i} className={className} title={label} type={type} onClick={callback}/>;

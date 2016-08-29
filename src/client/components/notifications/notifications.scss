@@ -18,3 +18,22 @@
 
 .notifications {
 }
+
+.remove-modal {
+  .message {
+    p {
+      margin-bottom: 4px;
+    }
+
+    .dependency-list {
+      background-color: $background-medium;
+      padding: 15px 10px;
+
+      p {
+        margin-bottom: 4px;
+      }
+    }
+  }
+
+
+}

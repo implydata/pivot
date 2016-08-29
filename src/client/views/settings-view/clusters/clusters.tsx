@@ -65,32 +65,32 @@ export class Clusters extends React.Component<ClustersProps, ClustersState> {
   }
 
   removeCluster(cluster: Cluster) {
+    var settings: AppSettings = this.state.newSettings;
+
+    const dependantDataCubes = settings.dataCubes.filter(d => d.clusterName === cluster.name);
+
     const remove = () => {
-      var settings: AppSettings = this.state.newSettings;
-      var index = settings.clusters.indexOf(cluster);
-
-      if (index < 0) return;
-
-      var newClusters = settings.clusters;
-      newClusters.splice(index, 1);
-
-      this.props.onSave(settings.changeClusters(newClusters), 'Cluster removed');
+      dependantDataCubes.forEach(cube => settings = settings.deleteDataCube(cube));
+      this.props.onSave(
+        settings.deleteCluster(cluster),
+        dependantDataCubes.length > 0 ? 'Cubes and cluster removed' : 'Cluster removed'
+      );
       Notifier.removeQuestion();
     };
 
-    const cancel = () => {
-      Notifier.removeQuestion();
-    };
 
     Notifier.ask({
-      title: 'Remove this cluster',
-      message: [
-        `Are you sure you would like to delete the cluster "${cluster.title}"?`,
-        'This action is not reversible.'
-      ],
+      title: `Remove the cluster "${cluster.title}"?`,
+      message: <div className="message">
+        <p>This cluster has {dependantDataCubes.length} data cubes relying on it.</p>
+        <p>Removing it will remove those cubes as well.</p>
+        <div className="dependency-list">
+          {dependantDataCubes.map(d => <p key={d.name}>{d.title}</p>)}
+        </div>
+      </div>,
       choices: [
         {label: 'Remove', callback: remove, type: 'warn'},
-        {label: 'Cancel', callback: cancel, type: 'secondary'}
+        {label: 'Cancel', callback: Notifier.removeQuestion, type: 'secondary'}
       ],
       onClose: Notifier.removeQuestion
     });

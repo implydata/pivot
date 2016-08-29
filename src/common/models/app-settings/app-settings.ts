@@ -236,6 +236,21 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
     return new AppSettings(value);
   }
 
+  public deleteCluster(cluster: Cluster): AppSettings {
+    var value = this.valueOf();
+    var index = value.clusters.indexOf(cluster);
+
+    if (index === -1) {
+      throw new Error(`Unknown cluster : ${cluster.toString()}`);
+    }
+
+    var newClusters = value.clusters.concat();
+    newClusters.splice(index, 1);
+
+    value.clusters = newClusters;
+    return new AppSettings(value);
+  }
+
   public addCollectionAt(collection: Collection, index: number): AppSettings {
     var value = this.valueOf();
 
