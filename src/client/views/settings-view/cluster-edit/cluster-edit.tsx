@@ -17,6 +17,10 @@
 require('./cluster-edit.css');
 
 import * as React from 'react';
+import * as Q from 'q';
+import { AttributeInfo, Attributes } from 'plywood';
+
+import { Ajax } from '../../../utils/ajax/ajax';
 import { List } from 'immutable';
 import { Fn, pluralIfNeeded, makeTitle } from '../../../../common/utils/general/general';
 import { classNames } from '../../../utils/dom/dom';
@@ -38,7 +42,8 @@ import { CLUSTER as LABELS } from '../../../../common/models/labels';
 export interface ClusterEditProps extends React.Props<any> {
   cluster?: Cluster;
   sources?: string[];
-  onSave: (newCluster: Cluster, dataCubes: DataCube[]) => void;
+  onSave: (newCluster: Cluster) => Q.Promise<void>;
+  onAddDataCubes?: (dataCubes: DataCube[]) => Q.Promise<void>;
   isNewCluster?: boolean;
   onCancel?: () => void;
   getSuggestedCubes?: () => DataCube[];
@@ -87,11 +92,33 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
   }
 
   save() {
-    if (this.props.onSave) this.props.onSave(this.state.newInstance, null);
+    if (this.props.onSave) this.props.onSave(this.state.newInstance);
   }
 
   saveAndAddCubes(dataCubes: DataCube[]) {
-    if (this.props.onSave) this.props.onSave(this.state.newInstance, dataCubes);
+    if (this.props.onSave) {
+      this.props.onSave(this.state.newInstance)
+      .then(() => {
+        Q.all(dataCubes.map(this.fetchSuggestions)).then((attributes: Attributes[]) => {
+          let newDataCubes = dataCubes.map((dc, i) => dc.fillAllFromAttributes(attributes[i]));
+          this.props.onAddDataCubes(newDataCubes);
+        });
+      });
+    }
+  }
+
+  fetchSuggestions(dataCube: DataCube): Q.Promise<Attributes> {
+    return Ajax.query({
+      method: "POST",
+      url: 'settings/attributes',
+      data: {
+        clusterName: dataCube.clusterName,
+        source: dataCube.source
+      }
+    }).then(
+        (resp) => AttributeInfo.fromJSs(resp.attributes)
+      );
+    ;
   }
 
   goBack() {

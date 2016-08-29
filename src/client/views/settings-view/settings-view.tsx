@@ -162,15 +162,11 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
     });
   }
 
-  addClusterAndDataCubes(newCluster: Cluster, newDataCubes: DataCube[]) {
+  addCluster(newCluster: Cluster): Q.Promise<any> {
     var settings = ImmutableUtils.addInArray(this.state.settings, 'clusters', newCluster);
     var message = 'Cluster created';
-    if (newDataCubes && newDataCubes.length) {
-      settings = settings.appendDataCubes(newDataCubes);
-      message = 'Cluster and data cubes created';
-    }
 
-    this.onSave(settings, message).then(this.backToClustersView.bind(this));
+    return this.onSave(settings, message).then(this.backToClustersView.bind(this));
   }
 
   backToClustersView() {
@@ -191,6 +187,20 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
       ImmutableUtils.addInArray(settings, 'clusters', newCluster, index)
     ).then(this.backToClustersView.bind(this));
   }
+
+  addDataCubes(dataCubes: DataCube[]) {
+    if (!dataCubes || !dataCubes.length) {
+      return;
+    }
+
+    this.onSave(
+      this.state.settings.appendDataCubes(dataCubes),
+      'Data cubes created'
+    )
+      .then(this.backToClustersView.bind(this))
+    ;
+  }
+
   // !-- Cluster creation flow
 
   // -- DataCubes creation flow
@@ -206,6 +216,7 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
       'Cube created'
     ).then(this.backToDataCubesView.bind(this));
   }
+
 
   backToDataCubesView() {
     window.location.hash = `#settings/${PATHS.dataCubes}`;
@@ -291,7 +302,8 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
                     isNewCluster={true}
                     cluster={tempCluster}
                     sources={tempClusterSources}
-                    onSave={this.addClusterAndDataCubes.bind(this)}
+                    onSave={this.addCluster.bind(this)}
+                    onAddDataCubes={this.addDataCubes.bind(this)}
                     onCancel={this.backToClustersView.bind(this)}
                   />
                 : <ClusterSeedModal
