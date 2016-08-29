@@ -236,18 +236,24 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
     return new AppSettings(value);
   }
 
-  public deleteCluster(cluster: Cluster): AppSettings {
-    var value = this.valueOf();
-    var index = value.clusters.indexOf(cluster);
+  public deleteCluster(clusterName: string): AppSettings {
+    if (clusterName === 'native') new Error(`Can not delete 'native' cluster`);
 
-    if (index === -1) {
-      throw new Error(`Unknown cluster : ${cluster.toString()}`);
+    var affectedDataCubes = this.getDataCubesForCluster(clusterName);
+
+    var value = this.valueOf();
+    value.clusters = value.clusters.filter(cluster => cluster.name !== clusterName);
+
+    if (affectedDataCubes.length) {
+      value.dataCubes = value.dataCubes.filter(dataCube => dataCube.clusterName !== clusterName);
+      value.collections = value.collections.map(collection => {
+        for (var affectedDataCube of affectedDataCubes) {
+          collection = collection.deleteTilesContainingCube(affectedDataCube.name)
+        }
+        return collection;
+      });
     }
 
-    var newClusters = value.clusters.concat();
-    newClusters.splice(index, 1);
-
-    value.clusters = newClusters;
     return new AppSettings(value);
   }
 

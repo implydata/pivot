@@ -15,9 +15,8 @@
  */
 
 import { Class, Instance, isInstanceOf, immutableArraysEqual } from 'immutable-class';
-import { findByName } from 'plywood';
+import { findByName, findIndexByName } from 'plywood';
 
-import { Manifest } from '../manifest/manifest';
 import { CollectionTile, CollectionTileJS, CollectionTileContext } from '../index';
 
 export interface CollectionValue {
@@ -124,15 +123,12 @@ export class Collection implements Instance<CollectionValue, CollectionJS> {
     return !this.findByName(name);
   }
 
-  public deleteTile(item: CollectionTile): Collection {
-    var index = this.tiles.indexOf(item);
+  public deleteTile(tileName: string): Collection {
+    return this.changeTiles(this.tiles.filter(tile => tile.name !== tileName));
+  }
 
-    if (index === -1) return this;
-
-    var newTiles = this.tiles.concat();
-    newTiles.splice(index, 1);
-
-    return this.change('tiles', newTiles);
+  public deleteTilesContainingCube(dataCubeName: string): Collection {
+    return this.changeTiles(this.tiles.filter(tile => tile.dataCube.name !== dataCubeName));
   }
 
   public change(propertyName: string, newValue: any): Collection {
@@ -147,14 +143,7 @@ export class Collection implements Instance<CollectionValue, CollectionJS> {
   }
 
   public updateTile(tile: CollectionTile): Collection {
-    var index = -1;
-
-    this.tiles.forEach(({name}, i) => {
-      if (name === tile.name) {
-        index = i;
-        return;
-      }
-    });
+    var index = findIndexByName(this.tiles, tile.name);
 
     if (index === -1) {
       throw new Error(`Can't add unknown tile : ${tile.toString()}`);
@@ -165,6 +154,10 @@ export class Collection implements Instance<CollectionValue, CollectionJS> {
     newTiles[index] = tile;
 
     return this.change('tiles', newTiles);
+  }
+
+  public getTiles(): CollectionTile[] {
+    return this.tiles || [];
   }
 
   public changeTiles(tiles: CollectionTile[]): Collection {

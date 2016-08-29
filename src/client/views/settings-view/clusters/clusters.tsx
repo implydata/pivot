@@ -65,14 +65,12 @@ export class Clusters extends React.Component<ClustersProps, ClustersState> {
   }
 
   removeCluster(cluster: Cluster) {
-    var settings: AppSettings = this.state.newSettings;
-
-    const dependantDataCubes = settings.dataCubes.filter(d => d.clusterName === cluster.name);
+    const settings: AppSettings = this.state.newSettings;
+    const dependantDataCubes = settings.getDataCubesForCluster(cluster.name);
 
     const remove = () => {
-      dependantDataCubes.forEach(cube => settings = settings.deleteDataCube(cube));
       this.props.onSave(
-        settings.deleteCluster(cluster),
+        settings.deleteCluster(cluster.name),
         dependantDataCubes.length > 0 ? 'Cubes and cluster removed' : 'Cluster removed'
       );
       Notifier.removeQuestion();
@@ -131,7 +129,7 @@ export class Clusters extends React.Component<ClustersProps, ClustersState> {
           rows={newSettings.clusters}
           actions={actions}
           onRowClick={this.editCluster.bind(this)}
-        ></SimpleTable>
+        />
       </div>
     </div>;
   }
