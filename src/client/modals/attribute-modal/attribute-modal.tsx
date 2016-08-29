@@ -34,6 +34,7 @@ export interface AttributeModalProps extends React.Props<any> {
   attributeInfo: AttributeInfo;
   onSave?: (attribute: AttributeInfo) => void;
   onClose?: () => void;
+  onRemove?: () => void;
   mode?: 'create' | 'edit';
 }
 
@@ -95,7 +96,7 @@ export class AttributeModal extends React.Component<AttributeModalProps, Attribu
   }
 
   render() {
-    const { attributeInfo, onClose, mode } = this.props;
+    const { attributeInfo, onClose, mode, onRemove } = this.props;
     const { newInstance, canSave, errors } = this.state;
     const saveButtonDisabled = !canSave || attributeInfo.equals(newInstance);
     if (!newInstance) return null;
@@ -142,9 +143,17 @@ export class AttributeModal extends React.Component<AttributeModalProps, Attribu
           />
         </div>
       </form>
-      <div className="button-bar">
-        <Button type="primary" title={okText} onClick={this.save.bind(this)} disabled={saveButtonDisabled} />
-        <Button className="cancel" title={STRINGS.cancel} type="secondary" onClick={onClose}/>
+      <div className="grid-row button-bar">
+        <div className="grid-col-50">
+          <Button type="primary" title={okText} onClick={this.save.bind(this)} disabled={saveButtonDisabled} />
+          <Button className="cancel" title={STRINGS.cancel} type="secondary" onClick={onClose}/>
+        </div>
+        <div className="grid-col-50 right">
+          { onRemove
+            ? <Button className="warn" title={STRINGS.removeAttribute} type="warn" onClick={onRemove}/>
+            : null
+          }
+        </div>
       </div>
     </Modal>;
   }

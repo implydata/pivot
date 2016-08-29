@@ -93,7 +93,7 @@
   .button-bar {
     margin-top: 10px;
 
-    button {
+    button:not(:last-child) {
       margin-right: 8px;
     }
   }

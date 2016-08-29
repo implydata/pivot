@@ -143,10 +143,16 @@ export class DataTable extends React.Component<DataTableProps, DataTableState> {
       onClose();
     };
 
+    const onRemove = () => {
+      onChange(dataCube.removeAttribute(editedAttribute));
+      onClose();
+    };
+
     return <AttributeModal
       attributeInfo={editedAttribute}
       onClose={onClose}
       onSave={onSave}
+      onRemove={onRemove}
     />;
   }
 

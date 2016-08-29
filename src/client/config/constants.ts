@@ -125,6 +125,7 @@ export const STRINGS = {
   quicklyAddSomeUsing: 'Quickly add some using',
   rawData: 'Raw Data',
   regex: 'Regex',
+  removeAttribute: 'Remove attribute',
   relative: 'Relative',
   save: 'Save',
   segment: 'segment',

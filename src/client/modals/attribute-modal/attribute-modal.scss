@@ -18,6 +18,8 @@
 $checkbox-width: 20px;
 
 .attribute-modal {
+  @import '../../utils/styles/grid';
+
   form {
     @extend %form;
     width: 100%;
