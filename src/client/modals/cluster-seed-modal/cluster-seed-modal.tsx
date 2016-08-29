@@ -19,6 +19,7 @@ require('./cluster-seed-modal.css');
 import * as React from 'react';
 import { SupportedType, Cluster } from "../../../common/models/cluster/cluster";
 
+import { classNames } from '../../utils/dom/dom';
 import { FormLabel, Button, Modal, ImmutableInput, ImmutableDropdown } from '../../components/index';
 import { STRINGS } from "../../config/constants";
 import { Ajax } from '../../utils/ajax/ajax';
@@ -49,6 +50,7 @@ export class ClusterSeedModal extends React.Component<ClusterSeedModalProps, Imm
     if (!clusters) return;
 
     this.setState({
+      canSave: false,
       newInstance: new Cluster({
         name: generateUniqueName('cl', name => indexByAttribute(clusters, 'name', name) === -1),
         title: 'Some Cluster',
@@ -85,7 +87,9 @@ export class ClusterSeedModal extends React.Component<ClusterSeedModalProps, Imm
 
   render(): JSX.Element {
     const { onCancel } = this.props;
-    const { newInstance, errors } = this.state;
+    const { newInstance, errors, canSave } = this.state;
+
+    console.log(canSave);
 
     if (!newInstance) return null;
     let clusterType = newInstance.type;
@@ -124,7 +128,12 @@ export class ClusterSeedModal extends React.Component<ClusterSeedModalProps, Imm
         {extraSQLFields}
       </form>
       <div className="button-bar">
-        <Button type="primary" title={`${STRINGS.next}: ${STRINGS.configureCluster}`} onClick={this.onNext.bind(this)}/>
+        <Button
+          className={classNames("save", {disabled: !canSave})}
+          type="primary"
+          title={`${STRINGS.next}: ${STRINGS.configureCluster}`}
+          onClick={this.onNext.bind(this)}
+        />
         <Button className="cancel" title="Cancel" type="secondary" onClick={onCancel}/>
       </div>
 

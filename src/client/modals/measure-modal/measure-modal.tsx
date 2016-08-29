@@ -17,7 +17,7 @@
 require('./measure-modal.css');
 
 import * as React from 'react';
-import { classNames, enterKey } from '../../utils/dom/dom';
+import { classNames } from '../../utils/dom/dom';
 import { List } from 'immutable';
 
 import { SvgIcon, FormLabel, Button, ImmutableInput, Modal, ImmutableDropdown } from '../../components/index';
