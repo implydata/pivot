@@ -64,7 +64,8 @@ export interface SettingsViewState {
 const PATHS = {
   general: 'general',
   clusters: 'clusters',
-  dataCubes: 'data-cubes'
+  dataCubes: 'data-cubes',
+  newDataCube: 'new-data-cube'
 };
 
 const VIEWS = [
@@ -252,13 +253,25 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
   // !-- DataCubes creation flow
 
 
+  shouldHaveLeftButtons(): boolean {
+    const { breadCrumbs } = this.state;
+
+    if (!breadCrumbs) return true;
+
+    if (breadCrumbs.length === 1) return true;
+
+    if (breadCrumbs[0] === PATHS.dataCubes && breadCrumbs[1] !== PATHS.newDataCube) return false;
+
+    return true;
+  }
+
   render() {
     const { user, onNavClick, customization } = this.props;
     const { settings, breadCrumbs, tempCluster, tempClusterSources, tempDataCube } = this.state;
 
     if (!settings) return null;
 
-    const hasLeftButtons = breadCrumbs && (breadCrumbs.length === 1 || breadCrumbs.indexOf(PATHS.dataCubes) === -1);
+    const hasLeftButtons = this.shouldHaveLeftButtons();
 
     const inflateCluster = (key: string, value: string): {key: string, value: any} => {
       if (key !== 'clusterId') return {key, value};
@@ -335,7 +348,7 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
           <Route fragment={PATHS.dataCubes}>
             <DataCubes settings={settings} onSave={this.onSave.bind(this)}/>
 
-            <Route fragment="new-data-cube">
+            <Route fragment={PATHS.newDataCube}>
               { tempDataCube ? null : <DataCubes settings={settings} onSave={this.onSave.bind(this)}/> }
 
               { tempDataCube

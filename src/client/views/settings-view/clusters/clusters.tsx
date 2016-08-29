@@ -78,16 +78,23 @@ export class Clusters extends React.Component<ClustersProps, ClustersState> {
       Notifier.removeQuestion();
     };
 
+    var message: string | JSX.Element;
 
-    Notifier.ask({
-      title: `Remove the cluster "${cluster.title}"?`,
-      message: <div className="message">
+    if (dependantDataCubes.length > 0) {
+      message = <div className="message">
         <p>This cluster has {dependantDataCubes.length} data cubes relying on it.</p>
         <p>Removing it will remove those cubes as well.</p>
         <div className="dependency-list">
           {dependantDataCubes.map(d => <p key={d.name}>{d.title}</p>)}
         </div>
-      </div>,
+      </div>;
+    } else {
+      message = 'This cannot be undone';
+    }
+
+    Notifier.ask({
+      title: `Remove the cluster "${cluster.title}"?`,
+      message,
       choices: [
         {label: 'Remove', callback: remove, type: 'warn'},
         {label: 'Cancel', callback: Notifier.removeQuestion, type: 'secondary'}

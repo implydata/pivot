@@ -152,8 +152,8 @@ export class DataTable extends React.Component<DataTableProps, DataTableState> {
     };
 
     const onRemove = () => {
-      onChange(dataCube.removeAttribute(editedAttribute));
       onClose();
+      this.askToRemoveAttribute(editedAttribute);
     };
 
     return <AttributeModal
@@ -162,6 +162,53 @@ export class DataTable extends React.Component<DataTableProps, DataTableState> {
       onSave={onSave}
       onRemove={onRemove}
     />;
+  }
+
+  askToRemoveAttribute(attribute: AttributeInfo) {
+    var { dataCube, onChange } = this.props;
+
+    const dependantDimensions = dataCube.dimensions.filter(d => {
+      // TODO: insert here something that links a dimension and an attribute
+      return (d.expression as any).name === attribute.name;
+    });
+
+    const dependantMeasures = dataCube.measures.filter(m => {
+      // TODO: insert here something that links a measure and an attribute
+      return false;
+    });
+
+    const remove = () => {
+      dependantDimensions.forEach(d => dataCube = dataCube.removeDimension(d));
+      dependantMeasures.forEach(m => dataCube = dataCube.removeMeasure(m));
+
+      onChange(dataCube.removeAttribute(attribute));
+      Notifier.removeQuestion();
+    };
+
+    var message: string | JSX.Element;
+
+    if (dependantDimensions.size > 0 || dependantMeasures.size > 0) {
+      message = <div className="message">
+        <p>This attribute has {dependantDimensions.size} dimensions and {dependantMeasures.size} measures relying on it.</p>
+        <p>Removing it will remove them as well.</p>
+        <div className="dependency-list">
+          {dependantDimensions.map(d => <p key={d.name}>{d.title}</p>)}
+          {dependantMeasures.map(m => <p key={m.name}>{m.title}</p>)}
+        </div>
+      </div>;
+    } else {
+      message = 'This cannot be undone';
+    }
+
+    Notifier.ask({
+      title: `Remove the attribute "${attribute.name}"?`,
+      message,
+      choices: [
+        {label: 'Remove', callback: remove, type: 'warn'},
+        {label: 'Cancel', callback: Notifier.removeQuestion, type: 'secondary'}
+      ],
+      onClose: Notifier.removeQuestion
+    });
   }
 
   getColumns(): SimpleTableColumn[] {

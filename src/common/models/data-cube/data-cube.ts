@@ -798,6 +798,32 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
     return new DataCube(value);
   }
 
+  public removeDimension(dimension: Dimension): DataCube {
+    var index = this.dimensions.indexOf(dimension);
+
+    if (index === -1) {
+      throw new Error(`Unknown dimension : ${dimension.toString()}`);
+    }
+
+    var newDimensions = this.dimensions.toArray().concat();
+    newDimensions.splice(index, 1);
+
+    return this.changeDimensions(List(newDimensions));
+  }
+
+  public removeMeasure(measure: Measure): DataCube {
+    var index = this.measures.indexOf(measure);
+
+    if (index === -1) {
+      throw new Error(`Unknown measure : ${measure.toString()}`);
+    }
+
+    var newMeasures = this.measures.toArray().concat();
+    newMeasures.splice(index, 1);
+
+    return this.changeMeasures(List(newMeasures));
+  }
+
   public filterDimensions(dimensionsToFilter: Dimension[]): Dimension[] {
     return dimensionsToFilter.filter(dimension => {
       if (this.getDimension(dimension.name)) return false;
