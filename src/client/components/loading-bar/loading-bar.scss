@@ -16,13 +16,36 @@
 
 @import '../../imports';
 
-.cluster-seed-modal {
-  form {
-    @extend %form;
-    width: 100%;
+.loading-bar {
+  width: 100%;
+  height: 30px;
+
+  // Inner text styling
+  > * {
+    padding-top: 9px;
+    text-align: center;
+    color: $brand;
   }
 
-  .loading-bar {
-    margin-top: 10px;
+  .undetermined {
+    $color-0: hsla(202, 83%, 95%, 1.00);
+    $color-1: hsla(201, 83%, 91%, 1.00);
+
+    width: 100%;
+    height: 100%;
+
+    background-image: repeating-linear-gradient(-45deg, $color-0, $color-0 7px, $color-1 7px, $color-1 10px);
+    animation: progress 1s linear infinite;
+    background-size: 150% 100%;
+
+    @keyframes progress {
+      0% {
+        background-position: 0 0;
+      }
+
+      100% {
+        background-position: -70px 0;
+      }
+    }
   }
 }

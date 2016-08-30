@@ -33,6 +33,7 @@ export interface ImmutableFormState<T> {
 export class ImmutableFormDelegate<T> {
 
   private form: React.Component<any, ImmutableFormState<T>>;
+  private callbacks: { [key: string]: (() => void)[]; };
 
   constructor(form: React.Component<any, ImmutableFormState<T>>) {
     this.form = form;
@@ -44,6 +45,15 @@ export class ImmutableFormDelegate<T> {
 
     this.onChange = this.onChange.bind(this);
     this.updateErrors = this.updateErrors.bind(this);
+
+    this.callbacks = {};
+  }
+
+  on(path: string, callback: () => void) {
+    var listeners = this.callbacks[path] || [];
+    listeners.push(callback);
+
+    this.callbacks[path] = listeners;
   }
 
   private setState(state: ImmutableFormState<T>, callback?: () => void) {
@@ -69,12 +79,20 @@ export class ImmutableFormDelegate<T> {
         errors,
         newInstance: newItem,
         canSave
-      });
+      }, this.callListeners.bind(this, path));
     } else {
       this.setState({
         errors,
         canSave: false
-      });
+      }, this.callListeners.bind(this, path));
     }
+  }
+
+  callListeners(path: string) {
+    const listeners = this.callbacks[path];
+
+    if (!listeners || !listeners.length) return;
+
+    listeners.forEach(l => l());
   }
 }

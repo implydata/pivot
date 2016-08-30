@@ -19,6 +19,10 @@
 .modal {
   @include pin-full;
 
+  &.deaf {
+    pointer-events: none;
+  }
+
   .backdrop {
     @include pin-full;
     background: $black;

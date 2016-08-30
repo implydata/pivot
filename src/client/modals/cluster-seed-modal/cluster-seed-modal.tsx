@@ -20,7 +20,7 @@ import * as React from 'react';
 import { SupportedType, Cluster } from "../../../common/models/cluster/cluster";
 
 import { classNames } from '../../utils/dom/dom';
-import { FormLabel, Button, Modal, ImmutableInput, ImmutableDropdown } from '../../components/index';
+import { FormLabel, Button, Modal, ImmutableInput, ImmutableDropdown, LoadingBar } from '../../components/index';
 import { STRINGS } from "../../config/constants";
 import { Ajax } from '../../utils/ajax/ajax';
 import { Notifier } from '../../components/notifications/notifications';
@@ -36,12 +36,22 @@ export interface ClusterSeedModalProps extends React.Props<any> {
   clusters: Cluster[];
 }
 
-export class ClusterSeedModal extends React.Component<ClusterSeedModalProps, ImmutableFormState<Cluster>> {
+export interface ClusterSeedModalState extends ImmutableFormState<Cluster> {
+  loading?: boolean;
+}
+
+export class ClusterSeedModal extends React.Component<ClusterSeedModalProps, ClusterSeedModalState> {
   private delegate: ImmutableFormDelegate<Cluster>;
 
   constructor() {
     super();
     this.delegate = new ImmutableFormDelegate<Cluster>(this);
+    this.delegate.on('type', this.makeSureHostIsValid.bind(this));
+  }
+
+  makeSureHostIsValid() {
+    const { newInstance } = this.state;
+    if (!newInstance.host) this.setState({canSave: false});
   }
 
   initFromProps(props: ClusterSeedModalProps) {
@@ -67,7 +77,7 @@ export class ClusterSeedModal extends React.Component<ClusterSeedModalProps, Imm
     this.initFromProps(this.props);
   }
 
-  onNext() {
+  connect() {
     Ajax.query({
       method: "POST",
       url: 'settings/cluster-connection',
@@ -77,20 +87,27 @@ export class ClusterSeedModal extends React.Component<ClusterSeedModalProps, Imm
     })
       .then(
         (resp) => {
+          this.setState({loading: false});
           var cluster = Cluster.fromJS(resp.cluster);
           cluster = cluster.changeTitle(`My ${cluster.type} cluster`);
           this.props.onNext(cluster, resp.sources);
         },
-        (xhr: XMLHttpRequest) => Notifier.failure('Woops', 'Something bad happened')
+        (xhr: XMLHttpRequest) => {
+          this.setState({loading: false});
+          Notifier.failure('Woops', 'Something bad happened');
+        }
       )
       .done();
   }
 
+  onNext() {
+    this.connect();
+    this.setState({loading: true});
+  }
+
   render(): JSX.Element {
     const { onCancel } = this.props;
-    const { newInstance, errors, canSave } = this.state;
-
-    console.log(canSave);
+    const { newInstance, errors, canSave, loading } = this.state;
 
     if (!newInstance) return null;
     let clusterType = newInstance.type;
@@ -118,6 +135,7 @@ export class ClusterSeedModal extends React.Component<ClusterSeedModalProps, Imm
       className="cluster-seed-modal"
       title={STRINGS.connectNewCluster}
       onClose={this.props.onCancel}
+      deaf={loading}
     >
       <form>
         {makeLabel('type')}
@@ -128,15 +146,20 @@ export class ClusterSeedModal extends React.Component<ClusterSeedModalProps, Imm
 
         {extraSQLFields}
       </form>
-      <div className="button-bar">
-        <Button
-          className={classNames("save", {disabled: !canSave})}
-          type="primary"
-          title={`${STRINGS.next}: ${STRINGS.configureCluster}`}
-          onClick={this.onNext.bind(this)}
-        />
-        <Button className="cancel" title="Cancel" type="secondary" onClick={onCancel}/>
-      </div>
+
+      {loading
+        ? <LoadingBar label="Creating cluster…"/>
+
+        : <div className="button-bar">
+          <Button
+            className={classNames("save", {disabled: !canSave})}
+            type="primary"
+            title={`${STRINGS.next}: ${STRINGS.configureCluster}`}
+            onClick={this.onNext.bind(this)}
+          />
+          <Button className="cancel" title="Cancel" type="secondary" onClick={onCancel}/>
+        </div>
+      }
 
     </Modal>;
   }
