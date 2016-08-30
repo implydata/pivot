@@ -134,8 +134,8 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
       onClose={this.closeCreateCubesModal.bind(this)}
       getLabel={(m) => `${m.title}`}
       options={sugestedDataCubes}
-      title={STRINGS.createCubesFromCluster}
-      okLabel={(n: number) => `${STRINGS.create} ${pluralIfNeeded(n, 'cube')}`}
+      title={STRINGS.createDataCubesFromCluster}
+      okLabel={(n: number) => `${STRINGS.create} ${pluralIfNeeded(n, 'data cube')}`}
     />;
   }
 
@@ -213,7 +213,7 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
 
     const lastBit = newInstance.title ? `: ${newInstance.title}` : '';
 
-    return (isNewCluster ? STRINGS.createCluster : STRINGS.editCluster) + lastBit;
+    return (isNewCluster ? STRINGS.connectCluster : STRINGS.editCluster) + lastBit;
   }
 
   render() {

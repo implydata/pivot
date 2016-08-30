@@ -188,7 +188,7 @@ export class DataTable extends React.Component<DataTableProps, DataTableState> {
         </div>
       </div>;
     } else {
-      message = 'This cannot be undone';
+      message = 'This cannot be undone.';
     }
 
     Notifier.ask({

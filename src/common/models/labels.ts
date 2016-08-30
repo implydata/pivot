@@ -164,8 +164,8 @@ export const CLUSTER = {
     'as the version will naturally be determined through introspection.'
   },
   timeout: {
-    label: 'Timeout',
-    description: `The timeout to set on the queries in ms. Default is <code>${Cluster.DEFAULT_TIMEOUT}</code>`
+    label: 'Timeout (ms)',
+    description: `The timeout to set on the queries. Default is <code>${Cluster.DEFAULT_TIMEOUT}</code>`
   },
   sourceListScan: {
     label: 'Source List Scan',

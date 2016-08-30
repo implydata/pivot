@@ -103,7 +103,7 @@ export class DataCubes extends React.Component<DataCubesProps, DataCubesState> {
     if (!newSettings.dataCubes.length) return this.renderEmpty();
 
     const columns: SimpleTableColumn[] = [
-      {label: 'Name', field: 'title', width: 170, cellIcon: require(`../../../icons/full-cube.svg`) },
+      {label: 'Title', field: 'title', width: 170, cellIcon: require(`../../../icons/full-cube.svg`) },
       {label: 'Source', field: 'source', width: 400},
       {label: 'Dimensions', field: (cube: DataCube) => cube.dimensions.size, width: 120},
       {label: 'Measures', field: (cube: DataCube) => cube.measures.size, width: 80}
@@ -117,7 +117,7 @@ export class DataCubes extends React.Component<DataCubesProps, DataCubesState> {
     return <div className="data-cubes">
       <div className="title-bar">
         <div className="title">Data Cubes</div>
-        <Button className="save" title="Add a cube" type="primary" onClick={this.startSeed.bind(this)}/>
+        <Button className="save" title="Create new data cube" type="primary" onClick={this.startSeed.bind(this)}/>
       </div>
       <div className="content">
         <SimpleTable

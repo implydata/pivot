@@ -62,7 +62,7 @@ export class Clusters extends React.Component<ClustersProps, ClustersState> {
   renderEmpty(): JSX.Element {
     return <div className="clusters empty">
       <div className="title">{STRINGS.noClusters}</div>
-      <div className="subtitle">Start by <a onClick={this.startSeed.bind(this)}>adding a new cluster</a></div>
+      <div className="subtitle">Start by <a onClick={this.startSeed.bind(this)}>connecting a cluster</a></div>
     </div>;
   }
 
@@ -93,7 +93,7 @@ export class Clusters extends React.Component<ClustersProps, ClustersState> {
         </div>
       </div>;
     } else {
-      message = 'This cannot be undone';
+      message = 'This cannot be undone.';
     }
 
     Notifier.ask({

@@ -25,6 +25,7 @@ import { FileManager } from '../file-manager/file-manager';
 import { ClusterManager } from '../cluster-manager/cluster-manager';
 import { updater } from '../updater/updater';
 
+const PREVIEW_LIMIT = 20;
 const LOTS_OF_TIME = TimeRange.fromJS({
   start: new Date('1000-01-01Z'),
   end: new Date('4000-01-01Z')
@@ -411,10 +412,10 @@ export class SettingsManager {
                 start: day.move(maxTime, Timezone.UTC, -14),
                 end: maxTime
               });
-              return $('temp').filter(primaryTimeExpression.in(lastTwoWeeks)).limit(500).compute(context) as any;
+              return $('temp').filter(primaryTimeExpression.in(lastTwoWeeks)).limit(PREVIEW_LIMIT).compute(context) as any;
             });
         } else {
-          return $('temp').limit(20).compute(context) as any;
+          return $('temp').limit(PREVIEW_LIMIT).compute(context) as any;
         }
       });
     }

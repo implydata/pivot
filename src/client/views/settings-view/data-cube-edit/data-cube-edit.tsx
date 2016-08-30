@@ -73,7 +73,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
     { label: 'Data', value: 'data', render: this.renderData, icon: require(`../../../icons/data.svg`) },
     { label: 'Dimensions', value: 'dimensions', render: this.renderDimensions, icon: require(`../../../icons/full-cube.svg`) },
     { label: 'Measures', value: 'measures', render: this.renderMeasures, icon: require(`../../../icons/measures.svg`) },
-    { label: 'Options', value: 'options', render: this.renderOptions, icon: require(`../../../icons/full-more.svg`) }
+    { label: 'Other', value: 'other', render: this.renderOther, icon: require(`../../../icons/full-more.svg`) }
   ];
 
   private modals: Modal[] = [
@@ -355,7 +355,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
 
   // ---------------------------------------------------
 
-  renderOptions(): JSX.Element {
+  renderOther(): JSX.Element {
     const { newInstance, errors } = this.state;
 
     var makeLabel = FormLabel.simpleGenerator(LABELS, errors);
