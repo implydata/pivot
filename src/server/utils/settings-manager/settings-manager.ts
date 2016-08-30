@@ -411,7 +411,7 @@ export class SettingsManager {
                 start: day.move(maxTime, Timezone.UTC, -14),
                 end: maxTime
               });
-              return $('temp').filter(primaryTimeExpression.in(lastTwoWeeks)).limit(20).compute(context) as any;
+              return $('temp').filter(primaryTimeExpression.in(lastTwoWeeks)).limit(500).compute(context) as any;
             });
         } else {
           return $('temp').limit(20).compute(context) as any;
@@ -419,5 +419,4 @@ export class SettingsManager {
       });
     }
   }
-
 }

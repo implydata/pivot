@@ -22,7 +22,9 @@ import { } from '../../../common/models/index';
 
 import { classNames } from '../../utils/dom/dom';
 
-import { SvgIcon, Scroller, ScrollerPart } from '../index';
+import { SvgIcon } from '../svg-icon/svg-icon';
+import { Scroller, ScrollerPart } from '../scroller/scroller';
+import { GlobalEventListener } from '../global-event-listener/global-event-listener';
 
 export interface SimpleTableColumn {
   label: string;
@@ -55,6 +57,13 @@ export interface SimpleTableState {
   hoveredRowIndex?: number;
   hoveredColumnIndex?: number;
   hoveredActionIndex?: number;
+
+  scrollTop?: number;
+  scrollLeft?: number;
+  viewportHeight?: number;
+  viewportWidth?: number;
+
+  columnsPosition?: number[];
 }
 
 const ROW_HEIGHT = 42;
@@ -70,7 +79,58 @@ export class SimpleTable extends React.Component<SimpleTableProps, SimpleTableSt
   constructor() {
     super();
 
-    this.state = {};
+    this.state = {
+      scrollLeft: 0,
+      scrollTop: 0
+    };
+  }
+
+  componentWillReceiveProps(nextProps: SimpleTableProps) {
+    this.computeColumnsPositions(nextProps.columns);
+  }
+
+  componentDidMount() {
+    this.computeColumnsPositions(this.props.columns);
+    this.onResize();
+  }
+
+  computeColumnsPositions(columns: SimpleTableColumn[]) {
+    if (columns) {
+      let columnsPosition: number[] = [];
+
+      let cumuledWidth = 0;
+      columns.forEach((c, i) => {
+        columnsPosition[i] = cumuledWidth;
+        cumuledWidth += c.width;
+      });
+
+      this.setState({columnsPosition});
+    }
+  }
+
+  onScroll(scrollTop: number, scrollLeft: number) {
+    if (this.state.scrollLeft !== scrollLeft || this.state.scrollTop !== scrollTop) {
+      this.setState({
+        scrollLeft,
+        scrollTop
+      });
+    }
+  }
+
+  onResize() {
+    const { viewportWidth, viewportHeight } = this.state;
+
+    var node = ReactDOM.findDOMNode(this.refs['scroller']);
+    if (!node) return;
+
+    var rect = node.getBoundingClientRect();
+
+    if (viewportHeight !== rect.height || viewportWidth !== rect.width) {
+      this.setState({
+        viewportHeight: rect.height,
+        viewportWidth: rect.width
+      });
+    }
   }
 
   renderHeaders(columns: SimpleTableColumn[], sortColumn: SimpleTableColumn, sortAscending: boolean): JSX.Element {
@@ -134,31 +194,6 @@ export class SimpleTable extends React.Component<SimpleTableProps, SimpleTableSt
     return column.field as (row: any) => any;
   }
 
-  renderRow(row: any, columns: SimpleTableColumn[], index: number): JSX.Element {
-    const { hoveredRowIndex } = this.state;
-    var items: JSX.Element[] = [];
-
-    for (let i = 0; i < columns.length; i++) {
-      let col = columns[i];
-
-      let icon = col.cellIcon ? <SvgIcon svg={col.cellIcon}/> : null;
-
-      items.push(<div
-        className={classNames('cell', {'has-icon': !!col.cellIcon})}
-        style={{width: col.width}}
-        key={`cell-${i}`}
-      >{icon}{this.labelizer(col)(row)}</div>);
-    }
-
-    return <div
-      className={classNames('row', {hover: hoveredRowIndex === index})}
-      key={`row-${index}`}
-      style={{height: ROW_HEIGHT}}
-    >
-      {items}
-    </div>;
-  }
-
   sortRows(rows: any[], sortColumn: SimpleTableColumn, sortAscending: boolean): any[] {
     if (!sortColumn) return rows;
 
@@ -187,18 +222,88 @@ export class SimpleTable extends React.Component<SimpleTableProps, SimpleTableSt
     });
   }
 
+  renderRow(row: any, columns: SimpleTableColumn[], index: number, columnStart: number, columnEnd: number): JSX.Element {
+    const { hoveredRowIndex, columnsPosition } = this.state;
+    var items: JSX.Element[] = [];
+
+    for (let i = columnStart; i < columnEnd; i++) {
+      let col = columns[i];
+
+      let icon = col.cellIcon ? <SvgIcon svg={col.cellIcon}/> : null;
+
+      items.push(<div
+        className={classNames('cell', {'has-icon': !!col.cellIcon})}
+        style={{width: col.width, left: columnsPosition[i]}}
+        key={`cell-${i}`}
+      >{icon}{this.labelizer(col)(row)}</div>);
+    }
+
+    return <div
+      className={classNames('row', {hover: hoveredRowIndex === index})}
+      key={`row-${index}`}
+      style={{height: ROW_HEIGHT, top: index * ROW_HEIGHT}}
+    >
+      {items}
+    </div>;
+  }
+
   renderRows(rows: any[], columns: SimpleTableColumn[], sortColumn: SimpleTableColumn, sortAscending: boolean): JSX.Element[] {
-    if (!rows || !rows.length) return null;
+    if (!rows || !rows.length || !columns || !columns.length) return null;
+
+    const vertical = this.getYBoundaries(rows);
+    const horizontal = this.getXBoundaries(columns);
 
     rows = this.sortRows(rows, sortColumn, sortAscending);
 
     var items: JSX.Element[] = [];
 
-    for (let i = 0; i < rows.length; i++) {
-      items.push(this.renderRow(rows[i], columns, i));
+    for (let i = vertical.start; i < vertical.end; i++) {
+      items.push(this.renderRow(rows[i], columns, i, horizontal.start, horizontal.end));
     }
 
     return items;
+  }
+
+  getXBoundaries(columns: SimpleTableColumn[]): {start: number, end: number} {
+    const { viewportWidth, scrollLeft } = this.state;
+    var headerWidth = 0;
+    var start = -1;
+    var end = -1;
+
+    const n = columns.length;
+    for (let i = 0; i < n; i++) {
+      let col = columns[i];
+
+      if (start === -1 && headerWidth + col.width > scrollLeft) {
+        start = i;
+      }
+
+      if  (end === -1 && headerWidth > scrollLeft + viewportWidth) {
+        end = i;
+      }
+
+      // To render last column
+      if (end === -1 && i === n - 1) {
+        end = n;
+      }
+
+      if (start !== -1 && end !== -1) break;
+
+      headerWidth += col.width;
+    }
+
+    return {start, end};
+  }
+
+  getYBoundaries(rows: any[]): {start: number, end: number} {
+    const { viewportHeight, scrollTop } = this.state;
+
+    var topIndex = Math.floor(scrollTop / ROW_HEIGHT);
+
+    return {
+      start: topIndex,
+      end: Math.min(topIndex + Math.ceil(viewportHeight / ROW_HEIGHT), rows.length)
+    };
   }
 
   getLayout(columns: SimpleTableColumn[], rows: any[], actions: SimpleTableAction[]) {
@@ -229,14 +334,19 @@ export class SimpleTable extends React.Component<SimpleTableProps, SimpleTableSt
   renderActions(rows: any[], actions: SimpleTableAction[]): JSX.Element[] {
     const { hoveredRowIndex, hoveredActionIndex } = this.state;
 
+    const vertical = this.getYBoundaries(rows);
+
     const directActions = this.getDirectActions(actions);
 
-    const generator = (row: any, i: number) => {
+    var elements: JSX.Element[] = [];
+
+    for (let i = vertical.start; i < vertical.end; i++) {
       let isRowHovered = i === hoveredRowIndex;
+      let row = rows[i];
 
       let icons = directActions.map((action, j) => {
         return <div
-          className={classNames("icon", {hover: isRowHovered && j === hoveredActionIndex})}
+          className={classNames('icon', {hover: isRowHovered && j === hoveredActionIndex})}
           key={`icon-${j}`}
           style={{width: ACTION_WIDTH}}
         >
@@ -244,16 +354,14 @@ export class SimpleTable extends React.Component<SimpleTableProps, SimpleTableSt
         </div>;
       });
 
-      return <div
-        className={classNames("row action", {hover: isRowHovered})}
+      elements.push(<div
+        className={classNames('row action', {hover: isRowHovered})}
         key={`action-${i}`}
-        style={{height: ROW_HEIGHT}}
-      >
-        {icons}
-      </div>;
-    };
+        style={{height: ROW_HEIGHT, top: i * ROW_HEIGHT}}
+      >{icons}</div>);
+    }
 
-    return rows.map(generator);
+    return elements;
   }
 
   getRowIndex(y: number): number {
@@ -366,6 +474,7 @@ export class SimpleTable extends React.Component<SimpleTableProps, SimpleTableSt
     if (!columns) return null;
 
     return <div className={classNames("simple-table", {clickable: hoveredRowIndex !== undefined})}>
+      <GlobalEventListener resize={this.onResize.bind(this)}/>
       <Scroller
         ref="scroller"
         layout={this.getLayout(columns, rows, actions)}
@@ -379,6 +488,7 @@ export class SimpleTable extends React.Component<SimpleTableProps, SimpleTableSt
         onClick={this.onClick.bind(this)}
         onMouseMove={this.onMouseMove.bind(this)}
         onMouseLeave={this.onMouseLeave.bind(this)}
+        onScroll={this.onScroll.bind(this)}
       />
     </div>;
   }
