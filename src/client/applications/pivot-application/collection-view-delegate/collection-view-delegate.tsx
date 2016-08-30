@@ -175,7 +175,7 @@ export class CollectionViewDelegate {
       this.save(this.getSettings().addCollectionAt(collection, oldIndex));
     };
 
-    return this.save(appSettings.deleteCollection(collection)).then( () => {
+    return this.save(appSettings.deleteCollection(collection.name)).then( () => {
       window.location.hash = `#/home`;
       Notifier.success('Collection removed', {label: STRINGS.undo, callback: undo});
     });

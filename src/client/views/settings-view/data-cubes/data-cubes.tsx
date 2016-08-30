@@ -48,21 +48,13 @@ export class DataCubes extends React.Component<DataCubesProps, DataCubesState> {
     });
   }
 
-  editCube(cube: DataCube) {
-    window.location.hash += `/${cube.name}`;
+  editDataCube(dataCube: DataCube) {
+    window.location.hash += `/${dataCube.name}`;
   }
 
-  removeCube(cube: DataCube) {
+  removeDataCube(dataCube: DataCube) {
     const remove = () => {
-      var settings: AppSettings = this.state.newSettings;
-      var index = settings.dataCubes.indexOf(cube);
-
-      if (index < 0) return;
-
-      var newCubes = settings.dataCubes;
-      newCubes.splice(index, 1);
-
-      this.props.onSave(settings.changeDataCubes(newCubes), 'Cube removed');
+      this.props.onSave(this.state.newSettings.deleteDataCube(dataCube.name), 'Date cube removed');
       Notifier.removeQuestion();
     };
 
@@ -71,9 +63,9 @@ export class DataCubes extends React.Component<DataCubesProps, DataCubesState> {
     };
 
     Notifier.ask({
-      title: 'Remove this cube',
+      title: 'Remove this data cube',
       message: [
-        `Are you sure you would like to delete the data cube "${cube.title}"?`,
+        `Are you sure you would like to delete the data cube "${dataCube.title}"?`,
         'This action is not reversible.'
       ],
       choices: [
@@ -110,8 +102,8 @@ export class DataCubes extends React.Component<DataCubesProps, DataCubesState> {
     ];
 
     const actions: SimpleTableAction[] = [
-      {icon: require(`../../../icons/full-edit.svg`), callback: this.editCube.bind(this)},
-      {icon: require(`../../../icons/full-remove.svg`), callback: this.removeCube.bind(this)}
+      {icon: require(`../../../icons/full-edit.svg`), callback: this.editDataCube.bind(this)},
+      {icon: require(`../../../icons/full-remove.svg`), callback: this.removeDataCube.bind(this)}
     ];
 
     return <div className="data-cubes">
@@ -124,7 +116,7 @@ export class DataCubes extends React.Component<DataCubesProps, DataCubesState> {
           columns={columns}
           rows={newSettings.dataCubes}
           actions={actions}
-          onRowClick={this.editCube.bind(this)}
+          onRowClick={this.editDataCube.bind(this)}
         />
       </div>
     </div>;

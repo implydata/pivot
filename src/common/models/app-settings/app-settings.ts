@@ -213,33 +213,16 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
     return new AppSettings(value);
   }
 
-  public deleteCollection(collection: Collection): AppSettings {
+  public deleteCollection(collectionName: string): AppSettings {
     var value = this.valueOf();
-    var index = value.collections.indexOf(collection);
-
-    if (index === -1) {
-      throw new Error(`Unknown collection : ${collection.toString()}`);
-    }
-
-    var newCollections = value.collections.concat();
-    newCollections.splice(index, 1);
-
-    value.collections = newCollections;
+    value.collections = value.collections.filter(collection => collection.name !== collectionName);
     return new AppSettings(value);
   }
 
-  public deleteDataCube(dataCube: DataCube): AppSettings {
+  public deleteDataCube(dataCubeName: string): AppSettings {
     var value = this.valueOf();
-    var index = value.dataCubes.indexOf(dataCube);
-
-    if (index === -1) {
-      throw new Error(`Unknown dataCube : ${dataCube.toString()}`);
-    }
-
-    var newDataCubes = value.dataCubes.concat();
-    newDataCubes.splice(index, 1);
-
-    value.dataCubes = newDataCubes;
+    value.dataCubes = value.dataCubes.filter(dataCube => dataCube.name !== dataCubeName);
+    value.collections = value.collections.map(collection => collection.deleteTilesContainingCube(dataCubeName));
     return new AppSettings(value);
   }
 
