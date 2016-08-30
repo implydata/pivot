@@ -95,7 +95,7 @@ export class DataCubes extends React.Component<DataCubesProps, DataCubesState> {
     if (!newSettings.dataCubes.length) return this.renderEmpty();
 
     const columns: SimpleTableColumn[] = [
-      {label: 'Title', field: 'title', width: 170, cellIcon: require(`../../../icons/full-cube.svg`) },
+      {label: 'Name', field: 'title', width: 170, cellIcon: require(`../../../icons/full-cube.svg`) },
       {label: 'Source', field: 'source', width: 400},
       {label: 'Dimensions', field: (cube: DataCube) => cube.dimensions.size, width: 120},
       {label: 'Measures', field: (cube: DataCube) => cube.measures.size, width: 80}

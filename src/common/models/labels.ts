@@ -16,19 +16,29 @@
 
 import { DataCube, Dimension, Measure, Cluster } from './index';
 
-export const DIMENSION = {
+export const ATTRIBUTE = {
   name: {
-    label: `Name (you won't be able to change this later)`,
-    description: `The name of the dimension. This does not have to correspond to the
-      attribute name (but the auto generated dimensions do). This should be a
-      URL safe string. Changing this property will break any URLs that someone
-      might have generated that include this dimension, that's why you can only
-      set it once`
+    label: `Name`,
+    description: `The attribute's name`
   },
+  type: {
+    label: `Type`,
+    description: `The attribute's type`
+  },
+  splittable: {
+    label: `Splittable`,
+    description: `Whether or not the attribute can be split on.`
+  },
+  special: {
+    label: `Special`,
+    description: `Special measures that are not numbers`
+  }
+};
+
+export const DIMENSION = {
   title: {
-    label: `Title`,
-    description: `The title for this dimension in the UI. Can be anything and is safe
-    to change at any time.`
+    label: `Name`,
+    description: `The display name for this dimension in the UI.`
   },
   kind: {
     label: `Kind`,
@@ -55,37 +65,10 @@ export const DIMENSION = {
   }
 };
 
-export const ATTRIBUTE = {
-  name: {
-    label: `Name`,
-    description: `The attribute's name`
-  },
-  type: {
-    label: `Type`,
-    description: `The attribute's type`
-  },
-  splittable: {
-    label: `Splittable`,
-    description: `Whether or not the attribute can be split on.`
-  },
-  special: {
-    label: `Special`,
-    description: `Special measures that are not numbers`
-  }
-};
-
-
 export const COLLECTION = {
-  name: {
-    label: `Name (you won't be able to change this later)`,
-    description: `The name of the collection. This should be a
-      URL safe string. Changing this property will break any URLs that someone
-      might have generated that include this dimension, that's why you can only
-      set it once`
-  },
   title: {
     label: `Title`,
-    description: `The title for this collection in the UI. Can be anything and is safe
+    description: `The display name for this collection in the UI. Can be anything and is safe
     to change at any time.`
   },
   description: {
@@ -95,17 +78,9 @@ export const COLLECTION = {
 };
 
 export const COLLECTION_ITEM = {
-  name: {
-    label: `Name (you won't be able to change this later)`,
-    description: `The name of the collection item. This should be a
-      URL safe string. Changing this property will break any URLs that someone
-      might have generated that include this dimension, that's why you can only
-      set it once`
-  },
   title: {
-    label: `Title`,
-    description: `The title for this item in the UI. Can be anything and is safe
-    to change at any time.`
+    label: `Name`,
+    description: `The display name for this item in the UI.`
   },
   description: {
     label: 'Description',
@@ -115,17 +90,9 @@ export const COLLECTION_ITEM = {
 };
 
 export const MEASURE = {
-  name: {
-    label: `Name (you won't be able to change this later)`,
-    description: `The name of the measure. This should be a
-      URL safe string. Changing this property will break any URLs that someone
-      might have generated that include this dimension, that's why you can only
-      set it once`
-  },
   title: {
-    label: `Title`,
-    description: `The title for this measure in the UI. Can be anything and is safe
-    to change at any time.`
+    label: `Name`,
+    description: `The display name for this measure in the UI.`
   },
   units: {
     label: `Units`,
@@ -141,14 +108,8 @@ export const MEASURE = {
 
 export const CLUSTER = {
   title: {
-    label: 'Title',
-    description: `The title of the Cluster in the UI. Can be anything and is
-    safe to change at anytime`
-  },
-
-  name: {
     label: 'Name',
-    description: `The name of the cluster (to be referenced later from the data cube)`
+    description: `The name of the Cluster in the UI.`
   },
   type: {
     label: 'Type',
@@ -204,7 +165,7 @@ export const CLUSTER = {
     description: 'The request decorator module filepath to load.'
   },
 
-  // PostGres + MySQL specific
+  // Postgres + MySQL specific
   database: {
     label: 'Database',
     description: 'The database to which to connect to.'
@@ -233,17 +194,9 @@ export const GENERAL = {
 };
 
 export const DATA_CUBE = {
-  name: {
-    label: 'Name',
-    description: `The name of the data cube as used internally in Pivot and used in the
-      URLs. This should be a URL safe string. Changing this property for a given
-      data cube will break any URLs that someone might have generated for that
-      data cube in the past.`
-  },
   title: {
-    label: 'Title',
-    description: `The user visible name that will be used to describe this data cube in
-      the UI. It is always safe to change this.`
+    label: 'Name',
+    description: `The user visible name that will be used to describe this data cube in the UI.`
   },
   description: {
     label: 'Description',
