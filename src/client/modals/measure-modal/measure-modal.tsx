@@ -89,11 +89,11 @@ export class MeasureModal extends React.Component<MeasureModalProps, ImmutableFo
         {makeLabel('title')}
         {makeTextInput('title', /^.+$/, true)}
 
-        {makeLabel('units')}
-        {makeTextInput('units')}
-
         {makeLabel('formula')}
         {makeTextInput('formula')}
+
+        {makeLabel('units')}
+        {makeTextInput('units')}
 
       </form>
 

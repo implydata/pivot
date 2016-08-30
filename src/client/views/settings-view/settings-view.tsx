@@ -38,12 +38,12 @@ import { ClusterSeedModal, DataCubeSeedModal } from '../../modals/index';
 import { AppSettings, Cluster } from '../../../common/models/index';
 
 import { SettingsHeaderBar } from './settings-header-bar/settings-header-bar';
-import { General } from './general/general';
+
 import { Clusters } from './clusters/clusters';
 import { ClusterEdit } from './cluster-edit/cluster-edit';
 import { DataCubes } from './data-cubes/data-cubes';
 import { DataCubeEdit } from './data-cube-edit/data-cube-edit';
-
+import { Other } from './other/other';
 
 export interface SettingsViewProps extends React.Props<any> {
   user?: User;
@@ -62,16 +62,16 @@ export interface SettingsViewState {
 }
 
 const PATHS = {
-  general: 'general',
   clusters: 'clusters',
   dataCubes: 'data-cubes',
-  newDataCube: 'new-data-cube'
+  newDataCube: 'new-data-cube',
+  other: 'other'
 };
 
 const VIEWS = [
-  {label: 'General', value: PATHS.general, svg: require('../../icons/full-settings.svg')},
   {label: 'Clusters', value: PATHS.clusters, svg: require('../../icons/full-cluster.svg')},
-  {label: 'Data Cubes', value: PATHS.dataCubes, svg: require('../../icons/full-cube.svg')}
+  {label: 'Data Cubes', value: PATHS.dataCubes, svg: require('../../icons/full-cube.svg')},
+  {label: 'Other', value: PATHS.other, svg: require('../../icons/full-more.svg')}
 ];
 
 function autoFillDataCube(dataCube: DataCube, cluster: Cluster): Q.Promise<DataCube> {
@@ -314,10 +314,6 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
 
         <Router rootFragment="settings" onURLChange={this.onURLChange.bind(this)}>
 
-          <Route fragment={PATHS.general}>
-            <General settings={settings} onSave={this.onSave.bind(this)}/>
-          </Route>
-
           <Route fragment={PATHS.clusters}>
             <Clusters settings={settings} onSave={this.onSave.bind(this)}/>
 
@@ -373,6 +369,11 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
             </Route>
 
           </Route>
+
+          <Route fragment={PATHS.other}>
+            <Other settings={settings} onSave={this.onSave.bind(this)}/>
+          </Route>
+
         </Router>
       </div>
      </div>;

@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-require('./general.css');
+require('./other.css');
 
 import { Timezone } from 'chronoshift';
 import * as React from 'react';
-import { Fn } from '../../../../common/utils/general/general';
 import { classNames } from '../../../utils/dom/dom';
 
 import { SvgIcon } from '../../../components/svg-icon/svg-icon';
@@ -32,12 +31,12 @@ import { AppSettings, AppSettingsJS } from '../../../../common/models/index';
 
 import { ImmutableFormDelegate, ImmutableFormState } from '../../../utils/immutable-form-delegate/immutable-form-delegate';
 
-export interface GeneralProps extends React.Props<any> {
+export interface OtherProps extends React.Props<any> {
   settings?: AppSettings;
   onSave?: (settings: AppSettings) => void;
 }
 
-export class General extends React.Component<GeneralProps, ImmutableFormState<AppSettings>> {
+export class Other extends React.Component<OtherProps, ImmutableFormState<AppSettings>> {
 
   private delegate: ImmutableFormDelegate<AppSettings>;
 
@@ -47,7 +46,7 @@ export class General extends React.Component<GeneralProps, ImmutableFormState<Ap
     this.delegate = new ImmutableFormDelegate<AppSettings>(this);
   }
 
-  componentWillReceiveProps(nextProps: GeneralProps) {
+  componentWillReceiveProps(nextProps: OtherProps) {
     if (nextProps.settings) this.setState({
       newInstance: nextProps.settings,
       errors: {}
@@ -73,9 +72,9 @@ export class General extends React.Component<GeneralProps, ImmutableFormState<Ap
     var makeLabel = FormLabel.simpleGenerator(LABELS, errors);
     var makeTextInput = ImmutableInput.simpleGenerator(newInstance, this.delegate.onChange);
 
-    return <div className="general">
+    return <div className="other">
       <div className="title-bar">
-        <div className="title">General</div>
+        <div className="title">Other</div>
         {canSave ? <Button className="save" title="Save" type="primary" onClick={this.save.bind(this)}/> : null}
       </div>
       <div className="content">
