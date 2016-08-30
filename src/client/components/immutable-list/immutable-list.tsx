@@ -133,10 +133,12 @@ export class ImmutableList<T> extends React.Component<ImmutableListProps<T>, Imm
   renderEmpty() {
     const { label, toggleSuggestions } = this.props;
     return <div className="empty-container">
-        <div className="label"> No {label} </div>
+      <div className="empty-message">
+        <div className="label">No {label}</div>
         { toggleSuggestions ?
           <div className="actions">{STRINGS.quicklyAddSomeUsing} <a key='suggestions' onClick={toggleSuggestions}>suggestions</a></div>
           : null }
+      </div>
     </div>;
   }
 
@@ -164,7 +166,7 @@ export class ImmutableList<T> extends React.Component<ImmutableListProps<T>, Imm
         </div>
       </div>
       {items.size === 0 ? this.renderEmpty() : this.renderList()}
-      {editedIndex !== undefined ? this.renderEditModal(editedIndex) : null}
+      {editedIndex != null ? this.renderEditModal(editedIndex) : null}
       {pendingAddItem ? this.renderAddModal(pendingAddItem) : null}
     </div>;
   }

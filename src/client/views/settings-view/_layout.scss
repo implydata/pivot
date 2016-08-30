@@ -133,5 +133,13 @@
 
   .tab-content {
     overflow: auto;
+
+    .immutable-list {
+      position: absolute;
+      top: 5px;
+      bottom: 5px;
+      left: 24px;
+      right: 0;
+    }
   }
 }

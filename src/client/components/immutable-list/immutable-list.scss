@@ -16,18 +16,15 @@
 
 @import '../../imports';
 
+$immutable-list-width: 400px;
+
 .immutable-list {
   $list-title-height: 44px;
-
-  position: absolute;
-  top: 5px;
-  bottom: 5px;
-  left: 24px;
-  width: 400px;
 
   .list-title {
     display: flex;
     height: $list-title-height;
+    width: $immutable-list-width;
     padding-top: 12px;
     border-bottom: 1px solid $border-super-light;
 
@@ -55,29 +52,33 @@
     right: 0;
 
     .row {
-      width: 400px;
+      width: $immutable-list-width;
     }
   }
 
   .empty-container {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    color: $text-light;
+    @include pin-left($immutable-list-width);
 
-    a {
-      color: $brand;
-      border-bottom: 1px dashed;
-      cursor: pointer;
-    }
+    .empty-message {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      color: $text-light;
 
-    .label {
-      display: inline-block;
-      height: 46px;
-      padding-top: 13px;
-      font-size: 20px;
+      a {
+        color: $brand;
+        border-bottom: 1px dashed;
+        cursor: pointer;
+      }
+
+      .label {
+        display: inline-block;
+        height: 46px;
+        padding-top: 13px;
+        font-size: 20px;
+      }
     }
   }
 }
