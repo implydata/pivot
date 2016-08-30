@@ -32,7 +32,7 @@ import { DATA_CUBES_STRATEGIES_LABELS, STRINGS } from '../../../config/constants
 
 import { SvgIcon, FormLabel, Button, SimpleTableColumn, SimpleTable, ImmutableInput, ImmutableList, ImmutableDropdown } from '../../../components/index';
 import { DimensionModal, MeasureModal, SuggestionModal, AttributeModal } from '../../../modals/index';
-import { AppSettings, ListItem, Cluster, DataCube, Dimension, DimensionJS, Measure, MeasureJS } from '../../../../common/models/index';
+import { AppSettings, ListItem, Cluster, DataCube, Dimension, DimensionJS, Measure, MeasureJS, Customization } from '../../../../common/models/index';
 
 import { DATA_CUBE as LABELS } from '../../../../common/models/labels';
 
@@ -168,6 +168,10 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       return { value: cluster.name, label: cluster.title };
     }));
 
+    var timezones = Customization.DEFAULT_TIMEZONES.map((tz) => {
+      return { label: tz.toString(), value: tz };
+    });
+
     return <form className="general vertical">
       {makeLabel('title')}
       {makeTextInput('title', /.*/, true)}
@@ -182,15 +186,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       {makeTextInput('source')}
 
       {makeLabel('defaultTimezone')}
-      <ImmutableInput
-        instance={newInstance}
-        path={'defaultTimezone'}
-        onChange={this.delegate.onChange}
-
-        valueToString={(value: Timezone) => value ? value.toJS() : undefined}
-        stringToValue={(str: string) => str ? Timezone.fromJS(str) : undefined}
-      />
-
+      {makeDropdownInput('defaultTimezone', timezones) }
     </form>;
   }
 
