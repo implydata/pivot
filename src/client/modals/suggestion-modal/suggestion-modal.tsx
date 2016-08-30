@@ -183,6 +183,7 @@ export class SuggestionModal<T> extends React.Component<SuggestionModalProps<T>,
       className="suggestion-modal"
       title={`${title}`}
       onClose={onClose}
+      onEnter={this.onAdd.bind(this)}
     >
       <div className="actions">
         <button key='all' onClick={this.selectAll.bind(this)}>Select all</button>

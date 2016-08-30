@@ -101,8 +101,11 @@ export class ClusterSeedModal extends React.Component<ClusterSeedModalProps, Clu
   }
 
   onNext() {
-    this.connect();
-    this.setState({loading: true});
+    const { canSave } = this.state;
+    if (canSave) {
+      this.connect();
+      this.setState({loading: true});
+    }
   }
 
   render(): JSX.Element {
@@ -135,6 +138,7 @@ export class ClusterSeedModal extends React.Component<ClusterSeedModalProps, Clu
       className="cluster-seed-modal"
       title={STRINGS.connectNewCluster}
       onClose={this.props.onCancel}
+      onEnter={this.onNext.bind(this)}
       deaf={loading}
     >
       <form>

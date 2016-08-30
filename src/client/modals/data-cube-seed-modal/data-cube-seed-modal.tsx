@@ -111,6 +111,7 @@ export class DataCubeSeedModal extends React.Component<DataCubeSeedModalProps, D
     const { dataCubes, clusters } = this.props;
     if (!dataCubes || !clusters) return;
     var { clusterSource, autoFill } = this.state;
+    if (!clusterSource) return;
 
     var newDataCube = DataCube.fromClusterAndSource(
       generateUniqueName('dc', name => indexByAttribute(dataCubes, 'name', name) === -1),
@@ -160,6 +161,11 @@ export class DataCubeSeedModal extends React.Component<DataCubeSeedModalProps, D
     });
   }
 
+  onEnter() {
+    this.onNext();
+    this.props.onCancel();
+  }
+
   render(): JSX.Element {
     const { onNext, onCancel } = this.props;
     const { errors, autoFill, clusterSources, clusterSource } = this.state;
@@ -170,6 +176,7 @@ export class DataCubeSeedModal extends React.Component<DataCubeSeedModalProps, D
       className="data-cube-seed-modal"
       title={STRINGS.createDataCube}
       onClose={this.props.onCancel}
+      onEnter={this.onEnter.bind(this)}
     >
       <form>
         { FormLabel.dumbLabel('Source') }
@@ -189,7 +196,7 @@ export class DataCubeSeedModal extends React.Component<DataCubeSeedModalProps, D
         />
       </form>
       <div className="button-bar">
-        <Button type="primary" title={`${STRINGS.next}: ${STRINGS.configureDataCube}`} onClick={this.onNext.bind(this)}/>
+        <Button type="primary" title={`${STRINGS.next}: ${STRINGS.configureDataCube}`} disabled={!clusterSource} onClick={this.onNext.bind(this)}/>
         <Button className="cancel" title="Cancel" type="secondary" onClick={onCancel}/>
       </div>
 

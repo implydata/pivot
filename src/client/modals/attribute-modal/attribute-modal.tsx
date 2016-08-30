@@ -125,6 +125,7 @@ export class AttributeModal extends React.Component<AttributeModalProps, Attribu
       className="attribute-modal"
       title={title}
       onClose={onClose}
+      onEnter={this.save.bind(this)}
     >
       <form>
         {nameDiv}
