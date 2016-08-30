@@ -183,7 +183,7 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
 
     const cancelButton = <Button
       className="cancel"
-      title={isNewCluster ?  "Cancel" : "Revert changes"}
+      title={isNewCluster ? "Cancel" : "Revert changes"}
       type="secondary"
       onClick={this.cancel.bind(this)}
     />;

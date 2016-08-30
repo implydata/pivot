@@ -131,6 +131,10 @@ export class Collection implements Instance<CollectionValue, CollectionJS> {
     return this.changeTiles(this.tiles.filter(tile => tile.dataCube.name !== dataCubeName));
   }
 
+  public dependsOnDataCube(dataCubeName: string): boolean {
+    return this.tiles.some((tile) => tile.dataCube.name === dataCubeName);
+  }
+
   public change(propertyName: string, newValue: any): Collection {
     var v = this.valueOf();
 

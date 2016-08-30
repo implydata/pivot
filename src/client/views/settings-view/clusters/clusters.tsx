@@ -27,6 +27,8 @@ import { AppSettings, Cluster, SupportedType } from '../../../../common/models/i
 import { SimpleTable, SimpleTableColumn, SimpleTableAction } from '../../../components/simple-table/simple-table';
 import { Notifier } from '../../../components/index';
 
+import { pluralIfNeeded } from "../../../../common/utils/general/general";
+
 export interface ClustersProps extends React.Props<any> {
   settings?: AppSettings;
   onSave?: (settings: AppSettings, message?: string) => void;
@@ -66,21 +68,25 @@ export class Clusters extends React.Component<ClustersProps, ClustersState> {
 
   removeCluster(cluster: Cluster) {
     const settings: AppSettings = this.state.newSettings;
+
     const dependantDataCubes = settings.getDataCubesForCluster(cluster.name);
+    const dependantCollections = settings.getCollectionsInvolvingCluster(cluster.name);
+    const dependants = dependantDataCubes.length + dependantCollections.length;
 
     const remove = () => {
       this.props.onSave(
         settings.deleteCluster(cluster.name),
-        dependantDataCubes.length > 0 ? 'Cubes and cluster removed' : 'Cluster removed'
+        dependants > 0 ? 'Cluster and dependants removed' : 'Cluster removed'
       );
       Notifier.removeQuestion();
     };
 
     var message: string | JSX.Element;
 
-    if (dependantDataCubes.length > 0) {
+    if (dependants > 0) {
+      // ToDo: better pluralization here
       message = <div className="message">
-        <p>This cluster has {dependantDataCubes.length} data cubes relying on it.</p>
+        <p>This cluster has {pluralIfNeeded(dependantDataCubes.length, 'data cube')} and {pluralIfNeeded(dependantCollections.length, 'collection')} relying on it.</p>
         <p>Removing it will remove those cubes as well.</p>
         <div className="dependency-list">
           {dependantDataCubes.map(d => <p key={d.name}>{d.title}</p>)}

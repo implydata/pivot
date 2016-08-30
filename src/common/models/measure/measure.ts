@@ -17,7 +17,7 @@
 import { List } from 'immutable';
 import { BaseImmutable, Property, isInstanceOf } from 'immutable-class';
 import * as numeral from 'numeral';
-import { $, Expression, Datum, ApplyAction, AttributeInfo, ChainExpression, deduplicateSort } from 'plywood';
+import { $, Expression, Datum, ApplyAction, AttributeInfo, RefExpression, deduplicateSort } from 'plywood';
 import { verifyUrlSafeName, makeTitle, makeUrlSafeName } from '../../utils/general/general';
 
 function formatFnFactory(format: string): (n: number) => string {
@@ -55,46 +55,6 @@ export class Measure extends BaseImmutable<MeasureValue, MeasureJS> {
     if (!measureName) return null;
     measureName = measureName.toLowerCase(); // Case insensitive
     return measures.find(measure => measure.name.toLowerCase() === measureName);
-  }
-
-  /**
-   * Look for all instances of aggregateAction($blah) and return the blahs
-   * @param ex
-   * @returns {string[]}
-   */
-  static getAggregateReferences(ex: Expression): string[] {
-    var references: string[] = [];
-    ex.forEach((ex: Expression) => {
-      if (ex instanceof ChainExpression) {
-        var actions = ex.actions;
-        for (var action of actions) {
-          if (action.isAggregate()) {
-            references = references.concat(action.getFreeReferences());
-          }
-        }
-      }
-    });
-    return deduplicateSort(references);
-  }
-
-  /**
-   * Look for all instances of countDistinct($blah) and return the blahs
-   * @param ex
-   * @returns {string[]}
-   */
-  static getCountDistinctReferences(ex: Expression): string[] {
-    var references: string[] = [];
-    ex.forEach((ex: Expression) => {
-      if (ex instanceof ChainExpression) {
-        var actions = ex.actions;
-        for (var action of actions) {
-          if (action.action === 'countDistinct') {
-            references = references.concat(action.getFreeReferences());
-          }
-        }
-      }
-    });
-    return deduplicateSort(references);
   }
 
   static measuresFromAttributeInfo(attribute: AttributeInfo): Measure[] {
@@ -204,5 +164,15 @@ export class Measure extends BaseImmutable<MeasureValue, MeasureJS> {
 
   public getFormat: () => string;
   public changeFormat: (newFormat: string) => this;
+
+  public usesAttribute(attributeName: string): boolean {
+    return this.expression.some((ex, index, depth, nestDiff) => {
+      if (nestDiff > 0 && ex instanceof RefExpression) {
+        return ex.name === attributeName;
+      } else {
+        return null;
+      }
+    });
+  }
 }
 BaseImmutable.finalize(Measure);

@@ -19,7 +19,7 @@ import { Class, Instance, isInstanceOf, immutableEqual, immutableArraysEqual, im
 import { Duration, Timezone, second } from 'chronoshift';
 import { $, ply, r, Expression, ExpressionJS, External, RefExpression, Dataset,
   Attributes, AttributeInfo, AttributeJSs, SortAction, SimpleFullType, DatasetFullType, PlyTypeSimple,
-  CustomDruidAggregations, CustomDruidTransforms, ExternalValue, findByName } from 'plywood';
+  CustomDruidAggregations, CustomDruidTransforms, ExternalValue, findByName, overrideByName } from 'plywood';
 import { hasOwnProperty, verifyUrlSafeName, makeUrlSafeName, makeTitle, immutableListsEqual } from '../../utils/general/general';
 import { getWallTimeString } from '../../utils/time/time';
 import { Dimension, DimensionJS } from '../dimension/dimension';
@@ -779,6 +779,18 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
     return this.measures.find(measure => measure.expression.equals(expression));
   }
 
+  public getDimensionsForAttribute(attributeName: string): Dimension[] {
+    return this.dimensions.toArray().filter((dimension) => {
+      return dimension.usesAttribute(attributeName);
+    });
+  }
+
+  public getMeasuresForAttribute(attributeName: string): Measure[] {
+    return this.measures.toArray().filter((measure) => {
+      return measure.usesAttribute(attributeName);
+    });
+  }
+
   public getSuggestedMeasures(): Measure[] {
     return this.filterMeasures(DataCube.suggestMeasures(this.attributes));
   }
@@ -844,30 +856,17 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
   }
 
   public updateAttribute(attribute: AttributeInfo): DataCube {
-    var attributes = this.attributes.concat();
-
-    for (let i = 0; i < attributes.length; i++) {
-      if (attributes[i].name === attribute.name) {
-        attributes[i] = attribute;
-        break;
-      }
-    }
-
-    return this.changeAttributes(attributes);
+    return this.changeAttributes(overrideByName(this.attributes, attribute));
   }
 
-  public removeAttribute(attribute: AttributeInfo): DataCube {
+  public removeAttribute(attributeName: string): DataCube {
+    if (!this.attributes) return this;
 
-    var index = this.attributes.indexOf(attribute);
-
-    if (index === -1) {
-      throw new Error(`Unknown attribute : ${attribute.toString()}`);
-    }
-
-    var newAttributes = this.attributes.concat();
-    newAttributes.splice(index, 1);
-
-    return this.changeAttributes(newAttributes);
+    var value = this.valueOf();
+    value.attributes = value.attributes.filter(attribute => attribute.name !== attributeName);
+    value.dimensions = value.dimensions.filter(dimension => !dimension.usesAttribute(attributeName)) as List<Dimension>;
+    value.measures = value.measures.filter(measure => !measure.usesAttribute(attributeName)) as List<Measure>;
+    return new DataCube(value);
   }
 
   public appendAttributes(attributes: Attributes): DataCube {

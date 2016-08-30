@@ -178,4 +178,34 @@ describe('Measure', () => {
     });
 
   });
+
+  describe('#usesAttribute', () => {
+    it('works with simple measure', () => {
+      var measure = Measure.fromJS({
+        "name": "price",
+        "title": "Price",
+        "formula": "$main.sum($price)"
+      });
+
+      expect(measure.usesAttribute('lol'), 'lol').to.equal(false);
+      expect(measure.usesAttribute('main'), 'main').to.equal(false);
+      expect(measure.usesAttribute('price'), 'price').to.equal(true);
+    });
+
+    it('works with complex measure', () => {
+      var measure = Measure.fromJS({
+        "name": "complex",
+        "title": "Complex",
+        "formula": "$main.sum($price * $conversion) / $main.countDistinct($city) * 1000"
+      });
+
+      expect(measure.usesAttribute('lol'), 'lol').to.equal(false);
+      expect(measure.usesAttribute('main'), 'main').to.equal(false);
+      expect(measure.usesAttribute('price'), 'price').to.equal(true);
+      expect(measure.usesAttribute('conversion'), 'conversion').to.equal(true);
+      expect(measure.usesAttribute('city'), 'city').to.equal(true);
+    });
+
+  });
+
 });

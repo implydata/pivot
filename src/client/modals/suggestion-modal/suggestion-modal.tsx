@@ -36,6 +36,13 @@ export interface Suggestion<T> {
   label: string;
 }
 
+function changeSelected<T>(suggestion: Suggestion<T>, value: boolean): Suggestion<T> {
+  const { option, label } = suggestion;
+  return {
+    option, label, selected: value
+  };
+}
+
 export interface SuggestionModalProps<T> extends React.Props<any> {
   onAdd: (suggestions: T[]) => void;
   onNothing?: () => void;
@@ -73,24 +80,11 @@ export class SuggestionModal<T> extends React.Component<SuggestionModalProps<T>,
     if (options) this.initFromProps(this.props);
   }
 
-  componentWillReceiveProps(nextProps: SuggestionModalProps<T>) {
-    if (nextProps) {
-      this.initFromProps(nextProps);
-    }
-  }
-
   initFromProps(props: SuggestionModalProps<T>) {
     const { options, getLabel } = props;
     this.setState({
       suggestions: options.map((s) => { return { option: s, selected: true, label: getLabel(s) }; })
     });
-  }
-
-  changeSelection(suggestion: Suggestion<T>, value: boolean): Suggestion<T> {
-    const { option, label } = suggestion;
-    return {
-      option, label, selected: value
-    };
   }
 
   onAdd() {
@@ -102,7 +96,7 @@ export class SuggestionModal<T> extends React.Component<SuggestionModalProps<T>,
 
   selectAll() {
     const { suggestions } = this.state;
-    const allSelected = suggestions.map((s) => this.changeSelection(s, true));
+    const allSelected = suggestions.map((s) => changeSelected(s, true));
     this.setState({
       suggestions: allSelected
     });
@@ -110,7 +104,7 @@ export class SuggestionModal<T> extends React.Component<SuggestionModalProps<T>,
 
   selectNone() {
     const { suggestions } = this.state;
-    const noneSelected = suggestions.map((s) => this.changeSelection(s, false));
+    const noneSelected = suggestions.map((s) => changeSelected(s, false));
     this.setState({
       suggestions: noneSelected
     });
@@ -122,8 +116,8 @@ export class SuggestionModal<T> extends React.Component<SuggestionModalProps<T>,
     const toggleKey = getKey(toggle.option);
 
     var newStateSuggestions = suggestions.map((suggestion) => {
-      let { option, selected, label } = suggestion;
-      return getKey(option) === toggleKey ? { option, selected: !selected, label } : suggestion;
+      let { option, selected } = suggestion;
+      return getKey(option) === toggleKey ? changeSelected(suggestion, !selected) : suggestion;
     });
 
     this.setState({

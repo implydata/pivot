@@ -186,6 +186,13 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
     return this.version;
   }
 
+  public getCollectionsInvolvingCluster(clusterName: string): Collection[] {
+    const dependantDataCubes = this.getDataCubesForCluster(clusterName);
+    return this.collections.filter((collection) => {
+      return dependantDataCubes.some((dataCube => collection.dependsOnDataCube(dataCube.name)));
+    });
+  }
+
   public getDataCubesForCluster(clusterName: string): DataCube[] {
     return this.dataCubes.filter(dataCube => dataCube.clusterName === clusterName);
   }
@@ -248,7 +255,7 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
       value.dataCubes = value.dataCubes.filter(dataCube => dataCube.clusterName !== clusterName);
       value.collections = value.collections.map(collection => {
         for (var affectedDataCube of affectedDataCubes) {
-          collection = collection.deleteTilesContainingCube(affectedDataCube.name)
+          collection = collection.deleteTilesContainingCube(affectedDataCube.name);
         }
         return collection;
       });
