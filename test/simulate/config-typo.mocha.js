@@ -43,8 +43,6 @@ describe('config typo', function () {
       expect(body).to.contain('<!DOCTYPE html>');
       expect(body).to.contain('<title>Pivot');
       expect(body).to.contain('<div class="app-container"></div>');
-      expect(body).to.contain('"dataCubes":[]');
-      expect(body).to.contain('</html>');
       testComplete();
     });
   });

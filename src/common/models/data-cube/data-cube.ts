@@ -882,9 +882,20 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
 
   public fillAllFromAttributes(attributes: Attributes): DataCube {
     var newDataCube = this.appendAttributes(this.filterAttributes(attributes));
-    return newDataCube
-      .appendDimensions(newDataCube.getSuggestedDimensions())
-      .appendMeasures(newDataCube.getSuggestedMeasures());
+
+    var introspection = this.getIntrospection();
+    // Most of the time introspection can be assumed to be 'autofill-all' consideration of the introspection value is
+    // done as a backwards compatibility measure
+
+    if (introspection === 'autofill-all' || introspection === 'autofill-dimensions-only') {
+      newDataCube = newDataCube.appendDimensions(newDataCube.getSuggestedDimensions());
+    }
+
+    if (introspection === 'autofill-all' || introspection === 'autofill-measures-only') {
+      newDataCube = newDataCube.appendMeasures(newDataCube.getSuggestedMeasures());
+    }
+
+    return newDataCube;
   }
 
   public getIntrospection(): Introspection {

@@ -291,6 +291,7 @@ if (serverSettingsFilePath) {
     }
 
   } else {
+    autoLoad = 'once';
     settingsStore = SettingsStore.fromReadOnlyFile(serverSettingsFilePath, 'yaml');
   }
 } else {
