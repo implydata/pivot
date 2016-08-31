@@ -115,7 +115,6 @@ export class DataCubeSeedModal extends React.Component<DataCubeSeedModalProps, D
 
     var newDataCube = DataCube.fromClusterAndSource(
       generateUniqueName('dc', name => indexByAttribute(dataCubes, 'name', name) === -1),
-      makeTitle(clusterSource.source),
       clusterSource.cluster,
       clusterSource.source
     );

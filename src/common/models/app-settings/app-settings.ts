@@ -201,6 +201,10 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
     return findByName(this.dataCubes, dataCubeName);
   }
 
+  public getCluster(clusterName: string): Cluster {
+    return findByName(this.clusters, clusterName);
+  }
+
   public addOrUpdateDataCube(dataCube: DataCube): AppSettings {
     var value = this.valueOf();
     value.dataCubes = overrideByName(value.dataCubes, dataCube);

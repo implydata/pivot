@@ -260,6 +260,9 @@ if (START_SERVER) {
 
 const CLUSTER_TYPES: SupportedType[] = ['druid', 'postgres', 'mysql'];
 
+type AutoLoad = 'none' | 'once' | 'continuous';
+var autoLoad: AutoLoad = 'none';
+
 var settingsStore: SettingsStore = null;
 
 if (serverSettingsFilePath) {
@@ -296,8 +299,10 @@ if (serverSettingsFilePath) {
   // If a file is specified add it as a dataCube
   var fileToLoad = parsedArgs['file'];
   if (fileToLoad) {
+    var fileName = path.basename(fileToLoad, path.extname(fileToLoad));
     initAppSettings = initAppSettings.addDataCube(new DataCube({
-      name: path.basename(fileToLoad, path.extname(fileToLoad)),
+      name: fileName,
+      title: fileName,
       clusterName: 'native',
       source: fileToLoad
     }));
@@ -310,8 +315,6 @@ if (serverSettingsFilePath) {
         name: clusterType,
         type: clusterType,
         host: host,
-        sourceListScan: 'auto',
-        sourceListRefreshInterval: 15000,
 
         user: parsedArgs['user'],
         password: parsedArgs['password'],
@@ -321,6 +324,7 @@ if (serverSettingsFilePath) {
   }
 
   settingsStore = SettingsStore.fromTransient(initAppSettings);
+  autoLoad = 'once';
 }
 
 export const SETTINGS_MANAGER = new SettingsManager(settingsStore, {
@@ -329,6 +333,10 @@ export const SETTINGS_MANAGER = new SettingsManager(settingsStore, {
   anchorPath,
   initialLoadTimeout: SERVER_SETTINGS.getPageMustLoadTimeout()
 });
+
+if (autoLoad === 'once') {
+  SETTINGS_MANAGER.autoLoad();
+}
 
 // --- Printing -------------------------------
 

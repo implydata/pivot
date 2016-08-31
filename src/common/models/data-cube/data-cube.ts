@@ -308,10 +308,10 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
     return measures;
   }
 
-  static fromClusterAndSource(name: string, title: string, cluster: Cluster, source: string): DataCube {
+  static fromClusterAndSource(name: string, cluster: Cluster, source: string): DataCube {
     return DataCube.fromJS({
       name,
-      title,
+      title: makeTitle(source),
       clusterName: cluster.name,
       source,
       primaryTimeAttribute: (cluster && cluster.type === 'druid') ? '__time' : null

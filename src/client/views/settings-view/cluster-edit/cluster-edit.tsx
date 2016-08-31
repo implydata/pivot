@@ -121,7 +121,7 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
     if (sources) {
       sugestedDataCubes = sources.map((source, i) => {
         // ToDo: make the name generation here better;
-        return DataCube.fromClusterAndSource(`${newInstance.name}_${i}`, makeTitle(source), newInstance, source);
+        return DataCube.fromClusterAndSource(`${newInstance.name}_${i}`, newInstance, source);
       });
     }
 

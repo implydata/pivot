@@ -340,7 +340,7 @@ export class SettingsManager {
       });
   }
 
-  getAllClusterSources(): Q.Promise<ClusterNameAndSource> {
+  getAllClusterSources(): Q.Promise<ClusterNameAndSource[]> {
     var clusterSources = this.clusterManagers.map((clusterManager) => {
       var clusterName = clusterManager.cluster.name;
       return clusterManager.getSources().then((sources) => {
@@ -350,7 +350,7 @@ export class SettingsManager {
       });
     });
 
-    return (Q.all(clusterSources) as any).then((things: ClusterNameAndSource[][]) => flatten(things));
+    return Q.all(clusterSources).then((things: ClusterNameAndSource[][]) => flatten(things));
   }
 
   getAllAttributes(source: string, cluster: string | Cluster): Q.Promise<Attributes> {
@@ -379,7 +379,7 @@ export class SettingsManager {
         }
       })
         .then((clusterManager: ClusterManager) => {
-          return DataCube.fromClusterAndSource('test_cube', 'TC', clusterManager.cluster, source)
+          return DataCube.fromClusterAndSource('test_cube', clusterManager.cluster, source)
             .toExternal(clusterManager.cluster, clusterManager.requester)
             .introspect()
             .then((introspectedExternal) => introspectedExternal.attributes) as any;
@@ -419,5 +419,38 @@ export class SettingsManager {
         }
       });
     }
+  }
+
+  public autoLoad(): void {
+    const { verbose, logger } = this;
+    logger.log(`Auto load requested`);
+
+    this.currentWork = this.currentWork
+      .then(() => {
+        logger.log(`Auto loading`);
+        return this.getAllClusterSources();
+      })
+      .then((clusterNameAndSources) => {
+        var nativeDataCubeFillTasks = this.appSettings.getDataCubesForCluster('native').map((nativeDataCube) => {
+          return this.getAllAttributes(nativeDataCube.source, 'native')
+            .then(attributes => {
+              return nativeDataCube.fillAllFromAttributes(attributes);
+            });
+        });
+
+        var clusterDataCubeFillTasks = clusterNameAndSources.map((clusterNameAndSource, i) => {
+          const { clusterName, source } = clusterNameAndSource;
+          var baseDataCube = DataCube.fromClusterAndSource(`${clusterName}-${source}-${i}`, this.appSettings.getCluster(clusterName), source);
+          return this.getAllAttributes(source, clusterName)
+            .then(attributes => {
+              return baseDataCube.fillAllFromAttributes(attributes);
+            });
+        });
+
+        return Q.all(nativeDataCubeFillTasks.concat(clusterDataCubeFillTasks));
+      })
+      .then((fullDataCube: DataCube[]) => {
+        return this.reviseSettings(this.appSettings.changeDataCubes(fullDataCube));
+      });
   }
 }
