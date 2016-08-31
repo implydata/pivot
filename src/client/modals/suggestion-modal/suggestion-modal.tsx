@@ -53,6 +53,7 @@ export interface SuggestionModalProps<T> extends React.Props<any> {
   title: string;
   okLabel?: (c: number) => string;
   nothingLabel?: string;
+  explanation?: (c: number) => string;
 }
 
 export interface SuggestionModalState<T> {
@@ -174,7 +175,7 @@ export class SuggestionModal<T> extends React.Component<SuggestionModalProps<T>,
   }
 
   render() {
-    const { onClose, title, okLabel } = this.props;
+    const { onClose, title, okLabel, explanation } = this.props;
     const { suggestions } = this.state;
     if (!suggestions || suggestions.length === 0) return this.renderEmpty();
 
@@ -185,6 +186,7 @@ export class SuggestionModal<T> extends React.Component<SuggestionModalProps<T>,
       onClose={onClose}
       onEnter={this.onAdd.bind(this)}
     >
+      { explanation ? <div className="explanation"> { explanation(length) } </div> : null }
       <div className="actions">
         <button key='all' onClick={this.selectAll.bind(this)}>Select all</button>
         <button key='none' onClick={this.selectNone.bind(this)}>Select none</button>

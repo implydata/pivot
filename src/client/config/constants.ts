@@ -70,6 +70,7 @@ export const STRINGS = {
   create: 'Create',
   cubes: 'cubes',
   dataCubes: 'Data Cubes',
+  dataSources: 'data sources',
   'delete': 'Delete',
   deleteCollection: 'Delete this collection',
   deleteCollectionTile: 'Delete this tile',
@@ -146,6 +147,7 @@ export const STRINGS = {
   unsplitable: 'Un-splittable',
   updateTimezone: 'Update Timezone',
   viewRawData: 'View raw data',
+  wouldYouLikeToCreateCubes: 'Would you like to create data cubes from them?',
   yes: 'Yes'
 };
 

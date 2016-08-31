@@ -136,6 +136,7 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
       options={sugestedDataCubes}
       title={STRINGS.createDataCubesFromCluster}
       okLabel={(n: number) => `${STRINGS.create} ${pluralIfNeeded(n, 'data cube')}`}
+      explanation={(n: number) => `${newInstance.name} has ${n} ${STRINGS.dataSources}. ${STRINGS.wouldYouLikeToCreateCubes}`}
     />;
   }
 

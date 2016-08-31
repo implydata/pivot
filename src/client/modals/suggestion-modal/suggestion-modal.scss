@@ -32,6 +32,10 @@ $checkbox-width: 20px;
     }
   }
 
+  .explanation {
+    margin-bottom: 10px;
+  }
+
   .actions {
     button {
       @extend %button-light-action
