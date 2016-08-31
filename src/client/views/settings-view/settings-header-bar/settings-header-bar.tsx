@@ -40,6 +40,10 @@ export class SettingsHeaderBar extends React.Component<SettingsHeaderBarProps, S
     };
   }
 
+  onHomeClick() {
+    window.location.hash = '#';
+  }
+
   // User menu
 
   onUserMenuClick(e: MouseEvent) {
@@ -95,6 +99,9 @@ export class SettingsHeaderBar extends React.Component<SettingsHeaderBarProps, S
       </div>
       <div className="right-bar">
         {this.props.children}
+        <div className="icon-button home" onClick={this.onHomeClick.bind(this)}>
+          <SvgIcon svg={require('../../../icons/home.svg')}/>
+        </div>
         {userButton}
       </div>
       {this.renderUserMenu()}
