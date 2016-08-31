@@ -424,17 +424,12 @@ export class SettingsManager {
     }
   }
 
-  public autoLoad(): void {
+  private autoLoadFromInitSettings(initSettings: AppSettings): Q.Promise<AppSettings> {
     const { verbose, logger } = this;
-    logger.log(`Auto load requested`);
-
-    this.currentWork = this.currentWork
-      .then(() => {
-        logger.log(`Auto loading`);
-        return this.getAllClusterSources();
-      })
+    logger.log(`Auto loading`);
+    return this.getAllClusterSources()
       .then((clusterNameAndSources) => {
-        var nativeDataCubeFillTasks = this.appSettings.getDataCubesForCluster('native').map((nativeDataCube) => {
+        var nativeDataCubeFillTasks = initSettings.getDataCubesForCluster('native').map((nativeDataCube) => {
           return this.getAllAttributes(nativeDataCube.source, 'native')
             .then(attributes => {
               return nativeDataCube.fillAllFromAttributes(attributes);
@@ -443,7 +438,10 @@ export class SettingsManager {
 
         var clusterDataCubeFillTasks = clusterNameAndSources.map((clusterNameAndSource, i) => {
           const { clusterName, source } = clusterNameAndSource;
-          var baseDataCube = DataCube.fromClusterAndSource(`${clusterName}-${source}-${i}`, this.appSettings.getCluster(clusterName), source);
+          var baseDataCube = initSettings.getDataCubeByClusterSource(clusterName, source);
+          if (!baseDataCube) {
+            baseDataCube = DataCube.fromClusterAndSource(`${clusterName}-${source}-${i}`, initSettings.getCluster(clusterName), source);
+          }
           return this.getAllAttributes(source, clusterName)
             .then(attributes => {
               return baseDataCube.fillAllFromAttributes(attributes);
@@ -452,8 +450,19 @@ export class SettingsManager {
 
         return Q.all(nativeDataCubeFillTasks.concat(clusterDataCubeFillTasks));
       })
-      .then((fullDataCube: DataCube[]) => {
-        return this.reviseSettings(this.appSettings.changeDataCubes(fullDataCube));
+      .then((fullDataCubes: DataCube[]) => {
+        return initSettings.changeDataCubes(fullDataCubes);
+      });
+  }
+
+  public autoLoad(): void {
+    const { verbose, logger } = this;
+    logger.log(`Auto load requested`);
+
+    this.currentWork = this.currentWork
+      .then(() => this.autoLoadFromInitSettings(this.appSettings))
+      .then((appSettings: AppSettings) => {
+        return this.reviseSettings(appSettings);
       });
   }
 }

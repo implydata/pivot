@@ -16,7 +16,7 @@
 
 import { Class, Instance, isInstanceOf, immutableArraysEqual, immutableEqual } from 'immutable-class';
 import { ImmutableUtils } from '../../utils/index';
-import { Executor, findByName, overrideByName } from 'plywood';
+import { Executor, find, findByName, overrideByName } from 'plywood';
 import { hasOwnProperty } from '../../utils/general/general';
 import { Cluster, ClusterJS } from '../cluster/cluster';
 import { Customization, CustomizationJS } from '../customization/customization';
@@ -195,6 +195,10 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
 
   public getDataCubesForCluster(clusterName: string): DataCube[] {
     return this.dataCubes.filter(dataCube => dataCube.clusterName === clusterName);
+  }
+
+  public getDataCubeByClusterSource(clusterName: string, source: string): DataCube {
+    return find(this.dataCubes, (dataCube) => dataCube.clusterName === clusterName && dataCube.source === source);
   }
 
   public getDataCube(dataCubeName: string): DataCube {
