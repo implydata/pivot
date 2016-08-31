@@ -244,5 +244,9 @@ export const DATA_CUBE = {
     description: `While Pivot tries to learn as much as it can from your data cube
       from Druid directly. It can not (yet) do a perfect job.
       The attributeOverrides: section of the data cube is there for you to fix that.`
+  },
+  options: {
+    label: `Options`,
+    description: `This does options.` // todo fill me in
   }
 };
