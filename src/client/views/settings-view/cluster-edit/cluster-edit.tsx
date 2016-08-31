@@ -30,7 +30,7 @@ import { ImmutableInput } from '../../../components/immutable-input/immutable-in
 import { ImmutableDropdown } from '../../../components/immutable-dropdown/immutable-dropdown';
 import { SuggestionModal } from "../../../modals/suggestion-modal/suggestion-modal";
 
-import { ImmutableFormDelegate, ImmutableFormState } from '../../../utils/immutable-form-delegate/immutable-form-delegate';
+import { ImmutableFormDelegate, ImmutableFormState } from '../../../delegates/index';
 
 import { AppSettings, Cluster, ListItem, DataCube } from '../../../../common/models/index';
 

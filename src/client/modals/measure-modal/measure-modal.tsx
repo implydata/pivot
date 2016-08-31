@@ -26,7 +26,7 @@ import { Measure } from '../../../common/models/index';
 
 import { MEASURE as LABELS } from '../../../common/models/labels';
 
-import { ImmutableFormDelegate, ImmutableFormState } from '../../utils/immutable-form-delegate/immutable-form-delegate';
+import { ImmutableFormDelegate, ImmutableFormState } from '../../delegates/index';
 
 
 export interface MeasureModalProps extends React.Props<any> {

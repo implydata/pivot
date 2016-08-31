@@ -36,7 +36,7 @@ import { AppSettings, ListItem, Cluster, DataCube, Dimension, DimensionJS, Measu
 
 import { DATA_CUBE as LABELS } from '../../../../common/models/labels';
 
-import { ImmutableFormDelegate, ImmutableFormState } from '../../../utils/immutable-form-delegate/immutable-form-delegate';
+import { ImmutableFormDelegate, ImmutableFormState } from '../../../delegates/index';
 
 import { DataTable } from '../data-table/data-table';
 

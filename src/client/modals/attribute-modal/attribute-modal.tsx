@@ -24,7 +24,7 @@ import { AttributeInfo } from 'plywood';
 import { ATTRIBUTE as LABELS } from '../../../common/models/labels';
 import { ListItem } from "../../../common/models/list-item/list-item";
 
-import { ImmutableFormDelegate, ImmutableFormState } from "../../utils/immutable-form-delegate/immutable-form-delegate";
+import { ImmutableFormDelegate, ImmutableFormState } from "../../delegates/index";
 import { FormLabel, ImmutableDropdown, Modal, ImmutableInput, Checkbox, Button } from "../../components/index";
 
 const SELECTED = "hsl(200, 80%, 51%)";

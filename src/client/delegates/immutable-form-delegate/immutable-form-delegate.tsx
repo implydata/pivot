@@ -38,10 +38,10 @@ export class ImmutableFormDelegate<T> {
   constructor(form: React.Component<any, ImmutableFormState<T>>) {
     this.form = form;
 
-    this.form.state = {
-      canSave: false,
-      errors: {}
-    };
+    if (!this.form.state) this.form.state = {};
+
+    this.form.state.canSave = false;
+    this.form.state.errors = {};
 
     this.onChange = this.onChange.bind(this);
     this.updateErrors = this.updateErrors.bind(this);

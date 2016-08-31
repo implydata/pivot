@@ -27,7 +27,7 @@ import { Dimension, ListItem, granularityFromJS, granularityToString } from '../
 
 import { DIMENSION as LABELS } from '../../../common/models/labels';
 
-import { ImmutableFormDelegate, ImmutableFormState } from '../../utils/immutable-form-delegate/immutable-form-delegate';
+import { ImmutableFormDelegate, ImmutableFormState } from '../../delegates/index';
 
 
 export interface DimensionModalProps extends React.Props<any> {

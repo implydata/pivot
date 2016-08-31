@@ -21,7 +21,7 @@ import * as ReactDOM from 'react-dom';
 
 import { ImmutableUtils } from '../../../common/utils/index';
 import { classNames } from '../../utils/dom/dom';
-import { ChangeFn } from '../../utils/immutable-form-delegate/immutable-form-delegate';
+import { ChangeFn } from '../../delegates/immutable-form-delegate/immutable-form-delegate';
 
 import { firstUp } from '../../../common/utils/string/string';
 

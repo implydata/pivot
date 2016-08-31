@@ -28,7 +28,10 @@ import { CLUSTER as LABELS } from '../../../common/models/labels';
 import { generateUniqueName } from '../../../common/utils/string/string';
 import { indexByAttribute } from '../../../common/utils/array/array';
 
-import { ImmutableFormDelegate, ImmutableFormState } from '../../utils/immutable-form-delegate/immutable-form-delegate';
+import {
+  ImmutableFormDelegate, ImmutableFormState,
+  LoadingMessageDelegate, LoadingMessageState
+} from '../../delegates/index';
 
 export interface ClusterSeedModalProps extends React.Props<any> {
   onNext: (newCluster: Cluster, sources: string[]) => void;
@@ -36,17 +39,22 @@ export interface ClusterSeedModalProps extends React.Props<any> {
   clusters: Cluster[];
 }
 
-export interface ClusterSeedModalState extends ImmutableFormState<Cluster> {
-  loading?: boolean;
-}
+export interface ClusterSeedModalState extends ImmutableFormState<Cluster>, LoadingMessageState {}
 
 export class ClusterSeedModal extends React.Component<ClusterSeedModalProps, ClusterSeedModalState> {
-  private delegate: ImmutableFormDelegate<Cluster>;
+  private formDelegate: ImmutableFormDelegate<Cluster>;
+
+  // This delays the loading state by 250ms so it doesn't flicker in case the
+  // server responds quickly
+  private loadingDelegate: LoadingMessageDelegate;
+
 
   constructor() {
     super();
-    this.delegate = new ImmutableFormDelegate<Cluster>(this);
-    this.delegate.on('type', this.makeSureHostIsValid.bind(this));
+    this.formDelegate = new ImmutableFormDelegate<Cluster>(this);
+    this.formDelegate.on('type', this.makeSureHostIsValid.bind(this));
+
+    this.loadingDelegate = new LoadingMessageDelegate(this);
   }
 
   makeSureHostIsValid() {
@@ -87,13 +95,13 @@ export class ClusterSeedModal extends React.Component<ClusterSeedModalProps, Clu
     })
       .then(
         (resp) => {
-          this.setState({loading: false});
+          this.loadingDelegate.stop();
           var cluster = Cluster.fromJS(resp.cluster);
           cluster = cluster.changeTitle(`My ${cluster.type} cluster`);
           this.props.onNext(cluster, resp.sources);
         },
         (xhr: XMLHttpRequest) => {
-          this.setState({loading: false});
+          this.loadingDelegate.stop();
           Notifier.failure('Woops', 'Something bad happened');
         }
       )
@@ -104,20 +112,20 @@ export class ClusterSeedModal extends React.Component<ClusterSeedModalProps, Clu
     const { canSave } = this.state;
     if (canSave) {
       this.connect();
-      this.setState({loading: true});
+      this.loadingDelegate.start('Creating cluster…');
     }
   }
 
   render(): JSX.Element {
     const { onCancel } = this.props;
-    const { newInstance, errors, canSave, loading } = this.state;
+    const { newInstance, errors, canSave, loadingMessage, isLoading } = this.state;
 
     if (!newInstance) return null;
     let clusterType = newInstance.type;
 
     var makeLabel = FormLabel.simpleGenerator(LABELS, errors, true);
-    var makeTextInput = ImmutableInput.simpleGenerator(newInstance, this.delegate.onChange);
-    var makeDropdownInput = ImmutableDropdown.simpleGenerator(newInstance, this.delegate.onChange);
+    var makeTextInput = ImmutableInput.simpleGenerator(newInstance, this.formDelegate.onChange);
+    var makeDropdownInput = ImmutableDropdown.simpleGenerator(newInstance, this.formDelegate.onChange);
 
     var extraSQLFields: JSX.Element = null;
 
@@ -139,7 +147,7 @@ export class ClusterSeedModal extends React.Component<ClusterSeedModalProps, Clu
       title={STRINGS.connectNewCluster}
       onClose={this.props.onCancel}
       onEnter={this.onNext.bind(this)}
-      deaf={loading}
+      deaf={isLoading}
     >
       <form>
         {makeLabel('type')}
@@ -151,8 +159,8 @@ export class ClusterSeedModal extends React.Component<ClusterSeedModalProps, Clu
         {extraSQLFields}
       </form>
 
-      {loading
-        ? <LoadingBar label="Creating cluster…"/>
+      {isLoading
+        ? <LoadingBar label={loadingMessage}/>
 
         : <div className="button-bar">
           <Button

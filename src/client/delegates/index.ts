@@ -14,15 +14,5 @@
  * limitations under the License.
  */
 
-@import '../../imports';
-
-.data-cube-seed-modal {
-  form {
-    @extend %form;
-    width: 100%;
-  }
-
-  .loading-bar {
-    margin-top: 10px;
-  }
-}
+export * from './immutable-form-delegate/immutable-form-delegate';
+export * from './loading-message-delegate/loading-message-delegate';

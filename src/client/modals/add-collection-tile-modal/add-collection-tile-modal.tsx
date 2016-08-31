@@ -13,7 +13,7 @@ import { STRINGS } from '../../config/constants';
 
 import { COLLECTION_ITEM as LABELS } from '../../../common/models/labels';
 
-import { ImmutableFormDelegate, ImmutableFormState } from '../../utils/immutable-form-delegate/immutable-form-delegate';
+import { ImmutableFormDelegate, ImmutableFormState } from '../../delegates/index';
 
 export type CollectionMode = 'adding' | 'picking' | 'none';
 

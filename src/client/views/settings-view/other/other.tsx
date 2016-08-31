@@ -29,7 +29,7 @@ import { GENERAL as LABELS } from '../../../../common/models/labels';
 
 import { AppSettings, AppSettingsJS } from '../../../../common/models/index';
 
-import { ImmutableFormDelegate, ImmutableFormState } from '../../../utils/immutable-form-delegate/immutable-form-delegate';
+import { ImmutableFormDelegate, ImmutableFormState } from '../../../delegates/index';
 
 export interface OtherProps extends React.Props<any> {
   settings?: AppSettings;

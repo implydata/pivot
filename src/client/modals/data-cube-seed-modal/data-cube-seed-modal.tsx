@@ -20,16 +20,15 @@ import * as React from 'react';
 import { AttributeInfo, findByName } from 'plywood';
 import { DataCube, Cluster } from "../../../common/models/index";
 
-import { FormLabel, Button, Modal, ImmutableInput, Dropdown, Checkbox } from '../../components/index';
+import { FormLabel, Button, Modal, ImmutableInput, Dropdown, Checkbox, LoadingBar, Notifier } from '../../components/index';
 import { STRINGS } from "../../config/constants";
 import { Ajax } from '../../utils/ajax/ajax';
-import { Notifier } from '../../components/notifications/notifications';
 import { DATA_CUBE as LABELS } from '../../../common/models/labels';
 import { makeTitle } from "../../../common/utils/general/general";
 import { generateUniqueName } from '../../../common/utils/string/string';
 import { indexByAttribute } from '../../../common/utils/array/array';
 
-import { ImmutableFormDelegate, ImmutableFormState } from '../../utils/immutable-form-delegate/immutable-form-delegate';
+import { LoadingMessageDelegate, LoadingMessageState } from '../../delegates/index';
 
 export interface DataCubeSeedModalProps extends React.Props<any> {
   onNext: (newDataCube: DataCube) => void;
@@ -43,24 +42,30 @@ export interface ClusterSource {
   source: string;
 }
 
-export interface DataCubeSeedModalState extends ImmutableFormState<DataCube> {
+export interface DataCubeSeedModalState extends LoadingMessageState {
+  newInstance?: DataCube;
   autoFill?: boolean;
   clusterSources?: ClusterSource[];
   clusterSource?: ClusterSource;
+  loadingMessage?: string;
 }
 
 export class DataCubeSeedModal extends React.Component<DataCubeSeedModalProps, DataCubeSeedModalState> {
   private mounted = false;
-  private delegate: ImmutableFormDelegate<DataCube>;
+
+  // This delays the loading state by 250ms so it doesn't flicker in case the
+  // server responds quickly
+  private loadingDelegate: LoadingMessageDelegate;
 
   constructor() {
     super();
-    this.delegate = new ImmutableFormDelegate<DataCube>(this);
     this.state = {
       autoFill: true,
       clusterSources: [],
       clusterSource: null
     };
+
+    this.loadingDelegate = new LoadingMessageDelegate(this);
   }
 
   initFromProps(props: DataCubeSeedModalProps) {
@@ -80,6 +85,8 @@ export class DataCubeSeedModal extends React.Component<DataCubeSeedModalProps, D
     this.mounted = true;
     this.initFromProps(this.props);
 
+    this.loadingDelegate.start('Loading clusters…');
+
     Ajax.query({ method: "GET", url: 'settings/cluster-sources' })
       .then(
         (resp) => {
@@ -93,6 +100,8 @@ export class DataCubeSeedModal extends React.Component<DataCubeSeedModalProps, D
             };
           });
 
+          this.loadingDelegate.stop();
+
           this.setState({
             clusterSources,
             clusterSource: clusterSources[0] || null
@@ -100,6 +109,7 @@ export class DataCubeSeedModal extends React.Component<DataCubeSeedModalProps, D
         },
         (e: Error) => {
           if (!this.mounted) return;
+          this.loadingDelegate.stop();
           Notifier.failure('Sorry', `There was a problem loading sources ${e.message}`);
         }
       ).done();
@@ -108,7 +118,6 @@ export class DataCubeSeedModal extends React.Component<DataCubeSeedModalProps, D
   componentWillUnmount() {
     this.mounted = false;
   }
-
 
   onNext() {
     const { dataCubes, clusters } = this.props;
@@ -121,6 +130,8 @@ export class DataCubeSeedModal extends React.Component<DataCubeSeedModalProps, D
       clusterSource.cluster,
       clusterSource.source
     );
+
+    this.loadingDelegate.start('Creating cube…');
 
     Ajax.query({
       method: "POST",
@@ -139,9 +150,13 @@ export class DataCubeSeedModal extends React.Component<DataCubeSeedModalProps, D
             newDataCube = newDataCube.changeAttributes(attributes);
           }
 
+          this.loadingDelegate.stop();
           this.props.onNext(newDataCube);
         },
-        (xhr: XMLHttpRequest) => Notifier.failure('Woops', 'Something bad happened')
+        (xhr: XMLHttpRequest) => {
+          this.loadingDelegate.stop();
+          Notifier.failure('Woops', 'Something bad happened');
+        }
       )
       .done();
   }
@@ -165,7 +180,7 @@ export class DataCubeSeedModal extends React.Component<DataCubeSeedModalProps, D
 
   render(): JSX.Element {
     const { onNext, onCancel } = this.props;
-    const { errors, autoFill, clusterSources, clusterSource } = this.state;
+    const { autoFill, clusterSources, clusterSource, loadingMessage, isLoading } = this.state;
 
     let ClusterSourceDropdown = Dropdown.specialize<ClusterSource>();
 
@@ -174,6 +189,7 @@ export class DataCubeSeedModal extends React.Component<DataCubeSeedModalProps, D
       title={STRINGS.createDataCube}
       onClose={this.props.onCancel}
       onEnter={this.onNext.bind(this)}
+      deaf={isLoading}
     >
       <form>
         { FormLabel.dumbLabel('Source') }
@@ -192,15 +208,19 @@ export class DataCubeSeedModal extends React.Component<DataCubeSeedModalProps, D
           label={STRINGS.autoFillDimensionsAndMeasures}
         />
       </form>
-      <div className="button-bar">
-        <Button
-          type="primary"
-          title={`${STRINGS.next}: ${STRINGS.configureDataCube}`}
-          disabled={!clusterSource}
-          onClick={this.onNext.bind(this)}
-        />
-        <Button className="cancel" title="Cancel" type="secondary" onClick={onCancel}/>
-      </div>
+
+      {isLoading
+        ? <LoadingBar label={loadingMessage}/>
+        : <div className="button-bar">
+          <Button
+            type="primary"
+            title={`${STRINGS.next}: ${STRINGS.configureDataCube}`}
+            disabled={!clusterSource}
+            onClick={this.onNext.bind(this)}
+          />
+          <Button className="cancel" title="Cancel" type="secondary" onClick={onCancel}/>
+        </div>
+      }
 
     </Modal>;
   }
