@@ -99,7 +99,7 @@ export class ClusterSeedModal extends React.Component<ClusterSeedModalProps, Clu
           var cluster = Cluster.fromJS(resp.cluster);
           cluster = cluster
             .changeTitle(`My ${cluster.type} cluster`)
-            .changeTimeout('40000')
+            .changeTimeout(Cluster.DEFAULT_TIMEOUT)
             ;
           this.props.onNext(cluster, resp.sources);
         },
