@@ -39,7 +39,7 @@ $immutable-list-width: 400px;
 
     .actions {
       button {
-        @extend %button-light-action
+        @extend %button-light-action;
       }
     }
   }

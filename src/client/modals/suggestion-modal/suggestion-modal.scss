@@ -19,6 +19,8 @@ $checkbox-width: 20px;
 
 .suggestion-modal {
 
+  @import '../../utils/styles/grid';
+
   .background {
     background: $background-lightest;
     padding: 10px 0;
@@ -38,7 +40,7 @@ $checkbox-width: 20px;
 
   .actions {
     button {
-      @extend %button-light-action
+      @extend %button-light-action;
     }
 
     padding-bottom: 10px;
@@ -79,6 +81,10 @@ $checkbox-width: 20px;
 
       &:not(:last-child) {
         margin-right: 6px;
+      }
+
+      &.alternate {
+        @extend %button-light-action;
       }
     }
   }

@@ -27,13 +27,11 @@ import { ListItem } from "../../../common/models/list-item/list-item";
 import { ImmutableFormDelegate, ImmutableFormState } from "../../delegates/index";
 import { FormLabel, ImmutableDropdown, Modal, ImmutableInput, Checkbox, Button } from "../../components/index";
 
-const SELECTED = "hsl(200, 80%, 51%)";
-const UNSELECTED = "#cccccc";
-
 export interface AttributeModalProps extends React.Props<any> {
   attributeInfo: AttributeInfo;
   onSave?: (attribute: AttributeInfo) => void;
   onClose?: () => void;
+  onAlternateClick?: () => void;
   onRemove?: () => void;
   mode?: 'create' | 'edit';
 }
@@ -58,6 +56,10 @@ export class AttributeModal extends React.Component<AttributeModalProps, Attribu
     {label: 'Histogram', value: 'histogram'}
   ];
 
+  static defaultProps = {
+    mode: 'edit'
+  };
+
   public mounted: boolean;
   private delegate: ImmutableFormDelegate<AttributeInfo>;
 
@@ -70,7 +72,7 @@ export class AttributeModal extends React.Component<AttributeModalProps, Attribu
     if (props.attributeInfo) {
       this.setState({
         newInstance: new AttributeInfo(props.attributeInfo.valueOf()),
-        canSave: false,
+        canSave: props.mode === 'create',
         errors: {}
       });
     }
@@ -95,6 +97,36 @@ export class AttributeModal extends React.Component<AttributeModalProps, Attribu
     return this.delegate.onChange(toggled, true, 'unsplitable', undefined);
   }
 
+  renderAlternateButton() {
+    const { onRemove, onAlternateClick, mode } = this.props;
+
+    if (mode === 'create' && onAlternateClick) {
+      return <Button className="alternate" title={STRINGS.orViewSuggestedAttributes} type="primary" onClick={onAlternateClick}/>;
+    } else if (mode === 'edit' && onRemove) {
+      return <Button className="warn" title={STRINGS.removeAttribute} type="warn" onClick={onRemove}/>;
+    }
+
+    return null;
+  }
+
+  renderButtons() {
+    const { attributeInfo, onClose, mode, onRemove } = this.props;
+    const { newInstance, canSave } = this.state;
+    const saveButtonDisabled = !canSave || (mode === 'edit' && attributeInfo.equals(newInstance));
+
+    const okText = mode === 'create' ? STRINGS.add : STRINGS.save;
+
+    return <div className="grid-row button-bar">
+      <div className="grid-col-50">
+        <Button type="primary" title={okText} onClick={this.save.bind(this)} disabled={saveButtonDisabled} />
+        <Button className="cancel" title={STRINGS.cancel} type="secondary" onClick={onClose}/>
+      </div>
+      <div className="grid-col-50 right">
+        {this.renderAlternateButton()}
+      </div>
+    </div>;
+  }
+
   render() {
     const { attributeInfo, onClose, mode, onRemove } = this.props;
     const { newInstance, canSave, errors } = this.state;
@@ -106,7 +138,6 @@ export class AttributeModal extends React.Component<AttributeModalProps, Attribu
     var makeDropdownInput = ImmutableDropdown.simpleGenerator(newInstance, this.delegate.onChange);
 
     var title: string = null;
-    var okText: string = null;
     let nameDiv: JSX.Element = null;
     if (mode === 'create') {
       var makeTextInput = ImmutableInput.simpleGenerator(newInstance, this.delegate.onChange);
@@ -115,10 +146,8 @@ export class AttributeModal extends React.Component<AttributeModalProps, Attribu
         {makeTextInput('name', /^.+$/, true)}
       </div>;
       title = `${STRINGS.add} ${STRINGS.attribute}`;
-      okText = `${STRINGS.add} ${STRINGS.attribute}`;
     } else {
       title = attributeInfo.name;
-      okText = `${STRINGS.save}`;
     }
 
     return <Modal
@@ -133,29 +162,11 @@ export class AttributeModal extends React.Component<AttributeModalProps, Attribu
         {makeDropdownInput('type', AttributeModal.TYPES)}
         {makeLabel('special')}
         {makeDropdownInput('special', AttributeModal.SPECIAL)}
-        <div
-          className="row"
-          onClick={this.toggleSplittable.bind(this)}
-        >
-          <Checkbox
-            color={unsplitable ? SELECTED : UNSELECTED}
-            label="Un-Splittable"
-            selected={unsplitable}
-          />
+        <div className="row" onClick={this.toggleSplittable.bind(this)}>
+          <Checkbox label="Un-Splittable" selected={unsplitable}/>
         </div>
       </form>
-      <div className="grid-row button-bar">
-        <div className="grid-col-50">
-          <Button type="primary" title={okText} onClick={this.save.bind(this)} disabled={saveButtonDisabled} />
-          <Button className="cancel" title={STRINGS.cancel} type="secondary" onClick={onClose}/>
-        </div>
-        <div className="grid-col-50 right">
-          { onRemove
-            ? <Button className="warn" title={STRINGS.removeAttribute} type="warn" onClick={onRemove}/>
-            : null
-          }
-        </div>
-      </div>
+      {this.renderButtons()}
     </Modal>;
   }
 }

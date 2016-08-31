@@ -24,9 +24,6 @@ import { pluralIfNeeded } from "../../../common/utils/general/general";
 
 import { Checkbox } from "../../components/checkbox/checkbox";
 
-const SELECTED = "hsl(200, 80%, 51%)";
-const UNSELECTED = "#cccccc";
-
 function defaultGetKey(thing: any): string {
   return thing.name;
 }
@@ -45,6 +42,7 @@ export interface Suggestion<T> {
 export interface SuggestionModalProps<T> extends React.Props<any> {
   onOk: SuggestionModalAction<T>;
   onDoNothing: SuggestionModalAction<T>;
+  onAlternateView?: SuggestionModalAction<T>;
 
   suggestions: ListItem[];
 
@@ -132,6 +130,19 @@ export class SuggestionModal<T> extends React.Component<SuggestionModalProps<T>,
     />;
   }
 
+  renderAlternateButton() {
+    const { onAlternateView } = this.props;
+
+    if (!onAlternateView) return null;
+
+    return <Button
+      className="alternate"
+      title={onAlternateView.label(length)}
+      type="primary"
+      onClick={onAlternateView.callback}
+    />;
+  }
+
   renderEmpty() {
     const { onClose, title, onDoNothing } = this.props;
 
@@ -139,8 +150,13 @@ export class SuggestionModal<T> extends React.Component<SuggestionModalProps<T>,
       <div className="background">
         <div className="message">{STRINGS.thereAreNoSuggestionsAtTheMoment}</div>
       </div>
-      <div className="button-bar">
-        {this.renderSecondaryButton()}
+      <div className="grid-row button-bar">
+        <div className="grid-col-50">
+          {this.renderSecondaryButton()}
+        </div>
+        <div className="grid-col-50 right">
+          {this.renderAlternateButton()}
+        </div>
       </div>
     </Modal>;
   }
@@ -152,8 +168,6 @@ export class SuggestionModal<T> extends React.Component<SuggestionModalProps<T>,
     if (!suggestions || suggestions.length === 0) return this.renderEmpty();
 
     const length = selection.filter(Boolean).length;
-
-     // : `${STRINGS.add} ${pluralIfNeeded(length, title)}`
 
     return <Modal
       className="suggestion-modal"
@@ -169,14 +183,20 @@ export class SuggestionModal<T> extends React.Component<SuggestionModalProps<T>,
       <div className="background">
         {this.renderSuggestions()}
       </div>
-      <div className="button-bar">
-        <Button
-          type="primary"
-          title={onOk.label(length)}
-          disabled={length === 0}
-          onClick={this.onAdd.bind(this)}
-        />
-        {this.renderSecondaryButton()}
+
+      <div className="grid-row button-bar">
+        <div className="grid-col-50">
+          <Button
+            type="primary"
+            title={onOk.label(length)}
+            disabled={length === 0}
+            onClick={this.onAdd.bind(this)}
+          />
+          {this.renderSecondaryButton()}
+        </div>
+        <div className="grid-col-50 right">
+          {this.renderAlternateButton()}
+        </div>
       </div>
     </Modal>;
   }

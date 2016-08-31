@@ -43,6 +43,16 @@ $checkbox-width: 20px;
 
   .checkbox {
     margin-top: 2px;
+
+    &.selected {
+      .checkbox-body {
+        background: $brand;
+      }
+    }
+  }
+
+  button.alternate {
+    @extend %button-light-action;
   }
 }
 

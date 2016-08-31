@@ -117,6 +117,8 @@ export const STRINGS = {
   noFilter: 'No filter',
   noTilesInThisCollection: 'There are no tiles in this collection',
   ok: 'OK',
+  orAddASpecificAttribute: 'Or add a specific attribute',
+  orViewSuggestedAttributes: 'Or view suggested attributes',
   openIn: 'Open in',
   pin: 'Pin',
   pinboard: 'Pinboard',

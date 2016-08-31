@@ -23,6 +23,7 @@ import { AttributeInfo, Attributes, findByName, Dataset } from 'plywood';
 
 import { titleCase } from '../../../../common/utils/string/string';
 import { pluralIfNeeded } from "../../../../common/utils/general/general";
+import { generateUniqueName } from '../../../../common/utils/string/string';
 
 import { STRINGS } from "../../../config/constants";
 
@@ -43,6 +44,8 @@ export interface DataTableState {
 
   showSuggestionsModal?: boolean;
   attributeSuggestions?: Attributes;
+
+  showAddAttributeModal?: boolean;
 
   dataset?: Dataset;
   error?: Error;
@@ -180,7 +183,8 @@ export class DataTable extends React.Component<DataTableProps, DataTableState> {
 
     if (dependants > 0) {
       message = <div className="message">
-        <p>This attribute has {pluralIfNeeded(dependantDimensions.length, 'dimension')} and {pluralIfNeeded(dependantMeasures.length, 'measure')} relying on it.</p>
+        <p>This attribute has {pluralIfNeeded(dependantDimensions.length, 'dimension')}
+        and {pluralIfNeeded(dependantMeasures.length, 'measure')} relying on it.</p>
         <p>Removing it will remove them as well.</p>
         <div className="dependency-list">
           {dependantDimensions.map(d => <p key={d.name}>{d.title}</p>)}
@@ -255,7 +259,8 @@ export class DataTable extends React.Component<DataTableProps, DataTableState> {
   closeAttributeSuggestions() {
     this.setState({
       attributeSuggestions: null,
-      showSuggestionsModal: false
+      showSuggestionsModal: false,
+      showAddAttributeModal: false
     });
   }
 
@@ -280,7 +285,17 @@ export class DataTable extends React.Component<DataTableProps, DataTableState> {
 
     const onDoNothing = {
       label: () => STRINGS.cancel,
-      callback: this.closeAttributeSuggestions
+      callback: this.closeAttributeSuggestions.bind(this)
+    };
+
+    const onAlternateView = {
+      label: () => STRINGS.orAddASpecificAttribute,
+      callback: () => {
+        this.setState({
+          showSuggestionsModal: false,
+          showAddAttributeModal: true
+        });
+      }
     };
 
     const AttributeSuggestionModal = SuggestionModal.specialize<AttributeInfo>();
@@ -288,10 +303,43 @@ export class DataTable extends React.Component<DataTableProps, DataTableState> {
     return <AttributeSuggestionModal
       onOk={onOk}
       onDoNothing={onDoNothing}
+      onAlternateView={onAlternateView}
       suggestions={attributeSuggestions.map(a => {return {label: getAttributeLabel(a), value: a};})}
 
       onClose={this.closeAttributeSuggestions.bind(this)}
       title={`${STRINGS.attribute} ${STRINGS.suggestions}`}
+    />;
+  }
+
+  renderAttributeAdd() {
+    const { onChange, dataCube } = this.props;
+    const { showAddAttributeModal } = this.state;
+
+    if (!showAddAttributeModal) return null;
+
+    const attribute = new AttributeInfo({
+      name: generateUniqueName('a', () => true),
+      type: 'STRING'
+    });
+
+    const onSave = (attribute: AttributeInfo) => {
+      onChange(dataCube.changeAttributes(dataCube.attributes.concat([attribute]).sort()));
+      this.closeAttributeSuggestions();
+    };
+
+    const onAlternateClick = () => {
+      this.setState({
+        showSuggestionsModal: true,
+        showAddAttributeModal: false
+      });
+    };
+
+    return  <AttributeModal
+      attributeInfo={attribute}
+      onClose={this.closeAttributeSuggestions.bind(this)}
+      onSave={onSave}
+      onAlternateClick={onAlternateClick}
+      mode="create"
     />;
   }
 
@@ -311,6 +359,7 @@ export class DataTable extends React.Component<DataTableProps, DataTableState> {
       />
       { this.renderEditModal() }
       { this.renderAttributeSuggestions() }
+      { this.renderAttributeAdd() }
     </div>;
   }
 }
