@@ -31,7 +31,7 @@ import { Duration, Timezone } from 'chronoshift';
 import { DATA_CUBES_STRATEGIES_LABELS, STRINGS } from '../../../config/constants';
 
 import { SvgIcon, FormLabel, Button, SimpleTableColumn, SimpleTable, ImmutableInput, ImmutableList, ImmutableDropdown } from '../../../components/index';
-import { DimensionModal, MeasureModal, SuggestionModal, SuggestionModalAction, AttributeModal } from '../../../modals/index';
+import { DimensionModal, MeasureModal, SuggestionModal, AttributeModal } from '../../../modals/index';
 import { AppSettings, ListItem, Cluster, DataCube, Dimension, DimensionJS, Measure, MeasureJS, Customization } from '../../../../common/models/index';
 
 import { DATA_CUBE as LABELS } from '../../../../common/models/labels';
@@ -266,15 +266,15 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
   renderDimensionSuggestions() {
     const { newInstance } = this.state;
 
-    const onOk: SuggestionModalAction<Dimension> = {
-      label: (n) => `${STRINGS.add} ${pluralIfNeeded(n, 'dimension')}`,
+    const onOk = {
+      label: (n: number) => `${STRINGS.add} ${pluralIfNeeded(n, 'dimension')}`,
       callback: (newDimensions: Dimension[]) => {
         this.addDimensions(newDimensions);
         this.closeModal();
       }
     };
 
-    const onDoNothing: SuggestionModalAction<Dimension> = {
+    const onDoNothing = {
       label: () => STRINGS.cancel,
       callback: this.closeModal
     };
@@ -353,15 +353,15 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
   renderMeasureSuggestions() {
     const { newInstance } = this.state;
 
-    const onOk: SuggestionModalAction<Measure> = {
-      label: (n) => `${STRINGS.add} ${pluralIfNeeded(n, 'measure')}`,
+    const onOk = {
+      label: (n: number) => `${STRINGS.add} ${pluralIfNeeded(n, 'measure')}`,
       callback: (newMeasures: Measure[]) => {
         this.addMeasures(newMeasures);
         this.closeModal();
       }
     };
 
-    const onDoNothing: SuggestionModalAction<Measure> = {
+    const onDoNothing = {
       label: () => STRINGS.cancel,
       callback: this.closeModal
     };

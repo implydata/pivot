@@ -31,7 +31,7 @@ import { DataCube } from '../../../../common/models/index';
 import { classNames } from '../../../utils/dom/dom';
 
 import { SvgIcon, SimpleTable, SimpleTableColumn, Notifier } from '../../../components/index';
-import { AttributeModal, SuggestionModal, SuggestionModalAction } from '../../../modals/index';
+import { AttributeModal, SuggestionModal } from '../../../modals/index';
 
 export interface DataTableProps extends React.Props<any> {
   dataCube?: DataCube;
@@ -270,15 +270,15 @@ export class DataTable extends React.Component<DataTableProps, DataTableState> {
       return `${a.name} as ${a.type}${special}`;
     };
 
-    const onOk: SuggestionModalAction<AttributeInfo> = {
-      label: (n) => `${STRINGS.add} ${pluralIfNeeded(n, 'attribute')}`,
+    const onOk = {
+      label: (n: number) => `${STRINGS.add} ${pluralIfNeeded(n, 'attribute')}`,
       callback: (extraAttributes: Attributes) => {
         onChange(dataCube.changeAttributes(dataCube.attributes.concat(extraAttributes).sort()));
         this.closeAttributeSuggestions();
       }
     };
 
-    const onDoNothing: SuggestionModalAction<AttributeInfo> = {
+    const onDoNothing = {
       label: () => STRINGS.cancel,
       callback: this.closeAttributeSuggestions
     };

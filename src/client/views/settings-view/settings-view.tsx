@@ -33,7 +33,7 @@ import { Notifier } from '../../components/notifications/notifications';
 
 import { Button, SvgIcon, Router, Route } from '../../components/index';
 
-import { ClusterSeedModal, DataCubeSeedModal, SuggestionModal, SuggestionModalAction } from '../../modals/index';
+import { ClusterSeedModal, DataCubeSeedModal, SuggestionModal } from '../../modals/index';
 
 import { AppSettings, Cluster } from '../../../common/models/index';
 
@@ -239,12 +239,12 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
 
     const closeModal = () => this.setState({tempClusterSources: null});
 
-    const onOk: SuggestionModalAction<DataCube> = {
-      label: (n) => `${STRINGS.create} ${pluralIfNeeded(n, 'data cube')}`,
+    const onOk = {
+      label: (n: number) => `${STRINGS.create} ${pluralIfNeeded(n, 'data cube')}`,
       callback: (cubes: DataCube[]) => this.addDependantCubes(cluster, cubes).then(closeModal)
     };
 
-    const onDoNothing: SuggestionModalAction<DataCube> = {
+    const onDoNothing = {
       label: () => STRINGS.noIllCreateThem,
       callback: closeModal
     };
