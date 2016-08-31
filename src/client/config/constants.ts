@@ -141,6 +141,7 @@ export const STRINGS = {
   start: 'Start',
   stringSearch: 'String search',
   subsplit: 'Split',
+  subsetFilter: 'Subset Filter',
   suggestion: 'suggestion',
   suggestions: 'suggestions',
   timezone: 'Timezone',

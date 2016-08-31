@@ -32,7 +32,7 @@ import { DataCube } from '../../../../common/models/index';
 import { classNames } from '../../../utils/dom/dom';
 
 import { SvgIcon, SimpleTable, SimpleTableColumn, Notifier } from '../../../components/index';
-import { AttributeModal, SuggestionModal } from '../../../modals/index';
+import { AttributeModal, SuggestionModal, DataCubeFilterModal } from '../../../modals/index';
 
 export interface DataTableProps extends React.Props<any> {
   dataCube?: DataCube;
@@ -46,6 +46,8 @@ export interface DataTableState {
   attributeSuggestions?: Attributes;
 
   showAddAttributeModal?: boolean;
+
+  showSubsetFilterModal?: boolean;
 
   dataset?: Dataset;
   error?: Error;
@@ -222,8 +224,33 @@ export class DataTable extends React.Component<DataTableProps, DataTableState> {
     });
   }
 
+  renderFiltersModal() {
+    const { dataCube, onChange } = this.props;
+    const { showSubsetFilterModal } = this.state;
+    if (!showSubsetFilterModal) return null;
+
+    const onClose = () => {
+      this.setState({
+        showSubsetFilterModal: false
+      });
+    };
+
+    const onSave = (dataCube: DataCube) => {
+      onChange(dataCube);
+      onClose();
+    };
+
+    return <DataCubeFilterModal
+      onSave={onSave}
+      onClose={onClose}
+      dataCube={dataCube}
+    />;
+  }
+
   onFiltersClick() {
-    // TODO: do.
+    this.setState({
+      showSubsetFilterModal: true
+    });
   }
 
   fetchSuggestions() {
@@ -360,6 +387,7 @@ export class DataTable extends React.Component<DataTableProps, DataTableState> {
       { this.renderEditModal() }
       { this.renderAttributeSuggestions() }
       { this.renderAttributeAdd() }
+      { this.renderFiltersModal() }
     </div>;
   }
 }

@@ -24,3 +24,4 @@ export * from './dimension-modal/dimension-modal';
 export * from './measure-modal/measure-modal';
 export * from './raw-data-modal/raw-data-modal';
 export * from './suggestion-modal/suggestion-modal';
+export * from './data-cube-filter-modal/data-cube-filter-modal';

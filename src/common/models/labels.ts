@@ -216,7 +216,7 @@ export const DATA_CUBE = {
     description: 'The name of cube\'s source. The dataSource, table, or filename of the data for this cube'
   },
   subsetFormula: {
-    label: 'Subset Formula',
+    label: 'Subset Filter Formula',
     description: 'A row level filter that is applied to the cube. This filter is never represented in the UI'
   },
   defaultDuration: {
