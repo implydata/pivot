@@ -24,11 +24,7 @@ import { classNames } from '../../../utils/dom/dom';
 import { NUM_REGEX } from '../../../../common/utils/string/string';
 import { STRINGS } from '../../../config/constants';
 
-import { FormLabel } from '../../../components/form-label/form-label';
-import { Button } from '../../../components/button/button';
-import { ImmutableInput } from '../../../components/immutable-input/immutable-input';
-import { ImmutableDropdown } from '../../../components/immutable-dropdown/immutable-dropdown';
-import { SuggestionModal } from "../../../modals/suggestion-modal/suggestion-modal";
+import { FormLabel, Button, ImmutableInput, ImmutableDropdown, GlobalEventListener } from '../../../components/index';
 
 import { ImmutableFormDelegate, ImmutableFormState } from '../../../delegates/index';
 
@@ -38,8 +34,7 @@ import { CLUSTER as LABELS } from '../../../../common/models/labels';
 
 export interface ClusterEditProps extends React.Props<any> {
   cluster?: Cluster;
-  sources?: string[];
-  onSave: (newCluster: Cluster, newDataCubes: DataCube[]) => Q.Promise<void>;
+  onSave: (newCluster: Cluster) => Q.Promise<void>;
   isNewCluster?: boolean;
   onCancel?: () => void;
   getSuggestedCubes?: () => DataCube[];
@@ -88,56 +83,13 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
   }
 
   save() {
-    if (this.props.onSave) this.props.onSave(this.state.newInstance, null);
-  }
-
-  saveAndAddCubes(dataCubes: DataCube[]) {
-    if (this.props.onSave) this.props.onSave(this.state.newInstance, dataCubes);
+    if (this.props.onSave) this.props.onSave(this.state.newInstance);
   }
 
   goBack() {
     const { cluster } = this.props;
     var hash = window.location.hash;
     window.location.hash = hash.replace(`/${cluster.name}`, '');
-  }
-
-  openCreateCubesModal() {
-    this.setState({
-      showCreateCubesModal: true
-    });
-  }
-
-  closeCreateCubesModal() {
-    this.setState({
-      showCreateCubesModal: true
-    });
-  }
-
-  renderCreateCubesModal(): JSX.Element {
-    const { sources } = this.props;
-    const { newInstance } = this.state;
-
-    var sugestedDataCubes: DataCube[] = [];
-    if (sources) {
-      sugestedDataCubes = sources.map((source, i) => {
-        // ToDo: make the name generation here better;
-        return DataCube.fromClusterAndSource(`${newInstance.name}_${i}`, newInstance, source);
-      });
-    }
-
-    const CubesSuggestionModal = SuggestionModal.specialize<DataCube>();
-
-    return <CubesSuggestionModal
-      onAdd={this.saveAndAddCubes.bind(this)}
-      onNothing={this.save.bind(this)}
-      nothingLabel={STRINGS.noIllCreateThem}
-      onClose={this.closeCreateCubesModal.bind(this)}
-      getLabel={(m) => `${m.title}`}
-      options={sugestedDataCubes}
-      title={STRINGS.createDataCubesFromCluster}
-      okLabel={(n: number) => `${STRINGS.create} ${pluralIfNeeded(n, 'data cube')}`}
-      explanation={(n: number) => `${newInstance.name} has ${n} ${STRINGS.dataSources}. ${STRINGS.wouldYouLikeToCreateCubes}`}
-    />;
   }
 
   renderGeneral(): JSX.Element {
@@ -177,6 +129,10 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
     </form>;
   }
 
+  onEnter() {
+    if (this.state.canSave) this.save();
+  }
+
   renderButtons(): JSX.Element {
     const { cluster, isNewCluster } = this.props;
     const { canSave, newInstance } = this.state;
@@ -193,7 +149,7 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
       className={classNames("save", {disabled: !canSave || (!isNewCluster && !hasChanged)})}
       title={isNewCluster ? "Connect cluster" : "Save"}
       type="primary"
-      onClick={this.openCreateCubesModal.bind(this)}
+      onClick={this.save.bind(this)}
     />;
 
     if (!isNewCluster && !hasChanged) {
@@ -219,11 +175,12 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
 
   render() {
     const { isNewCluster } = this.props;
-    const { newInstance, showCreateCubesModal } = this.state;
+    const { newInstance } = this.state;
 
     if (!newInstance) return null;
 
     return <div className="cluster-edit">
+      <GlobalEventListener enter={this.onEnter.bind(this)}/>
       <div className="title-bar">
         {isNewCluster
           ? null
@@ -240,8 +197,6 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
       <div className="content">
         {this.renderGeneral()}
       </div>
-      {showCreateCubesModal ? this.renderCreateCubesModal() : null}
-
     </div>;
   }
 }

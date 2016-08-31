@@ -97,7 +97,10 @@ export class ClusterSeedModal extends React.Component<ClusterSeedModalProps, Clu
         (resp) => {
           this.loadingDelegate.stop();
           var cluster = Cluster.fromJS(resp.cluster);
-          cluster = cluster.changeTitle(`My ${cluster.type} cluster`);
+          cluster = cluster
+            .changeTitle(`My ${cluster.type} cluster`)
+            .changeTimeout('40000')
+            ;
           this.props.onNext(cluster, resp.sources);
         },
         (xhr: XMLHttpRequest) => {

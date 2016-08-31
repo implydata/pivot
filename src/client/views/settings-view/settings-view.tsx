@@ -23,7 +23,7 @@ import { AttributeInfo } from 'plywood';
 import { DataCube, User, Customization } from '../../../common/models/index';
 import { MANIFESTS } from '../../../common/manifests/index';
 import { STRINGS } from '../../config/constants';
-import { Fn } from '../../../common/utils/general/general';
+import { Fn, pluralIfNeeded } from '../../../common/utils/general/general';
 import { Ajax } from '../../utils/ajax/ajax';
 import { indexByAttribute } from '../../../common/utils/array/array';
 import { ImmutableUtils } from '../../../common/utils/immutable-utils/immutable-utils';
@@ -33,7 +33,7 @@ import { Notifier } from '../../components/notifications/notifications';
 
 import { Button, SvgIcon, Router, Route } from '../../components/index';
 
-import { ClusterSeedModal, DataCubeSeedModal } from '../../modals/index';
+import { ClusterSeedModal, DataCubeSeedModal, SuggestionModal } from '../../modals/index';
 
 import { AppSettings, Cluster } from '../../../common/models/index';
 
@@ -52,12 +52,17 @@ export interface SettingsViewProps extends React.Props<any> {
   onSettingsChange?: (settings: AppSettings) => void;
 }
 
+export interface TempCubes {
+  names: string[];
+  cluster: Cluster;
+}
+
 export interface SettingsViewState {
   settings?: AppSettings;
   breadCrumbs?: string[];
 
   tempCluster?: Cluster;
-  tempClusterSources?: string[];
+  tempClusterSources?: TempCubes;
   tempDataCube?: DataCube;
 }
 
@@ -130,7 +135,7 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
       .then(
         (status) => {
           this.setState({settings});
-          Notifier.success(okMessage ? okMessage : 'Settings saved');
+          if (okMessage !== null) Notifier.success(okMessage || 'Settings saved');
 
           if (onSettingsChange) {
             onSettingsChange(settings.toClientSettings());
@@ -174,36 +179,25 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
   createCluster(newCluster: Cluster, sources: string[]) {
     this.setState({
       tempCluster: newCluster,
-      tempClusterSources: sources
+      tempClusterSources: {
+        names: sources,
+        cluster: newCluster
+      }
     });
   }
 
-  addClusterAndDataCubes(newCluster: Cluster, newDataCubes: DataCube[]) {
+  addCluster(newCluster: Cluster) {
     var { settings } = this.state;
     settings = ImmutableUtils.addInArray(settings, 'clusters', newCluster);
 
-    if (newDataCubes && newDataCubes.length) {
-      Q.all(newDataCubes.map((dataCube) => autoFillDataCube(dataCube, newCluster))).then(
-        (filledDataCubes) => {
-          settings = settings.appendDataCubes(filledDataCubes);
-          this.onSave(settings, 'Cluster and data cubes created').then(this.backToClustersView.bind(this));
-        },
-        (e: Error) => {
-          Notifier.failure('Woops', 'Something bad happened');
-        }
-      );
-    } else {
-      this.onSave(settings, 'Cluster created').then(this.backToClustersView.bind(this));
-    }
+    this.onSave(settings, 'Cluster created').then(this.backToClustersView.bind(this));
   }
 
   backToClustersView() {
-    window.location.hash = '#settings/clusters';
-
     this.setState({
-      tempCluster: null,
-      tempClusterSources: null
+      tempCluster: null
     });
+    window.location.hash = '#settings/clusters';
   }
 
   updateCluster(newCluster: Cluster) {
@@ -214,6 +208,54 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
     this.onSave(
       ImmutableUtils.addInArray(settings, 'clusters', newCluster, index)
     ).then(this.backToClustersView.bind(this));
+  }
+
+  renderCreateCubesModal(): JSX.Element {
+    const { settings, tempClusterSources } = this.state;
+    const { names, cluster } = tempClusterSources;
+
+    var sugestedDataCubes: DataCube[] = [];
+    if (tempClusterSources) {
+      sugestedDataCubes = names.map((source, i) => {
+        // ToDo: make the name generation here better;
+        return DataCube.fromClusterAndSource(`${cluster.name}_${i}`, cluster, source);
+      });
+    }
+
+    const add = (cubes: DataCube[]) => {
+      Q.all(cubes.map((c) => autoFillDataCube(c, cluster))).then(
+        (filledDataCubes) => {
+          this.onSave(settings.appendDataCubes(filledDataCubes), null)
+          .then(() => {
+            Notifier.success('Data cubes created', {
+              label: 'View first one',
+              callback: () => window.location.hash = `#settings/${PATHS.dataCubes}/${filledDataCubes[0].name}`
+            });
+          });
+        },
+        (e: Error) => {
+          Notifier.failure('Woops', 'Something bad happened');
+        }
+      );
+    };
+
+    const close = () => this.setState({
+      tempClusterSources: null
+    });
+
+    const CubesSuggestionModal = SuggestionModal.specialize<DataCube>();
+
+    return <CubesSuggestionModal
+      onAdd={add}
+      onNothing={close}
+      nothingLabel={STRINGS.noIllCreateThem}
+      onClose={close}
+      getLabel={(m) => `${m.title}`}
+      options={sugestedDataCubes}
+      title={STRINGS.createDataCubesFromCluster}
+      okLabel={(n: number) => `${STRINGS.create} ${pluralIfNeeded(n, 'data cube')}`}
+      explanation={(n: number) => `${cluster.title} has ${n} ${STRINGS.dataSources}. ${STRINGS.wouldYouLikeToCreateCubes}`}
+    />;
   }
 
   // !-- Cluster creation flow
@@ -227,11 +269,10 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
 
   addDataCube(newDataCube: DataCube) {
     this.onSave(
-      ImmutableUtils.addInArray(this.state.settings, 'dataCubes', newDataCube),
+      this.state.settings.appendDataCubes([newDataCube]),
       'Data cube created'
     ).then(this.backToDataCubesView.bind(this));
   }
-
 
   backToDataCubesView() {
     window.location.hash = `#settings/${PATHS.dataCubes}`;
@@ -303,7 +344,7 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
         title={STRINGS.settings}
       />
 
-      {hasLeftButtons
+      { hasLeftButtons
         ? <div className="left-panel">
             {this.renderLeftButtons(breadCrumbs)}
           </div>
@@ -316,6 +357,7 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
 
           <Route fragment={PATHS.clusters}>
             <Clusters settings={settings} onSave={this.onSave.bind(this)}/>
+            { tempClusterSources ? this.renderCreateCubesModal() : null }
 
             <Route fragment="new-cluster">
               { tempCluster ? null : <Clusters settings={settings} onSave={this.onSave.bind(this)}/> }
@@ -324,8 +366,7 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
                 ? <ClusterEdit
                     isNewCluster={true}
                     cluster={tempCluster}
-                    sources={tempClusterSources}
-                    onSave={this.addClusterAndDataCubes.bind(this)}
+                    onSave={this.addCluster.bind(this)}
                     onCancel={this.backToClustersView.bind(this)}
                   />
                 : <ClusterSeedModal
