@@ -33,7 +33,7 @@ import { Notifier } from '../../components/notifications/notifications';
 
 import { Button, SvgIcon, Router, Route } from '../../components/index';
 
-import { ClusterSeedModal, DataCubeSeedModal, SuggestionModal } from '../../modals/index';
+import { ClusterSeedModal, DataCubeSeedModal, SuggestionModal, SuggestionModalAction } from '../../modals/index';
 
 import { AppSettings, Cluster } from '../../../common/models/index';
 
@@ -135,7 +135,10 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
       .then(
         (status) => {
           this.setState({settings});
-          if (okMessage !== null) Notifier.success(okMessage || 'Settings saved');
+          if (okMessage !== null) {
+            Notifier.clear();
+            Notifier.success(okMessage || 'Settings saved');
+          }
 
           if (onSettingsChange) {
             onSettingsChange(settings.toClientSettings());
@@ -210,51 +213,54 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
     ).then(this.backToClustersView.bind(this));
   }
 
+  addDependantCubes(cluster: Cluster, cubes: DataCube[]) {
+    return Q.all(cubes.map((cube) => autoFillDataCube(cube, cluster)))
+      .then(this.addDataCubes.bind(this))
+      .then(
+        () => {
+          Notifier.clear();
+          Notifier.success('Data cubes created', {
+            label: 'View first one',
+            callback: () => window.location.hash = `#settings/${PATHS.dataCubes}/${cubes[0].name}`
+          });
+        },
+        (e: Error) => {
+          console.error(e);
+          Notifier.failure('Woops', 'Something bad happened');
+        }
+      );
+  }
+
   renderCreateCubesModal(): JSX.Element {
     const { settings, tempClusterSources } = this.state;
     const { names, cluster } = tempClusterSources;
 
-    var sugestedDataCubes: DataCube[] = [];
-    if (tempClusterSources) {
-      sugestedDataCubes = names.map((source, i) => {
-        // ToDo: make the name generation here better;
-        return DataCube.fromClusterAndSource(`${cluster.name}_${i}`, cluster, source);
-      });
-    }
-
-    const add = (cubes: DataCube[]) => {
-      Q.all(cubes.map((c) => autoFillDataCube(c, cluster))).then(
-        (filledDataCubes) => {
-          this.onSave(settings.appendDataCubes(filledDataCubes), null)
-          .then(() => {
-            Notifier.success('Data cubes created', {
-              label: 'View first one',
-              callback: () => window.location.hash = `#settings/${PATHS.dataCubes}/${filledDataCubes[0].name}`
-            });
-          });
-        },
-        (e: Error) => {
-          Notifier.failure('Woops', 'Something bad happened');
-        }
-      );
-    };
-
-    const close = () => this.setState({
-      tempClusterSources: null
-    });
-
     const CubesSuggestionModal = SuggestionModal.specialize<DataCube>();
 
+    const closeModal = () => this.setState({tempClusterSources: null});
+
+    const onOk: SuggestionModalAction<DataCube> = {
+      label: (n) => `${STRINGS.create} ${pluralIfNeeded(n, 'data cube')}`,
+      callback: (cubes: DataCube[]) => this.addDependantCubes(cluster, cubes).then(closeModal)
+    };
+
+    const onDoNothing: SuggestionModalAction<DataCube> = {
+      label: () => STRINGS.noIllCreateThem,
+      callback: closeModal
+    };
+
+    const suggestions = tempClusterSources.names.map((source, i) => {
+      // ToDo: make the name generation here better;
+      let cube = DataCube.fromClusterAndSource(`${cluster.name}_${i}`, cluster, source);
+      return {label: cube.title, value: cube};
+    });
+
     return <CubesSuggestionModal
-      onAdd={add}
-      onNothing={close}
-      nothingLabel={STRINGS.noIllCreateThem}
-      onClose={close}
-      getLabel={(m) => `${m.title}`}
-      options={sugestedDataCubes}
+      onOk={onOk}
+      onDoNothing={onDoNothing}
+      onClose={closeModal}
+      suggestions={suggestions}
       title={STRINGS.createDataCubesFromCluster}
-      okLabel={(n: number) => `${STRINGS.create} ${pluralIfNeeded(n, 'data cube')}`}
-      explanation={(n: number) => `"${cluster.title}" has ${n} ${STRINGS.dataSources}. ${STRINGS.wouldYouLikeToCreateCubes}`}
     />;
   }
 
@@ -272,6 +278,10 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
       this.state.settings.appendDataCubes([newDataCube]),
       'Data cube created'
     ).then(this.backToDataCubesView.bind(this));
+  }
+
+  addDataCubes(dataCubes: DataCube[]) {
+    return this.onSave(this.state.settings.appendDataCubes(dataCubes), null);
   }
 
   backToDataCubesView() {

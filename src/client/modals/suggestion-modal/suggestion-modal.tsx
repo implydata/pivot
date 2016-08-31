@@ -18,6 +18,7 @@ require('./suggestion-modal.css');
 
 import * as React from 'react';
 import { Button, Modal } from '../../components/index';
+import { ListItem } from '../../../common/models/index';
 import { STRINGS } from "../../config/constants";
 import { pluralIfNeeded } from "../../../common/utils/general/general";
 
@@ -30,141 +31,111 @@ function defaultGetKey(thing: any): string {
   return thing.name;
 }
 
+export interface SuggestionModalAction<T> {
+  label: (n: number) => string;
+  callback: (suggestions?: T[]) => void;
+}
+
 export interface Suggestion<T> {
   option: T;
   selected: boolean;
   label: string;
 }
 
-function changeSelected<T>(suggestion: Suggestion<T>, value: boolean): Suggestion<T> {
-  const { option, label } = suggestion;
-  return {
-    option, label, selected: value
-  };
-}
-
 export interface SuggestionModalProps<T> extends React.Props<any> {
-  onAdd: (suggestions: T[]) => void;
-  onNothing?: () => void;
+  onOk: SuggestionModalAction<T>;
+  onDoNothing: SuggestionModalAction<T>;
+
+  suggestions: ListItem[];
+
   onClose: () => void;
-  getLabel: (o: T) => string;
-  getKey?: (o: T) => string;
-  options: T[];
+
   title: string;
-  okLabel?: (c: number) => string;
-  nothingLabel?: string;
   explanation?: (c: number) => string;
 }
 
 export interface SuggestionModalState<T> {
-  suggestions: Suggestion<T>[];
+  selection?: boolean[];
 }
 
 export class SuggestionModal<T> extends React.Component<SuggestionModalProps<T>, SuggestionModalState<T>> {
-  static defaultProps = {
-    getKey: defaultGetKey
-  };
-
   static specialize<U>() {
     return SuggestionModal as { new (): SuggestionModal<U>; };
   }
 
   constructor() {
     super();
-    this.state = {
-      suggestions: []
-    };
+    this.state = {selection: []};
   }
 
   componentDidMount() {
-    const { options } = this.props;
-    if (options) this.initFromProps(this.props);
+    const { suggestions } = this.props;
+    if (suggestions) this.initFromProps(this.props);
   }
 
   initFromProps(props: SuggestionModalProps<T>) {
-    const { options, getLabel } = props;
     this.setState({
-      suggestions: options.map((s) => { return { option: s, selected: true, label: getLabel(s) }; })
+      selection: props.suggestions.map((s) => true)
     });
   }
 
   onAdd() {
-    const { onAdd, onClose } = this.props;
-    const { suggestions } = this.state;
-    onAdd(suggestions.filter(s => s.selected).map(s => s.option));
-    onClose();
+    const { onOk, suggestions } = this.props;
+    const { selection } = this.state;
+    onOk.callback(suggestions.filter((s, i) => selection[i]).map(s => s.value));
   }
 
   selectAll() {
-    const { suggestions } = this.state;
-    const allSelected = suggestions.map((s) => changeSelected(s, true));
     this.setState({
-      suggestions: allSelected
+      selection: this.state.selection.map(() => true)
     });
   }
 
   selectNone() {
-    const { suggestions } = this.state;
-    const noneSelected = suggestions.map((s) => changeSelected(s, false));
     this.setState({
-      suggestions: noneSelected
-    });
-  }
-
-  toggleSuggestion(toggle: Suggestion<T>) {
-    const { getKey } = this.props;
-    const { suggestions } = this.state;
-    const toggleKey = getKey(toggle.option);
-
-    var newStateSuggestions = suggestions.map((suggestion) => {
-      let { option, selected } = suggestion;
-      return getKey(option) === toggleKey ? changeSelected(suggestion, !selected) : suggestion;
-    });
-
-    this.setState({
-      suggestions: newStateSuggestions
+      selection: this.state.selection.map(() => false)
     });
   }
 
   renderSuggestions() {
-    const { getKey } = this.props;
-    const { suggestions } = this.state;
+    const { suggestions } = this.props;
+    const { selection } = this.state;
+
     if (!suggestions) return null;
 
-    return suggestions.map((s => {
-      let { option, selected, label } = s;
-      return <div
-        className="row"
-        key={getKey(option)}
-        onClick={this.toggleSuggestion.bind(this, s)}
-      >
-        <Checkbox
-          color={selected ? SELECTED : UNSELECTED}
-          label={label}
-          selected={selected}
-        />
-        </div>;
+    const toggle = (i: number) => {
+      selection[i] = !selection[i];
+
+      this.setState({
+        selection
+      });
+    };
+
+    return suggestions.map(((s, i) => {
+      return <div className="row" key={i} onClick={toggle.bind(this, i)}>
+        <Checkbox label={s.label} selected={selection[i]}/>
+      </div>;
     }));
   }
 
   renderSecondaryButton() {
-    const { onClose, onNothing, nothingLabel } = this.props;
+    const { onClose, onDoNothing } = this.props;
+    const { selection } = this.state;
 
-    if (onNothing && nothingLabel) {
-      return <Button className="cancel" title={nothingLabel} type="secondary" onClick={onNothing}/>;
-    } else {
-      return <Button className="cancel" title={STRINGS.cancel} type="secondary" onClick={onClose}/>;
-    }
+    const length = selection.filter(Boolean).length;
+
+    return <Button
+      className="cancel"
+      title={onDoNothing ? onDoNothing.label(length) : STRINGS.cancel}
+      type="secondary"
+      onClick={onDoNothing ? onDoNothing.callback : onClose}
+    />;
   }
 
   renderEmpty() {
-    const { onClose, title } = this.props;
+    const { onClose, title, onDoNothing } = this.props;
 
-    return <Modal
-      className="suggestion-modal"
-      title={`${title}`}
-      onClose={onClose}
-    >
+    return <Modal className="suggestion-modal" title={`${title}`} onClose={onClose}>
       <div className="background">
         <div className="message">{STRINGS.thereAreNoSuggestionsAtTheMoment}</div>
       </div>
@@ -175,11 +146,15 @@ export class SuggestionModal<T> extends React.Component<SuggestionModalProps<T>,
   }
 
   render() {
-    const { onClose, title, okLabel, explanation } = this.props;
-    const { suggestions } = this.state;
+    const { suggestions, onClose, title, onOk, explanation } = this.props;
+    const { selection } = this.state;
+
     if (!suggestions || suggestions.length === 0) return this.renderEmpty();
 
-    const length = suggestions.filter((s) => s.selected).length;
+    const length = selection.filter(Boolean).length;
+
+     // : `${STRINGS.add} ${pluralIfNeeded(length, title)}`
+
     return <Modal
       className="suggestion-modal"
       title={`${title}`}
@@ -188,14 +163,19 @@ export class SuggestionModal<T> extends React.Component<SuggestionModalProps<T>,
     >
       { explanation ? <div className="explanation"> { explanation(length) } </div> : null }
       <div className="actions">
-        <button key='all' onClick={this.selectAll.bind(this)}>Select all</button>
-        <button key='none' onClick={this.selectNone.bind(this)}>Select none</button>
+        <button onClick={this.selectAll.bind(this)}>Select all</button>
+        <button onClick={this.selectNone.bind(this)}>Select none</button>
       </div>
       <div className="background">
         {this.renderSuggestions()}
       </div>
       <div className="button-bar">
-        <Button type="primary" title={okLabel ? okLabel(length) : `${STRINGS.add} ${pluralIfNeeded(length, title)}`} disabled={length === 0} onClick={this.onAdd.bind(this)}/>
+        <Button
+          type="primary"
+          title={onOk.label(length)}
+          disabled={length === 0}
+          onClick={this.onAdd.bind(this)}
+        />
         {this.renderSecondaryButton()}
       </div>
     </Modal>;

@@ -31,7 +31,7 @@ import { Duration, Timezone } from 'chronoshift';
 import { DATA_CUBES_STRATEGIES_LABELS, STRINGS } from '../../../config/constants';
 
 import { SvgIcon, FormLabel, Button, SimpleTableColumn, SimpleTable, ImmutableInput, ImmutableList, ImmutableDropdown } from '../../../components/index';
-import { DimensionModal, MeasureModal, SuggestionModal, AttributeModal } from '../../../modals/index';
+import { DimensionModal, MeasureModal, SuggestionModal, SuggestionModalAction, AttributeModal } from '../../../modals/index';
 import { AppSettings, ListItem, Cluster, DataCube, Dimension, DimensionJS, Measure, MeasureJS, Customization } from '../../../../common/models/index';
 
 import { DATA_CUBE as LABELS } from '../../../../common/models/labels';
@@ -266,15 +266,31 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
   renderDimensionSuggestions() {
     const { newInstance } = this.state;
 
+    const onOk: SuggestionModalAction<Dimension> = {
+      label: (n) => `${STRINGS.add} ${pluralIfNeeded(n, 'dimension')}`,
+      callback: (newDimensions: Dimension[]) => {
+        this.addDimensions(newDimensions);
+        this.closeModal();
+      }
+    };
+
+    const onDoNothing: SuggestionModalAction<Dimension> = {
+      label: () => STRINGS.cancel,
+      callback: this.closeModal
+    };
+
+    const suggestions = newInstance.getSuggestedDimensions().map(d => {
+      return {label: `${d.title} (${d.formula})`, value: d};
+    });
+
     const DimensionSuggestionModal = SuggestionModal.specialize<Dimension>();
 
     return <DimensionSuggestionModal
-      onAdd={this.addDimensions.bind(this)}
+      onOk={onOk}
+      onDoNothing={onDoNothing}
       onClose={this.closeModal.bind(this)}
-      getLabel={(d) => `${d.title} (${d.formula})`}
-      options={newInstance.getSuggestedDimensions()}
+      suggestions={suggestions}
       title={`${STRINGS.dimension} ${STRINGS.suggestion}s`}
-      okLabel={(n) => `${STRINGS.add} ${pluralIfNeeded(n, 'dimension')}`}
     />;
   }
 
@@ -337,15 +353,31 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
   renderMeasureSuggestions() {
     const { newInstance } = this.state;
 
+    const onOk: SuggestionModalAction<Measure> = {
+      label: (n) => `${STRINGS.add} ${pluralIfNeeded(n, 'measure')}`,
+      callback: (newMeasures: Measure[]) => {
+        this.addMeasures(newMeasures);
+        this.closeModal();
+      }
+    };
+
+    const onDoNothing: SuggestionModalAction<Measure> = {
+      label: () => STRINGS.cancel,
+      callback: this.closeModal
+    };
+
+    const suggestions = newInstance.getSuggestedMeasures().map(d => {
+      return {label: `${d.title} (${d.formula})`, value: d};
+    });
+
     const MeasureSuggestionModal = SuggestionModal.specialize<Measure>();
 
     return <MeasureSuggestionModal
-      onAdd={this.addMeasures.bind(this)}
+      onOk={onOk}
+      onDoNothing={onDoNothing}
       onClose={this.closeModal.bind(this)}
-      getLabel={(m) => `${m.title} (${m.formula})`}
-      options={newInstance.getSuggestedMeasures()}
+      suggestions={suggestions}
       title={`${STRINGS.measure} ${STRINGS.suggestion}s`}
-      okLabel={(n) => `${STRINGS.add} ${pluralIfNeeded(n, 'measure')}`}
     />;
   }
 

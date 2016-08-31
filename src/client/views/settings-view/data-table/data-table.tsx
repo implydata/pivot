@@ -31,7 +31,7 @@ import { DataCube } from '../../../../common/models/index';
 import { classNames } from '../../../utils/dom/dom';
 
 import { SvgIcon, SimpleTable, SimpleTableColumn, Notifier } from '../../../components/index';
-import { AttributeModal, SuggestionModal } from '../../../modals/index';
+import { AttributeModal, SuggestionModal, SuggestionModalAction } from '../../../modals/index';
 
 export interface DataTableProps extends React.Props<any> {
   dataCube?: DataCube;
@@ -270,20 +270,28 @@ export class DataTable extends React.Component<DataTableProps, DataTableState> {
       return `${a.name} as ${a.type}${special}`;
     };
 
-    const onAdd = (extraAttributes: Attributes) => {
-      onChange(dataCube.changeAttributes(dataCube.attributes.concat(extraAttributes).sort()));
+    const onOk: SuggestionModalAction<AttributeInfo> = {
+      label: (n) => `${STRINGS.add} ${pluralIfNeeded(n, 'attribute')}`,
+      callback: (extraAttributes: Attributes) => {
+        onChange(dataCube.changeAttributes(dataCube.attributes.concat(extraAttributes).sort()));
+        this.closeAttributeSuggestions();
+      }
+    };
+
+    const onDoNothing: SuggestionModalAction<AttributeInfo> = {
+      label: () => STRINGS.cancel,
+      callback: this.closeAttributeSuggestions
     };
 
     const AttributeSuggestionModal = SuggestionModal.specialize<AttributeInfo>();
 
     return <AttributeSuggestionModal
-      onAdd={onAdd}
-      onClose={this.closeAttributeSuggestions.bind(this)}
-      getLabel={getAttributeLabel}
-      options={attributeSuggestions}
-      title={`${STRINGS.attribute} ${STRINGS.suggestions}`}
+      onOk={onOk}
+      onDoNothing={onDoNothing}
+      suggestions={attributeSuggestions.map(a => {return {label: getAttributeLabel(a), value: a};})}
 
-      okLabel={(n) => `${STRINGS.add} ${pluralIfNeeded(n, 'attribute')}`}
+      onClose={this.closeAttributeSuggestions.bind(this)}
+      title={`${STRINGS.attribute} ${STRINGS.suggestions}`}
     />;
   }
 
