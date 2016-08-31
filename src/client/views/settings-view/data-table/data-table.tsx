@@ -271,7 +271,7 @@ export class DataTable extends React.Component<DataTableProps, DataTableState> {
     };
 
     const onAdd = (extraAttributes: Attributes) => {
-      onChange(dataCube.changeAttributes(dataCube.attributes.concat(extraAttributes)));
+      onChange(dataCube.changeAttributes(dataCube.attributes.concat(extraAttributes).sort()));
     };
 
     const AttributeSuggestionModal = SuggestionModal.specialize<AttributeInfo>();
