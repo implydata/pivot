@@ -276,7 +276,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
 
     const onDoNothing = {
       label: () => STRINGS.cancel,
-      callback: this.closeModal
+      callback: this.closeModal.bind(this)
     };
 
     const suggestions = newInstance.getSuggestedDimensions().map(d => {
@@ -363,7 +363,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
 
     const onDoNothing = {
       label: () => STRINGS.cancel,
-      callback: this.closeModal
+      callback: this.closeModal.bind(this)
     };
 
     const suggestions = newInstance.getSuggestedMeasures().map(d => {
