@@ -254,7 +254,7 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
       options={sugestedDataCubes}
       title={STRINGS.createDataCubesFromCluster}
       okLabel={(n: number) => `${STRINGS.create} ${pluralIfNeeded(n, 'data cube')}`}
-      explanation={(n: number) => `${cluster.title} has ${n} ${STRINGS.dataSources}. ${STRINGS.wouldYouLikeToCreateCubes}`}
+      explanation={(n: number) => `"${cluster.title}" has ${n} ${STRINGS.dataSources}. ${STRINGS.wouldYouLikeToCreateCubes}`}
     />;
   }
 

@@ -20,6 +20,24 @@
   form {
     @extend %form;
     width: 100%;
+
+    .checkbox {
+      margin-top: 25px;
+
+      &.selected {
+        .checkbox-body {
+          background: $brand;
+        }
+      }
+
+      .label {
+        top: 4px;
+        text-transform: initial;
+        color: $text-medium;
+        font-size: 13px;
+      }
+    }
+
   }
 
   .loading-bar {
