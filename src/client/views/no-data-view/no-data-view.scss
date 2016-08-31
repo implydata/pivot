@@ -17,47 +17,10 @@
 @import '../../imports';
 
 .no-data-view {
+  @extend %empty;
   @import '../../utils/styles/grid';
 
   .no-data-header-bar {
     @include pin-top($header-height);
-  }
-
-  .container {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-
-    transform: translate(-50%, -50%);
-    text-align: center;
-
-    .title {
-      .icon {
-        display: inline-block;
-        margin-bottom: 6px;
-        width: 42px;
-
-        path {
-          fill: $text-light;
-        }
-      }
-
-      .label {
-        display: inline-block;
-        height: 46px;
-        padding-top: 13px;
-        font-size: 20px;
-        color: $text-light;
-      }
-    }
-
-    .action {
-      color: $text-light;
-
-      a {
-        color: $brand;
-        border-bottom: 1px dashed;
-      }
-    }
   }
 }

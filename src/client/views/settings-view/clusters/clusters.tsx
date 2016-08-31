@@ -19,12 +19,12 @@ require('./clusters.css');
 import * as React from 'react';
 
 import { Button } from '../../../components/button/button';
-import { ClusterSeedModal } from "../../../modals/index";
 import { STRINGS } from "../../../config/constants";
 
 import { AppSettings, Cluster, SupportedType } from '../../../../common/models/index';
 
 import { SimpleTable, SimpleTableColumn, SimpleTableAction } from '../../../components/simple-table/simple-table';
+import { SvgIcon } from "../../../components/svg-icon/svg-icon";
 import { Notifier } from '../../../components/index';
 
 import { pluralIfNeeded } from "../../../../common/utils/general/general";
@@ -57,13 +57,6 @@ export class Clusters extends React.Component<ClustersProps, ClustersState> {
 
   startSeed() {
     window.location.hash += '/new-cluster';
-  }
-
-  renderEmpty(): JSX.Element {
-    return <div className="clusters empty">
-      <div className="title">{STRINGS.noClusters}</div>
-      <div className="subtitle">Start by <a onClick={this.startSeed.bind(this)}>connecting a cluster</a></div>
-    </div>;
   }
 
   removeCluster(cluster: Cluster) {
@@ -107,11 +100,22 @@ export class Clusters extends React.Component<ClustersProps, ClustersState> {
     });
   }
 
-  render() {
-    const { newSettings } = this.state;
-    if (!newSettings) return null;
+  renderEmpty(): JSX.Element {
+    return <div className="empty">
+      <div className="container">
+        <div className="title">
+          <div className="icon">
+            <SvgIcon svg={require('../../../icons/data-cubes.svg')}/>
+          </div>
+          <div className="label">{STRINGS.noClusters}</div>
+        </div>
+        <div className="action">Start by <a onClick={this.startSeed.bind(this)}>connecting a cluster</a></div>
+      </div>
+    </div>;
+  }
 
-    if (!newSettings.clusters.length) return this.renderEmpty();
+  renderTable() {
+    const { newSettings } = this.state;
 
     const columns: SimpleTableColumn[] = [
       {label: 'Name', field: 'title', width: 200, cellIcon: require(`../../../icons/full-cluster.svg`) },
@@ -124,19 +128,26 @@ export class Clusters extends React.Component<ClustersProps, ClustersState> {
       {icon: require(`../../../icons/full-remove.svg`), callback: this.removeCluster.bind(this)}
     ];
 
+    return <div className="content">
+      <SimpleTable
+        columns={columns}
+        rows={newSettings.clusters}
+        actions={actions}
+        onRowClick={this.editCluster.bind(this)}
+      />
+    </div>;
+  }
+
+  render() {
+    const { newSettings } = this.state;
+    if (!newSettings) return null;
+
     return <div className="clusters">
       <div className="title-bar">
         <div className="title">Clusters</div>
         <Button className="add" title={STRINGS.connectNewCluster} type="primary" onClick={this.startSeed.bind(this)}/>
       </div>
-      <div className="content">
-        <SimpleTable
-          columns={columns}
-          rows={newSettings.clusters}
-          actions={actions}
-          onRowClick={this.editCluster.bind(this)}
-        />
-      </div>
+      {!newSettings.clusters.length ?  this.renderEmpty() : this.renderTable()}
     </div>;
   }
 }
