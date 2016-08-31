@@ -146,7 +146,7 @@ export class ClusterSeedModal extends React.Component<ClusterSeedModalProps, Clu
         {makeDropdownInput('type', Cluster.TYPE_VALUES.map(type => {return {value: type, label: type}; }))}
 
         {makeLabel('host')}
-        {makeTextInput('host', /^.+$/)}
+        {makeTextInput('host', /^.+$/, true)}
 
         {extraSQLFields}
       </form>
