@@ -328,10 +328,13 @@ export class SettingsManager {
       anchorPath
     });
 
-    return clusterManager.establishInitialConnection()
-      .then(() => {
-        return clusterManager.getSources();
-      })
+    return clusterManager.establishInitialConnection(0)
+      .then(
+        () => clusterManager.getSources(),
+        (e) => {
+          throw new Error('Unable to connect tp cluster');
+        }
+      )
       .then((sources) => {
         return {
           cluster: clusterManager.cluster,

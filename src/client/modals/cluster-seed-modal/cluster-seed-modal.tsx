@@ -102,7 +102,8 @@ export class ClusterSeedModal extends React.Component<ClusterSeedModalProps, Clu
         },
         (xhr: XMLHttpRequest) => {
           this.loadingDelegate.stop();
-          Notifier.failure('Woops', 'Something bad happened');
+          console.error((xhr as any).message);
+          Notifier.failure(`Couldn't connect to cluster`, 'Please check your parameters');
         }
       )
       .done();
