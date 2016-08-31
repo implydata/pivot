@@ -116,11 +116,8 @@ export class SuggestionModal<T> extends React.Component<SuggestionModalProps<T>,
     }));
   }
 
-  renderSecondaryButton() {
+  renderSecondaryButton(length: number) {
     const { onClose, onDoNothing } = this.props;
-    const { selection } = this.state;
-
-    const length = selection.filter(Boolean).length;
 
     return <Button
       className="cancel"
@@ -130,7 +127,7 @@ export class SuggestionModal<T> extends React.Component<SuggestionModalProps<T>,
     />;
   }
 
-  renderAlternateButton() {
+  renderAlternateButton(length: number) {
     const { onAlternateView } = this.props;
 
     if (!onAlternateView) return null;
@@ -143,26 +140,69 @@ export class SuggestionModal<T> extends React.Component<SuggestionModalProps<T>,
     />;
   }
 
+  renderPrimaryButton(length: number) {
+    const { onOk } = this.props;
+
+    return <Button
+      type="primary"
+      title={onOk.label(length)}
+      disabled={length === 0}
+      onClick={this.onAdd.bind(this)}
+    />;
+  }
+
   renderEmpty() {
-    const { onClose, title, onDoNothing } = this.props;
+    const { onClose, title } = this.props;
 
     return <Modal className="suggestion-modal" title={`${title}`} onClose={onClose}>
       <div className="background">
         <div className="message">{STRINGS.thereAreNoSuggestionsAtTheMoment}</div>
       </div>
-      <div className="grid-row button-bar">
-        <div className="grid-col-50">
-          {this.renderSecondaryButton()}
-        </div>
-        <div className="grid-col-50 right">
-          {this.renderAlternateButton()}
-        </div>
-      </div>
+      {this.renderButtons(true)}
     </Modal>;
   }
 
+  renderButtons(empty = false) {
+    const { selection } = this.state;
+    const length = selection.filter(Boolean).length;
+
+    const alternateButton = this.renderAlternateButton(length);
+    const secondaryButton = this.renderSecondaryButton(length);
+    const primaryButton = this.renderPrimaryButton(length);
+
+    if (empty) {
+      if (alternateButton) {
+        return <div className="grid-row button-bar">
+          <div className="grid-col-50">{secondaryButton}</div>
+          <div className="grid-col-50 right">{alternateButton}</div>
+        </div>;
+      } else {
+        return <div className="grid-row button-bar">
+          <div className="grid-col-100">{secondaryButton}</div>
+        </div>;
+      }
+    } else {
+      if (alternateButton) {
+        return <div className="grid-row button-bar">
+          <div className="grid-col-50">
+            {primaryButton}
+            {secondaryButton}
+          </div>
+          <div className="grid-col-50 right">{alternateButton}</div>
+        </div>;
+      } else {
+        return <div className="grid-row button-bar">
+          <div className="grid-col-100">
+            {primaryButton}
+            {secondaryButton}
+          </div>
+        </div>;
+      }
+    }
+  }
+
   render() {
-    const { suggestions, onClose, title, onOk, explanation } = this.props;
+    const { suggestions, onClose, title, explanation } = this.props;
     const { selection } = this.state;
 
     if (!suggestions || suggestions.length === 0) return this.renderEmpty();
@@ -184,20 +224,7 @@ export class SuggestionModal<T> extends React.Component<SuggestionModalProps<T>,
         {this.renderSuggestions()}
       </div>
 
-      <div className="grid-row button-bar">
-        <div className="grid-col-50">
-          <Button
-            type="primary"
-            title={onOk.label(length)}
-            disabled={length === 0}
-            onClick={this.onAdd.bind(this)}
-          />
-          {this.renderSecondaryButton()}
-        </div>
-        <div className="grid-col-50 right">
-          {this.renderAlternateButton()}
-        </div>
-      </div>
+      {this.renderButtons()}
     </Modal>;
   }
 }

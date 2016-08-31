@@ -196,6 +196,10 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
     this.onSave(settings, 'Cluster created').then(this.backToClustersView.bind(this));
   }
 
+  cancelClusterCreation() {
+    this.selectTab(PATHS.clusters);
+  }
+
   backToClustersView() {
     this.setState({
       tempCluster: null
@@ -377,7 +381,7 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
                     isNewCluster={true}
                     cluster={tempCluster}
                     onSave={this.addCluster.bind(this)}
-                    onCancel={this.backToClustersView.bind(this)}
+                    onCancel={this.cancelClusterCreation.bind(this)}
                   />
                 : <ClusterSeedModal
                     onNext={this.createCluster.bind(this)}
