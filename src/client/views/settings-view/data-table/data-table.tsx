@@ -374,9 +374,12 @@ export class DataTable extends React.Component<DataTableProps, DataTableState> {
     const { dataset } = this.state;
 
     return <div className="data-table">
-      <div className="actions">
-        <button onClick={this.onFiltersClick.bind(this)}>{STRINGS.filters}</button>
-        <button onClick={this.openSuggestionsModal.bind(this)}>{STRINGS.addAttributes}</button>
+      <div className="header">
+        <div className="title">{STRINGS.attributes}</div>
+        <div className="actions">
+          <button onClick={this.onFiltersClick.bind(this)}>{STRINGS.filters}</button>
+          <button onClick={this.openSuggestionsModal.bind(this)}>{STRINGS.addAttributes}</button>
+        </div>
       </div>
       <SimpleTable
         columns={this.getColumns()}

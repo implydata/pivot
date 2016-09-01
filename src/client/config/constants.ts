@@ -50,6 +50,7 @@ export const STRINGS = {
   addVisualization: 'Add tile',
   any: 'any',
   attribute: 'Attribute',
+  attributes: 'attributes',
   autoFillDimensionsAndMeasures: 'Auto-fill dimensions and measures',
   autoUpdate: 'Auto update',
   cancel: 'Cancel',

@@ -16,13 +16,28 @@
 
 @import '../../../imports';
 
+$header-height: 34px;
+
 .data-table {
 
-  .actions {
-    text-align: right;
+  .header {
+    height: $header-height;
 
-    button {
-      @extend %button-light-action
+    .title {
+      padding: 6px 0;
+      color: $text-lighter;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    .actions {
+      position: absolute;
+      right: 12px;
+      top: 0;
+
+      button {
+        @extend %button-light-action
+      }
     }
   }
 
