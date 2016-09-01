@@ -17,6 +17,8 @@
 require('./data-cube-filter-modal.css');
 
 import * as React from 'react';
+import { findByName } from 'plywood';
+
 import { DataCube } from "../../../common/models/data-cube/data-cube";
 import { DATA_CUBE as LABELS } from '../../../common/models/labels';
 import { FormLabel, Button, Modal, ImmutableInput } from '../../components/index';
@@ -63,6 +65,19 @@ export class DataCubeFilterModal extends React.Component<DataCubeFilterModalProp
     this.initFromProps(this.props);
   }
 
+  validate(input: string) {
+    const { newInstance } = this.state;
+    const { attributes } = newInstance;
+
+    let refPattern = /(?:\$)([a-zA-Z0-9_]+)/g;
+    let refs: RegExpExecArray;
+    while ((refs = refPattern.exec(input))) {
+      let ref = refs[1];
+      if (!findByName(attributes, ref)) throw new Error(`could not find attribute ${ref}`);
+    }
+    return true;
+  }
+
   save() {
     const { canSave, newInstance } = this.state;
     const { onSave } = this.props;
@@ -90,11 +105,12 @@ export class DataCubeFilterModal extends React.Component<DataCubeFilterModalProp
           path={'subsetFormula'}
           onChange={this.delegate.onChange}
           type="textarea"
+          validator={this.validate.bind(this)}
         />
         <div className="button-bar">
           <Button
             type="primary"
-            title={`${STRINGS.save}`}
+            title={`${STRINGS.ok}`}
             disabled={!canSave}
             onClick={this.save.bind(this)}
           />
