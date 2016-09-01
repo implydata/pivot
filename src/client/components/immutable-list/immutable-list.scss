@@ -16,20 +16,16 @@
 
 @import '../../imports';
 
+$immutable-list-width: 400px;
+
 .immutable-list {
   $list-title-height: 44px;
-
-  position: absolute;
-  top: 5px;
-  bottom: 5px;
-  left: 24px;
-  right: 0;
 
   .list-title {
     display: flex;
     height: $list-title-height;
+    width: $immutable-list-width;
     padding-top: 12px;
-    width: 400px;
     border-bottom: 1px solid $border-super-light;
 
     .label {
@@ -43,16 +39,7 @@
 
     .actions {
       button {
-        @extend %button-light;
-        font-size: 12px;
-        text-transform: uppercase;
-        color: $brand;
-        padding: 6px;
-        border-radius: 2px;
-
-        &:not(:last-child) {
-          margin-right: 15px;
-        }
+        @extend %button-light-action;
       }
     }
   }
@@ -65,7 +52,33 @@
     right: 0;
 
     .row {
-      width: 400px;
+      width: $immutable-list-width;
+    }
+  }
+
+  .empty-container {
+    @include pin-left($immutable-list-width);
+
+    .empty-message {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      color: $text-light;
+
+      a {
+        color: $brand;
+        border-bottom: 1px dashed;
+        cursor: pointer;
+      }
+
+      .label {
+        display: inline-block;
+        height: 46px;
+        padding-top: 13px;
+        font-size: 20px;
+      }
     }
   }
 }

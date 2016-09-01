@@ -15,7 +15,8 @@
  */
 
 import { Router, Request, Response } from 'express';
-import { AppSettings } from '../../../common/models/index';
+import { Dataset } from 'plywood';
+import { AppSettings, Cluster, DataCube } from '../../../common/models/index';
 import { MANIFESTS } from '../../../common/manifests/index';
 
 import { PivotRequest } from '../../utils/index';
@@ -24,10 +25,10 @@ import { SETTINGS_MANAGER } from '../../config';
 var router = Router();
 
 router.get('/', (req: PivotRequest, res: Response) => {
-  SETTINGS_MANAGER.getSettings()
+  SETTINGS_MANAGER.getFullSettings()
     .then(
-      (appSettings) => {
-        res.send({ appSettings });
+      (fullSettings) => {
+        res.send({ appSettings: fullSettings.appSettings });
       },
       (e: Error) => {
         console.log('error:', e.message);
@@ -42,6 +43,153 @@ router.get('/', (req: PivotRequest, res: Response) => {
     )
     .done();
 
+});
+
+router.post('/cluster-connection', (req: PivotRequest, res: Response) => {
+  var { cluster } = req.body;
+
+  if (typeof cluster === 'undefined') {
+    res.status(400).send({
+      error: 'must have a cluster'
+    });
+    return;
+  }
+
+  try {
+    var testCluster = Cluster.fromJS(cluster);
+  } catch (e) {
+    res.status(400).send({
+      error: 'invalid cluster',
+      message: e.message
+    });
+    return;
+  }
+
+  SETTINGS_MANAGER.checkClusterConnectionInfo(testCluster)
+    .then(
+      (clusterAndSources) => {
+        res.send(clusterAndSources);
+      },
+      (e: Error) => {
+        console.log('error:', e.message);
+        if (e.hasOwnProperty('stack')) {
+          console.log((<any>e).stack);
+        }
+        res.status(500).send({
+          error: 'could not compute',
+          message: e.message
+        });
+      }
+    )
+    .done();
+});
+
+router.get('/cluster-sources', (req: PivotRequest, res: Response) => {
+  SETTINGS_MANAGER.getAllClusterSources()
+    .then(
+      (clusterSources) => {
+        res.send({ clusterSources: clusterSources });
+      },
+      (e: Error) => {
+        console.log('error:', e.message);
+        if (e.hasOwnProperty('stack')) {
+          console.log((<any>e).stack);
+        }
+        res.status(500).send({
+          error: 'could not compute',
+          message: e.message
+        });
+      }
+    )
+    .done();
+});
+
+router.post('/attributes', (req: PivotRequest, res: Response) => {
+  var { source, cluster, clusterName } = req.body;
+
+  if (typeof source !== 'string') {
+    res.status(400).send({
+      error: 'must have a source'
+    });
+    return;
+  }
+
+  var testCluster: Cluster = null;
+  if (typeof clusterName !== 'string') {
+    if (typeof cluster === 'undefined') {
+      res.status(400).send({
+        error: 'must have a clusterName or cluster'
+      });
+      return;
+    }
+
+    try {
+      testCluster = Cluster.fromJS(cluster);
+    } catch (e) {
+      res.status(400).send({
+        error: 'invalid cluster',
+        message: e.message
+      });
+      return;
+    }
+  }
+
+  SETTINGS_MANAGER.getAllAttributes(source, testCluster || clusterName)
+    .then(
+      (attributes) => {
+        res.send({ attributes: attributes });
+      },
+      (e: Error) => {
+        console.log('error:', e.message);
+        if (e.hasOwnProperty('stack')) {
+          console.log((<any>e).stack);
+        }
+        res.status(500).send({
+          error: 'could not compute',
+          message: e.message
+        });
+      }
+    )
+    .done();
+});
+
+router.post('/preview', (req: PivotRequest, res: Response) => {
+  var { dataCube } = req.body;
+
+  if (typeof dataCube === 'undefined') {
+    res.status(400).send({
+      error: 'must have a dataCube'
+    });
+    return;
+  }
+
+  try {
+    var previewDataCube = DataCube.fromJS(dataCube);
+  } catch (e) {
+    res.status(400).send({
+      error: 'invalid DataCube',
+      message: e.message
+    });
+    return;
+  }
+
+  SETTINGS_MANAGER.preview(previewDataCube)
+    .then(
+      (dataset: Dataset) => {
+        res.send({ dataset });
+      },
+      (e: Error) => {
+        console.log('error:', e.message);
+        if (e.hasOwnProperty('stack')) {
+          console.log((<any>e).stack);
+        }
+        res.status(500).send({
+          error: 'could not compute',
+          message: e.message
+        });
+      }
+    )
+    .done();
 });
 
 router.post('/', (req: PivotRequest, res: Response) => {

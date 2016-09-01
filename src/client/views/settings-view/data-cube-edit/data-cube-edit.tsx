@@ -18,23 +18,27 @@ require('./data-cube-edit.css');
 
 import * as React from 'react';
 import { List } from 'immutable';
-import { AttributeInfo } from 'plywood';
+import { AttributeInfo, Attributes, findByName, Nameable } from 'plywood';
 import { classNames } from '../../../utils/dom/dom';
+import { Ajax } from '../../../utils/ajax/ajax';
 
 import { generateUniqueName } from '../../../../common/utils/string/string';
-import { ImmutableUtils } from "../../../../common/utils/immutable-utils/immutable-utils";
+import { pluralIfNeeded } from "../../../../common/utils/general/general";
+import { Notifier } from '../../../components/notifications/notifications';
 
 import { Duration, Timezone } from 'chronoshift';
 
 import { DATA_CUBES_STRATEGIES_LABELS, STRINGS } from '../../../config/constants';
 
-import { SvgIcon, FormLabel, Button, SimpleList, ImmutableInput, ImmutableList, ImmutableDropdown } from '../../../components/index';
+import { SvgIcon, FormLabel, Button, SimpleTableColumn, SimpleTable, ImmutableInput, ImmutableList, ImmutableDropdown } from '../../../components/index';
 import { DimensionModal, MeasureModal, SuggestionModal } from '../../../modals/index';
-import { AppSettings, ListItem, Cluster, DataCube, Dimension, DimensionJS, Measure, MeasureJS } from '../../../../common/models/index';
+import { AppSettings, ListItem, Cluster, DataCube, Dimension, DimensionJS, Measure, MeasureJS, Customization } from '../../../../common/models/index';
 
 import { DATA_CUBE as LABELS } from '../../../../common/models/labels';
 
-import { ImmutableFormDelegate, ImmutableFormState } from '../../../utils/immutable-form-delegate/immutable-form-delegate';
+import { ImmutableFormDelegate, ImmutableFormState } from '../../../delegates/index';
+
+import { DataTable } from '../data-table/data-table';
 
 export interface DataCubeEditProps extends React.Props<any> {
   isNewDataCube?: boolean;
@@ -47,23 +51,34 @@ export interface DataCubeEditProps extends React.Props<any> {
 
 export interface DataCubeEditState extends ImmutableFormState<DataCube> {
   tab?: any;
-  showDimensionsSuggestion?: boolean;
-  showMeasuresSuggestion?: boolean;
+  modal?: Modal;
 }
 
 export interface Tab {
   label: string;
   value: string;
   render: () => JSX.Element;
+  icon: string;
 }
 
+export interface Modal extends Nameable {
+  name: string;
+  render: (arg?: any) => JSX.Element;
+  active?: boolean;
+}
 
 export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEditState> {
   private tabs: Tab[] = [
-    {label: 'General', value: 'general', render: this.renderGeneral},
-    {label: 'Attributes', value: 'attributes', render: this.renderAttributes},
-    {label: 'Dimensions', value: 'dimensions', render: this.renderDimensions},
-    {label: 'Measures', value: 'measures', render: this.renderMeasures}
+    { label: 'General', value: 'general', render: this.renderGeneral, icon: require(`../../../icons/full-settings.svg`) },
+    { label: 'Data', value: 'data', render: this.renderData, icon: require(`../../../icons/data.svg`) },
+    { label: 'Dimensions', value: 'dimensions', render: this.renderDimensions, icon: require(`../../../icons/full-cube.svg`) },
+    { label: 'Measures', value: 'measures', render: this.renderMeasures, icon: require(`../../../icons/measures.svg`) },
+    { label: 'Other', value: 'other', render: this.renderOther, icon: require(`../../../icons/full-more.svg`) }
+  ];
+
+  private modals: Modal[] = [
+    { name: 'dimensions', render: this.renderDimensionSuggestions },
+    { name: 'measures', render: this.renderMeasureSuggestions }
   ];
 
   private delegate: ImmutableFormDelegate<DataCube>;
@@ -86,12 +101,11 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
 
   initFromProps(props: DataCubeEditProps) {
     this.setState({
-      newInstance: new DataCube(props.dataCube.valueOf()),
+      newInstance: this.state.newInstance || new DataCube(props.dataCube.valueOf()),
       canSave: true,
       errors: {},
       tab: props.isNewDataCube ? this.tabs[0] : this.tabs.filter((tab) => tab.value === props.tab)[0],
-      showDimensionsSuggestion: false,
-      showMeasuresSuggestion: false
+      modal: null
     });
   }
 
@@ -107,11 +121,14 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
 
   renderTabs(activeTab: Tab): JSX.Element[] {
     return this.tabs.map((tab) => {
-      return <button
+      return <Button
         className={classNames({active: activeTab.value === tab.value})}
+        title={tab.label}
+        type="primary"
+        svg={tab.icon}
         key={tab.value}
         onClick={this.selectTab.bind(this, tab)}
-      >{tab.label}</button>;
+      />;
     });
   }
 
@@ -137,30 +154,23 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
     window.location.hash = hash.replace(`/${dataCube.name}/${tab}`, '');
   }
 
-  getIntrospectionStrategies(): ListItem[] {
-    const labels = DATA_CUBES_STRATEGIES_LABELS as any;
-
-    return [{
-      label: `Default (${labels[DataCube.DEFAULT_INTROSPECTION]})`,
-      value: undefined
-    }].concat(DataCube.INTROSPECTION_VALUES.map((value) => {
-      return {value, label: labels[value]};
-    }));
-  }
-
   renderGeneral(): JSX.Element {
     const { clusters } = this.props;
     const { newInstance, errors } = this.state;
 
     var makeLabel = FormLabel.simpleGenerator(LABELS, errors);
     var makeTextInput = ImmutableInput.simpleGenerator(newInstance, this.delegate.onChange);
-    var makeDropDownInput = ImmutableDropdown.simpleGenerator(newInstance, this.delegate.onChange);
+    var makeDropdownInput = ImmutableDropdown.simpleGenerator(newInstance, this.delegate.onChange);
 
     var possibleClusters = [
       { value: 'native', label: 'Load a file and serve it natively' }
     ].concat(clusters.map((cluster) => {
-      return { value: cluster.name, label: cluster.name };
+      return { value: cluster.name, label: cluster.title };
     }));
+
+    var timezones = Customization.DEFAULT_TIMEZONES.map((tz) => {
+      return { label: tz.toString(), value: tz };
+    });
 
     return <form className="general vertical">
       {makeLabel('title')}
@@ -170,44 +180,43 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       {makeTextInput('description')}
 
       {makeLabel('clusterName')}
-      {makeDropDownInput('clusterName', possibleClusters)}
+      {makeDropdownInput('clusterName', possibleClusters)}
 
       {makeLabel('source')}
       {makeTextInput('source')}
 
       {makeLabel('defaultTimezone')}
-      <ImmutableInput
-        instance={newInstance}
-        path={'defaultTimezone'}
-        onChange={this.delegate.onChange}
-
-        valueToString={(value: Timezone) => value ? value.toJS() : undefined}
-        stringToValue={(str: string) => str ? Timezone.fromJS(str) : undefined}
-      />
-
+      {makeDropdownInput('defaultTimezone', timezones) }
     </form>;
   }
 
-  renderAttributes(): JSX.Element {
-    const { newInstance, errors } = this.state;
+  // ---------------------------------------------------
 
-    var makeLabel = FormLabel.simpleGenerator(LABELS, errors);
+  renderData(): JSX.Element {
+    const { newInstance } = this.state;
 
-    return <form className="general vertical">
+    const onChange = (newDataCube: DataCube) => {
+      this.setState({
+        newInstance: newDataCube
+      });
+    };
 
-      {makeLabel('attributeOverrides')}
-      <ImmutableInput
-        instance={newInstance}
-        path={'attributeOverrides'}
-        onChange={this.delegate.onChange}
-
-        valueToString={(value: AttributeInfo[]) => value ? JSON.stringify(AttributeInfo.toJSs(value), null, 2) : undefined}
-        stringToValue={(str: string) => str ? AttributeInfo.fromJSs(JSON.parse(str)) : undefined}
-        type="textarea"
-      />
-
-    </form>;
+    return <DataTable dataCube={newInstance} onChange={onChange}/>;
   }
+
+  openModal(name: string) {
+    this.setState({
+      modal: findByName(this.modals, name)
+    });
+  }
+
+  closeModal() {
+    this.setState({
+      modal: null
+    });
+  }
+
+  // ---------------------------------------------------
 
   renderDimensions(): JSX.Element {
     const { newInstance } = this.state;
@@ -219,7 +228,9 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       });
     };
 
-    const getModal = (item: Dimension) => <DimensionModal dimension={item}/>;
+    const getModal = (item: Dimension) => {
+      return <DimensionModal dimension={item} validate={newInstance.validateFormula.bind(newInstance)} />;
+    };
 
     const getNewItem = () => Dimension.fromJS({
       name: generateUniqueName('d', name => !newInstance.dimensions.find(m => m.name === name)),
@@ -230,7 +241,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       return {
         title: dimension.title,
         description: dimension.expression.toString(),
-        icon: `dim-${dimension.kind}`
+        icon: require(`../../../icons/dim-${dimension.kind}.svg`)
       };
     });
 
@@ -243,42 +254,49 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       getModal={getModal}
       getNewItem={getNewItem}
       getRows={getRows}
-      toggleSuggestions={this.toggleDimensionsSuggestions.bind(this)}
+      toggleSuggestions={this.openModal.bind(this, 'dimensions')}
     />;
   }
 
-  toggleDimensionsSuggestions() {
-    const { showDimensionsSuggestion } = this.state;
-    this.setState({
-      showDimensionsSuggestion: !showDimensionsSuggestion
-    });
-  }
-
-  addToCube(property: string, additionalValues: (Dimension | Measure)[]) {
+  addDimensions(extraDimensions: Dimension[]) {
     const { newInstance } = this.state;
-    var newValues = additionalValues.concat((newInstance as any)[property].toArray());
     this.setState({
-      newInstance: ImmutableUtils.setProperty(newInstance, property, List(newValues))
+      newInstance: newInstance.appendDimensions(extraDimensions)
     });
   }
 
   renderDimensionSuggestions() {
     const { newInstance } = this.state;
-    return <SuggestionModal
-      onAdd={this.addToCube.bind(this, 'dimensions')}
-      onClose={this.toggleDimensionsSuggestions.bind(this)}
-      getLabel={(d: Dimension) => `${d.title} (${d.formula})`}
-      getOptions={newInstance.getSuggestedDimensions.bind(newInstance)}
-      title={`${STRINGS.dimension} ${STRINGS.suggestion}`}
+
+    const onOk = {
+      label: (n: number) => `${STRINGS.add} ${pluralIfNeeded(n, 'dimension')}`,
+      callback: (newDimensions: Dimension[]) => {
+        this.addDimensions(newDimensions);
+        this.closeModal();
+      }
+    };
+
+    const onDoNothing = {
+      label: () => STRINGS.cancel,
+      callback: this.closeModal.bind(this)
+    };
+
+    const suggestions = newInstance.getSuggestedDimensions().map(d => {
+      return {label: `${d.title} (${d.formula})`, value: d};
+    });
+
+    const DimensionSuggestionModal = SuggestionModal.specialize<Dimension>();
+
+    return <DimensionSuggestionModal
+      onOk={onOk}
+      onDoNothing={onDoNothing}
+      onClose={this.closeModal.bind(this)}
+      suggestions={suggestions}
+      title={`${STRINGS.dimension} ${STRINGS.suggestion}s`}
     />;
   }
 
-  toggleMeasuresSuggestions() {
-    const { showMeasuresSuggestion } = this.state;
-    this.setState({
-      showMeasuresSuggestion: !showMeasuresSuggestion
-    });
-  }
+  // ---------------------------------------------------
 
   renderMeasures(): JSX.Element {
     var { newInstance } = this.state;
@@ -289,7 +307,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
 
       if (defaultSortMeasure) {
         if (!newMeasures.find((measure) => measure.name === defaultSortMeasure)) {
-          newInstance = newInstance.changeDefaultSortMeasure(newMeasures.get(0).name);
+          newInstance = newInstance.changeDefaultSortMeasure(null);
         }
       }
 
@@ -299,7 +317,9 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       });
     };
 
-    const getModal = (item: Measure) => <MeasureModal measure={item}/>;
+    const getModal = (item: Measure) => {
+      return <MeasureModal measure={item} validate={newInstance.validateFormulaInMeasureContext.bind(newInstance)}/>;
+    };
 
     const getNewItem = () => Measure.fromJS({
       name: generateUniqueName('m', name => !newInstance.measures.find(m => m.name === name)),
@@ -310,7 +330,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       return {
         title: measure.title,
         description: measure.expression.toString(),
-        icon: `measure`
+        icon: require(`../../../icons/measures.svg`)
       };
     });
 
@@ -323,19 +343,69 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       getModal={getModal}
       getNewItem={getNewItem}
       getRows={getRows}
-      toggleSuggestions={this.toggleMeasuresSuggestions.bind(this)}
+      toggleSuggestions={this.openModal.bind(this, 'measures')}
     />;
+  }
+
+  addMeasures(extraMeasures: Measure[]) {
+    const { newInstance } = this.state;
+    this.setState({
+      newInstance: newInstance.appendMeasures(extraMeasures)
+    });
   }
 
   renderMeasureSuggestions() {
     const { newInstance } = this.state;
-    return <SuggestionModal
-      onAdd={this.addToCube.bind(this, 'measures')}
-      onClose={this.toggleMeasuresSuggestions.bind(this)}
-      getLabel={(m: Measure) => `${m.title} (${m.formula})`}
-      getOptions={newInstance.getSuggestedMeasures.bind(newInstance)}
-      title={`${STRINGS.measure} ${STRINGS.suggestion}`}
+
+    const onOk = {
+      label: (n: number) => `${STRINGS.add} ${pluralIfNeeded(n, 'measure')}`,
+      callback: (newMeasures: Measure[]) => {
+        this.addMeasures(newMeasures);
+        this.closeModal();
+      }
+    };
+
+    const onDoNothing = {
+      label: () => STRINGS.cancel,
+      callback: this.closeModal.bind(this)
+    };
+
+    const suggestions = newInstance.getSuggestedMeasures().map(d => {
+      return {label: `${d.title} (${d.formula})`, value: d};
+    });
+
+    const MeasureSuggestionModal = SuggestionModal.specialize<Measure>();
+
+    return <MeasureSuggestionModal
+      onOk={onOk}
+      onDoNothing={onDoNothing}
+      onClose={this.closeModal.bind(this)}
+      suggestions={suggestions}
+      title={`${STRINGS.measure} ${STRINGS.suggestion}s`}
     />;
+  }
+
+  // ---------------------------------------------------
+
+  renderOther(): JSX.Element {
+    const { newInstance, errors } = this.state;
+
+    var makeLabel = FormLabel.simpleGenerator(LABELS, errors);
+
+    return <form className="general vertical">
+
+      {makeLabel('options')}
+      <ImmutableInput
+        instance={newInstance}
+        path={'options'}
+        onChange={this.delegate.onChange}
+
+        valueToString={(value: AttributeInfo[]) => value ? JSON.stringify(value, null, 2) : undefined}
+        stringToValue={(str: string) => str ? JSON.parse(str) : undefined}
+        type="textarea"
+      />
+
+    </form>;
   }
 
   renderButtons(): JSX.Element {
@@ -380,7 +450,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
 
   render() {
     const { dataCube, isNewDataCube } = this.props;
-    const { tab, newInstance, showDimensionsSuggestion, showMeasuresSuggestion } = this.state;
+    const { tab, newInstance, modal } = this.state;
 
     if (!newInstance || !tab || !dataCube) return null;
 
@@ -406,8 +476,7 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
           {tab.render.bind(this)()}
         </div>
       </div>
-      {showDimensionsSuggestion ? this.renderDimensionSuggestions() : null}
-      {showMeasuresSuggestion ? this.renderMeasureSuggestions() : null}
+      { modal ? modal.render.bind(this)() : null }
     </div>;
   }
 }

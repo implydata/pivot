@@ -25,6 +25,7 @@ import { Essence, Stage, DataCube, Timekeeper } from '../../../common/models/ind
 
 import { Fn, makeTitle, arraySum } from '../../../common/utils/general/general';
 import { download, makeFileName } from '../../utils/download/download';
+import { QueryRunner } from '../../utils/query-runner/query-runner';
 import { formatFilterClause } from '../../../common/utils/formatter/formatter';
 import { classNames } from '../../utils/dom/dom';
 import { getVisibleSegments } from '../../utils/sizing/sizing';
@@ -108,7 +109,7 @@ export class RawDataModal extends React.Component<RawDataModalProps, RawDataModa
     const $main = $('main');
     const query = $main.filter(essence.getEffectiveFilter(timekeeper).toExpression()).limit(LIMIT);
     this.setState({ loading: true });
-    dataCube.executor(query, { timezone: essence.timezone })
+    QueryRunner.fetch(dataCube, query, essence.timezone)
       .then(
         (dataset: Dataset) => {
           if (!this.mounted) return;
@@ -153,7 +154,7 @@ export class RawDataModal extends React.Component<RawDataModalProps, RawDataModa
   }
 
   getSortedAttributes(dataCube: DataCube): AttributeInfo[] {
-    const timeAttributeName = dataCube.timeAttribute ? dataCube.timeAttribute.name : null;
+    const timeAttributeName = dataCube.getPrimaryTimeAttribute();
 
     var attributeRank = (attribute: AttributeInfo) => {
       const name = attribute.name;
@@ -268,7 +269,7 @@ export class RawDataModal extends React.Component<RawDataModalProps, RawDataModa
 
     const title = `${makeTitle(STRINGS.segment)} ${STRINGS.rawData}`;
 
-    const filtersString = essence.getEffectiveFilter(timekeeper).getFileString(dataCube.timeAttribute);
+    const filtersString = essence.getEffectiveFilter(timekeeper).getFileString(dataCube.getPrimaryTimeExpression());
 
     const scrollerLayout: ScrollerLayout = {
       // Inner dimensions

@@ -468,8 +468,7 @@ export class PivotApplication extends React.Component<PivotApplicationProps, Piv
 
   deleteDataCube(dataCube: DataCube) {
     const appSettings = this.state.appSettings as AppSettings;
-
-    this.saveDataCubes(appSettings.deleteDataCube(dataCube));
+    this.saveDataCubes(appSettings.deleteDataCube(dataCube.name));
   }
 
 

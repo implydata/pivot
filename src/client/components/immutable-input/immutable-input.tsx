@@ -21,7 +21,7 @@ import * as ReactDOM from 'react-dom';
 
 import { ImmutableUtils } from '../../../common/utils/index';
 import { classNames } from '../../utils/dom/dom';
-import { ChangeFn } from '../../utils/immutable-form-delegate/immutable-form-delegate';
+import { ChangeFn } from '../../delegates/immutable-form-delegate/immutable-form-delegate';
 
 import { firstUp } from '../../../common/utils/string/string';
 
@@ -54,7 +54,8 @@ export class ImmutableInput extends React.Component<ImmutableInputProps, Immutab
   };
 
   static simpleGenerator (instance: any, changeFn: ChangeFn) {
-    return (name: string, validator= /^.+$/, focusOnStartUp= false) => {
+    return (name: string, validator?: RegExp | ((str: string) => boolean), focusOnStartUp= false) => {
+      if (!validator) validator = /^.+$/;
       return <ImmutableInput
         key={name}
         instance={instance}

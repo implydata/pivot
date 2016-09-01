@@ -1,0 +1,151 @@
+/*
+ * Copyright 2015-2016 Imply Data, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@import '../../../imports';
+
+$header-height: 34px;
+
+.data-table {
+
+  .header {
+    height: $header-height;
+
+    .title {
+      padding: 6px 0;
+      color: $text-lighter;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    .actions {
+      position: absolute;
+      right: 12px;
+      top: 0;
+
+      button {
+        @extend %button-light-action
+      }
+    }
+  }
+
+  .simple-table {
+    position: absolute;
+    top: 30px;
+    bottom: 10px;
+    left: 0;
+    right: 0;
+    width: initial;
+    height: initial;
+
+    .header {
+
+      .cell {
+        padding: 10px;
+
+        &.name {
+          color: $white;
+          background-color: hsla(201, 80%, 63%, 1.00);
+
+          border-color: hsla(201, 81%, 49%, 1.00);
+          border-style: solid;
+
+          border-right-width: 1px;
+          border-bottom-width: 1px;
+          border-top-width: 1px;
+
+          .label {
+            display: inline-block;
+            height: 20px;
+            padding-top: 5px;
+            font-size: 14px;
+            text-transform: initial;
+          }
+
+          .svg-icon {
+            position: absolute;
+            right: 4px;
+            height: 20px;
+            top: 12px;
+
+            path {
+              fill: $white;
+            }
+          }
+        }
+
+        &.type {
+          color: $text-medium;
+          background-color: hsla(0, 0%, 93%, 1.00);
+
+          border-color: hsla(0, 0%, 80%, 1.00);
+          border-style: solid;
+
+          border-right-width: 1px;
+          border-bottom-width: 1px;
+
+          .label {
+            display: inline-block;
+            height: 20px;
+            padding-top: 3px;
+            text-transform: initial;
+            font-size: 14px;
+            padding-left: 8px;
+          }
+
+          .svg-icon {
+            width: 19px;
+            padding-top: 1px;
+
+            path {
+              fill: hsla(0, 0%, 70%, 1.00);
+            }
+          }
+        }
+      }
+
+      &:first-child .cell {
+        &.name {
+          border-left-width: 1px;
+        }
+
+        &.type {
+          border-left-width: 1px;
+        }
+      }
+    }
+
+    .body {
+      .row {
+        .cell {
+          height: 100%;
+
+          border-right: 1px solid hsla(0, 0%, 87%, 1.00);
+
+          padding: 14px 10px 5px 5px;
+
+          &:first-child {
+            border-left: 1px solid hsla(0, 0%, 87%, 1.00);
+          }
+        }
+      }
+    }
+  }
+
+  .loader {
+    @include unpin-full(0);
+    background-color: hsla(0, 0%, 93%, 0.5);
+  }
+}

@@ -29,10 +29,6 @@ export interface ClusterValue {
   version?: string;
   timeout?: number;
   sourceListScan?: SourceListScan;
-  sourceListRefreshOnLoad?: boolean;
-  sourceListRefreshInterval?: number;
-  sourceReintrospectOnLoad?: boolean;
-  sourceReintrospectInterval?: number;
 
   introspectionStrategy?: string;
   requestDecorator?: string;
@@ -51,10 +47,6 @@ export interface ClusterJS {
   version?: string;
   timeout?: number;
   sourceListScan?: SourceListScan;
-  sourceListRefreshOnLoad?: boolean;
-  sourceListRefreshInterval?: number;
-  sourceReintrospectOnLoad?: boolean;
-  sourceReintrospectInterval?: number;
 
   introspectionStrategy?: string;
   requestDecorator?: string;
@@ -71,20 +63,11 @@ function ensureNotNative(name: string): void {
   }
 }
 
-function ensureNotTiny(v: number): void {
-  if (v === 0) return;
-  if (v < 1000) {
-    throw new Error(`can not be < 1000 (is ${v})`);
-  }
-}
-
 export class Cluster extends BaseImmutable<ClusterValue, ClusterJS> {
   static TYPE_VALUES: SupportedType[] = ['druid', 'mysql', 'postgres'];
   static DEFAULT_TIMEOUT = 40000;
   static DEFAULT_SOURCE_LIST_SCAN: SourceListScan = 'auto';
   static SOURCE_LIST_SCAN_VALUES: SourceListScan[] = ['disable', 'auto'];
-  static DEFAULT_SOURCE_LIST_REFRESH_INTERVAL = 15000;
-  static DEFAULT_SOURCE_REINTROSPECT_INTERVAL = 120000;
   static DEFAULT_INTROSPECTION_STRATEGY = 'segment-metadata-fallback';
 
   static isCluster(candidate: any): candidate is Cluster {
@@ -98,12 +81,6 @@ export class Cluster extends BaseImmutable<ClusterValue, ClusterJS> {
     if (typeof parameters.timeout === 'string') {
       parameters.timeout = parseInt(parameters.timeout, 10);
     }
-    if (typeof parameters.sourceListRefreshInterval === 'string') {
-      parameters.sourceListRefreshInterval = parseInt(parameters.sourceListRefreshInterval, 10);
-    }
-    if (typeof parameters.sourceReintrospectInterval === 'string') {
-      parameters.sourceReintrospectInterval = parseInt(parameters.sourceReintrospectInterval, 10);
-    }
     return new Cluster(BaseImmutable.jsToValue(Cluster.PROPERTIES, parameters));
   }
 
@@ -115,10 +92,6 @@ export class Cluster extends BaseImmutable<ClusterValue, ClusterJS> {
     { name: 'version', defaultValue: null },
     { name: 'timeout', defaultValue: Cluster.DEFAULT_TIMEOUT },
     { name: 'sourceListScan', defaultValue: Cluster.DEFAULT_SOURCE_LIST_SCAN, possibleValues: Cluster.SOURCE_LIST_SCAN_VALUES },
-    { name: 'sourceListRefreshOnLoad', defaultValue: false },
-    { name: 'sourceListRefreshInterval', defaultValue: Cluster.DEFAULT_SOURCE_LIST_REFRESH_INTERVAL, validate: [BaseImmutable.ensure.number, ensureNotTiny] },
-    { name: 'sourceReintrospectOnLoad', defaultValue: false },
-    { name: 'sourceReintrospectInterval', defaultValue: Cluster.DEFAULT_SOURCE_REINTROSPECT_INTERVAL, validate: [BaseImmutable.ensure.number, ensureNotTiny] },
 
     // Druid
     { name: 'introspectionStrategy', defaultValue: Cluster.DEFAULT_INTROSPECTION_STRATEGY },
@@ -139,10 +112,6 @@ export class Cluster extends BaseImmutable<ClusterValue, ClusterJS> {
   public version: string;
   public timeout: number;
   public sourceListScan: SourceListScan;
-  public sourceListRefreshOnLoad: boolean;
-  public sourceListRefreshInterval: number;
-  public sourceReintrospectOnLoad: boolean;
-  public sourceReintrospectInterval: number;
 
   // Druid
   public introspectionStrategy: string;
@@ -156,6 +125,7 @@ export class Cluster extends BaseImmutable<ClusterValue, ClusterJS> {
 
   constructor(parameters: ClusterValue) {
     super(parameters);
+    if (!this.title) this.title = this.name;
 
     switch (this.type) {
       case 'druid':
@@ -174,30 +144,18 @@ export class Cluster extends BaseImmutable<ClusterValue, ClusterJS> {
 
   }
 
+  public getTitle: () => string;
   public getTimeout: () => number;
   public getSourceListScan: () => SourceListScan;
-  public getSourceListRefreshInterval: () => number;
-  public getSourceReintrospectInterval: () => number;
   public getIntrospectionStrategy: () => string;
-  public changeHost: (newHost: string) => Cluster;
-  public changeTimeout: (newTimeout: string) => Cluster;
-  public changeSourceListRefreshInterval: (newSourceListRefreshInterval: string) => Cluster;
+  public changeTitle: (title: string) => Cluster;
+  public changeHost: (host: string) => Cluster;
+  public changeTimeout: (timeout: number) => Cluster;
 
   public toClientCluster(): Cluster {
     return new Cluster({
       name: this.name,
       type: this.type
-    });
-  }
-
-  public makeExternalFromSourceName(source: string, version?: string): External {
-    return External.fromValue({
-      engine: this.type,
-      source,
-      version: version,
-
-      allowSelectQueries: true,
-      allowEternity: false
     });
   }
 

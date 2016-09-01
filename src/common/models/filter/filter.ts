@@ -252,9 +252,9 @@ export class Filter implements Instance<FilterValue, FilterJS> {
   public getFileString(timeAttribute: Expression) {
     var nonTimeClauseSize = this.clauses.size;
     const timeRange = this.getExtent(timeAttribute); // ToDo: revisit this
-    const nonTimeFilters = ((nonTimeClauseSize: number) => {
+    const nonTimeFilters = (nonTimeClauseSize: number) => {
       return nonTimeClauseSize === 0 ? "" : `_filters-${nonTimeClauseSize}`;
-    });
+    };
     if (timeRange) {
       var { start, end } = timeRange;
       nonTimeClauseSize--;

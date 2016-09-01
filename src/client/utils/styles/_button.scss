@@ -121,3 +121,16 @@
     background-color: $highlight;
   }
 }
+
+%button-light-action {
+  @extend %button-light;
+  font-size: 12px;
+  text-transform: uppercase;
+  color: $brand;
+  padding: 6px;
+  border-radius: 2px;
+
+  &:not(:last-child) {
+    margin-right: 15px;
+  }
+}

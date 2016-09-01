@@ -19,9 +19,31 @@ $checkbox-width: 20px;
 
 .suggestion-modal {
 
-  form {
+  @import '../../utils/styles/grid';
+
+  .background {
     background: $background-lightest;
     padding: 10px 0;
+    max-height: 300px;
+    overflow: auto;
+
+    .message {
+      padding: 4px 10px;
+      color: $text-light;
+      font-style: italic;
+    }
+  }
+
+  .explanation {
+    margin-bottom: 10px;
+  }
+
+  .actions {
+    button {
+      @extend %button-light-action;
+    }
+
+    padding-bottom: 10px;
   }
 
   .row {
@@ -43,6 +65,12 @@ $checkbox-width: 20px;
 
   .checkbox {
     margin-top: 2px;
+
+    &.selected {
+      .checkbox-body {
+        background: $brand;
+      }
+    }
   }
 
   .button-bar {
@@ -53,6 +81,10 @@ $checkbox-width: 20px;
 
       &:not(:last-child) {
         margin-right: 6px;
+      }
+
+      &.alternate {
+        @extend %button-light-action;
       }
     }
   }

@@ -4,8 +4,6 @@ clusters:
     host: "%{DRUID_HOST}%"
     version: 0.9.1
     sourceListRefreshOnLoad: true
-    sourceListRefreshInterval: 0
-    sourceReintrospectInterval: 0
 
 dataCubes:
   - name: wiki

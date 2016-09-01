@@ -36,7 +36,10 @@ export class TimeMonitor {
     this.regularCheckInterval = 60000;
     this.specialCheckInterval = 60000;
     this.timekeeper = Timekeeper.EMPTY;
-    setInterval(this.doChecks.bind(this), 1000);
+
+    var timer: any = setInterval(this.doChecks.bind(this), 1000);
+    if (timer.unref) timer.unref();
+    this.doChecks(); // Also do checks right now!
   }
 
   addCheck(name: string, check: Check): this {

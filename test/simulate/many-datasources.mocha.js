@@ -221,7 +221,7 @@ describe('many datasources', function () {
             expect(body).to.contain('</html>');
 
             var config = extractConfig(body);
-            expect(config.appSettings.dataCubes.map((d) => d.name)).to.deep.equal(["wiki", "github"]);
+            expect(config.appSettings.dataCubes.map((d) => d.name)).to.deep.equal(["wiki", "druid-github-0"]);
 
             testComplete();
           });

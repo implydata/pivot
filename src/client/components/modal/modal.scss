@@ -19,6 +19,10 @@
 .modal {
   @include pin-full;
 
+  &.deaf {
+    pointer-events: none;
+  }
+
   .backdrop {
     @include pin-full;
     background: $black;
@@ -32,7 +36,7 @@
 
   .modal-window {
     @extend %modal-cont;
-    width: 420px;
+    width: 450px;
     padding: $modal-window-padding;
     background: $white;
 
@@ -93,7 +97,7 @@
   .button-bar {
     margin-top: 10px;
 
-    button {
+    button:not(:last-child) {
       margin-right: 8px;
     }
   }

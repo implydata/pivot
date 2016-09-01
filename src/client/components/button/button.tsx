@@ -33,10 +33,7 @@ export interface ButtonProps extends React.Props<any> {
   onClick?: Fn;
 }
 
-export interface ButtonState {
-}
-
-export class Button extends React.Component<ButtonProps, ButtonState> {
+export class Button extends React.Component<ButtonProps, any> {
   constructor() {
     super();
   }

@@ -187,8 +187,8 @@ export class LinkView extends React.Component<LinkViewProps, LinkViewState> {
     const { essence } = this.state;
     var newEssence = linkTile.essence;
 
-    if (essence.getTimeAttribute()) {
-      newEssence = newEssence.changeTimeSelection(essence.getTimeSelection());
+    if (essence.dataCube.getPrimaryTimeExpression()) {
+      newEssence = newEssence.changeTimeSelection(essence.getPrimaryTimeSelection());
     }
 
     this.setState({
@@ -246,7 +246,7 @@ export class LinkView extends React.Component<LinkViewProps, LinkViewState> {
     const { essence } = this.state;
     const PresetDropdown = Dropdown.specialize<Preset>();
 
-    var selected = find(latestPresets, p => p.selection.equals(essence.getTimeSelection()));
+    var selected = find(latestPresets, p => p.selection.equals(essence.getPrimaryTimeSelection()));
     return <PresetDropdown
       items={latestPresets}
       selectedItem={selected}

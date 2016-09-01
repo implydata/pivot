@@ -99,8 +99,6 @@ export class SimpleList extends React.Component<SimpleListProps, SimpleListState
     const { onEdit, onRemove, onReorder } = this.props;
     const { draggedItem, dropIndex } = this.state;
 
-    const svgize = (iconName: string) => iconName ? <SvgIcon svg={require(`../../icons/${iconName}.svg`)}/> : null;
-
     return rows.map((row, i) => {
       let {title, description, icon} = row;
 
@@ -108,15 +106,14 @@ export class SimpleList extends React.Component<SimpleListProps, SimpleListState
         <SvgIcon svg={require('../../icons/dragger.svg')}/>
       </div>;
 
-      let svg = svgize(icon);
       let text = <div className="text">
         <div className="title">{title}</div>
         <div className="description">{description}</div>
       </div>;
 
       let actions = <div className="actions">
-        <button onClick={onEdit.bind(this, i)}>{svgize('full-edit')}</button>
-        <button onClick={onRemove.bind(this, i)}>{svgize('full-remove')}</button>
+        <button onClick={onEdit.bind(this, i)}><SvgIcon svg={require(`../../icons/full-edit.svg`)}/></button>
+        <button onClick={onRemove.bind(this, i)}><SvgIcon svg={require(`../../icons/full-remove.svg`)}/></button>
       </div>;
 
       const isBeingDragged = draggedItem === row;
@@ -141,7 +138,7 @@ export class SimpleList extends React.Component<SimpleListProps, SimpleListState
         onDragStart={this.dragStart.bind(this, row)}
       >
         {onReorder ? dragHandle : null}
-        {svg}
+        {icon ? <SvgIcon svg={icon}/> : null}
         {text}
         {actions}
       </div>;

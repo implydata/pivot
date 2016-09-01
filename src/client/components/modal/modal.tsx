@@ -33,6 +33,7 @@ export interface ModalProps extends React.Props<any> {
   onClose?: Fn;
   onEnter?: Fn;
   startUpFocusOn?: string;
+  deaf?: boolean;
 }
 
 export interface ModalState {
@@ -110,8 +111,8 @@ export class Modal extends React.Component<ModalProps, ModalState> {
   }
 
   onMouseDown(e: MouseEvent) {
-    var { onClose, mandatory } = this.props;
-    if (mandatory) return;
+    var { onClose, mandatory, deaf } = this.props;
+    if (mandatory || deaf) return;
 
     var { id } = this.state;
     // can not use ReactDOM.findDOMNode(this) because portal?
@@ -124,7 +125,7 @@ export class Modal extends React.Component<ModalProps, ModalState> {
   }
 
   render() {
-    var { className, title, children, onClose } = this.props;
+    var { className, title, children, onClose, deaf } = this.props;
     var { id } = this.state;
 
     var titleElement: JSX.Element = null;
@@ -138,7 +139,7 @@ export class Modal extends React.Component<ModalProps, ModalState> {
     }
 
     return <BodyPortal fullSize={true}>
-      <div className={classNames('modal', className)}>
+      <div className={classNames('modal', className, {deaf})}>
         <GlobalEventListener
           enter={this.onEnter.bind(this)}
           escape={this.onEscape.bind(this)}

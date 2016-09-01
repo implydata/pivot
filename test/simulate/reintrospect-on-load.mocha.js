@@ -118,7 +118,7 @@ describe('reintrospect on load', function () {
         }
       });
 
-      pivotServer.onHook(`Getting the latest MaxTime for`, done);
+      pivotServer.onHook(`Got the latest time for 'druid-wikipedia-0'`, done);
     });
   });
 

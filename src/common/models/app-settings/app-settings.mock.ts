@@ -294,13 +294,12 @@ export class AppSettingsMock {
       clusters: [
         {
           name: 'druid',
+          title: 'druid',
           type: 'druid',
           host: '192.168.99.100',
           version: '0.9.1',
           timeout: 30000,
           sourceListScan: 'auto',
-          sourceListRefreshInterval: 10000,
-          sourceReintrospectInterval: 10000,
 
           introspectionStrategy: 'segment-metadata-fallback'
         }
@@ -321,13 +320,12 @@ export class AppSettingsMock {
       clusters: [
         {
           name: 'druid',
+          title: 'druid',
           type: 'druid',
           host: '192.168.99.100',
           version: '0.9.1',
           timeout: 30000,
           sourceListScan: 'auto',
-          sourceListRefreshInterval: 10000,
-          sourceReintrospectInterval: 10000,
 
           introspectionStrategy: 'segment-metadata-fallback'
         }
@@ -347,13 +345,12 @@ export class AppSettingsMock {
       clusters: [
         {
           name: 'druid',
+          title: 'druid',
           type: 'druid',
           host: '192.168.99.100',
           version: '0.9.1',
           timeout: 30000,
           sourceListScan: 'auto',
-          sourceListRefreshInterval: 10000,
-          sourceReintrospectInterval: 10000,
 
           introspectionStrategy: "segment-metadata-fallback"
         }
@@ -375,17 +372,17 @@ export class AppSettingsMock {
     return AppSettings.fromJS(AppSettingsMock.wikiOnlyJS(), AppSettingsMock.getContext());
   }
 
-  static wikiOnlyWithExecutor() {
-    return AppSettingsMock.wikiOnly().attachExecutors(() => {
-      return basicExecutorFactory({
+  static wikiTwitter() {
+    return AppSettings.fromJS(AppSettingsMock.wikiTwitterJS(), AppSettingsMock.getContext());
+  }
+
+  static executorsWiki(): Lookup<Executor> {
+    return {
+      wiki: basicExecutorFactory({
         datasets: {
           main: Dataset.fromJS(SMALL_WIKI_DATA)
         }
-      });
-    });
-  }
-
-  static wikiTwitter() {
-    return AppSettings.fromJS(AppSettingsMock.wikiTwitterJS(), AppSettingsMock.getContext());
+      })
+    };
   }
 }

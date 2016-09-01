@@ -132,4 +132,29 @@ describe('Dimension', () => {
 
   });
 
+  describe('#usesAttribute', () => {
+    it('works with simple dimension', () => {
+      var dimension = Dimension.fromJS({
+        "name": "country",
+        "title": "Country",
+        "formula": "$country"
+      });
+
+      expect(dimension.usesAttribute('lol'), 'lol').to.equal(false);
+      expect(dimension.usesAttribute('country'), 'country').to.equal(true);
+    });
+
+    it('works with complex dimension', () => {
+      var dimension = Dimension.fromJS({
+        "name": "complex",
+        "title": "Complex",
+        "formula": "'[' ++ $country.lookup('lol') ++ ']'"
+      });
+
+      expect(dimension.usesAttribute('lol'), 'lol').to.equal(false);
+      expect(dimension.usesAttribute('country'), 'country').to.equal(true);
+    });
+
+  });
+
 });

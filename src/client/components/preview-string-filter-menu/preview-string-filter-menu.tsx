@@ -22,6 +22,7 @@ import { Fn, collect } from "../../../common/utils/general/general";
 import { STRINGS, SEARCH_WAIT } from "../../config/constants";
 import { Clicker, Essence, Timekeeper, Filter, FilterClause, FilterMode, Dimension } from "../../../common/models/index";
 import { enterKey, classNames } from "../../utils/dom/dom";
+import { QueryRunner } from '../../utils/query-runner/query-runner';
 import { Loader } from "../loader/loader";
 import { QueryError } from "../query-error/query-error";
 import { HighlightString } from "../highlight-string/highlight-string";
@@ -88,7 +89,7 @@ export class PreviewStringFilterMenu extends React.Component<PreviewStringFilter
       loading: true,
       fetchQueued: false
     });
-    dataCube.executor(query, { timezone: essence.timezone })
+    QueryRunner.fetch(dataCube, query, essence.timezone)
       .then(
         (dataset: Dataset) => {
           if (!this.mounted) return;

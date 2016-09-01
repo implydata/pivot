@@ -104,12 +104,7 @@ export function clusterToYAML(cluster: Cluster, withComments: boolean): string[]
     .add('host')
     .add('version')
     .add('timeout', {defaultValue: Cluster.DEFAULT_TIMEOUT})
-    .add('sourceListScan', {defaultValue: Cluster.DEFAULT_SOURCE_LIST_SCAN})
-    .add('sourceListRefreshOnLoad', {defaultValue: false})
-    .add('sourceListRefreshInterval', {defaultValue: Cluster.DEFAULT_SOURCE_LIST_REFRESH_INTERVAL})
-    .add('sourceReintrospectOnLoad', {defaultValue: false})
-    .add('sourceReintrospectInterval', {defaultValue: Cluster.DEFAULT_SOURCE_REINTROSPECT_INTERVAL})
-    ;
+    .add('sourceListScan', {defaultValue: Cluster.DEFAULT_SOURCE_LIST_SCAN});
 
 
   if (withComments) {
@@ -241,15 +236,14 @@ export function dataCubeToYAML(dataCube: DataCube, withComments: boolean): strin
     `source: ${dataCube.source}`
   ];
 
-  var timeAttribute = dataCube.timeAttribute;
-  if (timeAttribute && !(dataCube.clusterName === 'druid' && timeAttribute.name === '__time')) {
+  var primaryTimeAttribute = dataCube.primaryTimeAttribute;
+  if (primaryTimeAttribute) {
     if (withComments) {
       lines.push(`# The primary time attribute of the data refers to the attribute that must always be filtered on`);
       lines.push(`# This is particularly useful for Druid data cubes as they must always have a time filter.`);
     }
-    lines.push(`timeAttribute: ${timeAttribute.name}`, '');
+    lines.push(`primaryTimeAttribute: ${primaryTimeAttribute}`, '');
   }
-
 
   var refreshRule = dataCube.refreshRule;
   if (withComments) {

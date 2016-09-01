@@ -17,7 +17,7 @@
 require('./measure-modal.css');
 
 import * as React from 'react';
-import { classNames, enterKey } from '../../utils/dom/dom';
+import { classNames } from '../../utils/dom/dom';
 import { List } from 'immutable';
 
 import { SvgIcon, FormLabel, Button, ImmutableInput, Modal, ImmutableDropdown } from '../../components/index';
@@ -26,13 +26,14 @@ import { Measure } from '../../../common/models/index';
 
 import { MEASURE as LABELS } from '../../../common/models/labels';
 
-import { ImmutableFormDelegate, ImmutableFormState } from '../../utils/immutable-form-delegate/immutable-form-delegate';
+import { ImmutableFormDelegate, ImmutableFormState } from '../../delegates/index';
 
 
 export interface MeasureModalProps extends React.Props<any> {
   measure?: Measure;
   onSave?: (measure: Measure) => void;
   onClose?: () => void;
+  validate?: (str: string) => boolean;
 }
 
 
@@ -69,7 +70,7 @@ export class MeasureModal extends React.Component<MeasureModalProps, ImmutableFo
   }
 
   render(): JSX.Element {
-    const { measure } = this.props;
+    const { measure, validate } = this.props;
     const { newInstance, canSave, errors } = this.state;
     const saveButtonDisabled = !canSave || measure.equals(newInstance);
 
@@ -77,7 +78,7 @@ export class MeasureModal extends React.Component<MeasureModalProps, ImmutableFo
 
     var makeLabel = FormLabel.simpleGenerator(LABELS, errors, true);
     var makeTextInput = ImmutableInput.simpleGenerator(newInstance, this.delegate.onChange);
-    var makeDropDownInput = ImmutableDropdown.simpleGenerator(newInstance, this.delegate.onChange);
+    var makeDropdownInput = ImmutableDropdown.simpleGenerator(newInstance, this.delegate.onChange);
 
     return <Modal
       className="dimension-modal"
@@ -89,11 +90,11 @@ export class MeasureModal extends React.Component<MeasureModalProps, ImmutableFo
         {makeLabel('title')}
         {makeTextInput('title', /^.+$/, true)}
 
+        {makeLabel('formula')}
+        {makeTextInput('formula', validate)}
+
         {makeLabel('units')}
         {makeTextInput('units')}
-
-        {makeLabel('formula')}
-        {makeTextInput('formula')}
 
       </form>
 

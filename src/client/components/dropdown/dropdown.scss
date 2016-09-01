@@ -19,7 +19,9 @@
 .dropdown {
   cursor: pointer;
   white-space: nowrap;
-  pointer-events: none;
+
+  // Why this ? - SF
+  // pointer-events: none;
 
   &:hover {
     .caret-icon {
@@ -33,7 +35,9 @@
     @extend %input-cont;
     @include ellipsis;
     display: block;
-    pointer-events: auto;
+
+    // Same : why this ? - SF
+    // pointer-events: auto;
     height: $input-height;
     padding: 8px 22px 0 6px;
   }

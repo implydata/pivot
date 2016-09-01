@@ -122,7 +122,7 @@ describe('reintrospect on load with datasource', function () {
         }
       });
 
-      pivotServer.onHook(`Cluster 'druid' could not introspect 'wiki' because: No such datasource`, done);
+      pivotServer.onHook(`Removing data cube manager for 'wiki'`, done);
     });
   });
 

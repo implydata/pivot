@@ -27,13 +27,14 @@ import { Dimension, ListItem, granularityFromJS, granularityToString } from '../
 
 import { DIMENSION as LABELS } from '../../../common/models/labels';
 
-import { ImmutableFormDelegate, ImmutableFormState } from '../../utils/immutable-form-delegate/immutable-form-delegate';
+import { ImmutableFormDelegate, ImmutableFormState } from '../../delegates/index';
 
 
 export interface DimensionModalProps extends React.Props<any> {
   dimension?: Dimension;
   onSave?: (dimension: Dimension) => void;
   onClose?: () => void;
+  validate?: (str: string) => boolean;
 }
 
 export class DimensionModal extends React.Component<DimensionModalProps, ImmutableFormState<Dimension>> {
@@ -81,7 +82,7 @@ export class DimensionModal extends React.Component<DimensionModalProps, Immutab
   }
 
   render(): JSX.Element {
-    const { dimension } = this.props;
+    const { dimension, validate } = this.props;
     const { newInstance, canSave, errors } = this.state;
     const saveButtonDisabled = !canSave || dimension.equals(newInstance);
 
@@ -92,7 +93,7 @@ export class DimensionModal extends React.Component<DimensionModalProps, Immutab
 
     var makeLabel = FormLabel.simpleGenerator(LABELS, errors, true);
     var makeTextInput = ImmutableInput.simpleGenerator(newInstance, this.delegate.onChange);
-    var makeDropDownInput = ImmutableDropdown.simpleGenerator(newInstance, this.delegate.onChange);
+    var makeDropdownInput = ImmutableDropdown.simpleGenerator(newInstance, this.delegate.onChange);
 
     return <Modal
       className="dimension-modal"
@@ -105,10 +106,10 @@ export class DimensionModal extends React.Component<DimensionModalProps, Immutab
         {makeTextInput('title', /^.+$/, true)}
 
         {makeLabel('kind')}
-        {makeDropDownInput('kind', DimensionModal.KINDS)}
+        {makeDropdownInput('kind', DimensionModal.KINDS)}
 
         {makeLabel('formula')}
-        {makeTextInput('formula')}
+        {makeTextInput('formula', validate)}
 
         {makeLabel('url')}
         {makeTextInput('url')}
@@ -124,7 +125,7 @@ export class DimensionModal extends React.Component<DimensionModalProps, Immutab
         /> : null}
 
         {isContinuous ? makeLabel('bucketingStrategy') : null}
-        {isContinuous ? makeDropDownInput('bucketingStrategy', DimensionModal.BUCKETING_STRATEGIES) : null}
+        {isContinuous ? makeDropdownInput('bucketingStrategy', DimensionModal.BUCKETING_STRATEGIES) : null}
 
       </form>
 

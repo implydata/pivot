@@ -195,7 +195,7 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
     var visualization = findByName(visualizations, visualizationName);
 
     var timezone = parameters.timezone ? Timezone.fromJS(parameters.timezone) : null;
-    var filter = parameters.filter ? Filter.fromJS(parameters.filter).constrainToDimensions(dataCube.dimensions, dataCube.timeAttribute) : null;
+    var filter = parameters.filter ? Filter.fromJS(parameters.filter).constrainToDimensions(dataCube.dimensions, dataCube.getPrimaryTimeExpression()) : null;
     var splits = Splits.fromJS(parameters.splits || [], dataCube).constrainToDimensionsAndMeasures(dataCube.dimensions, dataCube.measures);
 
     var defaultSortMeasureName = dataCube.getDefaultSortMeasure();
@@ -213,13 +213,13 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
     var compare: Filter = null;
     var compareJS = parameters.compare;
     if (compareJS) {
-      compare = Filter.fromJS(compareJS).constrainToDimensions(dataCube.dimensions, dataCube.timeAttribute);
+      compare = Filter.fromJS(compareJS).constrainToDimensions(dataCube.dimensions, dataCube.getPrimaryTimeExpression());
     }
 
     var highlight: Highlight = null;
     var highlightJS = parameters.highlight;
     if (highlightJS) {
-      highlight = Highlight.fromJS(highlightJS).constrainToDimensions(dataCube.dimensions, dataCube.timeAttribute);
+      highlight = Highlight.fromJS(highlightJS).constrainToDimensions(dataCube.dimensions, dataCube.getPrimaryTimeExpression());
     }
 
     return new Essence({
@@ -433,13 +433,13 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
     return urlPrefix + this.toHash();
   }
 
-  public getTimeAttribute(): RefExpression {
-    return this.dataCube.timeAttribute;
-  }
-
-  public getTimeDimension(): Dimension {
-    return this.dataCube.getTimeDimension();
-  }
+  // public getTimeAttribute(): RefExpression {
+  //   return this.dataCube.timeAttribute;
+  // }
+  //
+  // public getTimeDimension(): Dimension {
+  //   return this.dataCube.getTimeDimension();
+  // }
 
   public evaluateSelection(selection: Expression, timekeeper: Timekeeper): TimeRange {
     var { timezone, dataCube } = this;
@@ -458,9 +458,9 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
     return filter.getSpecificFilter(timekeeper.now(), dataCube.getMaxTime(timekeeper), timezone);
   }
 
-  public getTimeSelection(): Expression {
-    const timeAttribute = this.getTimeAttribute();
-    return this.filter.getSelection(timeAttribute) as Expression;
+  public getPrimaryTimeSelection(): Expression {
+    const primaryTimeExpression = this.dataCube.getPrimaryTimeExpression();
+    return this.filter.getSelection(primaryTimeExpression) as Expression;
   }
 
   public isFixedMeasureMode(): boolean {
@@ -596,15 +596,18 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
   }
 
   public updateDataCube(newDataCube: DataCube): Essence {
-    var { dataCube, visualizations } = this;
+    var { dataCube } = this;
 
     if (dataCube.equals(newDataCube)) return this; // nothing to do
+
+    var newPrimaryTimeExpression = newDataCube.getPrimaryTimeExpression();
+    var oldPrimaryTimeExpression = dataCube.getPrimaryTimeExpression();
 
     var value = this.valueOf();
     value.dataCube = newDataCube;
 
     // Make sure that all the elements of state are still valid
-    value.filter = value.filter.constrainToDimensions(newDataCube.dimensions, newDataCube.timeAttribute, dataCube.timeAttribute);
+    value.filter = value.filter.constrainToDimensions(newDataCube.dimensions, newPrimaryTimeExpression, oldPrimaryTimeExpression);
     value.splits = value.splits.constrainToDimensionsAndMeasures(newDataCube.dimensions, newDataCube.measures);
     value.selectedMeasures = constrainMeasures(value.selectedMeasures, newDataCube);
     if (value.selectedMeasures.size === 0) {
@@ -620,11 +623,11 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
     if (!newDataCube.getMeasure(value.pinnedSort)) value.pinnedSort = newDataCube.getDefaultSortMeasure();
 
     if (value.compare) {
-      value.compare = value.compare.constrainToDimensions(newDataCube.dimensions, newDataCube.timeAttribute);
+      value.compare = value.compare.constrainToDimensions(newDataCube.dimensions, newPrimaryTimeExpression, oldPrimaryTimeExpression);
     }
 
     if (value.highlight) {
-      value.highlight = value.highlight.constrainToDimensions(newDataCube.dimensions, newDataCube.timeAttribute);
+      value.highlight = value.highlight.constrainToDimensions(newDataCube.dimensions, newPrimaryTimeExpression, oldPrimaryTimeExpression);
     }
 
     return new Essence(value);
@@ -653,10 +656,11 @@ export class Essence implements Instance<EssenceValue, EssenceJS> {
     return new Essence(value);
   }
 
-  public changeTimeSelection(check: Expression): Essence {
+  public changeTimeSelection(selection: Expression): Essence {
     var { filter } = this;
-    var timeAttribute = this.getTimeAttribute();
-    return this.changeFilter(filter.setSelection(timeAttribute, check));
+    var primaryTimeExpression = this.dataCube.getPrimaryTimeExpression();
+    if (!primaryTimeExpression) return this;
+    return this.changeFilter(filter.setSelection(primaryTimeExpression, selection));
   }
 
   public convertToSpecificFilter(timekeeper: Timekeeper): Essence {

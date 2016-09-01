@@ -17,10 +17,9 @@
 require('./data-cubes.css');
 
 import * as React from 'react';
-import { Fn } from '../../../../common/utils/general/general';
-import { classNames } from '../../../utils/dom/dom';
 
-import { AppSettings, Cluster, DataCube} from '../../../../common/models/index';
+import { AppSettings, DataCube} from '../../../../common/models/index';
+import { STRINGS } from "../../../config/constants";
 
 import { SimpleTable, SimpleTableColumn, SimpleTableAction, SvgIcon, FormLabel, Button, Notifier } from '../../../components/index';
 
@@ -48,21 +47,13 @@ export class DataCubes extends React.Component<DataCubesProps, DataCubesState> {
     });
   }
 
-  editCube(cube: DataCube) {
-    window.location.hash += `/${cube.name}`;
+  editDataCube(dataCube: DataCube) {
+    window.location.hash += `/${dataCube.name}`;
   }
 
-  removeCube(cube: DataCube) {
+  removeDataCube(dataCube: DataCube) {
     const remove = () => {
-      var settings: AppSettings = this.state.newSettings;
-      var index = settings.dataCubes.indexOf(cube);
-
-      if (index < 0) return;
-
-      var newCubes = settings.dataCubes;
-      newCubes.splice(index, 1);
-
-      this.props.onSave(settings.changeDataCubes(newCubes), 'Cube removed');
+      this.props.onSave(this.state.newSettings.deleteDataCube(dataCube.name), 'Date cube removed');
       Notifier.removeQuestion();
     };
 
@@ -71,9 +62,9 @@ export class DataCubes extends React.Component<DataCubesProps, DataCubesState> {
     };
 
     Notifier.ask({
-      title: 'Remove this cube',
+      title: 'Remove this data cube',
       message: [
-        `Are you sure you would like to delete the data cube "${cube.title}"?`,
+        `Are you sure you would like to delete the data cube "${dataCube.title}"?`,
         'This action is not reversible.'
       ],
       choices: [
@@ -89,44 +80,54 @@ export class DataCubes extends React.Component<DataCubesProps, DataCubesState> {
   }
 
   renderEmpty(): JSX.Element {
-    return <div className="data-cubes empty">
-      <div className="title">No data cubes</div>
-      <div className="subtitle actionable" onClick={this.startSeed.bind(this)}>Create a new data cube</div>
+    return <div className="empty">
+      <div className="container">
+        <div className="title">
+          <div className="icon">
+            <SvgIcon svg={require('../../../icons/data-cubes.svg')}/>
+          </div>
+          <div className="label">{STRINGS.noDataCubes}</div>
+        </div>
+        <div className="action"><a onClick={this.startSeed.bind(this)}>Create a new data cube</a></div>
+      </div>
     </div>;
   }
 
-  render() {
+  renderTable() {
     const { newSettings } = this.state;
 
-    if (!newSettings) return null;
-
-    if (!newSettings.dataCubes.length) return this.renderEmpty();
-
     const columns: SimpleTableColumn[] = [
-      {label: 'Name', field: 'title', width: 170, cellIcon: 'full-cube'},
+      {label: 'Name', field: 'title', width: 170, cellIcon: require(`../../../icons/full-cube.svg`) },
       {label: 'Source', field: 'source', width: 400},
       {label: 'Dimensions', field: (cube: DataCube) => cube.dimensions.size, width: 120},
       {label: 'Measures', field: (cube: DataCube) => cube.measures.size, width: 80}
     ];
 
     const actions: SimpleTableAction[] = [
-      {icon: 'full-edit', callback: this.editCube.bind(this)},
-      {icon: 'full-remove', callback: this.removeCube.bind(this)}
+      {icon: require(`../../../icons/full-edit.svg`), callback: this.editDataCube.bind(this)},
+      {icon: require(`../../../icons/full-remove.svg`), callback: this.removeDataCube.bind(this)}
     ];
+
+    return  <div className="content">
+      <SimpleTable
+        columns={columns}
+        rows={newSettings.dataCubes}
+        actions={actions}
+        onRowClick={this.editDataCube.bind(this)}
+      />
+    </div>;
+  }
+
+  render() {
+    const { newSettings } = this.state;
+    if (!newSettings) return null;
 
     return <div className="data-cubes">
       <div className="title-bar">
         <div className="title">Data Cubes</div>
-        <Button className="save" title="Add a cube" type="primary" onClick={this.startSeed.bind(this)}/>
+        <Button className="save" title="Create new data cube" type="primary" onClick={this.startSeed.bind(this)}/>
       </div>
-      <div className="content">
-        <SimpleTable
-          columns={columns}
-          rows={newSettings.dataCubes}
-          actions={actions}
-          onRowClick={this.editCube.bind(this)}
-        ></SimpleTable>
-      </div>
+      {!newSettings.dataCubes.length ? this.renderEmpty() : this.renderTable() }
     </div>;
   }
 }

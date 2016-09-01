@@ -29,6 +29,7 @@ import { Clicker, Essence, Timekeeper, VisStrategy, Dimension, SortOn, SplitComb
   granularityToString, getDefaultGranularityForKind, getGranularities } from '../../../common/models/index';
 
 import { setDragGhost, classNames } from '../../utils/dom/dom';
+import { QueryRunner } from '../../utils/query-runner/query-runner';
 import { DragManager } from '../../utils/drag-manager/drag-manager';
 import { STRINGS, getLocale } from '../../config/constants';
 import { PIN_TITLE_HEIGHT, PIN_ITEM_HEIGHT, PIN_PADDING_BOTTOM, MAX_SEARCH_LENGTH, SEARCH_WAIT } from '../../config/constants';
@@ -101,7 +102,7 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
 
     var filter = essence.getEffectiveFilter(timekeeper);
     // don't remove filter if time
-    if (unfolded && dimension !== essence.getTimeDimension()) {
+    if (unfolded && dataCube.isMandatoryFilter(dimension.expression)) {
       filter = filter.remove(dimension.expression);
     }
 
@@ -156,7 +157,7 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
       loading: true,
       fetchQueued: false
     });
-    dataCube.executor(query, { timezone: essence.timezone })
+    QueryRunner.fetch(dataCube, query, essence.timezone)
       .then(
         (dataset: Dataset) => {
           if (!this.mounted) return;
@@ -216,8 +217,8 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
     var unfolded = this.updateFoldability(nextEssence, nextDimension, nextColors);
 
     // keep granularity selection if measures change or if autoupdate
-    var currentSelection = essence.getTimeSelection();
-    var nextSelection = nextEssence.getTimeSelection();
+    var currentSelection = essence.getPrimaryTimeSelection();
+    var nextSelection = nextEssence.getPrimaryTimeSelection();
     var differentTimeFilterSelection = currentSelection ? !currentSelection.equals(nextSelection) : Boolean(nextSelection);
     if (differentTimeFilterSelection) {
       // otherwise render will try to format exiting dataset based off of new granularity (before fetchData returns)
@@ -323,7 +324,7 @@ export class DimensionTile extends React.Component<DimensionTileProps, Dimension
       return {
         selected: filterMode === value,
         onSelect: this.changeFilterMode.bind(this, value),
-        displayValue: STRINGS[value],
+        displayValue: (STRINGS as any)[value],
         keyString: value
       };
     });

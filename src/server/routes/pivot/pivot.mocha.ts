@@ -29,11 +29,18 @@ import * as pivotRouter from './pivot';
 
 var app = express();
 
-var appSettings: AppSettings = AppSettingsMock.wikiOnlyWithExecutor();
+var appSettings = AppSettingsMock.wikiOnly();
+var executors = AppSettingsMock.executorsWiki();
 app.use((req: PivotRequest, res: express.Response, next: Function) => {
   req.user = null;
   req.version = '0.9.4';
-  req.getSettings = (dataCubeOfInterest?: string) => Q(appSettings);
+  req.getFullSettings = (dataCubeOfInterest?: string) => {
+    return Q({
+      appSettings,
+      timekeeper: null,
+      executors
+    });
+  };
   next();
 });
 

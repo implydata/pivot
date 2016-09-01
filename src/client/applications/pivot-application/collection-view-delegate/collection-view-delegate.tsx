@@ -89,7 +89,7 @@ export class CollectionViewDelegate {
     const collectionURL = `#collection/${collection.name}`;
     const oldIndex = collection.tiles.indexOf(tile);
 
-    const newCollection = collection.deleteTile(tile);
+    const newCollection = collection.deleteTile(tile.name);
     const newSettings = appSettings.addOrUpdateCollection(newCollection);
 
     const undo = () => this.addTile(newCollection, tile, oldIndex);
@@ -175,7 +175,7 @@ export class CollectionViewDelegate {
       this.save(this.getSettings().addCollectionAt(collection, oldIndex));
     };
 
-    return this.save(appSettings.deleteCollection(collection)).then( () => {
+    return this.save(appSettings.deleteCollection(collection.name)).then( () => {
       window.location.hash = `#/home`;
       Notifier.success('Collection removed', {label: STRINGS.undo, callback: undo});
     });

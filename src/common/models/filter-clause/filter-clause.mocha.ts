@@ -147,8 +147,8 @@ describe('FilterClause', () => {
           "op": "literal",
           "type": "TIME_RANGE",
           "value": {
-            "end": new Date('2016-01-15T08:23:00Z'),
-            "start": new Date('2016-01-14T08:23:00Z')
+            "end": new Date('2016-01-15T08:22:00Z'),
+            "start": new Date('2016-01-14T08:22:00Z')
           }
         },
         "expression": {

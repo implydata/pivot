@@ -17,19 +17,16 @@
 require('./cluster-edit.css');
 
 import * as React from 'react';
-import { List } from 'immutable';
-import { Fn, pluralIfNeeded } from '../../../../common/utils/general/general';
+import * as Q from 'q';
+
+import { Fn, pluralIfNeeded, makeTitle } from '../../../../common/utils/general/general';
 import { classNames } from '../../../utils/dom/dom';
-import { firstUp, IP_REGEX, NUM_REGEX } from '../../../../common/utils/string/string';
+import { NUM_REGEX } from '../../../../common/utils/string/string';
 import { STRINGS } from '../../../config/constants';
 
-import { FormLabel } from '../../../components/form-label/form-label';
-import { Button } from '../../../components/button/button';
-import { ImmutableInput } from '../../../components/immutable-input/immutable-input';
-import { ImmutableDropdown } from '../../../components/immutable-dropdown/immutable-dropdown';
-import { SuggestionModal } from "../../../modals/suggestion-modal/suggestion-modal";
+import { FormLabel, Button, ImmutableInput, ImmutableDropdown, GlobalEventListener } from '../../../components/index';
 
-import { ImmutableFormDelegate, ImmutableFormState } from '../../../utils/immutable-form-delegate/immutable-form-delegate';
+import { ImmutableFormDelegate, ImmutableFormState } from '../../../delegates/index';
 
 import { AppSettings, Cluster, ListItem, DataCube } from '../../../../common/models/index';
 
@@ -37,11 +34,10 @@ import { CLUSTER as LABELS } from '../../../../common/models/labels';
 
 export interface ClusterEditProps extends React.Props<any> {
   cluster?: Cluster;
-  onSave: (newCluster: Cluster) => void;
+  onSave: (newCluster: Cluster) => Q.Promise<void>;
   isNewCluster?: boolean;
   onCancel?: () => void;
   getSuggestedCubes?: () => DataCube[];
-  addCubes?: (cubes: DataCube[]) => void;
 }
 
 export interface ClusterEditState extends ImmutableFormState<Cluster> {
@@ -96,33 +92,12 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
     window.location.hash = hash.replace(`/${cluster.name}`, '');
   }
 
-  toggleCreateCubesModal() {
-    const { showCreateCubesModal } = this.state;
-    this.setState({
-      showCreateCubesModal: !showCreateCubesModal
-    });
-  }
-
-  renderCreateCubesModal(): JSX.Element {
-    const { getSuggestedCubes, addCubes } = this.props;
-
-    return <SuggestionModal
-      onAdd={addCubes.bind(this)}
-      onClose={this.toggleCreateCubesModal.bind(this)}
-      getLabel={(m) => `${m.title}`}
-      getOptions={getSuggestedCubes}
-      title={STRINGS.createCubesFromCluster}
-      cancelLabel={STRINGS.noIllCreateThem}
-      okLabel={(n: number) => `${STRINGS.create} ${pluralIfNeeded(n, 'cube')}`}
-    />;
-  }
-
   renderGeneral(): JSX.Element {
     const { newInstance, errors } = this.state;
 
     var makeLabel = FormLabel.simpleGenerator(LABELS, errors);
     var makeTextInput = ImmutableInput.simpleGenerator(newInstance, this.delegate.onChange);
-    var makeDropDownInput = ImmutableDropdown.simpleGenerator(newInstance, this.delegate.onChange);
+    var makeDropdownInput = ImmutableDropdown.simpleGenerator(newInstance, this.delegate.onChange);
 
     var needsAuth = ['mysql', 'postgres'].indexOf(newInstance.type) > -1;
 
@@ -131,10 +106,10 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
       {makeTextInput('title', /.*/, true)}
 
       {makeLabel('host')}
-      {makeTextInput('host', IP_REGEX)}
+      {makeTextInput('host', /.*/)}
 
       {makeLabel('type')}
-      {makeDropDownInput('type', Cluster.TYPE_VALUES.map(type => {return {value: type, label: type}; }))}
+      {makeDropdownInput('type', Cluster.TYPE_VALUES.map(type => {return {value: type, label: type}; }))}
 
       {makeLabel('timeout')}
       {makeTextInput('timeout', NUM_REGEX)}
@@ -154,6 +129,10 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
     </form>;
   }
 
+  onEnter() {
+    if (this.state.canSave) this.save();
+  }
+
   renderButtons(): JSX.Element {
     const { cluster, isNewCluster } = this.props;
     const { canSave, newInstance } = this.state;
@@ -161,7 +140,7 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
 
     const cancelButton = <Button
       className="cancel"
-      title={isNewCluster ?  "Cancel" : "Revert changes"}
+      title={isNewCluster ? "Cancel" : "Revert changes"}
       type="secondary"
       onClick={this.cancel.bind(this)}
     />;
@@ -170,7 +149,7 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
       className={classNames("save", {disabled: !canSave || (!isNewCluster && !hasChanged)})}
       title={isNewCluster ? "Connect cluster" : "Save"}
       type="primary"
-      onClick={this.toggleCreateCubesModal.bind(this)}
+      onClick={this.save.bind(this)}
     />;
 
     if (!isNewCluster && !hasChanged) {
@@ -191,16 +170,17 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
 
     const lastBit = newInstance.title ? `: ${newInstance.title}` : '';
 
-    return (isNewCluster ? STRINGS.createCluster : STRINGS.editCluster) + lastBit;
+    return (isNewCluster ? STRINGS.connectCluster : STRINGS.editCluster) + lastBit;
   }
 
   render() {
     const { isNewCluster } = this.props;
-    const { newInstance, showCreateCubesModal } = this.state;
+    const { newInstance } = this.state;
 
     if (!newInstance) return null;
 
     return <div className="cluster-edit">
+      <GlobalEventListener enter={this.onEnter.bind(this)}/>
       <div className="title-bar">
         {isNewCluster
           ? null
@@ -217,8 +197,6 @@ export class ClusterEdit extends React.Component<ClusterEditProps, ClusterEditSt
       <div className="content">
         {this.renderGeneral()}
       </div>
-      {showCreateCubesModal ? this.renderCreateCubesModal() : null}
-
     </div>;
   }
 }

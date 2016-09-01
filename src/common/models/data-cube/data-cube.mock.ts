@@ -14,15 +14,7 @@
  * limitations under the License.
  */
 
-import { $, Executor, Dataset, basicExecutorFactory } from 'plywood';
 import { DataCube, DataCubeJS } from './data-cube';
-
-var executor = basicExecutorFactory({
-  datasets: {
-    wiki: Dataset.fromJS([]),
-    twitter: Dataset.fromJS([])
-  }
-});
 
 export class DataCubeMock {
   public static get WIKI_JS(): DataCubeJS {
@@ -78,7 +70,7 @@ export class DataCubeMock {
           formula: '$main.sum($added)'
         }
       ],
-      timeAttribute: 'time',
+      primaryTimeAttribute: 'time',
       defaultTimezone: 'Etc/UTC',
       defaultFilter: { op: 'literal', value: true },
       defaultDuration: 'P3D',
@@ -88,6 +80,9 @@ export class DataCubeMock {
       refreshRule: {
         time: new Date('2016-04-30T12:39:51.350Z'),
         rule: "fixed"
+      },
+      options: {
+        druidTimeAttributeName: 'time'
       }
     };
   }
@@ -127,7 +122,7 @@ export class DataCubeMock {
           formula: '$main.count()'
         }
       ],
-      timeAttribute: 'time',
+      primaryTimeAttribute: 'time',
       defaultTimezone: 'Etc/UTC',
       defaultFilter: { op: 'literal', value: true },
       defaultDuration: 'P3D',
@@ -135,15 +130,18 @@ export class DataCubeMock {
       defaultPinnedDimensions: ['tweet'],
       refreshRule: {
         rule: "realtime"
+      },
+      options: {
+        druidTimeAttributeName: 'time'
       }
     };
   }
 
   static wiki() {
-    return DataCube.fromJS(DataCubeMock.WIKI_JS, { executor });
+    return DataCube.fromJS(DataCubeMock.WIKI_JS);
   }
 
   static twitter() {
-    return DataCube.fromJS(DataCubeMock.TWITTER_JS, { executor });
+    return DataCube.fromJS(DataCubeMock.TWITTER_JS);
   }
 }

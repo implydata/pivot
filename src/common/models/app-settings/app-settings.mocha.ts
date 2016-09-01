@@ -38,7 +38,7 @@ describe('AppSettings', () => {
     it("errors if there is no matching cluster", () => {
       var js = AppSettingsMock.wikiOnlyJS();
       js.clusters = [];
-      expect(() => AppSettings.fromJS(js, context)).to.throw("Can not find cluster 'druid' for data cube 'wiki'");
+      expect(() => AppSettings.fromJS(js, context)).to.throw("data cube 'wiki' refers to an unknown cluster 'druid'");
     });
 
   });
@@ -62,9 +62,6 @@ describe('AppSettings', () => {
         druidHost: '192.168.99.100',
         timeout: 30003,
         sourceListScan: 'auto',
-        sourceListRefreshInterval: 10001,
-        sourceReintrospectInterval: 10002,
-        sourceReintrospectOnLoad: true,
         dataSources: [
           wikiDataCubeJS
         ]
@@ -73,12 +70,10 @@ describe('AppSettings', () => {
       expect(AppSettings.fromJS(oldJS, context).toJS().clusters).to.deep.equal([
         {
           "name": "druid",
+          "title": "druid",
           "type": "druid",
           "host": "192.168.99.100",
-          "sourceListRefreshInterval": 10001,
           "sourceListScan": "auto",
-          "sourceReintrospectInterval": 10002,
-          "sourceReintrospectOnLoad": true,
           "timeout": 30003
         }
       ]);
@@ -97,6 +92,7 @@ describe('AppSettings', () => {
         {
           "host": "192.168.99.100",
           "name": "druid",
+          "title": "druid",
           "sourceListScan": "disable",
           "type": "druid"
         }
@@ -116,12 +112,13 @@ describe('AppSettings', () => {
     });
 
     it("converts to client settings", () => {
-      const settings = AppSettingsMock.wikiOnlyWithExecutor();
+      const settings = AppSettingsMock.wikiOnly();
 
       expect(settings.toClientSettings().toJS()).to.deep.equal({
         "clusters": [
           {
             "name": "druid",
+            "title": "druid",
             "type": "druid"
           }
         ],
@@ -217,7 +214,7 @@ describe('AppSettings', () => {
               "time": new Date('2016-04-30T12:39:51.350Z')
             },
             "source": "wiki",
-            "timeAttribute": "time",
+            "primaryTimeAttribute": "time",
             "title": "Wiki"
           }
         ]

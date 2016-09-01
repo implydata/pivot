@@ -18,8 +18,9 @@ import * as path from 'path';
 import * as nopt from 'nopt';
 import { TRACKER, LOGGER } from 'logger-tracker';
 
-import { arraySum } from '../common/utils/general/general';
+import { arraySum, inlineVars } from '../common/utils/general/general';
 import { Cluster, DataCube, SupportedType, AppSettings } from '../common/models/index';
+import { MANIFESTS } from '../common/manifests/index';
 import { appSettingsToYAML } from '../common/utils/yaml-helper/yaml-helper';
 import { ServerSettings } from './models/index';
 import { loadFileSync, SettingsManager, SettingsStore } from './utils/index';
@@ -45,6 +46,13 @@ function zeroOne(thing: any): number {
   return Number(Boolean(thing));
 }
 
+function appSettingsJSHasOnLoad(appSettingsJS: any): boolean {
+  if (appSettingsJS.sourceReintrospectOnLoad || appSettingsJS.sourceListRefreshOnLoad) return true;
+  if (Array.isArray(appSettingsJS.clusters)) {
+    return appSettingsJS.clusters.some((cluster: any) => cluster.sourceReintrospectOnLoad || cluster.sourceListRefreshOnLoad);
+  }
+  return false;
+}
 
 var packageObj: any = null;
 try {
@@ -184,7 +192,7 @@ var serverSettingsJS: any;
 if (serverSettingsFilePath) {
   anchorPath = path.dirname(serverSettingsFilePath);
   try {
-    serverSettingsJS = loadFileSync(serverSettingsFilePath, 'yaml');
+    serverSettingsJS = inlineVars(loadFileSync(serverSettingsFilePath, 'yaml'), process.env);
     LOGGER.log(`Using config ${serverSettingsFilePath}`);
   } catch (e) {
     exitWithError(`Could not load config from '${serverSettingsFilePath}': ${e.message}`);
@@ -288,7 +296,13 @@ if (serverSettingsFilePath) {
     }
 
   } else {
-    settingsStore = SettingsStore.fromReadOnlyFile(serverSettingsFilePath, 'yaml');
+    // Assume that the config holds the settings this used to be the only way to provide settings
+    try {
+      var appSettingsFromConfig = AppSettings.fromJS(serverSettingsJS, { visualizations: MANIFESTS });
+    } catch (e) {
+      exitWithError(`Could not read setting from config file: ${e.message}`);
+    }
+    settingsStore = SettingsStore.fromTransient(appSettingsFromConfig, appSettingsJSHasOnLoad(serverSettingsJS));
   }
 } else {
   var initAppSettings = AppSettings.BLANK;
@@ -296,8 +310,10 @@ if (serverSettingsFilePath) {
   // If a file is specified add it as a dataCube
   var fileToLoad = parsedArgs['file'];
   if (fileToLoad) {
+    var fileName = path.basename(fileToLoad, path.extname(fileToLoad));
     initAppSettings = initAppSettings.addDataCube(new DataCube({
-      name: path.basename(fileToLoad, path.extname(fileToLoad)),
+      name: fileName,
+      title: fileName,
       clusterName: 'native',
       source: fileToLoad
     }));
@@ -310,8 +326,6 @@ if (serverSettingsFilePath) {
         name: clusterType,
         type: clusterType,
         host: host,
-        sourceListScan: 'auto',
-        sourceListRefreshInterval: 15000,
 
         user: parsedArgs['user'],
         password: parsedArgs['password'],
@@ -335,10 +349,10 @@ export const SETTINGS_MANAGER = new SettingsManager(settingsStore, {
 if (PRINT_CONFIG) {
   var withComments = Boolean(parsedArgs['with-comments']);
 
-  SETTINGS_MANAGER.getSettings({
+  SETTINGS_MANAGER.getFullSettings({
     timeout: 10000
-  }).then(appSettings => {
-    console.log(appSettingsToYAML(appSettings, withComments, {
+  }).then(fullSettings => {
+    console.log(appSettingsToYAML(fullSettings.appSettings, withComments, {
       header: true,
       version: VERSION,
       verbose: VERBOSE,

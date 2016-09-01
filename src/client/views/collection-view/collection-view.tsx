@@ -101,7 +101,7 @@ export class CollectionView extends React.Component<CollectionViewProps, Collect
     var tempCollection = this.state.tempCollection as Collection;
 
     this.setState({
-      tempCollection: tempCollection.deleteTile(tile)
+      tempCollection: tempCollection.deleteTile(tile.name)
     });
   }
 

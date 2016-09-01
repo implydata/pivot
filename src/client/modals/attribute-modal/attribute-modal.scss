@@ -14,8 +14,45 @@
  * limitations under the License.
  */
 
-@import '../../../imports';
+@import '../../imports';
+$checkbox-width: 20px;
 
-.general {
-  height: 100%;
+.attribute-modal {
+  @import '../../utils/styles/grid';
+
+  form {
+    @extend %form;
+    width: 100%;
+  }
+
+  .row {
+    height: 27px;
+    cursor: pointer;
+    white-space: nowrap;
+
+    .label {
+      position: absolute;
+      top: 5px;
+      left: $checkbox-width;
+    }
+
+    &:hover {
+      background: $hover;
+    }
+  }
+
+  .checkbox {
+    margin-top: 2px;
+
+    &.selected {
+      .checkbox-body {
+        background: $brand;
+      }
+    }
+  }
+
+  button.alternate {
+    @extend %button-light-action;
+  }
 }
+

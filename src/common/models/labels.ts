@@ -16,19 +16,29 @@
 
 import { DataCube, Dimension, Measure, Cluster } from './index';
 
-export const DIMENSION = {
+export const ATTRIBUTE = {
   name: {
-    label: `Name (you won't be able to change this later)`,
-    description: `The name of the dimension. This does not have to correspond to the
-      attribute name (but the auto generated dimensions do). This should be a
-      URL safe string. Changing this property will break any URLs that someone
-      might have generated that include this dimension, that's why you can only
-      set it once`
+    label: `Name`,
+    description: `The attribute's name`
   },
+  type: {
+    label: `Type`,
+    description: `The attribute's type`
+  },
+  splittable: {
+    label: `Splittable`,
+    description: `Whether or not the attribute can be split on.`
+  },
+  special: {
+    label: `Special`,
+    description: `Special measures that are not numbers`
+  }
+};
+
+export const DIMENSION = {
   title: {
-    label: `Title`,
-    description: `The title for this dimension in the UI. Can be anything and is safe
-    to change at any time.`
+    label: `Name`,
+    description: `The display name for this dimension in the UI.`
   },
   kind: {
     label: `Kind`,
@@ -56,16 +66,9 @@ export const DIMENSION = {
 };
 
 export const COLLECTION = {
-  name: {
-    label: `Name (you won't be able to change this later)`,
-    description: `The name of the collection. This should be a
-      URL safe string. Changing this property will break any URLs that someone
-      might have generated that include this dimension, that's why you can only
-      set it once`
-  },
   title: {
     label: `Title`,
-    description: `The title for this collection in the UI. Can be anything and is safe
+    description: `The display name for this collection in the UI. Can be anything and is safe
     to change at any time.`
   },
   description: {
@@ -75,17 +78,9 @@ export const COLLECTION = {
 };
 
 export const COLLECTION_ITEM = {
-  name: {
-    label: `Name (you won't be able to change this later)`,
-    description: `The name of the collection item. This should be a
-      URL safe string. Changing this property will break any URLs that someone
-      might have generated that include this dimension, that's why you can only
-      set it once`
-  },
   title: {
-    label: `Title`,
-    description: `The title for this item in the UI. Can be anything and is safe
-    to change at any time.`
+    label: `Name`,
+    description: `The display name for this item in the UI.`
   },
   description: {
     label: 'Description',
@@ -95,17 +90,9 @@ export const COLLECTION_ITEM = {
 };
 
 export const MEASURE = {
-  name: {
-    label: `Name (you won't be able to change this later)`,
-    description: `The name of the measure. This should be a
-      URL safe string. Changing this property will break any URLs that someone
-      might have generated that include this dimension, that's why you can only
-      set it once`
-  },
   title: {
-    label: `Title`,
-    description: `The title for this measure in the UI. Can be anything and is safe
-    to change at any time.`
+    label: `Name`,
+    description: `The display name for this measure in the UI.`
   },
   units: {
     label: `Units`,
@@ -114,21 +101,15 @@ export const MEASURE = {
   formula: {
     label: `Formula`,
     description: `The <a href="http://plywood.imply.io/expressions" target="_blank">
-      Plywood expression</a> for this dimension. By default it is
+      Plywood expression</a> for this measure. By default it is
       <code>$main.sum($name)</code> where <em>name</em> is the name of the measure.`
   }
 };
 
 export const CLUSTER = {
   title: {
-    label: 'Title',
-    description: `The title of the Cluster in the UI. Can be anything and is
-    safe to change at anytime`
-  },
-
-  name: {
     label: 'Name',
-    description: `The name of the cluster (to be referenced later from the data cube)`
+    description: `The name of the Cluster in the UI.`
   },
   type: {
     label: 'Type',
@@ -144,33 +125,13 @@ export const CLUSTER = {
     'as the version will naturally be determined through introspection.'
   },
   timeout: {
-    label: 'Timeout',
-    description: `The timeout to set on the queries in ms. Default is <code>${Cluster.DEFAULT_TIMEOUT}</code>`
+    label: 'Timeout (ms)',
+    description: `The timeout to set on the queries. Default is <code>${Cluster.DEFAULT_TIMEOUT}</code>`
   },
   sourceListScan: {
     label: 'Source List Scan',
     description: `Should the sources of this cluster be automatically scanned and new
       sources added as data cubes. Default: <code>${Cluster.DEFAULT_SOURCE_LIST_SCAN}</code>`
-  },
-  sourceListRefreshOnLoad: {
-    label: 'Source List Refresh On Load',
-    description: `Should the list of sources be reloaded every time that Pivot is
-    loaded. This will put additional load on the data store but will ensure that
-    sources are visible in the UI as soon as they are created.`
-  },
-  sourceListRefreshInterval: {
-    label: 'Source List Refresh Interval',
-    description: `How often should sources be reloaded in ms. Default: <code>${Cluster.DEFAULT_SOURCE_LIST_REFRESH_INTERVAL}</code>`
-  },
-  sourceReintrospectOnLoad: {
-    label: 'Source Reintrospect On Load',
-    description: `Should sources be scanned for additional dimensions every time that
-      Pivot is loaded. This will put additional load on the data store but will
-      ensure that dimension are visible in the UI as soon as they are created. Default: <code>${Cluster.DEFAULT_SOURCE_REINTROSPECT_INTERVAL}</code>`
-  },
-  sourceReintrospectInterval: {
-    label: 'Source Reintrospect Interval',
-    description: 'How often should source schema be reloaded in ms.'
   },
 
   // Druid specific
@@ -184,7 +145,7 @@ export const CLUSTER = {
     description: 'The request decorator module filepath to load.'
   },
 
-  // PostGres + MySQL specific
+  // Postgres + MySQL specific
   database: {
     label: 'Database',
     description: 'The database to which to connect to.'
@@ -213,17 +174,9 @@ export const GENERAL = {
 };
 
 export const DATA_CUBE = {
-  name: {
-    label: 'Name',
-    description: `The name of the data cube as used internally in Pivot and used in the
-      URLs. This should be a URL safe string. Changing this property for a given
-      data cube will break any URLs that someone might have generated for that
-      data cube in the past.`
-  },
   title: {
-    label: 'Title',
-    description: `The user visible name that will be used to describe this data cube in
-      the UI. It is always safe to change this.`
+    label: 'Name',
+    description: `The user visible name that will be used to describe this data cube in the UI.`
   },
   description: {
     label: 'Description',
@@ -243,7 +196,7 @@ export const DATA_CUBE = {
     description: 'The name of cube\'s source. The dataSource, table, or filename of the data for this cube'
   },
   subsetFormula: {
-    label: 'Subset Formula',
+    label: 'Subset Filter Formula',
     description: 'A row level filter that is applied to the cube. This filter is never represented in the UI'
   },
   defaultDuration: {
@@ -271,5 +224,9 @@ export const DATA_CUBE = {
     description: `While Pivot tries to learn as much as it can from your data cube
       from Druid directly. It can not (yet) do a perfect job.
       The attributeOverrides: section of the data cube is there for you to fix that.`
+  },
+  options: {
+    label: `Options`,
+    description: `This does options.` // todo fill me in
   }
 };

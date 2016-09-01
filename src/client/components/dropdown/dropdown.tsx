@@ -27,7 +27,7 @@ function simpleEqual(item1: any, item2: any): boolean {
   return item1 === item2;
 }
 
-export interface DropdownProps<T> {
+export interface DropdownProps<T> extends React.Props<any> {
   label?: string;
   items: T[];
   className?: string;

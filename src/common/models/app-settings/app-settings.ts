@@ -16,13 +16,23 @@
 
 import { Class, Instance, isInstanceOf, immutableArraysEqual, immutableEqual } from 'immutable-class';
 import { ImmutableUtils } from '../../utils/index';
-import { Executor, findByName, overrideByName } from 'plywood';
+import { Executor, find, findByName, overrideByName } from 'plywood';
 import { hasOwnProperty } from '../../utils/general/general';
 import { Cluster, ClusterJS } from '../cluster/cluster';
 import { Customization, CustomizationJS } from '../customization/customization';
 import { DataCube, DataCubeJS } from  '../data-cube/data-cube';
 import { Collection, CollectionJS, CollectionContext } from '../collection/collection';
 import { Manifest } from '../manifest/manifest';
+
+// ToDo: move this into an appropriate util file
+function checkNamedArrayUnique(as: any[]): void {
+  var seen: Lookup<number> = {};
+  for (var a of as) {
+    var name = a.name;
+    if (seen[name]) throw new Error(`duplicate '${name}'`);
+    seen[name] = 1;
+  }
+}
 
 export interface AppSettingsValue {
   version?: number;
@@ -44,7 +54,6 @@ export interface AppSettingsJS {
 
 export interface AppSettingsContext {
   visualizations: Manifest[];
-  executorFactory?: (dataCube: DataCube) => Executor;
 }
 
 var check: Class<AppSettingsValue, AppSettingsJS>;
@@ -72,21 +81,7 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
       clusters = [];
     }
 
-    var executorFactory = context.executorFactory;
-    var dataCubes = (parameters.dataCubes || (parameters as any).dataSources || []).map((dataCubeJS: DataCubeJS) => {
-      var dataCubeClusterName = dataCubeJS.clusterName || (dataCubeJS as any).engine;
-      if (dataCubeClusterName !== 'native') {
-        var cluster = findByName(clusters, dataCubeClusterName);
-        if (!cluster) throw new Error(`Can not find cluster '${dataCubeClusterName}' for data cube '${dataCubeJS.name}'`);
-      }
-
-      var dataCubeObject = DataCube.fromJS(dataCubeJS, { cluster });
-      if (executorFactory) {
-        var executor = executorFactory(dataCubeObject);
-        if (executor) dataCubeObject = dataCubeObject.attachExecutor(executor);
-      }
-      return dataCubeObject;
-    });
+    var dataCubes = (parameters.dataCubes || (parameters as any).dataSources || []).map((dataCubeJS: DataCubeJS) => DataCube.fromJS(dataCubeJS));
 
     var collectionContext = { dataCubes, visualizations: context.visualizations };
     var makeCollection = (js: CollectionJS) => {
@@ -125,16 +120,19 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
     for (var dataCube of dataCubes) {
       if (dataCube.clusterName === 'native') continue;
       if (!findByName(clusters, dataCube.clusterName)) {
-        throw new Error(`data cube ${dataCube.name} refers to an unknown cluster ${dataCube.clusterName}`);
+        throw new Error(`data cube '${dataCube.name}' refers to an unknown cluster '${dataCube.clusterName}'`);
       }
     }
 
     this.version = version || 0;
     this.clusters = clusters;
+    checkNamedArrayUnique(this.clusters);
     this.customization = customization;
     this.dataCubes = dataCubes;
+    checkNamedArrayUnique(this.dataCubes);
     this.linkViewConfig = linkViewConfig;
     this.collections = collections;
+    checkNamedArrayUnique(this.collections);
   }
 
   public valueOf(): AppSettingsValue {
@@ -179,13 +177,8 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
 
   public toClientSettings(): AppSettings {
     var value = this.valueOf();
-
     value.clusters = value.clusters.map((c) => c.toClientCluster());
-
-    value.dataCubes = value.dataCubes
-      .filter((ds) => ds.isQueryable())
-      .map((ds) => ds.toClientDataCube());
-
+    value.dataCubes = value.dataCubes.map((ds) => ds.toClientDataCube());
     return new AppSettings(value);
   }
 
@@ -193,12 +186,27 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
     return this.version;
   }
 
-  public getDataCubesForCluster(clusterName: string): DataCube[] {
+  public getCollectionsInvolvingCluster(clusterName: string): Collection[] {
+    const dependantDataCubes = this.getDataCubesByCluster(clusterName);
+    return this.collections.filter((collection) => {
+      return dependantDataCubes.some((dataCube => collection.dependsOnDataCube(dataCube.name)));
+    });
+  }
+
+  public getDataCubesByCluster(clusterName: string): DataCube[] {
     return this.dataCubes.filter(dataCube => dataCube.clusterName === clusterName);
+  }
+
+  public getDataCubesByClusterSource(clusterName: string, source: string): DataCube[] {
+    return this.dataCubes.filter((dataCube) => dataCube.clusterName === clusterName && dataCube.source === source);
   }
 
   public getDataCube(dataCubeName: string): DataCube {
     return findByName(this.dataCubes, dataCubeName);
+  }
+
+  public getCluster(clusterName: string): Cluster {
+    return findByName(this.clusters, clusterName);
   }
 
   public addOrUpdateDataCube(dataCube: DataCube): AppSettings {
@@ -213,33 +221,37 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
     return new AppSettings(value);
   }
 
-  public deleteCollection(collection: Collection): AppSettings {
+  public deleteCollection(collectionName: string): AppSettings {
     var value = this.valueOf();
-    var index = value.collections.indexOf(collection);
-
-    if (index === -1) {
-      throw new Error(`Unknown collection : ${collection.toString()}`);
-    }
-
-    var newCollections = value.collections.concat();
-    newCollections.splice(index, 1);
-
-    value.collections = newCollections;
+    value.collections = value.collections.filter(collection => collection.name !== collectionName);
     return new AppSettings(value);
   }
 
-  public deleteDataCube(dataCube: DataCube): AppSettings {
+  public deleteDataCube(dataCubeName: string): AppSettings {
     var value = this.valueOf();
-    var index = value.dataCubes.indexOf(dataCube);
+    value.dataCubes = value.dataCubes.filter(dataCube => dataCube.name !== dataCubeName);
+    value.collections = value.collections.map(collection => collection.deleteTilesContainingCube(dataCubeName));
+    return new AppSettings(value);
+  }
 
-    if (index === -1) {
-      throw new Error(`Unknown dataCube : ${dataCube.toString()}`);
+  public deleteCluster(clusterName: string): AppSettings {
+    if (clusterName === 'native') new Error(`Can not delete 'native' cluster`);
+
+    var affectedDataCubes = this.getDataCubesByCluster(clusterName);
+
+    var value = this.valueOf();
+    value.clusters = value.clusters.filter(cluster => cluster.name !== clusterName);
+
+    if (affectedDataCubes.length) {
+      value.dataCubes = value.dataCubes.filter(dataCube => dataCube.clusterName !== clusterName);
+      value.collections = value.collections.map(collection => {
+        for (var affectedDataCube of affectedDataCubes) {
+          collection = collection.deleteTilesContainingCube(affectedDataCube.name);
+        }
+        return collection;
+      });
     }
 
-    var newDataCubes = value.dataCubes.concat();
-    newDataCubes.splice(index, 1);
-
-    value.dataCubes = newDataCubes;
     return new AppSettings(value);
   }
 
@@ -251,20 +263,6 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
 
     value.collections = newCollections;
     return new AppSettings(value);
-  }
-
-  public attachExecutors(executorFactory: (dataCube: DataCube) => Executor): AppSettings {
-    var value = this.valueOf();
-    value.dataCubes = value.dataCubes.map((ds) => {
-      var executor = executorFactory(ds);
-      if (executor) ds = ds.attachExecutor(executor);
-      return ds;
-    });
-    return new AppSettings(value);
-  }
-
-  public getSuggestedCubes(): DataCube[] {
-    return this.dataCubes;
   }
 
   changeCustomization(customization: Customization): AppSettings {
@@ -285,6 +283,10 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
 
   changeDataCubes(dataCubes: DataCube[]): AppSettings {
     return this.change('dataCubes', dataCubes);
+  }
+
+  appendDataCubes(dataCubes: DataCube[]): AppSettings {
+    return this.changeDataCubes(this.dataCubes.concat(dataCubes));
   }
 
   changeCollections(collections: Collection[]): AppSettings {

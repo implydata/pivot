@@ -80,7 +80,7 @@ describe('cli', function () {
   });
 
   it('complains if an inlined var can not be found', (testComplete) => {
-    exec('bin/pivot --config test/configs/inline-vars.yaml --print-config',
+    exec('bin/pivot --config test/configs/inline-vars.yaml',
       {
         env: extend(process.env, {
           DS_NAME: 'test1',
@@ -89,7 +89,7 @@ describe('cli', function () {
       },
       (error, stdout, stderr) => {
         expect(error).to.be.an('error');
-        expect(stderr).to.contain("There was an error generating a config:"); // ToDo: make the error here better
+        expect(stderr).to.contain("Could not load config from 'test/configs/inline-vars.yaml': could not find variable 'DS_SOURCE'");
         testComplete();
       });
   });
@@ -108,6 +108,14 @@ describe('cli', function () {
       expect(error).to.be.an('error');
       expect(stderr).to.contain('only one of --config, --examples, --file, --druid, --postgres, --mysql can be given on the command line');
       expect(stderr).to.contain('https://github.com/implydata/pivot/blob/master/docs/pivot-0.9.x-migration.md');
+      testComplete();
+    });
+  });
+
+  it('complains if the config settings have an error', (testComplete) => {
+    exec('bin/pivot --config test/configs/duplicate-measure-dimension-name.yaml', (error, stdout, stderr) => {
+      expect(error).to.be.an('error');
+      expect(stderr).to.contain("Could not read setting from config file: name 'language' found in both dimensions and measures in data cube: 'wiki'");
       testComplete();
     });
   });

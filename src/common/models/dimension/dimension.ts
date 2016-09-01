@@ -16,7 +16,7 @@
 
 import { List } from 'immutable';
 import { Class, Instance, isInstanceOf, immutableArraysEqual } from 'immutable-class';
-import { $, Expression } from 'plywood';
+import { $, Expression, RefExpression } from 'plywood';
 import { verifyUrlSafeName, makeTitle } from '../../utils/general/general';
 import { Granularity, GranularityJS, granularityFromJS, granularityToJS, granularityEquals } from "../granularity/granularity";
 
@@ -247,6 +247,16 @@ export class Dimension implements Instance<DimensionValue, DimensionJS> {
 
   public changeFormula(newFormula: string): Dimension {
     return this.change('formula', newFormula);
+  }
+
+  public usesAttribute(attributeName: string): boolean {
+    return this.expression.some((ex) => {
+      if (ex instanceof RefExpression) {
+        return ex.name === attributeName;
+      } else {
+        return null;
+      }
+    });
   }
 
 }

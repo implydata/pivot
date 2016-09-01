@@ -98,24 +98,6 @@ The timeout to set on the queries in ms. Default: 40000
 
 Should the sources of this cluster be automatically scanned and new sources added as data cubes. Default: 'auto'
 
-**sourceListRefreshOnLoad** (boolean)
-
-Should the list of sources be reloaded every time that Pivot is loaded.
-This will put additional load on the data store but will ensure that sources are visible in the UI as soon as they are created.
-
-**sourceListRefreshInterval** (number)
-
-How often should sources be reloaded in ms.
-
-**sourceReintrospectOnLoad** (boolean)
-
-Should sources be scanned for additional dimensions every time that Pivot is loaded.
-This will put additional load on the data store but will ensure that dimension are visible in the UI as soon as they are created.
-
-**sourceReintrospectInterval** (number)
-
-How often should source schema be reloaded in ms.
-
 ### Druid specific
 
 **introspectionStrategy** (string)

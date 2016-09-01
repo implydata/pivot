@@ -237,6 +237,8 @@ export class Router extends React.Component<RouterProps, RouterState> {
     for (let i = 0; i < candidates.length; i++) {
       let candidate = candidates[i];
 
+      if (!candidate) continue;
+
       if (this.isAComment(candidate)) continue;
 
       let fragment = candidate.props.fragment;

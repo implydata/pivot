@@ -81,6 +81,7 @@ export class SortOn implements Instance<SortOnValue, SortOnJS> {
   constructor(parameters: SortOnValue) {
     this.dimension = parameters.dimension;
     this.measure = parameters.measure;
+    if (!(this.dimension || this.measure)) throw new Error('must have a dimension or a measure');
   }
 
   public valueOf(): SortOnValue {

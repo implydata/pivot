@@ -13,7 +13,7 @@ import { STRINGS } from '../../config/constants';
 
 import { COLLECTION_ITEM as LABELS } from '../../../common/models/labels';
 
-import { ImmutableFormDelegate, ImmutableFormState } from '../../utils/immutable-form-delegate/immutable-form-delegate';
+import { ImmutableFormDelegate, ImmutableFormState } from '../../delegates/index';
 
 export type CollectionMode = 'adding' | 'picking' | 'none';
 
@@ -125,7 +125,7 @@ export class AddCollectionTileModal extends React.Component<AddCollectionTileMod
 
     if (!collections || collections.length === 0)  return null;
 
-    const MyDropDown = Dropdown.specialize<Collection>();
+    const MyDropdown = Dropdown.specialize<Collection>();
 
     const setCollection = (c: Collection) => {
       this.setState({
@@ -134,7 +134,7 @@ export class AddCollectionTileModal extends React.Component<AddCollectionTileMod
       });
     };
 
-    return <MyDropDown
+    return <MyDropdown
       label="Collection"
       items={collections}
       selectedItem={collection}

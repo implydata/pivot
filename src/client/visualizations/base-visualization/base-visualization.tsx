@@ -19,6 +19,7 @@ require('./base-visualization.css');
 import * as React from 'react';
 import { $, ply, Expression, Dataset } from 'plywood';
 import { Measure, VisualizationProps, DatasetLoad, Essence, Timekeeper } from '../../../common/models/index';
+import { QueryRunner } from '../../utils/query-runner/query-runner';
 
 import { SPLIT } from '../../config/constants';
 
@@ -133,7 +134,7 @@ export class BaseVisualization<S extends BaseVisualizationState> extends React.C
     let query = this.makeQuery(essence, timekeeper);
 
     this.precalculate(this.props, { loading: true });
-    essence.dataCube.executor(query, { timezone: essence.timezone })
+    QueryRunner.fetch(essence.dataCube, query, essence.timezone)
       .then(
         (dataset: Dataset) => {
           if (!this._isMounted) return;

@@ -48,6 +48,7 @@ export * from './immutable-input/immutable-input';
 export * from './immutable-list/immutable-list';
 export * from './line-chart-axis/line-chart-axis';
 export * from './loader/loader';
+export * from './loading-bar/loading-bar';
 export * from './manual-fallback/manual-fallback';
 export * from './measures-tile/measures-tile';
 export * from './modal/modal';

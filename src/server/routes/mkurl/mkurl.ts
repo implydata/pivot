@@ -47,9 +47,9 @@ router.post('/', (req: PivotRequest, res: Response) => {
     return;
   }
 
-  req.getSettings(dataCube)
-    .then((appSettings) => {
-      var myDataCube = appSettings.getDataCube(dataCube);
+  req.getFullSettings(dataCube)
+    .then((fullSettings) => {
+      var myDataCube = fullSettings.appSettings.getDataCube(dataCube);
       if (!myDataCube) {
         res.status(400).send({ error: 'unknown data cube' });
         return;
