@@ -183,15 +183,6 @@ export class ClusterManager {
     return Q(null);
   }
 
-  // Refresh the cluster now, will trigger onExternalUpdate and then return an empty promise when done
-  public refresh(): Q.Promise<any> {
-    const { cluster, initialConnectionEstablished } = this;
-    var process = Q(null);
-    if (!initialConnectionEstablished) return process;
-
-    return process;
-  }
-
   public getSources(): Q.Promise<string[]> {
     return (External.getConstructorFor(this.cluster.type) as any).getSourceList(this.requester);
   }

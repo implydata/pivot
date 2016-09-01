@@ -17,13 +17,12 @@
 import * as Q from 'q';
 import * as fs from 'fs-promise';
 import * as yaml from 'js-yaml';
-import { inlineVars } from '../../../common/utils/general/general';
 import { MANIFESTS } from '../../../common/manifests/index';
 import { AppSettings } from '../../../common/models/index';
 import { appSettingsToYAML } from '../../../common/utils/yaml-helper/yaml-helper';
 import { Format } from '../../models/index';
 
-function readSettingsFactory(filepath: string, format: Format, inline = false) {
+function readSettingsFactory(filepath: string, format: Format) {
   return () => {
     return Q(fs.readFile(filepath, 'utf-8')
       .then((fileData) => {
@@ -34,7 +33,6 @@ function readSettingsFactory(filepath: string, format: Format, inline = false) {
         }
       })
       .then((appSettingsJS) => {
-        if (inline) appSettingsJS = inlineVars(appSettingsJS, process.env);
         return AppSettings.fromJS(appSettingsJS, { visualizations: MANIFESTS });
       })
     );
@@ -62,15 +60,24 @@ export interface StateStore {
 }
 
 export class SettingsStore {
-  static fromTransient(initAppSettings: AppSettings): SettingsStore {
-    var settingsStore = new SettingsStore();
-    settingsStore.readSettings = () => Q(initAppSettings);
+  static fromTransient(initAppSettings: AppSettings, updateOnLoad = true): SettingsStore {
+    var settingsStore = new SettingsStore(true);
+    settingsStore.readSettings = () => {
+      if (settingsStore.autoLoader) {
+        return settingsStore.autoLoader(initAppSettings);
+      } else {
+        return Q(initAppSettings);
+      }
+    };
+    if (updateOnLoad) {
+      settingsStore.hasUpdateOnLoad = () => Q(true);
+    }
     return settingsStore;
   }
 
   static fromReadOnlyFile(filepath: string, format: Format): SettingsStore {
     var settingsStore = new SettingsStore();
-    settingsStore.readSettings = readSettingsFactory(filepath, format, true);
+    settingsStore.readSettings = readSettingsFactory(filepath, format);
     return settingsStore;
   }
 
@@ -101,10 +108,15 @@ export class SettingsStore {
   }
 
 
+  public needsAutoLoader: boolean;
+  public autoLoader: (initAppSettings: AppSettings) => Q.Promise<AppSettings>;
   public readSettings: () => Q.Promise<AppSettings>;
   public writeSettings: (appSettings: AppSettings) => Q.Promise<any>;
+  public hasUpdateOnLoad: () => Q.Promise<boolean>;
 
-  constructor() {}
+  constructor(needsAutoLoader = false) {
+    this.needsAutoLoader = needsAutoLoader;
+  }
 }
 
 

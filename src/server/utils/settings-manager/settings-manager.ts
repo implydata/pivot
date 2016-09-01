@@ -91,10 +91,26 @@ export class SettingsManager {
     this.initialLoadTimeout = options.initialLoadTimeout || 30000;
     this.appSettings = AppSettings.BLANK;
 
+    // do initial load of initial settings
     this.currentWork = settingsStore.readSettings()
       .then((appSettings) => {
-        return this.reviseSettings(appSettings);
-      })
+        return this.synchronizeSettings(appSettings);
+      });
+
+    // add the auto loader if need after completing initial read
+    if (this.settingsStore.needsAutoLoader) {
+      this.settingsStore.autoLoader = this.autoLoadDataCubes.bind(this);
+
+      // Reread the settings
+      this.currentWork = this.currentWork
+        .then(() => settingsStore.readSettings())
+        .then((appSettings) => {
+          return this.synchronizeSettings(appSettings);
+        });
+    }
+
+    // log error if something goes wrong
+    this.currentWork = this.currentWork
       .catch(e => {
         logger.error(`Fatal settings load error: ${e.message}`);
         logger.error(e.stack);
@@ -115,13 +131,23 @@ export class SettingsManager {
   }
 
   getFullSettings(opts: GetSettingsOptions = {}): Q.Promise<FullSettings> {
+    const { settingsStore } = this;
     var currentWork = this.currentWork;
 
-    // Refresh all clusters
-    var currentWork = currentWork.then(() => {
-      // ToDo: utilize dataCubeOfInterest
-      return Q.all(this.clusterManagers.map(clusterManager => clusterManager.refresh())) as any;
-    });
+    if (settingsStore.hasUpdateOnLoad) {
+      currentWork = currentWork
+        .then(() => {
+          return settingsStore.hasUpdateOnLoad().then(hasUpdate => {
+            if (!hasUpdate) return null;
+
+            // There is an update so re-read and sync teh settings
+            return settingsStore.readSettings()
+              .then((appSettings) => {
+                return this.synchronizeSettings(appSettings);
+              });
+          });
+        });
+    }
 
     var timeout = opts.timeout || this.initialLoadTimeout;
     if (timeout !== 0) {
@@ -140,10 +166,10 @@ export class SettingsManager {
     });
   }
 
-  reviseSettings(newSettings: AppSettings): Q.Promise<any> {
+  synchronizeSettings(newSettings: AppSettings): Q.Promise<any> {
     var tasks = [
-      this.reviseClusters(newSettings),
-      this.reviseDataCubes(newSettings)
+      this.synchronizeClusters(newSettings),
+      this.synchronizeDataCubes(newSettings)
     ];
     this.appSettings = newSettings;
 
@@ -174,7 +200,7 @@ export class SettingsManager {
   }
 
 
-  reviseClusters(newSettings: AppSettings): Q.Promise<any> {
+  synchronizeClusters(newSettings: AppSettings): Q.Promise<any> {
     const { verbose, logger } = this;
     var oldSettings = this.appSettings;
     var tasks: Q.Promise<any>[] = [];
@@ -273,14 +299,14 @@ export class SettingsManager {
     this.removeTimeCheck(dataCube);
   }
 
-  reviseDataCubes(newSettings: AppSettings): Q.Promise<any> {
+  synchronizeDataCubes(newSettings: AppSettings): Q.Promise<any> {
     const { verbose, logger } = this;
     var oldSettings = this.appSettings;
     var tasks: Q.Promise<any>[] = [];
 
     updater(oldSettings.dataCubes, newSettings.dataCubes, {
       onExit: (oldDataCube) => {
-        logger.log(`Removing cube manager for '${oldDataCube.name}'`);
+        logger.log(`Removing data cube manager for '${oldDataCube.name}'`);
         if (oldDataCube.clusterName === 'native') {
           this.removeNativeCube(oldDataCube);
         } else {
@@ -288,7 +314,10 @@ export class SettingsManager {
         }
       },
       onUpdate: (newDataCube, oldDataCube) => {
-        logger.log(`Updating cube manager for '${newDataCube.name}'`);
+        // If native sources are the same, nothing to do.
+        if (newDataCube.clusterName === 'native' && oldDataCube.clusterName === 'native' && newDataCube.source === oldDataCube.source) return;
+
+        logger.log(`Updating data cube manager for '${newDataCube.name}'`);
         if (oldDataCube.clusterName === 'native') {
           this.removeNativeCube(oldDataCube);
           tasks.push(this.addNativeCube(newDataCube));
@@ -298,7 +327,7 @@ export class SettingsManager {
         }
       },
       onEnter: (newDataCube) => {
-        logger.log(`Adding cube manager for '${newDataCube.name}'`);
+        logger.log(`Adding data cube manager for '${newDataCube.name}'`);
         if (newDataCube.clusterName === 'native') {
           tasks.push(this.addNativeCube(newDataCube));
         } else {
@@ -315,7 +344,7 @@ export class SettingsManager {
 
     return this.settingsStore.writeSettings(newSettings)
       .then(() => {
-        this.reviseSettings(newSettings);
+        this.synchronizeSettings(newSettings);
       });
   }
 
@@ -356,9 +385,12 @@ export class SettingsManager {
     return Q.all(clusterSources).then((things: ClusterNameAndSource[][]) => flatten(things));
   }
 
-  getAllAttributes(source: string, cluster: string | Cluster): Q.Promise<Attributes> {
+  getAllAttributes(source: string, cluster: string | Cluster, templateDataCube: DataCube = null): Q.Promise<Attributes> {
     const { verbose, logger, anchorPath } = this;
 
+    var clusterName: string = typeof cluster === 'string' ? cluster : cluster.name;
+
+    logger.log(`Getting attributes for source '${source}' in cluster '${clusterName}'`);
     if (cluster === 'native') {
       return Q.fcall(() => {
         var fileManager = this.getFileManagerFor(source);
@@ -382,7 +414,7 @@ export class SettingsManager {
         }
       })
         .then((clusterManager: ClusterManager) => {
-          return DataCube.fromClusterAndSource('test_cube', clusterManager.cluster, source)
+          return (templateDataCube || DataCube.fromClusterAndSource('test_cube', clusterManager.cluster, source))
             .toExternal(clusterManager.cluster, clusterManager.requester)
             .introspect()
             .then((introspectedExternal) => introspectedExternal.attributes) as any;
@@ -424,45 +456,58 @@ export class SettingsManager {
     }
   }
 
-  private autoLoadFromInitSettings(initSettings: AppSettings): Q.Promise<AppSettings> {
+  private autoLoadDataCubes(initSettings: AppSettings): Q.Promise<AppSettings> {
     const { verbose, logger } = this;
+
     logger.log(`Auto loading`);
     return this.getAllClusterSources()
       .then((clusterNameAndSources) => {
-        var nativeDataCubeFillTasks = initSettings.getDataCubesForCluster('native').map((nativeDataCube) => {
-          return this.getAllAttributes(nativeDataCube.source, 'native')
-            .then(attributes => {
-              return nativeDataCube.fillAllFromAttributes(attributes);
-            });
+        var dataCubeFillTasks: Q.Promise<any>[] = [];
+        var fullDataCubes: DataCube[] = [];
+        var fullExtraDataCubes: DataCube[] = [];
+
+        initSettings.getDataCubesByCluster('native').forEach((nativeDataCube) => {
+          dataCubeFillTasks.push(
+            this.getAllAttributes(nativeDataCube.source, 'native')
+              .then(attributes => {
+                fullDataCubes.push(nativeDataCube.fillAllFromAttributes(attributes));
+              })
+          );
         });
 
-        var clusterDataCubeFillTasks = clusterNameAndSources.map((clusterNameAndSource, i) => {
+        clusterNameAndSources.forEach((clusterNameAndSource, i) => {
           const { clusterName, source } = clusterNameAndSource;
-          var baseDataCube = initSettings.getDataCubeByClusterSource(clusterName, source);
-          if (!baseDataCube) {
-            baseDataCube = DataCube.fromClusterAndSource(`${clusterName}-${source}-${i}`, initSettings.getCluster(clusterName), source);
+
+          var baseDataCubes = initSettings.getDataCubesByClusterSource(clusterName, source);
+          var isNewDataCube = baseDataCubes.length === 0;
+          if (isNewDataCube) {
+            var newName = `${clusterName}-${source}-${i}`;
+            if (verbose) logger.log(`Adding DataCube '${newName}'`);
+            var cluster = initSettings.getCluster(clusterName);
+            if (cluster.getSourceListScan() === 'auto') { // Respect sourceListScan property
+              baseDataCubes = [DataCube.fromClusterAndSource(newName, cluster, source)];
+            }
           }
-          return this.getAllAttributes(source, clusterName)
-            .then(attributes => {
-              return baseDataCube.fillAllFromAttributes(attributes);
-            });
+
+          baseDataCubes.forEach(baseDataCube => {
+            dataCubeFillTasks.push(
+              this.getAllAttributes(source, clusterName, baseDataCube)
+                .then(attributes => {
+                  var fullDataCube = baseDataCube.fillAllFromAttributes(attributes);
+                  if (isNewDataCube) {
+                    fullExtraDataCubes.push(fullDataCube);
+                  } else {
+                    fullDataCubes.push(fullDataCube);
+                  }
+                })
+            );
+          });
         });
 
-        return Q.all(nativeDataCubeFillTasks.concat(clusterDataCubeFillTasks));
-      })
-      .then((fullDataCubes: DataCube[]) => {
-        return initSettings.changeDataCubes(fullDataCubes);
+        return Q.allSettled(dataCubeFillTasks).then(() => {
+          return initSettings.changeDataCubes(fullDataCubes.concat(fullExtraDataCubes));
+        });
       });
   }
 
-  public autoLoad(): void {
-    const { verbose, logger } = this;
-    logger.log(`Auto load requested`);
-
-    this.currentWork = this.currentWork
-      .then(() => this.autoLoadFromInitSettings(this.appSettings))
-      .then((appSettings: AppSettings) => {
-        return this.reviseSettings(appSettings);
-      });
-  }
 }

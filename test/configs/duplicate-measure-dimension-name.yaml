@@ -1,7 +1,7 @@
 clusters:
   - name: druid
     type: druid
-    host: "%{DRUID_HOST}%"
+    host: dm
     timeout: 30000
 
 dataCubes:

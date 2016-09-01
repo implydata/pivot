@@ -187,18 +187,18 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
   }
 
   public getCollectionsInvolvingCluster(clusterName: string): Collection[] {
-    const dependantDataCubes = this.getDataCubesForCluster(clusterName);
+    const dependantDataCubes = this.getDataCubesByCluster(clusterName);
     return this.collections.filter((collection) => {
       return dependantDataCubes.some((dataCube => collection.dependsOnDataCube(dataCube.name)));
     });
   }
 
-  public getDataCubesForCluster(clusterName: string): DataCube[] {
+  public getDataCubesByCluster(clusterName: string): DataCube[] {
     return this.dataCubes.filter(dataCube => dataCube.clusterName === clusterName);
   }
 
-  public getDataCubeByClusterSource(clusterName: string, source: string): DataCube {
-    return find(this.dataCubes, (dataCube) => dataCube.clusterName === clusterName && dataCube.source === source);
+  public getDataCubesByClusterSource(clusterName: string, source: string): DataCube[] {
+    return this.dataCubes.filter((dataCube) => dataCube.clusterName === clusterName && dataCube.source === source);
   }
 
   public getDataCube(dataCubeName: string): DataCube {
@@ -237,7 +237,7 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
   public deleteCluster(clusterName: string): AppSettings {
     if (clusterName === 'native') new Error(`Can not delete 'native' cluster`);
 
-    var affectedDataCubes = this.getDataCubesForCluster(clusterName);
+    var affectedDataCubes = this.getDataCubesByCluster(clusterName);
 
     var value = this.valueOf();
     value.clusters = value.clusters.filter(cluster => cluster.name !== clusterName);

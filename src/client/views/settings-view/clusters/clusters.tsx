@@ -62,7 +62,7 @@ export class Clusters extends React.Component<ClustersProps, ClustersState> {
   removeCluster(cluster: Cluster) {
     const settings: AppSettings = this.state.newSettings;
 
-    const dependantDataCubes = settings.getDataCubesForCluster(cluster.name);
+    const dependantDataCubes = settings.getDataCubesByCluster(cluster.name);
     const dependantCollections = settings.getCollectionsInvolvingCluster(cluster.name);
     const dependants = dependantDataCubes.length + dependantCollections.length;
 

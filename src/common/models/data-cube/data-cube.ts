@@ -851,7 +851,11 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
 
   public changeAttributes(attributes: Attributes): DataCube {
     var value = this.valueOf();
+    if (value.attributeOverrides) {
+      attributes = AttributeInfo.override(attributes, value.attributeOverrides);
+    }
     value.attributes = attributes;
+    value.attributeOverrides = null;
     return new DataCube(value);
   }
 
