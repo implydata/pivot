@@ -2,6 +2,13 @@
 
 For updates follow [@implydata](https://twitter.com/implydata) on Twitter.
 
+## 0.10.1
+
+- Added collections
+- Added cold start settings flow
+- Settings fully working
+- Redid maxTime storage and calculation (added Timekeeper)
+
 ## 0.9.39
 
 - Fixed numeric dimension extent computation
