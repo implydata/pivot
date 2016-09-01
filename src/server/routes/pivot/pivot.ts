@@ -28,7 +28,7 @@ router.get('/', (req: PivotRequest, res: Response, next: Function) => {
       var clientSettings = appSettings.toClientSettings();
       res.send(pivotLayout({
         version: req.version,
-        title: appSettings.customization.getTitle(req.version),
+        title: appSettings.customization.getTitleWithVersion(req.version),
         user: req.user,
         appSettings: clientSettings,
         timekeeper: timekeeper,

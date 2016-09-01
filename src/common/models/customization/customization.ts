@@ -14,16 +14,9 @@
  * limitations under the License.
  */
 
-import { Class, Instance, isInstanceOf, isImmutableClass, immutableArraysEqual } from 'immutable-class';
-import { ImmutableUtils } from '../../utils/index';
+import { BaseImmutable, Property, isInstanceOf } from 'immutable-class';
 import { Timezone } from 'chronoshift';
-import { ExternalView, ExternalViewValue} from '../external-view/external-view';
-
-var { WallTime } = require('chronoshift');
-if (!WallTime.rules) {
-  var tzData = require("chronoshift/lib/walltime/walltime-data.js");
-  WallTime.init(tzData.rules, tzData.zones);
-}
+import { ExternalView, ExternalViewValue } from '../external-view/external-view';
 
 export interface CustomizationValue {
   title?: string;
@@ -43,8 +36,7 @@ export interface CustomizationJS {
   logoutHref?: string;
 }
 
-var check: Class<CustomizationValue, CustomizationJS>;
-export class Customization implements Instance<CustomizationValue, CustomizationJS> {
+export class Customization extends BaseImmutable<CustomizationValue, CustomizationJS> {
   static DEFAULT_TITLE = 'Pivot (%v)';
 
   static DEFAULT_TIMEZONES: Timezone[] = [
@@ -73,112 +65,39 @@ export class Customization implements Instance<CustomizationValue, Customization
   }
 
   static fromJS(parameters: CustomizationJS): Customization {
-    var value: CustomizationValue = {
-      title: parameters.title,
-      headerBackground: parameters.headerBackground,
-      customLogoSvg: parameters.customLogoSvg,
-      logoutHref: parameters.logoutHref
-    };
-
-    var paramViewsJS = parameters.externalViews;
-    var externalViews: ExternalView[] = null;
-    if (Array.isArray(paramViewsJS)) {
-      externalViews = paramViewsJS.map((view, i) => ExternalView.fromJS(view));
-      value.externalViews = externalViews;
-    }
-
-    var timezonesJS = parameters.timezones;
-    var timezones: Timezone[] = null;
-    if (Array.isArray(timezonesJS)) {
-      timezones = timezonesJS.map(Timezone.fromJS);
-      value.timezones = timezones;
-    }
-
-    return new Customization(value);
+    return new Customization(BaseImmutable.jsToValue(Customization.PROPERTIES, parameters));
   }
 
+  static PROPERTIES: Property[] = [
+    { name: 'title', defaultValue: Customization.DEFAULT_TITLE },
+    { name: 'headerBackground', defaultValue: null },
+    { name: 'customLogoSvg', defaultValue: null },
+    { name: 'externalViews', defaultValue: [], immutableClassArray: (ExternalView as any) },
+    { name: 'timezones', defaultValue: Customization.DEFAULT_TIMEZONES, immutableClassArray: (Timezone as any) },
+    { name: 'logoutHref', defaultValue: Customization.DEFAULT_LOGOUT_HREF }
+  ];
+
+  public title: string;
   public headerBackground: string;
   public customLogoSvg: string;
   public externalViews: ExternalView[];
   public timezones: Timezone[];
-  public title: string;
   public logoutHref: string;
 
 
   constructor(parameters: CustomizationValue) {
-    this.title = parameters.title || null;
-    this.headerBackground = parameters.headerBackground || null;
-    this.customLogoSvg = parameters.customLogoSvg || null;
-    if (parameters.externalViews) this.externalViews = parameters.externalViews;
-    if (parameters.timezones) this.timezones = parameters.timezones;
-    this.logoutHref = parameters.logoutHref;
+    super(parameters);
   }
 
+  public getTitle: () => string;
 
-  public valueOf(): CustomizationValue {
-    return {
-      title: this.title,
-      headerBackground: this.headerBackground,
-      customLogoSvg: this.customLogoSvg,
-      externalViews: this.externalViews,
-      timezones: this.timezones,
-      logoutHref: this.logoutHref
-    };
+  public getTitleWithVersion(version: string): string {
+    return this.getTitle().replace(/%v/g, version);
   }
 
-  public toJS(): CustomizationJS {
-    var js: CustomizationJS = {};
-    if (this.title) js.title = this.title;
-    if (this.headerBackground) js.headerBackground = this.headerBackground;
-    if (this.customLogoSvg) js.customLogoSvg = this.customLogoSvg;
-    if (this.externalViews) {
-      js.externalViews = this.externalViews.map(view => view.toJS());
-    }
-    if (this.timezones) {
-      js.timezones = this.timezones.map(tz => tz.toJS());
-    }
-    if (this.logoutHref) js.logoutHref = this.logoutHref;
-    return js;
-  }
+  public changeTitle: (title: string) => Customization;
+  public getTimezones: () => Timezone[];
+  public getLogoutHref: () => string;
 
-  public toJSON(): CustomizationJS {
-    return this.toJS();
-  }
-
-  public toString(): string {
-    return `[custom: (${this.headerBackground}) logo: ${Boolean(this.customLogoSvg)}, externalViews: ${Boolean(this.externalViews)}, timezones: ${Boolean(this.timezones)}]`;
-  }
-
-  public equals(other: Customization): boolean {
-    return Customization.isCustomization(other) &&
-      this.title === other.title &&
-      this.headerBackground === other.headerBackground &&
-      this.customLogoSvg === other.customLogoSvg &&
-      immutableArraysEqual(this.externalViews, other.externalViews) &&
-      immutableArraysEqual(this.timezones, other.timezones) &&
-      this.logoutHref === other.logoutHref;
-  }
-
-  public getTitle(version: string): string {
-    var title = this.title || Customization.DEFAULT_TITLE;
-    return title.replace(/%v/g, version);
-  }
-
-  change(propertyName: string, newValue: any): Customization {
-    return ImmutableUtils.change(this, propertyName, newValue);
-  }
-
-  public changeTitle(title: string): Customization {
-    return this.change('title', title);
-  }
-
-  public getTimezones() {
-    return this.timezones || Customization.DEFAULT_TIMEZONES;
-  }
-
-  public getLogoutHref() {
-    return this.logoutHref || Customization.DEFAULT_LOGOUT_HREF;
-  }
 }
-
-check = Customization;
+BaseImmutable.finalize(Customization);

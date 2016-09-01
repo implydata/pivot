@@ -52,7 +52,9 @@ export class ImmutableUtils {
     var value = instance;
     var bits = path.split('.');
     var bit: string;
-    while (bit = bits.shift()) value = value[bit];
+    while (bit = bits.shift()) {
+      value = value.get ? value.get(bit) : value[bit];
+    }
 
     return value as any;
   }
