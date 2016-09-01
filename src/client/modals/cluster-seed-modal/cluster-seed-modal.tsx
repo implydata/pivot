@@ -148,10 +148,10 @@ export class ClusterSeedModal extends React.Component<ClusterSeedModalProps, Clu
     if (clusterType === 'mysql' || clusterType === 'postgres') {
       extraSQLFields = <div>
         {makeLabel('database')}
-        {makeTextInput('database', /^.+$/)}
+        {makeTextInput('database')}
 
         {makeLabel('user')}
-        {makeTextInput('user', /^.+$/)}
+        {makeTextInput('user')}
 
         {makeLabel('password')}
         {makeTextInput('password')}
