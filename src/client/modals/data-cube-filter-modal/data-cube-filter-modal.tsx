@@ -67,15 +67,7 @@ export class DataCubeFilterModal extends React.Component<DataCubeFilterModalProp
 
   validate(input: string) {
     const { newInstance } = this.state;
-    const { attributes } = newInstance;
-
-    let refPattern = /(?:\$)([a-zA-Z0-9_]+)/g;
-    let refs: RegExpExecArray;
-    while ((refs = refPattern.exec(input))) {
-      let ref = refs[1];
-      if (!findByName(attributes, ref)) throw new Error(`could not find attribute ${ref}`);
-    }
-    return true;
+    return newInstance.checkFormula(input);
   }
 
   save() {

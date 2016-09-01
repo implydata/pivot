@@ -683,6 +683,16 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
     return issues;
   }
 
+  public checkFormula(formula: string): boolean {
+    var mainTypeContext = this.getMainTypeContext();
+    try {
+      Expression.parse(formula).referenceCheckInTypeContext(mainTypeContext);
+    } catch (e) {
+      throw e;
+    }
+    return true;
+  };
+
   public toClientDataCube(): DataCube {
     var value = this.valueOf();
 
