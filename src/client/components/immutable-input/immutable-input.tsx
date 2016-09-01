@@ -54,7 +54,8 @@ export class ImmutableInput extends React.Component<ImmutableInputProps, Immutab
   };
 
   static simpleGenerator (instance: any, changeFn: ChangeFn) {
-    return (name: string, validator= /^.+$/, focusOnStartUp= false) => {
+    return (name: string, validator?: RegExp | ((str: string) => boolean), focusOnStartUp= false) => {
+      if (!validator) validator = /^.+$/;
       return <ImmutableInput
         key={name}
         instance={instance}

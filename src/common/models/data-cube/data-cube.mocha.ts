@@ -176,8 +176,8 @@ describe('DataCube', () => {
 
   });
 
-  describe("#getIssues", () => {
-    it("raises issues", () => {
+  describe("#validation", () => {
+    it("throws accordingly", () => {
       var dataCube = DataCube.fromJS({
         name: 'wiki',
         clusterName: 'druid',
@@ -186,49 +186,17 @@ describe('DataCube', () => {
           { name: '__time', type: 'TIME' },
           { name: 'articleName', type: 'STRING' },
           { name: 'count', type: 'NUMBER' }
-        ],
-        dimensions: [
-          {
-            name: 'gaga',
-            formula: '$gaga'
-          },
-          {
-            name: 'bucketArticleName',
-            formula: '$articleName.numberBucket(5)'
-          }
-        ],
-        measures: [
-          {
-            name: 'count',
-            formula: '$main.sum($count)'
-          },
-          {
-            name: 'added',
-            formula: '$main.sum($added)'
-          },
-          {
-            name: 'sumArticleName',
-            formula: '$main.sum($articleName)'
-          },
-          {
-            name: 'koalaCount',
-            formula: '$koala.sum($count)'
-          },
-          {
-            name: 'countByThree',
-            formula: '$count / 3'
-          }
         ]
       });
 
-      expect(dataCube.getIssues()).to.deep.equal([
-        "failed to validate dimension 'gaga': could not resolve $gaga",
-        "failed to validate dimension 'bucketArticleName': numberBucket must have input of type NUMBER or NUMBER_RANGE (is STRING)",
-        "failed to validate measure 'added': could not resolve $added",
-        "failed to validate measure 'sumArticleName': sum must have expression of type NUMBER (is STRING)",
-        "failed to validate measure 'koalaCount': measure must contain a $main reference",
-        "failed to validate measure 'countByThree': measure must contain a $main reference"
-      ]);
+      expect(() => dataCube.validateFormula('$gaga')).to.throw("could not resolve $gaga");
+      expect(() => dataCube.validateFormula('$articleName.numberBucket(5)')).to.throw("numberBucket must have input of type NUMBER or NUMBER_RANGE (is STRING)");
+      expect(() => dataCube.validateFormulaInMeasureContext('$main.sum($added)')).to.throw("Invalid formula: could not resolve $added");
+      expect(dataCube.validateFormulaInMeasureContext('$main.sum($count)')).to.equal(true);
+      expect(() => dataCube.validateFormulaInMeasureContext('$main.sum($articleName)')).to.throw("sum must have expression of type NUMBER (is STRING)");
+      expect(() => dataCube.validateFormulaInMeasureContext('$koala.sum($count)')).to.throw("Measure formula must contain a $main reference");
+      expect(() => dataCube.validateFormulaInMeasureContext('$count / 3')).to.throw("Measure formula must contain a $main reference");
+
     });
   });
 

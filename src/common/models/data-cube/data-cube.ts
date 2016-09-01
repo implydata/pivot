@@ -645,18 +645,13 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
     };
   }
 
-  public getIssues(): string[] {
-    var { dimensions, measures } = this;
+  public validateFormulaInMeasureContext(formula: string) {
     var mainTypeContext = this.getMainTypeContext();
-    var issues: string[] = [];
+    var measureExpression = Expression.parse(formula);
 
-    dimensions.forEach((dimension) => {
-      try {
-        dimension.expression.referenceCheckInTypeContext(mainTypeContext);
-      } catch (e) {
-        issues.push(`failed to validate dimension '${dimension.name}': ${e.message}`);
-      }
-    });
+    if (measureExpression.getFreeReferences().indexOf('main') === -1) {
+      throw new Error(`Measure formula must contain a $main reference.`);
+    }
 
     var measureTypeContext: DatasetFullType = {
       type: 'DATASET',
@@ -665,30 +660,21 @@ export class DataCube implements Instance<DataCubeValue, DataCubeJS> {
       }
     };
 
-    measures.forEach((measure) => {
-      try {
-        measure.expression.referenceCheckInTypeContext(measureTypeContext);
-      } catch (e) {
-        var message = e.message;
-        // If we get here it is possible that the user has misunderstood what the meaning of a measure is and have tried
-        // to do something like $volume / $volume. We detect this here by checking for a reference to $main
-        // If there is no main reference raise a more informative issue.
-        if (measure.expression.getFreeReferences().indexOf('main') === -1) {
-          message = 'measure must contain a $main reference';
-        }
-        issues.push(`failed to validate measure '${measure.name}': ${message}`);
-      }
-    });
-
-    return issues;
+    try {
+      measureExpression.referenceCheckInTypeContext(measureTypeContext);
+      return true;
+    } catch (e) {
+      throw new Error(`Invalid formula: ${e.message}`);
+    }
   }
 
-  public checkFormula(formula: string): boolean {
+  public validateFormula(formula: string): boolean {
     var mainTypeContext = this.getMainTypeContext();
+    var formulaExpr = Expression.parse(formula);
     try {
-      Expression.parse(formula).referenceCheckInTypeContext(mainTypeContext);
+      formulaExpr.referenceCheckInTypeContext(mainTypeContext);
     } catch (e) {
-      throw e;
+      throw new Error(`Invalid formula: ${e.message}`);
     }
     return true;
   };

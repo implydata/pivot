@@ -101,7 +101,7 @@ export const MEASURE = {
   formula: {
     label: `Formula`,
     description: `The <a href="http://plywood.imply.io/expressions" target="_blank">
-      Plywood expression</a> for this dimension. By default it is
+      Plywood expression</a> for this measure. By default it is
       <code>$main.sum($name)</code> where <em>name</em> is the name of the measure.`
   }
 };

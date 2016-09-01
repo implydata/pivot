@@ -67,7 +67,7 @@ export class DataCubeFilterModal extends React.Component<DataCubeFilterModalProp
 
   validate(input: string) {
     const { newInstance } = this.state;
-    return newInstance.checkFormula(input);
+    return newInstance.validateFormula(input);
   }
 
   save() {

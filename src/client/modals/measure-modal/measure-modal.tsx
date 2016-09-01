@@ -33,6 +33,7 @@ export interface MeasureModalProps extends React.Props<any> {
   measure?: Measure;
   onSave?: (measure: Measure) => void;
   onClose?: () => void;
+  validate?: (str: string) => boolean;
 }
 
 
@@ -69,7 +70,7 @@ export class MeasureModal extends React.Component<MeasureModalProps, ImmutableFo
   }
 
   render(): JSX.Element {
-    const { measure } = this.props;
+    const { measure, validate } = this.props;
     const { newInstance, canSave, errors } = this.state;
     const saveButtonDisabled = !canSave || measure.equals(newInstance);
 
@@ -90,7 +91,7 @@ export class MeasureModal extends React.Component<MeasureModalProps, ImmutableFo
         {makeTextInput('title', /^.+$/, true)}
 
         {makeLabel('formula')}
-        {makeTextInput('formula')}
+        {makeTextInput('formula', validate)}
 
         {makeLabel('units')}
         {makeTextInput('units')}

@@ -34,6 +34,7 @@ export interface DimensionModalProps extends React.Props<any> {
   dimension?: Dimension;
   onSave?: (dimension: Dimension) => void;
   onClose?: () => void;
+  validate?: (str: string) => boolean;
 }
 
 export class DimensionModal extends React.Component<DimensionModalProps, ImmutableFormState<Dimension>> {
@@ -81,7 +82,7 @@ export class DimensionModal extends React.Component<DimensionModalProps, Immutab
   }
 
   render(): JSX.Element {
-    const { dimension } = this.props;
+    const { dimension, validate } = this.props;
     const { newInstance, canSave, errors } = this.state;
     const saveButtonDisabled = !canSave || dimension.equals(newInstance);
 
@@ -108,7 +109,7 @@ export class DimensionModal extends React.Component<DimensionModalProps, Immutab
         {makeDropdownInput('kind', DimensionModal.KINDS)}
 
         {makeLabel('formula')}
-        {makeTextInput('formula')}
+        {makeTextInput('formula', validate)}
 
         {makeLabel('url')}
         {makeTextInput('url')}

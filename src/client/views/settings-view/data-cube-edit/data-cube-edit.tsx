@@ -228,7 +228,9 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       });
     };
 
-    const getModal = (item: Dimension) => <DimensionModal dimension={item}/>;
+    const getModal = (item: Dimension) => {
+      return <DimensionModal dimension={item} validate={newInstance.validateFormula.bind(newInstance)} />;
+    };
 
     const getNewItem = () => Dimension.fromJS({
       name: generateUniqueName('d', name => !newInstance.dimensions.find(m => m.name === name)),
@@ -315,7 +317,9 @@ export class DataCubeEdit extends React.Component<DataCubeEditProps, DataCubeEdi
       });
     };
 
-    const getModal = (item: Measure) => <MeasureModal measure={item}/>;
+    const getModal = (item: Measure) => {
+      return <MeasureModal measure={item} validate={newInstance.validateFormulaInMeasureContext.bind(newInstance)}/>;
+    };
 
     const getNewItem = () => Measure.fromJS({
       name: generateUniqueName('m', name => !newInstance.measures.find(m => m.name === name)),
