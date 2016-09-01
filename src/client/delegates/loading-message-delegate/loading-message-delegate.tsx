@@ -15,8 +15,9 @@
  */
 
 import * as React from 'react';
+import * as Q from 'q';
 
-const DELAY = 250;
+const DELAY = 100;
 
 export interface LoadingMessageState {
   loadingMessage?: string;
@@ -50,14 +51,32 @@ export class LoadingMessageDelegate {
     }, DELAY);
   }
 
-  public stop() {
+  public startNow(message: string) {
+    this.setState({
+      isLoading: true,
+      loadingMessage: message
+    });
+  }
+
+  public stop(): Q.Promise<any> {
+    var deferred = Q.defer();
+
     if (this.timeoutId) {
       window.clearTimeout(this.timeoutId);
+      deferred.resolve();
     } else {
       this.setState({
         isLoading: false,
         loadingMessage: undefined
-      });
+      }, () => deferred.resolve());
+    }
+
+    return deferred.promise;
+  }
+
+  unmount() {
+    if (this.timeoutId) {
+      window.clearTimeout(this.timeoutId);
     }
   }
 }

@@ -17,20 +17,22 @@
 require('./suggestion-modal.css');
 
 import * as React from 'react';
+import * as Q from 'q';
+
 import { Button, Modal } from '../../components/index';
 import { ListItem } from '../../../common/models/index';
 import { STRINGS } from "../../config/constants";
 import { pluralIfNeeded } from "../../../common/utils/general/general";
 
-import { Checkbox } from "../../components/checkbox/checkbox";
+import { Checkbox, LoadingBar } from "../../components/index";
 
-function defaultGetKey(thing: any): string {
-  return thing.name;
-}
+import { LoadingMessageDelegate, LoadingMessageState } from '../../delegates/index';
 
 export interface SuggestionModalAction<T> {
   label: (n: number) => string;
-  callback: (suggestions?: T[]) => void;
+  callback?: (suggestions?: T[]) => void;
+  closePromise?: (suggestions?: T[]) => Q.Promise<any>;
+  loadingMessage?: string;
 }
 
 export interface Suggestion<T> {
@@ -50,9 +52,11 @@ export interface SuggestionModalProps<T> extends React.Props<any> {
 
   title: string;
   explanation?: (c: number) => string;
+
+  loadingState?: LoadingMessageState;
 }
 
-export interface SuggestionModalState<T> {
+export interface SuggestionModalState<T> extends LoadingMessageState {
   selection?: boolean[];
 }
 
@@ -61,9 +65,17 @@ export class SuggestionModal<T> extends React.Component<SuggestionModalProps<T>,
     return SuggestionModal as { new (): SuggestionModal<U>; };
   }
 
+  static defaultProps = {
+    loadingState: {}
+  };
+
+  private loadingDelegate: LoadingMessageDelegate;
+
   constructor() {
     super();
     this.state = {selection: []};
+
+    this.loadingDelegate = new LoadingMessageDelegate(this);
   }
 
   componentDidMount() {
@@ -77,10 +89,20 @@ export class SuggestionModal<T> extends React.Component<SuggestionModalProps<T>,
     });
   }
 
-  onAdd() {
-    const { onOk, suggestions } = this.props;
+  onPrimary() {
+    const { onOk, suggestions, onClose } = this.props;
     const { selection } = this.state;
-    onOk.callback(suggestions.filter((s, i) => selection[i]).map(s => s.value));
+
+    const selectedSuggestions = suggestions.filter((s, i) => selection[i]).map(s => s.value);
+
+    if (onOk.closePromise) {
+      this.loadingDelegate.start(onOk.loadingMessage || '…');
+      onOk.closePromise(selectedSuggestions).then(() => {
+        this.loadingDelegate.stop().then(onClose);
+      });
+    } else if (onOk.callback) {
+      onOk.callback(selectedSuggestions);
+    }
   }
 
   selectAll() {
@@ -147,23 +169,24 @@ export class SuggestionModal<T> extends React.Component<SuggestionModalProps<T>,
       type="primary"
       title={onOk.label(length)}
       disabled={length === 0}
-      onClick={this.onAdd.bind(this)}
+      onClick={this.onPrimary.bind(this)}
     />;
   }
 
-  renderEmpty() {
-    const { onClose, title } = this.props;
-
-    return <Modal className="suggestion-modal" title={`${title}`} onClose={onClose}>
-      <div className="background">
-        <div className="message">{STRINGS.thereAreNoSuggestionsAtTheMoment}</div>
-      </div>
-      {this.renderButtons(true)}
-    </Modal>;
+  renderLoader(message: string) {
+    return <LoadingBar label={message}/>;
   }
 
   renderButtons(empty = false) {
-    const { selection } = this.state;
+    const { loadingState } = this.props;
+    const { selection, isLoading, loadingMessage } = this.state;
+
+    // Outer world said something is loading
+    if (loadingState.isLoading) return this.renderLoader(loadingState.loadingMessage);
+
+    // Loading due to a closePromise on a SuggestionModalAction
+    if (isLoading) return this.renderLoader(loadingMessage);
+
     const length = selection.filter(Boolean).length;
 
     const alternateButton = this.renderAlternateButton(length);
@@ -201,6 +224,17 @@ export class SuggestionModal<T> extends React.Component<SuggestionModalProps<T>,
     }
   }
 
+  renderEmpty() {
+    const { onClose, title } = this.props;
+
+    return <Modal className="suggestion-modal" title={`${title}`} onClose={onClose}>
+      <div className="background">
+        <div className="message">{STRINGS.thereAreNoSuggestionsAtTheMoment}</div>
+      </div>
+      {this.renderButtons(true)}
+    </Modal>;
+  }
+
   render() {
     const { suggestions, onClose, title, explanation } = this.props;
     const { selection } = this.state;
@@ -213,7 +247,7 @@ export class SuggestionModal<T> extends React.Component<SuggestionModalProps<T>,
       className="suggestion-modal"
       title={`${title}`}
       onClose={onClose}
-      onEnter={this.onAdd.bind(this)}
+      onEnter={this.onPrimary.bind(this)}
     >
       { explanation ? <div className="explanation"> { explanation(length) } </div> : null }
       <div className="actions">

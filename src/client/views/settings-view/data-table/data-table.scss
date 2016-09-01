@@ -42,7 +42,13 @@ $header-height: 34px;
   }
 
   .simple-table {
-    height: calc(100% - 20px);
+    position: absolute;
+    top: 30px;
+    bottom: 10px;
+    left: 0;
+    right: 0;
+    width: initial;
+    height: initial;
 
     .header {
 
@@ -136,5 +142,10 @@ $header-height: 34px;
         }
       }
     }
+  }
+
+  .loader {
+    @include unpin-full(0);
+    background-color: hsla(0, 0%, 93%, 0.5);
   }
 }

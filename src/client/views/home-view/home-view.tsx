@@ -183,8 +183,11 @@ export class HomeView extends React.Component< HomeViewProps, HomeViewState> {
   }
 
   renderCollections() {
-    const { collections, collectionsDelegate } = this.props;
-    if (!collectionsDelegate && collections.length === 0) return null;
+    const { collections, collectionsDelegate, stateful } = this.props;
+
+    const canEdit = stateful && collectionsDelegate;
+
+    if (!canEdit && collections.length === 0) return null;
 
     const create = this.createCollection.bind(this);
 
@@ -199,10 +202,7 @@ export class HomeView extends React.Component< HomeViewProps, HomeViewState> {
           : null }
         </div>
       </div>
-      {this.renderItems(
-        collections,
-        collectionsDelegate ? ItemCard.getNewItemCard(create) : null
-      )}
+      {this.renderItems(collections, canEdit ? ItemCard.getNewItemCard(create) : null)}
     </div>;
   }
 

@@ -44,6 +44,8 @@ export interface ClusterSeedModalState extends ImmutableFormState<Cluster>, Load
 export class ClusterSeedModal extends React.Component<ClusterSeedModalProps, ClusterSeedModalState> {
   private formDelegate: ImmutableFormDelegate<Cluster>;
 
+  private mounted = false;
+
   // This delays the loading state by 250ms so it doesn't flicker in case the
   // server responds quickly
   private loadingDelegate: LoadingMessageDelegate;
@@ -82,7 +84,13 @@ export class ClusterSeedModal extends React.Component<ClusterSeedModalProps, Clu
   }
 
   componentDidMount() {
+    this.mounted = true;
     this.initFromProps(this.props);
+  }
+
+  componentWillUnmount() {
+    this.mounted = false;
+    this.loadingDelegate.unmount();
   }
 
   connect() {
@@ -95,6 +103,8 @@ export class ClusterSeedModal extends React.Component<ClusterSeedModalProps, Clu
     })
       .then(
         (resp) => {
+          if (!this.mounted) return;
+
           this.loadingDelegate.stop();
           var cluster = Cluster.fromJS(resp.cluster);
           cluster = cluster
@@ -104,6 +114,8 @@ export class ClusterSeedModal extends React.Component<ClusterSeedModalProps, Clu
           this.props.onNext(cluster, resp.sources);
         },
         (xhr: XMLHttpRequest) => {
+          if (!this.mounted) return;
+
           this.loadingDelegate.stop();
           console.error((xhr as any).message);
           Notifier.failure(`Couldn't connect to cluster`, 'Please check your parameters');

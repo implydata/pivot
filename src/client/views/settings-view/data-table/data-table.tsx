@@ -31,15 +31,22 @@ import { DataCube } from '../../../../common/models/index';
 
 import { classNames } from '../../../utils/dom/dom';
 
-import { SvgIcon, SimpleTable, SimpleTableColumn, Notifier } from '../../../components/index';
+import { SvgIcon, SimpleTable, SimpleTableColumn, Notifier, Loader } from '../../../components/index';
 import { AttributeModal, SuggestionModal, DataCubeFilterModal } from '../../../modals/index';
+
+import { LoadingMessageDelegate, LoadingMessageState } from '../../../delegates/index';
+
+const LOADING = {
+  suggestions: 'Loading suggestions…',
+  data: 'Loading data…'
+};
 
 export interface DataTableProps extends React.Props<any> {
   dataCube?: DataCube;
   onChange?: (newDataCube: DataCube) => void;
 }
 
-export interface DataTableState {
+export interface DataTableState extends LoadingMessageState {
   editedAttribute?: AttributeInfo;
 
   showSuggestionsModal?: boolean;
@@ -50,21 +57,21 @@ export interface DataTableState {
   showSubsetFilterModal?: boolean;
 
   dataset?: Dataset;
-  error?: Error;
-  loading?: boolean;
 }
 
 export class DataTable extends React.Component<DataTableProps, DataTableState> {
-  public mounted: boolean;
+  private mounted: boolean;
+
+  private loadingDelegate: LoadingMessageDelegate;
 
   constructor() {
     super();
 
     this.state = {
-      loading: false,
-      dataset: null,
-      error: null
+      dataset: null
     };
+
+    this.loadingDelegate = new LoadingMessageDelegate(this);
   }
 
   componentDidMount() {
@@ -82,10 +89,12 @@ export class DataTable extends React.Component<DataTableProps, DataTableState> {
 
   componentWillUnmount() {
     this.mounted = false;
+    this.loadingDelegate.unmount();
   }
 
   fetchData(dataCube: DataCube): void {
-    this.setState({ loading: true });
+    this.loadingDelegate.startNow(LOADING.data);
+
     Ajax.query({
       method: "POST",
       url: 'settings/preview',
@@ -96,17 +105,16 @@ export class DataTable extends React.Component<DataTableProps, DataTableState> {
       .then(
         (resp: any) => {
           if (!this.mounted) return;
+
+          this.loadingDelegate.stop();
           this.setState({
-            dataset: Dataset.fromJS(resp.dataset),
-            loading: false
+            dataset: Dataset.fromJS(resp.dataset)
           });
         },
         (error: Error) => {
           if (!this.mounted) return;
-          this.setState({
-            error,
-            loading: false
-          });
+
+          this.loadingDelegate.stop();
         }
       );
   }
@@ -131,6 +139,8 @@ export class DataTable extends React.Component<DataTableProps, DataTableState> {
   }
 
   onHeaderClick(column: SimpleTableColumn) {
+    this.loadingDelegate.stop();
+
     this.setState({
       editedAttribute: column.data
     });
@@ -255,6 +265,7 @@ export class DataTable extends React.Component<DataTableProps, DataTableState> {
 
   fetchSuggestions() {
     const { dataCube } = this.props;
+    this.loadingDelegate.startNow(LOADING.suggestions);
 
     Ajax.query({
       method: "POST",
@@ -266,16 +277,26 @@ export class DataTable extends React.Component<DataTableProps, DataTableState> {
     })
       .then(
         (resp) => {
+          if (!this.mounted) return;
+
+          this.loadingDelegate.stop();
           this.setState({
             attributeSuggestions: dataCube.filterAttributes(AttributeInfo.fromJSs(resp.attributes))
           });
         },
-        (xhr: XMLHttpRequest) => Notifier.failure('Woops', 'Something bad happened')
+        (xhr: XMLHttpRequest) => {
+          if (!this.mounted) return;
+
+          this.loadingDelegate.stop();
+          Notifier.failure('Woops', 'Something bad happened');
+        }
       )
       .done();
   }
 
   openSuggestionsModal() {
+    this.loadingDelegate.stop();
+
     this.setState({
       showSuggestionsModal: true
     });
@@ -293,14 +314,19 @@ export class DataTable extends React.Component<DataTableProps, DataTableState> {
 
   renderAttributeSuggestions() {
     const { onChange, dataCube } = this.props;
-    const { attributeSuggestions, showSuggestionsModal } = this.state;
+    const { attributeSuggestions, showSuggestionsModal, isLoading, loadingMessage } = this.state;
 
-    if (!showSuggestionsModal || !attributeSuggestions) return null;
+    if (!showSuggestionsModal) return null;
+
 
     const getAttributeLabel = (a: AttributeInfo) => {
       var special = a.special ? ` [${a.special}]` : '';
       return `${a.name} as ${a.type}${special}`;
     };
+
+    const suggestions = (attributeSuggestions || []).map(a => {
+      return {label: getAttributeLabel(a), value: a};
+    });
 
     const onOk = {
       label: (n: number) => `${STRINGS.add} ${pluralIfNeeded(n, 'attribute')}`,
@@ -331,7 +357,9 @@ export class DataTable extends React.Component<DataTableProps, DataTableState> {
       onOk={onOk}
       onDoNothing={onDoNothing}
       onAlternateView={onAlternateView}
-      suggestions={attributeSuggestions.map(a => {return {label: getAttributeLabel(a), value: a};})}
+      suggestions={suggestions}
+
+      loadingState={{isLoading, loadingMessage}}
 
       onClose={this.closeAttributeSuggestions.bind(this)}
       title={`${STRINGS.attribute} ${STRINGS.suggestions}`}
@@ -344,8 +372,10 @@ export class DataTable extends React.Component<DataTableProps, DataTableState> {
 
     if (!showAddAttributeModal) return null;
 
+    const attributes = dataCube.attributes;
+
     const attribute = new AttributeInfo({
-      name: generateUniqueName('a', () => true),
+      name: generateUniqueName('a', (name) => attributes.filter(a => a.name === name).length === 0 ),
       type: 'STRING'
     });
 
@@ -371,7 +401,7 @@ export class DataTable extends React.Component<DataTableProps, DataTableState> {
   }
 
   render() {
-    const { dataset } = this.state;
+    const { dataset, isLoading, loadingMessage } = this.state;
 
     return <div className="data-table">
       <div className="header">
@@ -391,6 +421,7 @@ export class DataTable extends React.Component<DataTableProps, DataTableState> {
       { this.renderAttributeSuggestions() }
       { this.renderAttributeAdd() }
       { this.renderFiltersModal() }
+      { isLoading && loadingMessage !== LOADING.suggestions ? <Loader/> : null }
     </div>;
   }
 }

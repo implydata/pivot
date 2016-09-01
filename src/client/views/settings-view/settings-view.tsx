@@ -245,7 +245,8 @@ export class SettingsView extends React.Component<SettingsViewProps, SettingsVie
 
     const onOk = {
       label: (n: number) => `${STRINGS.create} ${pluralIfNeeded(n, 'data cube')}`,
-      callback: (cubes: DataCube[]) => this.addDependantCubes(cluster, cubes).then(closeModal)
+      closePromise: (cubes: DataCube[]) => this.addDependantCubes(cluster, cubes),
+      loadingMessage: 'Creating data cubes…'
     };
 
     const onDoNothing = {
