@@ -120,7 +120,7 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
     for (var dataCube of dataCubes) {
       if (dataCube.clusterName === 'native') continue;
       if (!findByName(clusters, dataCube.clusterName)) {
-        throw new Error(`data cube ${dataCube.name} refers to an unknown cluster ${dataCube.clusterName}`);
+        throw new Error(`data cube '${dataCube.name}' refers to an unknown cluster '${dataCube.clusterName}'`);
       }
     }
 

@@ -469,9 +469,14 @@ export class SettingsManager {
         initSettings.getDataCubesByCluster('native').forEach((nativeDataCube) => {
           dataCubeFillTasks.push(
             this.getAllAttributes(nativeDataCube.source, 'native')
-              .then(attributes => {
-                fullDataCubes.push(nativeDataCube.fillAllFromAttributes(attributes));
-              })
+              .then(
+                (attributes) => {
+                  fullDataCubes.push(nativeDataCube.fillAllFromAttributes(attributes));
+                },
+                () => {
+                  // fullDataCubes.push(nativeDataCube);
+                }
+              )
           );
         });
 
@@ -492,19 +497,25 @@ export class SettingsManager {
           baseDataCubes.forEach(baseDataCube => {
             dataCubeFillTasks.push(
               this.getAllAttributes(source, clusterName, baseDataCube)
-                .then(attributes => {
-                  var fullDataCube = baseDataCube.fillAllFromAttributes(attributes);
-                  if (isNewDataCube) {
-                    fullExtraDataCubes.push(fullDataCube);
-                  } else {
-                    fullDataCubes.push(fullDataCube);
+                .then(
+                  (attributes) => {
+                    var fullDataCube = baseDataCube.fillAllFromAttributes(attributes);
+                    if (isNewDataCube) {
+                      fullExtraDataCubes.push(fullDataCube);
+                    } else {
+                      fullDataCubes.push(fullDataCube);
+                    }
+                  },
+                  (e: Error) => {
+                    logger.error(`Could get attributes for '${baseDataCube.name}' because: ${e.message}`);
+                    // if (!isNewDataCube) fullDataCubes.push(baseDataCube);
                   }
-                })
+                )
             );
           });
         });
 
-        return Q.allSettled(dataCubeFillTasks).then(() => {
+        return Q.all(dataCubeFillTasks).then(() => {
           return initSettings.changeDataCubes(fullDataCubes.concat(fullExtraDataCubes));
         });
       });

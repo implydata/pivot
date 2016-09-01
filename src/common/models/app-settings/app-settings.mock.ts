@@ -294,13 +294,12 @@ export class AppSettingsMock {
       clusters: [
         {
           name: 'druid',
+          title: 'druid',
           type: 'druid',
           host: '192.168.99.100',
           version: '0.9.1',
           timeout: 30000,
           sourceListScan: 'auto',
-          sourceListRefreshInterval: 10000,
-          sourceReintrospectInterval: 10000,
 
           introspectionStrategy: 'segment-metadata-fallback'
         }
@@ -321,13 +320,12 @@ export class AppSettingsMock {
       clusters: [
         {
           name: 'druid',
+          title: 'druid',
           type: 'druid',
           host: '192.168.99.100',
           version: '0.9.1',
           timeout: 30000,
           sourceListScan: 'auto',
-          sourceListRefreshInterval: 10000,
-          sourceReintrospectInterval: 10000,
 
           introspectionStrategy: 'segment-metadata-fallback'
         }
@@ -347,13 +345,12 @@ export class AppSettingsMock {
       clusters: [
         {
           name: 'druid',
+          title: 'druid',
           type: 'druid',
           host: '192.168.99.100',
           version: '0.9.1',
           timeout: 30000,
           sourceListScan: 'auto',
-          sourceListRefreshInterval: 10000,
-          sourceReintrospectInterval: 10000,
 
           introspectionStrategy: "segment-metadata-fallback"
         }

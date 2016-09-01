@@ -133,26 +133,26 @@ describe('Dimension', () => {
   });
 
   describe('#usesAttribute', () => {
-    it('works with simple measure', () => {
-      var measure = Dimension.fromJS({
+    it('works with simple dimension', () => {
+      var dimension = Dimension.fromJS({
         "name": "country",
         "title": "Country",
         "formula": "$country"
       });
 
-      expect(measure.usesAttribute('lol'), 'lol').to.equal(false);
-      expect(measure.usesAttribute('country'), 'country').to.equal(true);
+      expect(dimension.usesAttribute('lol'), 'lol').to.equal(false);
+      expect(dimension.usesAttribute('country'), 'country').to.equal(true);
     });
 
-    it('works with complex measure', () => {
-      var measure = Dimension.fromJS({
+    it('works with complex dimension', () => {
+      var dimension = Dimension.fromJS({
         "name": "complex",
         "title": "Complex",
-        "formula": "'[' ++ $county.lookup('lol') ++ ']'"
+        "formula": "'[' ++ $country.lookup('lol') ++ ']'"
       });
 
-      expect(measure.usesAttribute('lol'), 'lol').to.equal(false);
-      expect(measure.usesAttribute('country'), 'country').to.equal(true);
+      expect(dimension.usesAttribute('lol'), 'lol').to.equal(false);
+      expect(dimension.usesAttribute('country'), 'country').to.equal(true);
     });
 
   });

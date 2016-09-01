@@ -133,26 +133,6 @@ export const CLUSTER = {
     description: `Should the sources of this cluster be automatically scanned and new
       sources added as data cubes. Default: <code>${Cluster.DEFAULT_SOURCE_LIST_SCAN}</code>`
   },
-  sourceListRefreshOnLoad: {
-    label: 'Source List Refresh On Load',
-    description: `Should the list of sources be reloaded every time that Pivot is
-    loaded. This will put additional load on the data store but will ensure that
-    sources are visible in the UI as soon as they are created.`
-  },
-  sourceListRefreshInterval: {
-    label: 'Source List Refresh Interval',
-    description: `How often should sources be reloaded in ms. Default: <code>${Cluster.DEFAULT_SOURCE_LIST_REFRESH_INTERVAL}</code>`
-  },
-  sourceReintrospectOnLoad: {
-    label: 'Source Reintrospect On Load',
-    description: `Should sources be scanned for additional dimensions every time that
-      Pivot is loaded. This will put additional load on the data store but will
-      ensure that dimension are visible in the UI as soon as they are created. Default: <code>${Cluster.DEFAULT_SOURCE_REINTROSPECT_INTERVAL}</code>`
-  },
-  sourceReintrospectInterval: {
-    label: 'Source Reintrospect Interval',
-    description: 'How often should source schema be reloaded in ms.'
-  },
 
   // Druid specific
   introspectionStrategy: {

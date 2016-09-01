@@ -122,7 +122,7 @@ describe('list refresh on load with datasource', function () {
         }
       });
 
-      pivotServer.onHook(`Cluster 'druid' could not introspect 'wiki' because: No such datasource`, done);
+      pivotServer.onHook(`Removing data cube manager for 'wiki'`, done);
     });
   });
 
@@ -153,7 +153,7 @@ describe('list refresh on load with datasource', function () {
       expect(body).to.contain('<div class="app-container"></div>');
       expect(body).to.contain('</html>');
 
-      expect(pivotServer.getStdall()).to.contain("Cluster 'druid' has never seen 'wikipedia' and will introspect 'wiki");
+      expect(pivotServer.getStdall()).to.contain("Adding data cube manager for 'wiki'");
 
       var config = extractConfig(body);
       expect(config.appSettings.dataCubes.map((ds) => ds.name)).to.deep.equal(['wiki']);

@@ -104,12 +104,7 @@ export function clusterToYAML(cluster: Cluster, withComments: boolean): string[]
     .add('host')
     .add('version')
     .add('timeout', {defaultValue: Cluster.DEFAULT_TIMEOUT})
-    .add('sourceListScan', {defaultValue: Cluster.DEFAULT_SOURCE_LIST_SCAN})
-    .add('sourceListRefreshOnLoad', {defaultValue: false})
-    .add('sourceListRefreshInterval', {defaultValue: Cluster.DEFAULT_SOURCE_LIST_REFRESH_INTERVAL})
-    .add('sourceReintrospectOnLoad', {defaultValue: false})
-    .add('sourceReintrospectInterval', {defaultValue: Cluster.DEFAULT_SOURCE_REINTROSPECT_INTERVAL})
-    ;
+    .add('sourceListScan', {defaultValue: Cluster.DEFAULT_SOURCE_LIST_SCAN});
 
 
   if (withComments) {
